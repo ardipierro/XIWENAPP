@@ -147,6 +147,43 @@ class ClassDailyLogRepository extends BaseRepository {
   }
 
   /**
+   * Reordenar todas las entradas del diario (para drag & drop)
+   * @param {string} logId - ID del diario
+   * @param {string[]} newOrder - Array de IDs de entradas en el nuevo orden
+   */
+  async reorderEntries(logId, newOrder) {
+    try {
+      const log = await this.getById(logId);
+      if (!log) {
+        throw new Error('Diario no encontrado');
+      }
+
+      // Crear mapa de entradas por ID para acceso rápido
+      const entriesMap = new Map(log.entries.map(e => [e.id, e]));
+
+      // Reordenar según el nuevo orden y actualizar campo 'order'
+      const reorderedEntries = newOrder.map((entryId, index) => {
+        const entry = entriesMap.get(entryId);
+        if (!entry) {
+          throw new Error(`Entrada no encontrada: ${entryId}`);
+        }
+        return { ...entry, order: index };
+      });
+
+      await this.update(logId, {
+        entries: reorderedEntries,
+        updatedAt: serverTimestamp()
+      });
+
+      logger.info(`🔀 Entradas reordenadas en diario: ${logId}`, 'ClassDailyLogRepository');
+      return { success: true };
+    } catch (error) {
+      logger.error('Error reordenando entradas:', error, 'ClassDailyLogRepository');
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
    * Eliminar entrada del diario
    */
   async removeEntry(logId, entryId) {
@@ -282,6 +319,7 @@ export const createLog = (logData) => logRepo.createLog(logData);
 export const addEntry = (logId, entry) => logRepo.addEntry(logId, entry);
 export const removeEntry = (logId, entryId) => logRepo.removeEntry(logId, entryId);
 export const reorderEntry = (logId, entryId, direction) => logRepo.reorderEntry(logId, entryId, direction);
+export const reorderEntries = (logId, newOrder) => logRepo.reorderEntries(logId, newOrder);
 export const updateScrollPosition = (logId, position) => logRepo.updateScrollPosition(logId, position);
 export const endLog = (logId) => logRepo.endLog(logId);
 export const getLogById = (logId) => logRepo.getById(logId);

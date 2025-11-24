@@ -6,6 +6,20 @@
 
 import { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense } from 'react';
 import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
   Plus,
   Save,
   Menu,
@@ -30,6 +44,7 @@ import {
   addEntry,
   removeEntry,
   reorderEntry,
+  reorderEntries,
   updateScrollPosition,
   updateLog,
   endLog
@@ -53,6 +68,7 @@ import {
   InSituContentEditor,
   EntryOptionsMenu
 } from './diary';
+import SortableDiaryEntry from './diary/SortableDiaryEntry';
 import WordHighlightExercise from './container/WordHighlightExercise';
 import SelectionDetector from './translation/SelectionDetector';
 
@@ -383,6 +399,56 @@ function ClassDailyLog({ logId, user, onBack }) {
     if (entryElement) {
       entryElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
       setSidebarOpen(false);
+    }
+  };
+
+  // ============================================
+  // DRAG & DROP PARA REORDENAR
+  // ============================================
+
+  // Configurar sensores para drag & drop
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // Requiere mover 8px antes de activar drag
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  // Handler cuando termina el drag
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) {
+      return;
+    }
+
+    // Calcular nuevo orden
+    const oldIndex = log.entries.findIndex((entry) => entry.id === active.id);
+    const newIndex = log.entries.findIndex((entry) => entry.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) {
+      return;
+    }
+
+    // Crear nuevo array de IDs en el orden correcto
+    const reorderedEntries = arrayMove(log.entries, oldIndex, newIndex);
+    const newOrder = reorderedEntries.map((entry) => entry.id);
+
+    try {
+      const result = await reorderEntries(logId, newOrder);
+      if (result.success) {
+        logger.info('🔀 Contenidos reordenados via drag & drop');
+        setHasUnsavedChanges(true);
+      } else {
+        setError('Error al reordenar');
+      }
+    } catch (err) {
+      logger.error('Error reordenando entradas:', err);
+      setError('Error al reordenar');
     }
   };
 
@@ -733,35 +799,32 @@ function ClassDailyLog({ logId, user, onBack }) {
                   size="sm"
                 />
               ) : (
-                <div className="space-y-2">
-                  {log.entries.map((entry, index) => {
-                    const Icon = CONTENT_ICONS[entry.contentType] || FileText;
-                    return (
-                      <button
-                        key={entry.id}
-                        onClick={() => handleScrollToEntry(index)}
-                        className="
-                          w-full p-3 rounded-lg text-left
-                          bg-gray-50 dark:bg-gray-750 hover:bg-gray-100 dark:hover:bg-gray-700
-                          border border-gray-200 dark:border-gray-600
-                          transition-colors
-                        "
-                      >
-                        <div className="flex items-start gap-3">
-                          <Icon size={20} className="text-gray-600 dark:text-gray-400 flex-shrink-0 mt-0.5" />
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm text-gray-900 dark:text-white truncate">
-                              {entry.contentTitle}
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              {entry.contentType}
-                            </p>
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={log.entries.map(e => e.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div className="space-y-2">
+                      {log.entries.map((entry, index) => {
+                        const Icon = CONTENT_ICONS[entry.contentType] || FileText;
+                        return (
+                          <SortableDiaryEntry
+                            key={entry.id}
+                            id={entry.id}
+                            entry={entry}
+                            Icon={Icon}
+                            onClick={() => handleScrollToEntry(index)}
+                            canDrag={isTeacher}
+                          />
+                        );
+                      })}
+                    </div>
+                  </SortableContext>
+                </DndContext>
               )}
             </div>
           )}
