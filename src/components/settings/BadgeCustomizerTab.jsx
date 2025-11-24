@@ -392,21 +392,8 @@ function BadgeRow({ badgeKey, badge, onUpdateColor, onUpdateProperty, onRemove }
     >
       {/* Fila principal */}
       <div className="flex items-center justify-between gap-3">
-        {/* Toggle de habilitación + Badge preview */}
+        {/* Badge preview */}
         <div className="flex items-center gap-3 flex-1">
-          {/* 🆕 Toggle para habilitar/deshabilitar */}
-          <button
-            onClick={() => onUpdateProperty(badgeKey, 'enabled', !isEnabled)}
-            className="p-1.5 rounded transition-all"
-            style={{
-              background: isEnabled ? 'var(--color-success, #10b981)' : 'var(--color-bg-tertiary)',
-              color: isEnabled ? '#ffffff' : 'var(--color-text-secondary)',
-            }}
-            title={isEnabled ? 'Click para ocultar este badge en toda la app' : 'Click para mostrar este badge'}
-          >
-            {isEnabled ? <Check size={14} /> : <EyeOff size={14} />}
-          </button>
-
           <CategoryBadge
             badgeKey={badgeKey}
             size="md"
@@ -476,8 +463,24 @@ function BadgeRow({ badgeKey, badge, onUpdateColor, onUpdateProperty, onRemove }
       {/* Opciones avanzadas */}
       {showAdvanced && (
         <div className="pt-2 border-t space-y-3" style={{ borderColor: 'var(--color-border)' }}>
-          {/* 🆕 Toggles de visualización */}
-          <div className="grid grid-cols-2 gap-2">
+          {/* Toggles de visualización */}
+          <div className="grid grid-cols-3 gap-2">
+            {/* Toggle Habilitar/Deshabilitar (movido aquí) */}
+            <button
+              type="button"
+              onClick={() => onUpdateProperty(badgeKey, 'enabled', !isEnabled)}
+              className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+              style={{
+                background: isEnabled ? 'var(--color-success, #10b981)' : 'var(--color-bg-tertiary)',
+                color: isEnabled ? '#ffffff' : 'var(--color-text-secondary)',
+                border: '1px solid var(--color-border)',
+              }}
+              title={isEnabled ? 'Click para ocultar este badge en toda la app' : 'Click para mostrar este badge'}
+            >
+              {isEnabled ? <Check size={14} /> : <EyeOff size={14} />}
+              {isEnabled ? 'Visible' : 'Oculto'}
+            </button>
+
             {/* Toggle Mostrar Icono */}
             <button
               type="button"
@@ -509,7 +512,7 @@ function BadgeRow({ badgeKey, badge, onUpdateColor, onUpdateProperty, onRemove }
             </button>
           </div>
           <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-            Sin Fondo = solo texto coloreado, ideal para badges minimalistas
+            Oculto = no se muestra en la app • Sin Fondo = solo texto coloreado
           </p>
 
           <BaseInput
