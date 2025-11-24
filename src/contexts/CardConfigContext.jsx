@@ -4,19 +4,21 @@
  * Este contexto carga configuración guardada de localStorage y la hace disponible
  * para todas las instancias de UniversalCard en la aplicación.
  *
- * Incluye control global de visibilidad de botones de eliminar.
+ * Incluye "Modo Edición" para mostrar botones de eliminar en tarjetas.
+ * - Por defecto: OFF (tarjetas limpias)
+ * - Activado: Muestra botones de eliminar en tarjetas para limpieza rápida
+ * - NO persiste entre sesiones (siempre arranca en modo normal)
  *
  * @module contexts/CardConfigContext
  */
 
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback } from 'react';
 import { cardVariants } from '../components/cards/cardConfig';
 
-// Keys para localStorage
+// Keys para localStorage (editMode NO usa localStorage - no persiste)
 const STORAGE_KEYS = {
   CARD_CONFIG: 'xiwen_card_config',
   COMPONENT_MAPPING: 'xiwen_card_component_mapping',
-  SHOW_DELETE_BUTTONS: 'xiwen_show_delete_buttons',
 };
 
 const CardConfigContext = createContext();
@@ -50,8 +52,12 @@ export function useCardConfig() {
       componentMapping: DEFAULT_COMPONENT_MAPPING,
       updateComponentMapping: () => {},
       getComponentVariant: (name) => DEFAULT_COMPONENT_MAPPING[name] || 'default',
-      // Estado global de botones de eliminar
-      showDeleteButtons: true,
+      // Modo Edición - muestra botones de eliminar en tarjetas
+      editMode: false,
+      toggleEditMode: () => {},
+      setEditMode: () => {},
+      // Aliases para compatibilidad (deprecated - usar editMode)
+      showDeleteButtons: false,
       toggleDeleteButtons: () => {},
       setShowDeleteButtons: () => {},
     };
@@ -105,34 +111,29 @@ export function CardConfigProvider({ children }) {
   });
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // Estado global de visibilidad de botones de eliminar
+  // Modo Edición - Muestra botones de eliminar en tarjetas
+  // Por defecto OFF, NO persiste entre sesiones
   // ═══════════════════════════════════════════════════════════════════════════
-  const [showDeleteButtons, setShowDeleteButtonsState] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.SHOW_DELETE_BUTTONS);
-    // Por defecto TRUE (mostrar botones)
-    return saved !== null ? JSON.parse(saved) : true;
-  });
+  const [editMode, setEditModeState] = useState(false);
 
   /**
-   * Toggle para mostrar/ocultar botones de eliminar globalmente
+   * Toggle para activar/desactivar modo edición
    */
-  const toggleDeleteButtons = useCallback(() => {
-    setShowDeleteButtonsState(prev => {
+  const toggleEditMode = useCallback(() => {
+    setEditModeState(prev => {
       const newValue = !prev;
-      localStorage.setItem(STORAGE_KEYS.SHOW_DELETE_BUTTONS, JSON.stringify(newValue));
-      console.log(`🗑️ Botones de eliminar: ${newValue ? 'VISIBLE' : 'OCULTO'}`);
+      console.log(`✏️ Modo Edición: ${newValue ? 'ACTIVADO' : 'DESACTIVADO'}`);
       return newValue;
     });
   }, []);
 
   /**
-   * Setter directo para el estado de botones de eliminar
+   * Setter directo para el modo edición
    */
-  const setShowDeleteButtons = useCallback((value) => {
+  const setEditMode = useCallback((value) => {
     const newValue = Boolean(value);
-    setShowDeleteButtonsState(newValue);
-    localStorage.setItem(STORAGE_KEYS.SHOW_DELETE_BUTTONS, JSON.stringify(newValue));
-    console.log(`🗑️ Botones de eliminar: ${newValue ? 'VISIBLE' : 'OCULTO'}`);
+    setEditModeState(newValue);
+    console.log(`✏️ Modo Edición: ${newValue ? 'ACTIVADO' : 'DESACTIVADO'}`);
   }, []);
 
   /**
@@ -160,12 +161,7 @@ export function CardConfigProvider({ children }) {
       // Si no hay config guardado, volver a defaults
       setConfig({...cardVariants});
     }
-
-    // También recargar estado de botones de eliminar
-    const savedDeleteButtons = localStorage.getItem(STORAGE_KEYS.SHOW_DELETE_BUTTONS);
-    if (savedDeleteButtons !== null) {
-      setShowDeleteButtonsState(JSON.parse(savedDeleteButtons));
-    }
+    // Nota: editMode NO se recarga - siempre arranca en false
   }, []);
 
   /**
@@ -187,23 +183,6 @@ export function CardConfigProvider({ children }) {
     return componentMapping[componentName] || 'default';
   }, [componentMapping]);
 
-  // Escuchar cambios en localStorage (para sincronizar entre tabs)
-  useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === STORAGE_KEYS.CARD_CONFIG) {
-        reloadConfig();
-      }
-      // Sincronizar estado de botones de eliminar entre tabs
-      if (e.key === STORAGE_KEYS.SHOW_DELETE_BUTTONS) {
-        const newValue = e.newValue !== null ? JSON.parse(e.newValue) : true;
-        setShowDeleteButtonsState(newValue);
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, [reloadConfig]);
-
   return (
     <CardConfigContext.Provider value={{
       config,
@@ -211,10 +190,14 @@ export function CardConfigProvider({ children }) {
       componentMapping,
       updateComponentMapping,
       getComponentVariant,
-      // Estado global de botones de eliminar
-      showDeleteButtons,
-      toggleDeleteButtons,
-      setShowDeleteButtons,
+      // Modo Edición - muestra botones de eliminar en tarjetas
+      editMode,
+      toggleEditMode,
+      setEditMode,
+      // Aliases para compatibilidad (deprecated - usar editMode)
+      showDeleteButtons: editMode,
+      toggleDeleteButtons: toggleEditMode,
+      setShowDeleteButtons: setEditMode,
     }}>
       {children}
     </CardConfigContext.Provider>

@@ -7,14 +7,16 @@
  */
 
 import { useState } from 'react';
-import { Settings, Palette, Wrench } from 'lucide-react';
+import { Settings, Palette, Wrench, Trash2 } from 'lucide-react';
 import PageHeader from './common/PageHeader';
 import BaseTabs from './common/BaseTabs';
 import DesignTab from './settings/DesignTab';
 import AdvancedTab from './settings/AdvancedTab';
+import { useCardConfig } from '../contexts/CardConfigContext';
 
 function SettingsPanel() {
   const [activeTab, setActiveTab] = useState('general');
+  const { editMode, setEditMode } = useCardConfig();
 
   const tabs = [
     { id: 'general', label: 'General', icon: Settings },
@@ -55,6 +57,41 @@ function SettingsPanel() {
                     <option>English</option>
                     <option>中文</option>
                   </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Separador */}
+            <div className="border-t border-gray-200 dark:border-gray-700"></div>
+
+            {/* Administración - Modo Edición */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Administración</h3>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                      <Trash2 size={20} className="text-red-600 dark:text-red-400" />
+                    </div>
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white">Modo Edición</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        Muestra botones de eliminar en las tarjetas para limpieza rápida sin abrir modales
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setEditMode(!editMode)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      editMode ? 'bg-red-500' : 'bg-gray-300 dark:bg-gray-600'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        editMode ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
                 </div>
               </div>
             </div>
