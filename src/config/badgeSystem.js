@@ -1285,20 +1285,42 @@ export const BADGE_CONFIG_STORAGE_KEY = 'xiwen_badge_config';
 // ============================================
 
 /**
+ * Propiedades por defecto que se aplican a cada badge
+ * Útil para agregar nuevas propiedades sin modificar cada badge individualmente
+ */
+const BADGE_DEFAULT_PROPERTIES = {
+  enabled: true,         // Si false, el badge no se muestra en ningún lado
+  showIcon: true,        // Si false, no se muestra el icono (solo texto)
+  showBackground: true,  // Si false, el badge es transparente (solo texto coloreado)
+};
+
+/**
  * Obtiene la configuración actual de badges (defaults + customs)
+ * Aplica las propiedades por defecto a cada badge
  */
 export function getBadgeConfig() {
   const saved = localStorage.getItem(BADGE_CONFIG_STORAGE_KEY);
+  let baseConfig = DEFAULT_BADGE_CONFIG;
+
   if (saved) {
     try {
       const custom = JSON.parse(saved);
-      return { ...DEFAULT_BADGE_CONFIG, ...custom };
+      baseConfig = { ...DEFAULT_BADGE_CONFIG, ...custom };
     } catch (err) {
       console.error('Error loading badge config:', err);
-      return DEFAULT_BADGE_CONFIG;
     }
   }
-  return DEFAULT_BADGE_CONFIG;
+
+  // Aplicar propiedades por defecto a cada badge (para retrocompatibilidad)
+  const configWithDefaults = {};
+  Object.entries(baseConfig).forEach(([key, badge]) => {
+    configWithDefaults[key] = {
+      ...BADGE_DEFAULT_PROPERTIES,
+      ...badge,
+    };
+  });
+
+  return configWithDefaults;
 }
 
 /**
