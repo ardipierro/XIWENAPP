@@ -376,18 +376,37 @@ function CategorySection({
 function BadgeRow({ badgeKey, badge, onUpdateColor, onUpdateProperty, onRemove }) {
   const [showAdvanced, setShowAdvanced] = useState(false);
 
+  // Valores por defecto para las nuevas propiedades
+  const isEnabled = badge.enabled !== false;
+  const showsIcon = badge.showIcon !== false;
+  const showsBackground = badge.showBackground !== false;
+
   return (
     <div
       className="rounded-lg p-3 space-y-2"
       style={{
         background: 'var(--color-bg-primary)',
         border: '1px solid var(--color-border)',
+        opacity: isEnabled ? 1 : 0.5,
       }}
     >
       {/* Fila principal */}
       <div className="flex items-center justify-between gap-3">
-        {/* Badge preview */}
+        {/* Toggle de habilitación + Badge preview */}
         <div className="flex items-center gap-3 flex-1">
+          {/* 🆕 Toggle para habilitar/deshabilitar */}
+          <button
+            onClick={() => onUpdateProperty(badgeKey, 'enabled', !isEnabled)}
+            className="p-1.5 rounded transition-all"
+            style={{
+              background: isEnabled ? 'var(--color-success, #10b981)' : 'var(--color-bg-tertiary)',
+              color: isEnabled ? '#ffffff' : 'var(--color-text-secondary)',
+            }}
+            title={isEnabled ? 'Click para ocultar este badge en toda la app' : 'Click para mostrar este badge'}
+          >
+            {isEnabled ? <Check size={14} /> : <EyeOff size={14} />}
+          </button>
+
           <CategoryBadge
             badgeKey={badgeKey}
             size="md"
@@ -401,6 +420,11 @@ function BadgeRow({ badgeKey, badge, onUpdateColor, onUpdateProperty, onRemove }
               {badge.custom && (
                 <BaseBadge variant="info" size="sm">
                   Custom
+                </BaseBadge>
+              )}
+              {!isEnabled && (
+                <BaseBadge variant="default" size="sm">
+                  Oculto
                 </BaseBadge>
               )}
             </div>
@@ -421,6 +445,7 @@ function BadgeRow({ badgeKey, badge, onUpdateColor, onUpdateProperty, onRemove }
             className="w-10 h-10 rounded border cursor-pointer"
             style={{ borderColor: 'var(--color-border)' }}
             title="Cambiar color"
+            disabled={!isEnabled}
           />
 
           {/* Botones de acción */}
@@ -450,7 +475,43 @@ function BadgeRow({ badgeKey, badge, onUpdateColor, onUpdateProperty, onRemove }
 
       {/* Opciones avanzadas */}
       {showAdvanced && (
-        <div className="pt-2 border-t space-y-2" style={{ borderColor: 'var(--color-border)' }}>
+        <div className="pt-2 border-t space-y-3" style={{ borderColor: 'var(--color-border)' }}>
+          {/* 🆕 Toggles de visualización */}
+          <div className="grid grid-cols-2 gap-2">
+            {/* Toggle Mostrar Icono */}
+            <button
+              type="button"
+              onClick={() => onUpdateProperty(badgeKey, 'showIcon', !showsIcon)}
+              className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+              style={{
+                background: showsIcon ? 'var(--color-primary)' : 'var(--color-bg-tertiary)',
+                color: showsIcon ? '#ffffff' : 'var(--color-text-secondary)',
+                border: '1px solid var(--color-border)',
+              }}
+            >
+              <Smile size={14} />
+              {showsIcon ? 'Con Icono' : 'Sin Icono'}
+            </button>
+
+            {/* Toggle Mostrar Fondo */}
+            <button
+              type="button"
+              onClick={() => onUpdateProperty(badgeKey, 'showBackground', !showsBackground)}
+              className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+              style={{
+                background: showsBackground ? 'var(--color-primary)' : 'var(--color-bg-tertiary)',
+                color: showsBackground ? '#ffffff' : 'var(--color-text-secondary)',
+                border: '1px solid var(--color-border)',
+              }}
+            >
+              <Box size={14} />
+              {showsBackground ? 'Con Fondo' : 'Sin Fondo'}
+            </button>
+          </div>
+          <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+            Sin Fondo = solo texto coloreado, ideal para badges minimalistas
+          </p>
+
           <BaseInput
             label="Label"
             value={badge.label}

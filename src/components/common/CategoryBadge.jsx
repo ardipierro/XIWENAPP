@@ -151,6 +151,18 @@ function CategoryBadge({
     );
   }
 
+  // 🆕 Si el badge está deshabilitado, no renderizar nada
+  if (badgeConfig.enabled === false) {
+    return null;
+  }
+
+  // 🆕 Determinar si mostrar icono basándose en config del badge y prop
+  // La config del badge tiene prioridad sobre la prop
+  const shouldShowIcon = badgeConfig.showIcon !== false && showIcon;
+
+  // 🆕 Determinar si mostrar fondo basándose en config del badge
+  const shouldShowBackground = badgeConfig.showBackground !== false;
+
   // Obtener color del icono según paleta monocromática
   const getIconColor = () => {
     const palette = iconLibraryConfig.monochromePalette || 'vibrant';
@@ -163,7 +175,7 @@ function CategoryBadge({
 
   // Renderizar icono según configuración
   const renderIcon = () => {
-    if (!showIcon) return null;
+    if (!shouldShowIcon) return null;
 
     const iconLibrary = iconLibraryConfig.library || 'emoji';
 
@@ -226,25 +238,42 @@ function CategoryBadge({
     return null;
   };
 
+  // 🆕 Calcular estilos basándose en showBackground y badgeStyle
+  const getStyleObject = () => {
+    // Sin fondo: solo texto coloreado, sin background ni border
+    if (!shouldShowBackground) {
+      return {
+        backgroundColor: 'transparent',
+        color: badgeConfig.color,
+        border: 'none',
+        boxShadow: 'none',
+      };
+    }
+
+    // Estilo outline: borde coloreado, fondo transparente
+    if (badgeConfig.badgeStyle === 'outline') {
+      return {
+        borderColor: badgeConfig.color,
+        color: badgeConfig.color,
+        backgroundColor: 'transparent',
+      };
+    }
+
+    // Estilo por defecto (solid y otros): fondo coloreado
+    return {
+      backgroundColor: badgeConfig.color,
+      color: getContrastText(badgeConfig.color),
+    };
+  };
+
   return (
     <BaseBadge
       variant={badgeConfig.variant}
-      badgeStyle={badgeConfig.badgeStyle || 'solid'}
+      badgeStyle={shouldShowBackground ? (badgeConfig.badgeStyle || 'solid') : 'text'}
       size={size}
       onRemove={onRemove}
       className={className}
-      style={
-        badgeConfig.badgeStyle === 'outline'
-          ? {
-              borderColor: badgeConfig.color,
-              color: badgeConfig.color,
-              backgroundColor: 'transparent',
-            }
-          : {
-              backgroundColor: badgeConfig.color,
-              color: getContrastText(badgeConfig.color),
-            }
-      }
+      style={getStyleObject()}
       {...rest}
     >
       {children ? (

@@ -1,5 +1,6 @@
 import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { AlertCircle, Loader } from 'lucide-react';
+import CategoryBadge from '../common/CategoryBadge';
 
 // Importación dinámica de componentes de ejercicio del Exercise Builder
 const exerciseComponents = {
@@ -138,20 +139,14 @@ export function UnifiedExerciseRenderer({
               en el visualizador del Diario de Clases.
             </p>
 
-            {/* Mostrar metadata disponible */}
+            {/* Mostrar metadata disponible (usando sistema universal de badges) */}
             {content.metadata && (
-              <div className="space-y-2 mb-3">
+              <div className="flex flex-wrap gap-2 mb-3">
                 {content.metadata.difficulty && (
-                  <span className="inline-block px-2 py-1 text-xs rounded bg-amber-200
-                                 dark:bg-amber-800 text-amber-900 dark:text-amber-100 mr-2">
-                    {content.metadata.difficulty}
-                  </span>
+                  <CategoryBadge type="difficulty" value={content.metadata.difficulty} size="sm" />
                 )}
                 {content.metadata.cefrLevel && (
-                  <span className="inline-block px-2 py-1 text-xs rounded bg-blue-200
-                                 dark:bg-blue-800 text-gray-900 dark:text-gray-100">
-                    Nivel {content.metadata.cefrLevel}
-                  </span>
+                  <CategoryBadge type="cefr" value={content.metadata.cefrLevel} size="sm" />
                 )}
               </div>
             )}
@@ -211,24 +206,15 @@ export function UnifiedExerciseRenderer({
 
           <div className="flex gap-2">
             {content.metadata?.difficulty && (
-              <span className="px-3 py-1 text-xs font-semibold rounded-full bg-white
-                             dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
-                {content.metadata.difficulty === 'easy' && '🟢 Fácil'}
-                {content.metadata.difficulty === 'intermediate' && '🟡 Intermedio'}
-                {content.metadata.difficulty === 'hard' && '🔴 Difícil'}
-              </span>
+              <CategoryBadge type="difficulty" value={content.metadata.difficulty} size="sm" />
             )}
             {content.metadata?.cefrLevel && (
-              <span className="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100
-                             dark:bg-blue-900 text-blue-800 dark:text-blue-200">
-                {content.metadata.cefrLevel}
-              </span>
+              <CategoryBadge type="cefr" value={content.metadata.cefrLevel} size="sm" />
             )}
             {content.metadata?.points && (
-              <span className="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100
-                             dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200">
+              <CategoryBadge badgeKey="GAMIFICATION_XP" size="sm">
                 {content.metadata.points} pts
-              </span>
+              </CategoryBadge>
             )}
           </div>
         </div>

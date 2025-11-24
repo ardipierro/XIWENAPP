@@ -89,19 +89,8 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
     }
   };
 
-  const getRoleBadge = () => {
-    const badges = {
-      admin: { text: 'Administrador', color: '#ef4444' },
-      teacher: { text: 'Profesor', color: '#10b981' },
-      trial_teacher: { text: 'Profesor (Prueba)', color: '#f59e0b' },
-      student: { text: 'Estudiante', color: '#5b8fa3' },
-      listener: { text: 'Oyente', color: '#6b7280' },
-      trial: { text: 'Prueba', color: '#f59e0b' },
-    };
-    return badges[userRole] || { text: userRole, color: '#6b7280' };
-  };
-
-  const roleBadge = getRoleBadge();
+  // NOTA: Se usa CategoryBadge type="role" directamente en el JSX
+  // El sistema universal de badges maneja los colores y estilos
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-[1100]" onClick={onClose}>

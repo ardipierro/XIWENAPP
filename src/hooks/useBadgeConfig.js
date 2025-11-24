@@ -109,6 +109,8 @@ function useBadgeConfig() {
 
   /**
    * Actualizar configuración global de badges (con guardado inmediato)
+   * NOTA: No reseteamos hasChanges aquí porque puede haber otros cambios pendientes
+   * que no se guardan con esta operación (como cambios de color individual)
    */
   const updateGlobalConfig = useCallback((key, value) => {
     setGlobalConfig((prev) => {
@@ -142,11 +144,14 @@ function useBadgeConfig() {
 
       return updated;
     });
-    setHasChanges(false); // Ya se guardó, no hay cambios pendientes
+    // FIX: Ya no reseteamos hasChanges - el usuario debe guardar explícitamente
+    // para confirmar que todos los cambios están guardados
+    setHasChanges(true);
   }, []);
 
   /**
    * Cambiar el estilo de TODOS los badges (solid/outline/soft/glass/gradient)
+   * NOTA: Se guarda inmediatamente pero mantenemos hasChanges=true para consistencia UX
    */
   const updateAllBadgeStyles = useCallback((badgeStyle) => {
     setConfig((prev) => {
@@ -175,7 +180,9 @@ function useBadgeConfig() {
       return updated;
     });
 
-    setHasChanges(false); // Ya se guardó, no hay cambios pendientes
+    // FIX: Mantenemos hasChanges=true para que el usuario vea que hubo cambios
+    // y pueda confirmar con el botón "Guardar" (aunque ya se guardó en tiempo real)
+    setHasChanges(true);
   }, []);
 
   /**
