@@ -1,21 +1,16 @@
 import { useState, useEffect } from 'react';
 import {
   Plus,
-  Search,
   Video,
   Calendar,
   PenTool,
   Presentation,
   Edit,
-  Trash2,
   Play,
-  StopCircle,
-  Users,
-  Clock,
-  X,
-  Zap
+  StopCircle
 } from 'lucide-react';
 import PageHeader from './common/PageHeader';
+import SearchBar from './common/SearchBar';
 import logger from '../utils/logger';
 import {
   getTeacherSessions,
@@ -46,8 +41,9 @@ import {
 import { UniversalCard } from './cards';
 
 /**
- * Gestor de Sesiones de Clase Unificadas
+ * Gestor de Clases Unificadas
  * Integra: LiveKit + Pizarras + Programación
+ * Soporta vistas: Grid y Lista (row)
  */
 function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClearEditSession }) {
   const [sessions, setSessions] = useState([]);
@@ -58,6 +54,7 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
   const [showModal, setShowModal] = useState(false);
   const [editingSession, setEditingSession] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
   const [filterStatus, setFilterStatus] = useState('all'); // all, scheduled, live, ended
   const [message, setMessage] = useState({ type: '', text: '' });
   const [actionLoading, setActionLoading] = useState(null);
@@ -410,9 +407,9 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
       {/* Page Header */}
       <PageHeader
         icon={Calendar}
-        title="Sesiones"
-        description={`${sessions.length} sesiones`}
-        actionLabel="Nueva sesión"
+        title="Clases"
+        description={`${sessions.length} clases`}
+        actionLabel="Nueva clase"
         onAction={() => setShowModal(true)}
       />
 
@@ -429,96 +426,75 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
         </div>
       )}
 
-      {/* Filtros */}
-      <div className="mb-6 space-y-4">
-        {/* Búsqueda */}
-        <div className="relative">
-          <Search
-            size={20}
-            strokeWidth={2}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-          />
-          <input
-            type="text"
-            placeholder="Buscar sesiones..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="
-              w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700
-              bg-white dark:bg-gray-800 text-gray-900 dark:text-white
-              placeholder-gray-400 dark:placeholder-gray-500
-              focus:outline-none focus:ring-2 focus:ring-zinc-900 dark:focus:ring-zinc-100
-            "
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-            >
-              <X size={18} strokeWidth={2} />
-            </button>
-          )}
-        </div>
-
-        {/* Filtros rápidos */}
-        <div className="flex gap-2">
-          <button
-            onClick={() => setFilterStatus('all')}
-            className={`
-              px-4 py-2 rounded-lg text-sm font-medium transition-all
-              ${filterStatus === 'all'
-                ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
-              }
-            `}
-          >
-            Todas
-          </button>
-          <button
-            onClick={() => setFilterStatus('live')}
-            className={`
-              px-4 py-2 rounded-lg text-sm font-medium transition-all
-              ${filterStatus === 'live'
-                ? 'bg-green-500 text-white'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
-              }
-            `}
-          >
-            En Vivo
-          </button>
-          <button
-            onClick={() => setFilterStatus('scheduled')}
-            className={`
-              px-4 py-2 rounded-lg text-sm font-medium transition-all
-              ${filterStatus === 'scheduled'
-                ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
-              }
-            `}
-          >
-            Programadas
-          </button>
-          <button
-            onClick={() => setFilterStatus('ended')}
-            className={`
-              px-4 py-2 rounded-lg text-sm font-medium transition-all
-              ${filterStatus === 'ended'
-                ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
-                : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
-              }
-            `}
-          >
-            Finalizadas
-          </button>
-        </div>
+      {/* Filtros rápidos */}
+      <div className="mb-4 flex flex-wrap gap-2">
+        <button
+          onClick={() => setFilterStatus('all')}
+          className={`
+            px-4 py-2 rounded-lg text-sm font-medium transition-all
+            ${filterStatus === 'all'
+              ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
+              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
+            }
+          `}
+        >
+          Todas
+        </button>
+        <button
+          onClick={() => setFilterStatus('live')}
+          className={`
+            px-4 py-2 rounded-lg text-sm font-medium transition-all
+            ${filterStatus === 'live'
+              ? 'bg-green-500 text-white'
+              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
+            }
+          `}
+        >
+          En Vivo
+        </button>
+        <button
+          onClick={() => setFilterStatus('scheduled')}
+          className={`
+            px-4 py-2 rounded-lg text-sm font-medium transition-all
+            ${filterStatus === 'scheduled'
+              ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
+              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
+            }
+          `}
+        >
+          Programadas
+        </button>
+        <button
+          onClick={() => setFilterStatus('ended')}
+          className={`
+            px-4 py-2 rounded-lg text-sm font-medium transition-all
+            ${filterStatus === 'ended'
+              ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
+              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
+            }
+          `}
+        >
+          Finalizadas
+        </button>
       </div>
 
-      {/* Sesiones */}
+      {/* Barra de búsqueda con toggle de vista */}
+      <SearchBar
+        value={searchTerm}
+        onChange={setSearchTerm}
+        placeholder="Buscar clases..."
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        viewModes={['grid', 'list']}
+        className="mb-6"
+      />
+
+      {/* Clases */}
       {filteredSessions.length === 0 ? (
         <BaseEmptyState
           icon={Calendar}
-          title="No hay sesiones"
-          description={searchTerm ? 'No se encontraron sesiones con ese criterio' : 'Crea tu primera sesión de clase'}
+          title="No hay clases"
+          description={searchTerm ? 'No se encontraron clases con ese criterio' : 'Crea tu primera clase'}
           size="lg"
           action={
             !searchTerm && (
@@ -527,12 +503,12 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
                 icon={Plus}
                 onClick={() => setShowModal(true)}
               >
-                Crear Sesión
+                Crear Clase
               </BaseButton>
             )
           }
         />
-      ) : (
+      ) : viewMode === 'grid' ? (
         <ResponsiveGrid size="md" gap="6">
           {filteredSessions.map(session => {
             // Preparar badges según el estado
@@ -584,7 +560,6 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
                   Editar Clase
                 </BaseButton>
               );
-              // Botón eliminar movido a onDelete prop (footer izquierda)
             } else {
               // Acciones para sesión única/instancia
               if (session.status === 'scheduled') {
@@ -638,7 +613,7 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
                 );
               }
 
-              // Botones de editar para sesiones no live (eliminar movido a onDelete)
+              // Botones de editar para sesiones no live
               if (session.status !== 'live') {
                 actions.push(
                   <BaseButton
@@ -652,7 +627,6 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
                     }}
                   />
                 );
-                // Botón eliminar movido a onDelete prop (footer izquierda)
               }
             }
 
@@ -674,12 +648,149 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
                     onJoinSession(session);
                   }
                 }}
-                onDelete={() => handleDelete(session)}  // ← NUEVO: Botón eliminar unificado (footer izquierda)
-                deleteConfirmMessage={`¿Eliminar ${session.type === 'recurring' ? 'clase recurrente' : 'sesión'} "${session.name}"?`}
+                onDelete={() => handleDelete(session)}
+                deleteConfirmMessage={`¿Eliminar ${session.type === 'recurring' ? 'clase recurrente' : 'clase'} "${session.name}"?`}
               />
             );
           })}
         </ResponsiveGrid>
+      ) : (
+        /* Vista de Lista (layout="row") */
+        <div className="flex flex-col gap-4">
+          {filteredSessions.map(session => {
+            // Preparar badges según el estado
+            const badges = [
+              { variant: session.status === 'live' ? 'success' : session.status === 'ended' ? 'default' : 'primary', children: session.status === 'live' ? 'En Vivo' : session.status === 'ended' ? 'Finalizada' : 'Programada' },
+              { variant: session.videoProvider === 'livekit' ? 'primary' : session.videoProvider === 'meet' ? 'success' : 'default', children: session.videoProvider === 'livekit' ? 'LiveKit' : session.videoProvider === 'meet' ? 'Google Meet' : session.videoProvider === 'zoom' ? 'Zoom' : 'Voov' }
+            ];
+
+            // Agregar badge de pizarra si existe
+            if (session.whiteboardType && session.whiteboardType !== 'none') {
+              badges.push({
+                variant: 'default',
+                icon: session.whiteboardType === 'canvas' ? Presentation : PenTool,
+                children: session.whiteboardType === 'canvas' ? 'Canvas' : 'Excalidraw'
+              });
+            }
+
+            // Preparar meta info
+            const meta = [];
+
+            // Agregar info de programación
+            const scheduleText = renderScheduleInfo(session);
+            if (scheduleText) {
+              meta.push({ icon: '📅', text: scheduleText });
+            }
+
+            // Agregar duración
+            if (session.duration) {
+              meta.push({ icon: '⏱️', text: `${session.duration} min` });
+            }
+
+            // Preparar actions según el tipo y estado (versión compacta para lista)
+            const actions = [];
+
+            if (session.type === 'recurring') {
+              actions.push(
+                <BaseButton
+                  key="edit"
+                  variant="ghost"
+                  size="sm"
+                  icon={Edit}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openEditModal(session);
+                  }}
+                />
+              );
+            } else {
+              if (session.status === 'scheduled') {
+                actions.push(
+                  <BaseButton
+                    key="start"
+                    variant="success"
+                    size="sm"
+                    icon={Play}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStartSession(session.id);
+                    }}
+                    loading={actionLoading === `start-${session.id}`}
+                  >
+                    Iniciar
+                  </BaseButton>
+                );
+              } else if (session.status === 'live') {
+                actions.push(
+                  <BaseButton
+                    key="join"
+                    variant="primary"
+                    size="sm"
+                    icon={Video}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onJoinSession && onJoinSession(session);
+                    }}
+                  >
+                    Unirse
+                  </BaseButton>
+                );
+                actions.push(
+                  <BaseButton
+                    key="end"
+                    variant="danger"
+                    size="sm"
+                    icon={StopCircle}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEndSession(session.id);
+                    }}
+                    loading={actionLoading === `end-${session.id}`}
+                  />
+                );
+              }
+
+              if (session.status !== 'live') {
+                actions.push(
+                  <BaseButton
+                    key="edit"
+                    variant="ghost"
+                    size="sm"
+                    icon={Edit}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEditModal(session);
+                    }}
+                  />
+                );
+              }
+            }
+
+            return (
+              <UniversalCard
+                key={session.id}
+                layout="row"
+                variant="class"
+                icon={Calendar}
+                title={session.name}
+                subtitle={session.courseName || 'Sin curso asignado'}
+                description={session.description}
+                badges={badges}
+                meta={meta}
+                actions={actions}
+                showLiveIndicator={session.status === 'live'}
+                liveText="EN VIVO"
+                onClick={() => {
+                  if (session.status === 'live' && onJoinSession) {
+                    onJoinSession(session);
+                  }
+                }}
+                onDelete={() => handleDelete(session)}
+                deleteConfirmMessage={`¿Eliminar ${session.type === 'recurring' ? 'clase recurrente' : 'clase'} "${session.name}"?`}
+              />
+            );
+          })}
+        </div>
       )}
 
       {/* Modal */}
