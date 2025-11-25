@@ -4,13 +4,14 @@
  */
 
 import { useState } from 'react';
-import { Box, CheckSquare, Move, Edit3, HelpCircle, MessageSquare, Table2 } from 'lucide-react';
+import { Box, CheckSquare, Move, Edit3, HelpCircle, MessageSquare, Table2, MessageCircle } from 'lucide-react';
 import { BaseBadge } from './common';
 import WordHighlightConfig from './container/WordHighlightConfig';
 import DragDropConfig from './container/DragDropConfig';
 import FillBlanksConfig from './container/FillBlanksConfig';
 import OpenQuestionsConfig from './container/OpenQuestionsConfig';
 import InfoTableConfig from './container/InfoTableConfig';
+import DialoguesConfig from './container/DialoguesConfig';
 import logger from '../utils/logger';
 
 /**
@@ -55,6 +56,14 @@ const CONTAINER_TABS = [
     icon: Table2,
     description: 'Tablas explicativas interactivas para gramática, conjugaciones, vocabulario. Usa #TABLA_INFO con columnas separadas por |',
     component: InfoTableConfig,
+    available: true
+  },
+  {
+    id: 'dialogues',
+    label: 'Diálogos',
+    icon: MessageCircle,
+    description: 'Diálogos interactivos estilo chat. Usa #DIALOGO con formato "Personaje: texto". Las palabras entre *asteriscos* se convierten en blancos.',
+    component: DialoguesConfig,
     available: true
   },
   {

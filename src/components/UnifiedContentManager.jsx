@@ -242,16 +242,17 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
       'ai_generated',
       'word-highlight',
       'drag-drop',
-      'fill-blanks'
+      'fill-blanks',
+      'dialogues'
     ];
 
     // Verificar si es un ejercicio interactivo por metadata o por contenido
     const exerciseType = content.metadata?.exerciseType;
     const isAIExercise = aiExerciseTypes.includes(exerciseType);
 
-    // También detectar por contenido (prefijos #marcar, #arrastrar, #completar o asteriscos)
+    // También detectar por contenido (prefijos #marcar, #arrastrar, #completar, #dialogo o asteriscos)
     const hasInteractiveContent = content.content && (
-      /^#(marcar|arrastrar|completar)/i.test(content.content.trim()) ||
+      /^#(marcar|arrastrar|completar|dialogo|diálogo)/i.test(content.content.trim()) ||
       /\*[^*]+\*/g.test(content.content)
     );
 
@@ -328,16 +329,17 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
       'ai_generated',
       'word-highlight',
       'drag-drop',
-      'fill-blanks'
+      'fill-blanks',
+      'dialogues'
     ];
 
     // Verificar si es un ejercicio interactivo por metadata o por contenido
     const exerciseType = content.metadata?.exerciseType;
     const isInteractive = interactiveExerciseTypes.includes(exerciseType);
 
-    // También detectar por contenido (prefijos #marcar, #arrastrar, #completar o asteriscos)
+    // También detectar por contenido (prefijos #marcar, #arrastrar, #completar, #dialogo o asteriscos)
     const hasInteractiveContent = content.content && (
-      /^#(marcar|arrastrar|completar)/i.test(content.content.trim()) ||
+      /^#(marcar|arrastrar|completar|dialogo|diálogo)/i.test(content.content.trim()) ||
       /\*[^*]+\*/g.test(content.content)
     );
 

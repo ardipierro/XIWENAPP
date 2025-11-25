@@ -12,6 +12,7 @@ import logger from '../utils/logger';
 // Lazy load de componentes de ejercicios adicionales
 const DragDropBlanksExercise = lazy(() => import('./container/DragDropBlanksExercise'));
 const FillInBlanksExercise = lazy(() => import('./container/FillInBlanksExercise'));
+const DialoguesExercise = lazy(() => import('./container/DialoguesExercise'));
 
 /**
  * Spinner de carga para lazy components
@@ -31,12 +32,13 @@ const ExerciseLoader = () => (
 const EXERCISE_TYPES = {
   HIGHLIGHT: 'word-highlight',
   DRAGDROP: 'drag-drop',
-  FILLBLANKS: 'fill-blanks'
+  FILLBLANKS: 'fill-blanks',
+  DIALOGUES: 'dialogues'
 };
 
 /**
  * Detectar tipo de ejercicio basado en prefijo o contenido
- * Prefijos soportados: #marcar, #arrastrar, #completar
+ * Prefijos soportados: #marcar, #arrastrar, #completar, #dialogo
  */
 function detectExerciseType(content) {
   if (!content) return { type: null, cleanContent: content };
@@ -63,6 +65,23 @@ function detectExerciseType(content) {
     return {
       type: EXERCISE_TYPES.FILLBLANKS,
       cleanContent: lines.slice(1).join('\n').trim()
+    };
+  }
+
+  // Detectar diálogos (#dialogo o #diálogo)
+  if (firstLine.startsWith('#dialogo') || firstLine.startsWith('#diálogo') || firstLine.includes('[tipo:dialogo]')) {
+    return {
+      type: EXERCISE_TYPES.DIALOGUES,
+      cleanContent: content // Mantener el contenido completo para el parser
+    };
+  }
+
+  // Detectar diálogos por formato (Personaje: texto)
+  const dialoguePattern = /^[A-Za-zÀ-ÿ\s]+:\s*.+$/m;
+  if (dialoguePattern.test(content) && content.split('\n').filter(l => dialoguePattern.test(l.trim())).length >= 2) {
+    return {
+      type: EXERCISE_TYPES.DIALOGUES,
+      cleanContent: content
     };
   }
 
@@ -109,6 +128,11 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
       }
     } else if (type === EXERCISE_TYPES.FILLBLANKS) {
       const savedConfig = localStorage.getItem('fillBlanksConfig');
+      if (savedConfig) {
+        setConfig(JSON.parse(savedConfig));
+      }
+    } else if (type === EXERCISE_TYPES.DIALOGUES) {
+      const savedConfig = localStorage.getItem('xiwen_dialogues_config');
       if (savedConfig) {
         setConfig(JSON.parse(savedConfig));
       }
@@ -200,6 +224,18 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
           <Suspense fallback={<ExerciseLoader />}>
             <FillInBlanksExercise
               text={cleanContent}
+              config={config}
+              onComplete={handleComplete}
+              onActionsChange={handleActionsChange}
+            />
+          </Suspense>
+        );
+
+      case EXERCISE_TYPES.DIALOGUES:
+        return (
+          <Suspense fallback={<ExerciseLoader />}>
+            <DialoguesExercise
+              content={cleanContent}
               config={config}
               onComplete={handleComplete}
               onActionsChange={handleActionsChange}
