@@ -6,8 +6,10 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   CheckCircle,
+  Check,
   Clock,
   AlertCircle,
+  AlertTriangle,
   User,
   Calendar,
   Eye,
@@ -631,6 +633,61 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete, s
         </div>
       )}
 
+      {/* Status Icon - Top right corner (solo ícono, sin texto) */}
+      {(isProcessing || isFailed || isTeacherApproved || isAIReady) && (
+        <div className="absolute top-2 right-2 z-10">
+          {isProcessing ? (() => {
+            const badgeConfig = getBadgeByKey('HOMEWORK_PROCESSING');
+            const bgColor = badgeConfig?.color || '#7a8fa8';
+            return (
+              <span
+                className="inline-flex items-center justify-center w-7 h-7 rounded-full shadow-md"
+                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
+                title="Procesando"
+              >
+                <RefreshCw size={14} className="animate-spin" style={{ color: 'inherit' }} />
+              </span>
+            );
+          })() : isFailed ? (() => {
+            const badgeConfig = getBadgeByKey('HOMEWORK_ERROR');
+            const bgColor = badgeConfig?.color || '#dc2626';
+            return (
+              <span
+                className="inline-flex items-center justify-center w-7 h-7 rounded-full shadow-md"
+                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
+                title="Error"
+              >
+                <AlertTriangle size={14} style={{ color: 'inherit' }} />
+              </span>
+            );
+          })() : isTeacherApproved ? (() => {
+            const badgeConfig = getBadgeByKey('HOMEWORK_APPROVED');
+            const bgColor = badgeConfig?.color || '#10b981';
+            return (
+              <span
+                className="inline-flex items-center justify-center w-7 h-7 rounded-full shadow-md"
+                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
+                title="Aprobado"
+              >
+                <Check size={14} style={{ color: 'inherit' }} />
+              </span>
+            );
+          })() : isAIReady ? (() => {
+            const badgeConfig = getBadgeByKey('HOMEWORK_PENDING');
+            const bgColor = badgeConfig?.color || '#f59e0b';
+            return (
+              <span
+                className="inline-flex items-center justify-center w-7 h-7 rounded-full shadow-md"
+                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
+                title="Pendiente revisión"
+              >
+                <Clock size={14} style={{ color: 'inherit' }} />
+              </span>
+            );
+          })() : null}
+        </div>
+      )}
+
       <div className="space-y-3">
         {/* Student Info */}
         <div className="flex items-start justify-between">
@@ -700,59 +757,6 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete, s
             {isStuck ? '⚠️ Procesamiento lento - considera cancelar' : '⏳ Analizando...'}
           </div>
         )}
-
-        {/* Status Badge - Below grade container */}
-        <div className="flex justify-center">
-          {isProcessing ? (() => {
-            const badgeConfig = getBadgeByKey('HOMEWORK_PROCESSING');
-            const bgColor = badgeConfig?.color || '#7a8fa8';
-            return (
-              <span
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-md"
-                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
-              >
-                <RefreshCw size={14} className="animate-spin" style={{ color: 'inherit' }} />
-                <span className="text-xs font-semibold">PROCESANDO</span>
-              </span>
-            );
-          })() : isFailed ? (() => {
-            const badgeConfig = getBadgeByKey('HOMEWORK_ERROR');
-            const bgColor = badgeConfig?.color || '#dc2626';
-            return (
-              <span
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-md"
-                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
-              >
-                <AlertCircle size={14} style={{ color: 'inherit' }} />
-                <span className="text-xs font-semibold">ERROR</span>
-              </span>
-            );
-          })() : isTeacherApproved ? (() => {
-            const badgeConfig = getBadgeByKey('HOMEWORK_APPROVED');
-            const bgColor = badgeConfig?.color || '#10b981';
-            return (
-              <span
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-md"
-                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
-              >
-                <CheckCircle size={14} style={{ color: 'inherit' }} />
-                <span className="text-xs font-semibold">APROBADO</span>
-              </span>
-            );
-          })() : isAIReady ? (() => {
-            const badgeConfig = getBadgeByKey('HOMEWORK_PENDING');
-            const bgColor = badgeConfig?.color || '#f59e0b';
-            return (
-              <span
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-md"
-                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
-              >
-                <Clock size={14} style={{ color: 'inherit' }} />
-                <span className="text-xs font-semibold">PENDIENTE REVISIÓN</span>
-              </span>
-            );
-          })() : null}
-        </div>
 
         {/* Cancel Button - Only when stuck */}
         {isStuck && (
