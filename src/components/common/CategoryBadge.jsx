@@ -30,6 +30,8 @@ import {
   getBadgeByKey,
   getIconLibraryConfig,
   MONOCHROME_PALETTES,
+  getPresetForBadge,
+  getBadgePresetConfig,
 } from '../../config/badgeSystem';
 import * as HeroIcons from '@heroicons/react/24/outline';
 import * as HeroIconsSolid from '@heroicons/react/24/solid';
@@ -68,6 +70,9 @@ function CategoryBadge({
   // Estado para forzar re-render cuando cambie la config de badges
   const [badgeConfigKey, setBadgeConfigKey] = useState(0);
 
+  // Estado para configuración de presets
+  const [presetConfig, setPresetConfig] = useState(getBadgePresetConfig());
+
   // Escuchar cambios en la configuración de iconos (MEJORADO)
   useEffect(() => {
     const handleIconLibraryChange = (event) => {
@@ -88,17 +93,28 @@ function CategoryBadge({
       setBadgeConfigKey(k => k + 1);
     };
 
+    // NUEVO: Escuchar cambios en configuración de presets
+    const handlePresetConfigChange = (event) => {
+      const newConfig = event.detail || getBadgePresetConfig();
+      logger.info('Preset config changed:', newConfig, 'CategoryBadge');
+      setPresetConfig(newConfig);
+      setBadgeConfigKey(k => k + 1); // Forzar re-render
+    };
+
     window.addEventListener('iconLibraryChange', handleIconLibraryChange);
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('xiwen_badge_config_changed', handleBadgeConfigChange);
+    window.addEventListener('badgePresetConfigChange', handlePresetConfigChange);
 
     // Cargar config inicial
     setIconLibraryConfig(getIconLibraryConfig());
+    setPresetConfig(getBadgePresetConfig());
 
     return () => {
       window.removeEventListener('iconLibraryChange', handleIconLibraryChange);
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('xiwen_badge_config_changed', handleBadgeConfigChange);
+      window.removeEventListener('badgePresetConfigChange', handlePresetConfigChange);
     };
   }, []);
 
@@ -171,17 +187,41 @@ function CategoryBadge({
     );
   }
 
-  // 🆕 Si el badge está deshabilitado, no renderizar nada
-  if (badgeConfig.enabled === false) {
+  // 🆕 OBTENER PRESET APLICABLE
+  // El preset tiene la máxima prioridad y se combina con la config del badge
+  const badgeKeyStr = badgeKey || (type && value ? `${type}_${value}` : null);
+  const appliedPreset = badgeKeyStr ? getPresetForBadge(badgeKeyStr, badgeConfig.category) : null;
+
+  // 🆕 Si el badge está deshabilitado por preset o config, no renderizar nada
+  const isEnabled = appliedPreset ? appliedPreset.enabled !== false : badgeConfig.enabled !== false;
+  if (!isEnabled) {
     return null;
   }
 
-  // 🆕 Determinar si mostrar icono basándose en config del badge y prop
-  // La config del badge tiene prioridad sobre la prop
-  const shouldShowIcon = badgeConfig.showIcon !== false && showIcon;
+  // 🆕 Determinar si mostrar icono basándose en PRESET > config del badge > prop
+  let shouldShowIcon = showIcon;
+  if (appliedPreset && appliedPreset.showIcon !== undefined) {
+    shouldShowIcon = appliedPreset.showIcon;
+  } else if (badgeConfig.showIcon !== undefined) {
+    shouldShowIcon = badgeConfig.showIcon;
+  }
 
-  // 🆕 Determinar si mostrar fondo basándose en config del badge
-  const shouldShowBackground = badgeConfig.showBackground !== false;
+  // 🆕 Determinar si mostrar texto basándose en PRESET > prop
+  let shouldShowLabel = showLabel;
+  if (appliedPreset && appliedPreset.showText !== undefined) {
+    shouldShowLabel = appliedPreset.showText;
+  }
+
+  // 🆕 Determinar si mostrar fondo basándose en PRESET > config del badge
+  let shouldShowBackground = true;
+  if (appliedPreset && appliedPreset.showBackground !== undefined) {
+    shouldShowBackground = appliedPreset.showBackground;
+  } else if (badgeConfig.showBackground !== undefined) {
+    shouldShowBackground = badgeConfig.showBackground;
+  }
+
+  // 🆕 Obtener fontWeight del preset o config
+  const fontWeight = appliedPreset?.fontWeight || badgeConfig.fontWeight || 'medium';
 
   // Obtener color del icono según paleta monocromática
   const getIconColor = () => {
@@ -258,11 +298,16 @@ function CategoryBadge({
     return null;
   };
 
-  // 🆕 Calcular estilos basándose en showBackground y badgeStyle
+  // 🆕 Calcular estilos basándose en showBackground, badgeStyle y fontWeight
   const getStyleObject = () => {
+    const baseStyles = {
+      fontWeight: fontWeight === 'normal' ? '400' : fontWeight === 'bold' ? '700' : fontWeight === 'semibold' ? '600' : '500',
+    };
+
     // Sin fondo: solo texto coloreado, sin background ni border
     if (!shouldShowBackground) {
       return {
+        ...baseStyles,
         backgroundColor: 'transparent',
         color: badgeConfig.color,
         border: 'none',
@@ -273,6 +318,7 @@ function CategoryBadge({
     // Estilo outline: borde coloreado, fondo transparente
     if (badgeConfig.badgeStyle === 'outline') {
       return {
+        ...baseStyles,
         borderColor: badgeConfig.color,
         color: badgeConfig.color,
         backgroundColor: 'transparent',
@@ -281,6 +327,7 @@ function CategoryBadge({
 
     // Estilo por defecto (solid y otros): fondo coloreado
     return {
+      ...baseStyles,
       backgroundColor: badgeConfig.color,
       color: getContrastText(badgeConfig.color),
     };
@@ -303,7 +350,7 @@ function CategoryBadge({
         // Si no hay children, renderizar icono y label por defecto
         <>
           {renderIcon()}
-          {showLabel && badgeConfig.label}
+          {shouldShowLabel && badgeConfig.label}
         </>
       )}
     </BaseBadge>

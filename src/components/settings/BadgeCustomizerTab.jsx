@@ -59,6 +59,8 @@ function BadgeCustomizerTab({ user }) {
     config,
     iconConfig,
     globalConfig,
+    presetConfig,
+    displayPresets,
     hasChanges,
     categories,
     defaults,
@@ -75,6 +77,11 @@ function BadgeCustomizerTab({ user }) {
     updateMonochromeColor,
     updateGlobalConfig,
     updateAllBadgeStyles,
+    updateCategoryPreset,
+    updateBadgePreset,
+    removeBadgePreset,
+    addCustomPreset,
+    removeCustomPreset,
   } = useBadgeConfig();
 
   const [expandedSections, setExpandedSections] = useState({
@@ -238,6 +245,19 @@ function BadgeCustomizerTab({ user }) {
         onMonochromeColorChange={(c) => updateMonochromeColor(c)}
         onBadgeStyleChange={(s) => updateAllBadgeStyles(s)}
         onGlobalConfigChange={(k, v) => updateGlobalConfig(k, v)}
+      />
+
+      {/* 🆕 PANEL DE PRESETS */}
+      <BadgePresetPanel
+        presetConfig={presetConfig}
+        displayPresets={displayPresets}
+        categories={categories}
+        config={config}
+        onUpdateCategoryPreset={updateCategoryPreset}
+        onUpdateBadgePreset={updateBadgePreset}
+        onRemoveBadgePreset={removeBadgePreset}
+        onAddCustomPreset={addCustomPreset}
+        onRemoveCustomPreset={removeCustomPreset}
       />
 
       {/* Categorías de Badges */}
@@ -1271,6 +1291,428 @@ function AddBadgeModal({ category, categoryInfo, onClose, onAdd }) {
             onClose={() => setShowIconPicker(false)}
           />
         )}
+      </div>
+    </div>
+  );
+}
+
+// ============================================
+// COMPONENTE: BadgePresetPanel (NUEVO)
+// ============================================
+
+function BadgePresetPanel({
+  presetConfig,
+  displayPresets,
+  categories,
+  config,
+  onUpdateCategoryPreset,
+  onUpdateBadgePreset,
+  onRemoveBadgePreset,
+  onAddCustomPreset,
+  onRemoveCustomPreset,
+}) {
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [expandedCategories, setExpandedCategories] = useState({});
+
+  // Combinar presets del sistema + custom
+  const allPresets = { ...displayPresets, ...presetConfig.customPresets };
+
+  return (
+    <div
+      className="rounded-lg p-4 space-y-4"
+      style={{
+        border: '2px solid var(--color-primary)',
+        background: 'var(--color-bg-secondary)',
+      }}
+    >
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-base font-semibold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+            <Tag size={18} />
+            🆕 Sistema de Presets de Visualización
+          </h3>
+          <p className="text-xs mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+            Controla cómo se muestran los badges en toda la app (icono, texto, fondo, etc.)
+          </p>
+        </div>
+        <BaseButton
+          variant="primary"
+          size="sm"
+          icon={Plus}
+          onClick={() => setShowCreateModal(true)}
+        >
+          Crear Preset
+        </BaseButton>
+      </div>
+
+      {/* PRESETS DISPONIBLES */}
+      <div>
+        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+          Presets Disponibles
+        </label>
+        <div className="grid grid-cols-4 gap-2">
+          {Object.entries(allPresets).map(([key, preset]) => (
+            <div
+              key={key}
+              className="p-3 rounded-lg border-2"
+              style={{
+                borderColor: 'var(--color-border)',
+                background: 'var(--color-bg-primary)',
+              }}
+            >
+              <div className="text-center">
+                <div className="text-2xl mb-1">{preset.icon}</div>
+                <div className="text-xs font-medium mb-0.5" style={{ color: 'var(--color-text-primary)' }}>
+                  {preset.name}
+                </div>
+                <div className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                  {preset.description}
+                </div>
+                {preset.custom && (
+                  <button
+                    onClick={() => {
+                      if (confirm(`¿Eliminar preset "${preset.name}"?`)) {
+                        onRemoveCustomPreset(key);
+                      }
+                    }}
+                    className="mt-2 text-xs text-red-500 hover:text-red-700"
+                  >
+                    <Trash2 size={12} className="inline mr-1" />
+                    Eliminar
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* CONFIGURACIÓN POR CATEGORÍA */}
+      <div>
+        <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+          Presets por Categoría
+        </label>
+        <p className="text-xs mb-3" style={{ color: 'var(--color-text-secondary)' }}>
+          Asigna un preset a cada categoría completa de badges
+        </p>
+        <div className="space-y-2">
+          {Object.entries(categories).map(([categoryKey, categoryInfo]) => {
+            const currentPreset = presetConfig.categories?.[categoryKey] || presetConfig.defaultPreset || 'full';
+
+            return (
+              <div
+                key={categoryKey}
+                className="flex items-center justify-between p-2 rounded-lg"
+                style={{
+                  background: 'var(--color-bg-tertiary)',
+                  border: '1px solid var(--color-border)',
+                }}
+              >
+                <div className="flex items-center gap-2 flex-1">
+                  <span className="text-lg" role="img">{categoryInfo.icon}</span>
+                  <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                    {categoryInfo.label}
+                  </span>
+                </div>
+                <select
+                  value={currentPreset}
+                  onChange={(e) => onUpdateCategoryPreset(categoryKey, e.target.value)}
+                  className="px-3 py-1.5 rounded text-sm"
+                  style={{
+                    background: 'var(--color-bg-primary)',
+                    border: '1px solid var(--color-border)',
+                    color: 'var(--color-text-primary)',
+                  }}
+                >
+                  {Object.entries(allPresets).map(([key, preset]) => (
+                    <option key={key} value={key}>
+                      {preset.icon} {preset.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* OVERRIDES INDIVIDUALES (Colapsable) */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+            Overrides Individuales (Opcional)
+          </label>
+          <button
+            onClick={() => setExpandedCategories({})}
+            className="text-xs px-2 py-1 rounded"
+            style={{
+              background: 'var(--color-bg-tertiary)',
+              color: 'var(--color-text-secondary)',
+            }}
+          >
+            Colapsar Todo
+          </button>
+        </div>
+        <p className="text-xs mb-3" style={{ color: 'var(--color-text-secondary)' }}>
+          Personaliza badges específicos con un preset diferente al de su categoría
+        </p>
+
+        {Object.entries(categories).map(([categoryKey, categoryInfo]) => {
+          const categoryBadges = Object.entries(config).filter(([key, badge]) => badge.category === categoryKey);
+          const hasOverrides = categoryBadges.some(([key]) => presetConfig.overrides?.[key]);
+          const isExpanded = expandedCategories[categoryKey];
+
+          return (
+            <div
+              key={categoryKey}
+              className="rounded-lg overflow-hidden mb-2"
+              style={{
+                border: '1px solid var(--color-border)',
+                background: 'var(--color-bg-tertiary)',
+              }}
+            >
+              <button
+                onClick={() => setExpandedCategories(prev => ({ ...prev, [categoryKey]: !prev[categoryKey] }))}
+                className="w-full px-3 py-2 flex items-center justify-between hover:opacity-80"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-base" role="img">{categoryInfo.icon}</span>
+                  <span className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                    {categoryInfo.label}
+                  </span>
+                  {hasOverrides && (
+                    <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'var(--color-primary)', color: '#fff' }}>
+                      {Object.keys(presetConfig.overrides || {}).filter(key =>
+                        config[key]?.category === categoryKey
+                      ).length}
+                    </span>
+                  )}
+                </div>
+                {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+              </button>
+
+              {isExpanded && (
+                <div className="px-3 pb-3 space-y-2">
+                  {categoryBadges.map(([badgeKey, badge]) => {
+                    const hasOverride = presetConfig.overrides?.[badgeKey];
+                    const currentPreset = hasOverride || presetConfig.categories?.[categoryKey] || 'full';
+
+                    return (
+                      <div
+                        key={badgeKey}
+                        className="flex items-center justify-between p-2 rounded"
+                        style={{
+                          background: 'var(--color-bg-primary)',
+                          border: hasOverride ? '1px solid var(--color-primary)' : '1px solid var(--color-border)',
+                        }}
+                      >
+                        <div className="flex items-center gap-2 flex-1">
+                          <CategoryBadge badgeKey={badgeKey} size="sm" />
+                          <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                            {badge.label}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={currentPreset}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              const categoryDefault = presetConfig.categories?.[categoryKey] || 'full';
+                              if (value === categoryDefault) {
+                                onRemoveBadgePreset(badgeKey);
+                              } else {
+                                onUpdateBadgePreset(badgeKey, value);
+                              }
+                            }}
+                            className="px-2 py-1 rounded text-xs"
+                            style={{
+                              background: 'var(--color-bg-secondary)',
+                              border: '1px solid var(--color-border)',
+                              color: 'var(--color-text-primary)',
+                            }}
+                          >
+                            <option value={presetConfig.categories?.[categoryKey] || 'full'}>
+                              Usar preset de categoría
+                            </option>
+                            {Object.entries(allPresets).map(([key, preset]) => (
+                              <option key={key} value={key}>
+                                {preset.icon} {preset.name}
+                              </option>
+                            ))}
+                          </select>
+                          {hasOverride && (
+                            <button
+                              onClick={() => onRemoveBadgePreset(badgeKey)}
+                              className="p-1 rounded hover:opacity-70"
+                              style={{ color: 'var(--color-danger, #ef4444)' }}
+                              title="Quitar override"
+                            >
+                              <X size={14} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Modal para crear preset personalizado */}
+      {showCreateModal && (
+        <CreatePresetModal
+          onClose={() => setShowCreateModal(false)}
+          onCreate={(data) => {
+            const key = `custom_${Date.now()}`;
+            onAddCustomPreset(key, data);
+            setShowCreateModal(false);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+// ============================================
+// COMPONENTE: CreatePresetModal
+// ============================================
+
+function CreatePresetModal({ onClose, onCreate }) {
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    icon: '🎨',
+    showIcon: true,
+    showText: true,
+    showBackground: true,
+    fontWeight: 'medium',
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.name.trim()) {
+      alert('El nombre es obligatorio');
+      return;
+    }
+    onCreate(formData);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 flex items-center justify-center p-4"
+      style={{
+        zIndex: 'var(--z-modal-backdrop)',
+        background: 'rgba(0, 0, 0, 0.5)',
+      }}
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-md rounded-xl p-6"
+        style={{
+          background: 'var(--color-bg-secondary)',
+          border: '1px solid var(--color-border)',
+          zIndex: 'var(--z-modal)',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="text-lg font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
+          Crear Preset Personalizado
+        </h3>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <BaseInput
+            label="Nombre *"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            required
+            placeholder="Ej: Solo Texto Grande"
+          />
+
+          <BaseInput
+            label="Descripción"
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            placeholder="Opcional"
+          />
+
+          <BaseInput
+            label="Icono (emoji)"
+            value={formData.icon}
+            onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+            placeholder="🎨"
+            helperText="Un solo emoji"
+          />
+
+          <div className="space-y-2">
+            <label className="block text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
+              Opciones de Visualización
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={formData.showIcon}
+                onChange={(e) => setFormData({ ...formData, showIcon: e.target.checked })}
+              />
+              <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                Mostrar Icono
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={formData.showText}
+                onChange={(e) => setFormData({ ...formData, showText: e.target.checked })}
+              />
+              <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                Mostrar Texto
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={formData.showBackground}
+                onChange={(e) => setFormData({ ...formData, showBackground: e.target.checked })}
+              />
+              <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                Mostrar Fondo de Color
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+              Peso de Fuente
+            </label>
+            <select
+              value={formData.fontWeight}
+              onChange={(e) => setFormData({ ...formData, fontWeight: e.target.value })}
+              className="w-full px-3 py-2 rounded text-sm"
+              style={{
+                background: 'var(--color-bg-primary)',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-text-primary)',
+              }}
+            >
+              <option value="normal">Normal</option>
+              <option value="medium">Medium</option>
+              <option value="semibold">Semibold</option>
+              <option value="bold">Bold</option>
+            </select>
+          </div>
+
+          {/* Acciones */}
+          <div className="flex gap-2 pt-2">
+            <BaseButton variant="ghost" onClick={onClose} fullWidth>
+              Cancelar
+            </BaseButton>
+            <BaseButton type="submit" variant="primary" fullWidth>
+              Crear Preset
+            </BaseButton>
+          </div>
+        </form>
       </div>
     </div>
   );
