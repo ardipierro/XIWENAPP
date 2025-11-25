@@ -126,13 +126,22 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
   useEffect(() => {
     if (!exercise) return;
 
+    console.log('%c=== EXERCISE VIEWER MODAL ===', 'background: blue; color: white; font-size: 16px; padding: 5px;');
+    console.log('📝 Exercise title:', exercise.title);
+
     // Detectar tipo de ejercicio y obtener contenido limpio
     // Soportar tanto 'content' como 'body' para compatibilidad
     let exerciseContent = exercise.content || exercise.body || '';
 
+    console.log('📄 Content type:', typeof exerciseContent);
+    console.log('📏 Content length:', typeof exerciseContent === 'string' ? exerciseContent.length : 'N/A');
+    if (typeof exerciseContent === 'string') {
+      console.log('📝 Content preview (first 300 chars):', exerciseContent.substring(0, 300));
+    }
+
     // Si el contenido es un objeto/JSON (ya parseado), intentar convertirlo a texto o usarlo directamente
     if (typeof exerciseContent === 'object') {
-      logger.info('Exercise content is already parsed JSON', 'ExerciseViewerModal');
+      console.log('📦 Exercise content is already parsed JSON');
 
       // Si es un ejercicio de tipo open_questions ya parseado
       if (exerciseContent.type === 'open_questions' || exerciseContent.type === 'OPEN_QUESTIONS') {
@@ -155,11 +164,15 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
     }
 
     const { type, cleanContent: content } = detectExerciseType(exerciseContent);
+
+    console.log('🎯 Detected type:', type);
+    console.log('📄 Clean content length:', typeof content === 'string' ? content.length : 'N/A');
+    if (typeof content === 'string') {
+      console.log('📝 Clean content preview:', content.substring(0, 200));
+    }
+
     setExerciseType(type);
     setCleanContent(content);
-
-    logger.info(`Exercise content source: ${exercise.content ? 'content' : 'body'}`, 'ExerciseViewerModal');
-    logger.info(`Exercise content length: ${typeof exerciseContent === 'string' ? exerciseContent.length : 'object'}`, 'ExerciseViewerModal');
 
     // Cargar configuración según el tipo
     if (type === EXERCISE_TYPES.HIGHLIGHT) {
@@ -311,8 +324,15 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
 
         // Si es texto plano, parsearlo
         try {
+          console.log('%c🔄 PARSEANDO TEXTO PLANO', 'background: purple; color: white; font-size: 14px; padding: 3px;');
+          console.log('📝 cleanContent type:', typeof cleanContent);
+          console.log('📝 cleanContent value:', cleanContent);
+
           const exercises = parseExerciseFile(cleanContent, 'General');
+          console.log('📦 Parsed exercises:', exercises);
+
           const openQuestionsData = exercises.find(ex => ex.type === 'open_questions');
+          console.log('🎯 Found open_questions data:', openQuestionsData);
 
           if (!openQuestionsData || !openQuestionsData.questions) {
             return (
