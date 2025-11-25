@@ -13,6 +13,7 @@ import logger from '../utils/logger';
 const DragDropBlanksExercise = lazy(() => import('./container/DragDropBlanksExercise'));
 const FillInBlanksExercise = lazy(() => import('./container/FillInBlanksExercise'));
 const DialoguesExercise = lazy(() => import('./container/DialoguesExercise'));
+const OpenQuestionsExercise = lazy(() => import('./container/OpenQuestionsExercise'));
 
 /**
  * Spinner de carga para lazy components
@@ -33,7 +34,8 @@ const EXERCISE_TYPES = {
   HIGHLIGHT: 'word-highlight',
   DRAGDROP: 'drag-drop',
   FILLBLANKS: 'fill-blanks',
-  DIALOGUES: 'dialogues'
+  DIALOGUES: 'dialogues',
+  OPEN_QUESTIONS: 'open-questions'
 };
 
 /**
@@ -72,6 +74,19 @@ function detectExerciseType(content) {
   if (firstLine.startsWith('#dialogo') || firstLine.startsWith('#diálogo') || firstLine.includes('[tipo:dialogo]')) {
     return {
       type: EXERCISE_TYPES.DIALOGUES,
+      cleanContent: content // Mantener el contenido completo para el parser
+    };
+  }
+
+  // Detectar RESPUESTA LIBRE / OPEN QUESTIONS (case-insensitive)
+  if (firstLine.includes('#respuesta_libre') ||
+      firstLine.includes('#respuesta-libre') ||
+      firstLine.includes('#open_questions') ||
+      firstLine.includes('#open-questions') ||
+      firstLine.includes('[tipo:respuesta_libre]') ||
+      firstLine.includes('[tipo:open_questions]')) {
+    return {
+      type: EXERCISE_TYPES.OPEN_QUESTIONS,
       cleanContent: content // Mantener el contenido completo para el parser
     };
   }
@@ -136,6 +151,11 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
       if (savedConfig) {
         setConfig(JSON.parse(savedConfig));
       }
+    } else if (type === EXERCISE_TYPES.OPEN_QUESTIONS) {
+      const savedConfig = localStorage.getItem('xiwen_open_questions_config');
+      if (savedConfig) {
+        setConfig(JSON.parse(savedConfig));
+      }
     }
 
     logger.info(`Exercise type detected: ${type}`, 'ExerciseViewerModal');
@@ -185,7 +205,7 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
             Este ejercicio no tiene un formato interactivo configurado.
           </p>
           <p className="text-sm mt-2" style={{ color: 'var(--color-text-tertiary)' }}>
-            Agrega un prefijo como <code>#marcar</code>, <code>#arrastrar</code> o <code>#completar</code> al inicio del texto.
+            Agrega un prefijo como <code>#RESPUESTA_LIBRE</code>, <code>#marcar</code>, <code>#arrastrar</code> o <code>#completar</code> al inicio del texto.
           </p>
           <div className="mt-4 p-4 rounded-lg text-left max-w-md mx-auto" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
             <pre className="text-xs whitespace-pre-wrap" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -242,6 +262,38 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
             />
           </Suspense>
         );
+
+      case EXERCISE_TYPES.OPEN_QUESTIONS: {
+        // Parsear el contenido para extraer preguntas
+        const { parseExerciseFile } = require('../utils/exerciseParser.js');
+        const exercises = parseExerciseFile(cleanContent, 'General');
+        const openQuestionsData = exercises.find(ex => ex.type === 'open_questions');
+
+        if (!openQuestionsData || !openQuestionsData.questions) {
+          return (
+            <div className="text-center py-12">
+              <p style={{ color: 'var(--color-text-secondary)' }}>
+                No se pudieron parsear las preguntas de respuesta libre.
+              </p>
+              <div className="mt-4 p-4 rounded-lg text-left max-w-md mx-auto" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+                <pre className="text-xs whitespace-pre-wrap" style={{ color: 'var(--color-text-tertiary)' }}>
+                  {cleanContent?.substring(0, 300)}...
+                </pre>
+              </div>
+            </div>
+          );
+        }
+
+        return (
+          <Suspense fallback={<ExerciseLoader />}>
+            <OpenQuestionsExercise
+              questions={openQuestionsData.questions}
+              config={config || {}}
+              onComplete={handleComplete}
+            />
+          </Suspense>
+        );
+      }
 
       default:
         return (
