@@ -312,14 +312,14 @@ export function ExerciseLibrary({onTemplateSelected = () => {}, onTemplateCloned
         </div>
       )}
 
-      {/* Modal de preview (simplificado) */}
+      {/* Modal de preview (simplificado) - Usa clases universales */}
       {previewTemplate && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          className="mobile-modal"
           onClick={() => setPreviewTemplate(null)}
         >
           <div
-            className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6"
+            className="mobile-modal-box modal-lg mobile-fullscreen overflow-y-auto p-6"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-start justify-between mb-4">

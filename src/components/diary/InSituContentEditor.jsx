@@ -183,12 +183,11 @@ export function InSituContentEditor({
         renderComponent(content)
       )}
 
-      {/* Modal de Historial (MEJORA 4) */}
+      {/* Modal de Historial (MEJORA 4) - Usa clases universales */}
       {showHistory && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+        <div className="mobile-modal"
              onClick={() => setShowHistory(false)}>
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-2xl max-w-4xl w-full
-                          max-h-[80vh] overflow-hidden"
+          <div className="mobile-modal-box modal-xl mobile-fullscreen"
                onClick={(e) => e.stopPropagation()}>
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center
                             justify-between">

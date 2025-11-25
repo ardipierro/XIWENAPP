@@ -115,12 +115,11 @@ export function VersionHistory({ blockId, currentContent, onRestore }) {
         )}
       </button>
 
-      {/* Panel de versiones */}
+      {/* Panel de versiones - Usa clases universales para mobile fullscreen */}
       {isOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+        <div className="mobile-modal"
              onClick={() => setIsOpen(false)}>
-          <div className="bg-white dark:bg-gray-800 rounded-lg w-full max-w-3xl max-h-[80vh]
-                         flex flex-col shadow-2xl"
+          <div className="mobile-modal-box modal-lg mobile-fullscreen"
                onClick={(e) => e.stopPropagation()}>
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b

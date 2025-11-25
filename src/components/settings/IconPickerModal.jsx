@@ -52,20 +52,11 @@ function IconPickerModal({ onSelect, onClose, currentIcon }) {
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center p-4"
-      style={{
-        zIndex: 'var(--z-modal-backdrop)',
-        background: 'rgba(0, 0, 0, 0.5)',
-      }}
+      className="mobile-modal"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-4xl max-h-[90vh] rounded-xl flex flex-col"
-        style={{
-          background: 'var(--color-bg-secondary)',
-          border: '1px solid var(--color-border)',
-          zIndex: 'var(--z-modal)',
-        }}
+        className="mobile-modal-box modal-xl mobile-fullscreen"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

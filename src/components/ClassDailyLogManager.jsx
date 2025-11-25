@@ -456,18 +456,18 @@ function CreateLogModal({ isOpen, onClose, onCreate, courses }) {
   ];
 
   return (
-    <div className={`fixed inset-0 z-50 ${isOpen ? '' : 'pointer-events-none'}`}>
+    <div className={`fixed inset-0 z-[10000] ${isOpen ? '' : 'pointer-events-none'}`}>
       {/* Backdrop */}
       <div
-        className={`absolute inset-0 bg-black transition-opacity ${isOpen ? 'opacity-50' : 'opacity-0'}`}
+        className={`absolute inset-0 bg-black transition-opacity backdrop-blur-sm ${isOpen ? 'opacity-50' : 'opacity-0'}`}
         onClick={onClose}
       />
 
-      {/* Modal */}
-      <div className="absolute inset-0 flex items-center justify-center p-4">
+      {/* Modal - usa clases universales para mobile fullscreen */}
+      <div className="absolute inset-0 flex items-center justify-center p-0 md:p-4">
         <div
           className={`
-            bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full
+            mobile-modal-box modal-md mobile-fullscreen
             transform transition-all
             ${isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}
           `}

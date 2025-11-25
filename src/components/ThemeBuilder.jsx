@@ -742,10 +742,10 @@ function ThemeBuilder() {
         </div>
       )}
 
-      {/* Modal para guardar preset */}
+      {/* Modal para guardar preset - Usa clases universales */}
       {showPresetModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className={`${mode === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-xl p-6 max-w-md w-full`}>
+        <div className="mobile-modal">
+          <div className={`mobile-modal-box modal-md p-6 ${mode === 'dark' ? '!bg-gray-800' : '!bg-white'}`}>
             <h3 className={`text-xl font-semibold mb-4 ${mode === 'dark' ? 'text-white' : 'text-gray-900'}`}>
               Save Preset
             </h3>

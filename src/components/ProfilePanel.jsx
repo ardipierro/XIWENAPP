@@ -104,8 +104,8 @@ function ProfilePanel({ user, userRole, onClose, onUpdate }) {
   const roleBadge = getRoleBadge();
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-[1100]" onClick={onClose}>
-      <div className="style={{ background: 'var(--color-bg-secondary)' }} border border-zinc-200 dark:border-zinc-800 rounded-lg w-[90%] max-w-[500px] max-h-[90vh] flex flex-col overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+    <div className="mobile-modal" onClick={onClose}>
+      <div className="mobile-modal-box modal-md mobile-fullscreen" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-zinc-200 dark:border-zinc-800">
           <h2 className="flex items-center gap-3 text-[22px] font-bold text-zinc-900 dark:text-zinc-50 m-0">
