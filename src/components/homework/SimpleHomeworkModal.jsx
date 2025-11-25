@@ -273,11 +273,24 @@ export default function SimpleHomeworkModal({
   const gradeColor = grade >= 80 ? 'text-green-600' : grade >= 60 ? 'text-amber-600' : 'text-red-600';
 
   const modalContent = (
-    <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div
+      className="fixed inset-0 flex items-center justify-center p-4 bg-black/50 dark:bg-black/70 backdrop-blur-sm"
+      style={{ zIndex: 'var(--z-modal-backdrop)' }}
+    >
+      <div
+        className="rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
+        style={{
+          zIndex: 'var(--z-modal)',
+          background: 'var(--color-bg-secondary)',
+          border: '1px solid var(--color-border)'
+        }}
+      >
 
         {/* Header - Student name/selector */}
-        <div className="flex items-center justify-between p-4 border-b border-zinc-200 dark:border-zinc-700">
+        <div
+          className="flex items-center justify-between p-4"
+          style={{ borderBottom: '1px solid var(--color-border)' }}
+        >
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <User className="w-5 h-5 text-zinc-400 flex-shrink-0" />
             {loadingStudents ? (
