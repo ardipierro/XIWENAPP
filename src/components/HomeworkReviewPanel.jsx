@@ -46,7 +46,6 @@ import {
   ImageLightbox
 } from './common';
 import CategoryBadge from './common/CategoryBadge';
-import { getBadgeByKey, getContrastText } from '../config/badgeSystem';
 import { CardDeleteButton, UniversalCard, CardGrid } from './cards';
 import { useCardConfig } from '../contexts/CardConfigContext';
 import CorrectionReviewPanel from './homework/CorrectionReviewPanel';
@@ -633,58 +632,31 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete, s
         </div>
       )}
 
-      {/* Status Icon - Top right corner (solo ícono, sin texto) */}
+      {/* Status Icon - Top right corner (badge configurable desde sistema universal) */}
       {(isProcessing || isFailed || isTeacherApproved || isAIReady) && (
         <div className="absolute top-2 right-2 z-10">
-          {isProcessing ? (() => {
-            const badgeConfig = getBadgeByKey('HOMEWORK_PROCESSING');
-            const bgColor = badgeConfig?.color || '#7a8fa8';
-            return (
-              <span
-                className="inline-flex items-center justify-center w-7 h-7 rounded-full shadow-md"
-                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
-                title="Procesando"
-              >
-                <RefreshCw size={14} className="animate-spin" style={{ color: 'inherit' }} />
-              </span>
-            );
-          })() : isFailed ? (() => {
-            const badgeConfig = getBadgeByKey('HOMEWORK_ERROR');
-            const bgColor = badgeConfig?.color || '#dc2626';
-            return (
-              <span
-                className="inline-flex items-center justify-center w-7 h-7 rounded-full shadow-md"
-                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
-                title="Error"
-              >
-                <AlertTriangle size={14} style={{ color: 'inherit' }} />
-              </span>
-            );
-          })() : isTeacherApproved ? (() => {
-            const badgeConfig = getBadgeByKey('HOMEWORK_APPROVED');
-            const bgColor = badgeConfig?.color || '#10b981';
-            return (
-              <span
-                className="inline-flex items-center justify-center w-7 h-7 rounded-full shadow-md"
-                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
-                title="Aprobado"
-              >
-                <Check size={14} style={{ color: 'inherit' }} />
-              </span>
-            );
-          })() : isAIReady ? (() => {
-            const badgeConfig = getBadgeByKey('HOMEWORK_PENDING');
-            const bgColor = badgeConfig?.color || '#f59e0b';
-            return (
-              <span
-                className="inline-flex items-center justify-center w-7 h-7 rounded-full shadow-md"
-                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
-                title="Pendiente revisión"
-              >
-                <Clock size={14} style={{ color: 'inherit' }} />
-              </span>
-            );
-          })() : null}
+          <div
+            className="inline-flex items-center justify-center w-8 h-8 rounded-full shadow-md transition-all hover:scale-110"
+            title={
+              isProcessing ? 'Procesando' :
+              isFailed ? 'Error' :
+              isTeacherApproved ? 'Aprobado' :
+              'Pendiente revisión'
+            }
+          >
+            <CategoryBadge
+              badgeKey={
+                isProcessing ? 'HOMEWORK_PROCESSING' :
+                isFailed ? 'HOMEWORK_ERROR' :
+                isTeacherApproved ? 'HOMEWORK_APPROVED' :
+                'HOMEWORK_PENDING'
+              }
+              showLabel={false}
+              showIcon={true}
+              size="md"
+              className="!p-0 !w-full !h-full !rounded-full !shadow-md"
+            />
+          </div>
         </div>
       )}
 
