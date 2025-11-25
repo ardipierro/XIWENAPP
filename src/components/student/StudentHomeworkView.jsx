@@ -447,15 +447,17 @@ function HomeworkCard({ review, onSelect, viewMode = 'grid' }) {
 
             return (
               <div
-                className={`px-3 py-1.5 ${borderRadiusClass} shadow-lg flex items-center gap-1.5 transition-all hover:scale-105`}
+                className={`inline-flex items-center justify-center w-8 h-8 ${borderRadiusClass} shadow-md transition-all hover:scale-110 cursor-pointer`}
                 style={styleProps}
+                title={
+                  isFailed ? 'Error' :
+                  isApproved ? 'Aprobado' :
+                  'En revisión'
+                }
               >
-                {(isProcessing || isPendingReview) && <Clock size={14} />}
-                {isFailed && <AlertCircle size={14} />}
-                {isApproved && <CheckCircle size={14} />}
-                <span className="text-xs font-semibold">
-                  {isFailed ? 'ERROR' : isApproved ? '✓ CORREGIDA' : 'EN REVISIÓN'}
-                </span>
+                {(isProcessing || isPendingReview) && <Clock size={16} />}
+                {isFailed && <AlertCircle size={16} />}
+                {isApproved && <CheckCircle size={16} />}
               </div>
             );
           })()}
