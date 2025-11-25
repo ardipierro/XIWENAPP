@@ -193,36 +193,25 @@ export default function StudentHomeworkView({ user }) {
         </div>
       </div>
 
-      {/* Filtros */}
-      <div className="flex flex-wrap gap-2 mb-6">
-        <BaseButton
-          onClick={() => setFilter('all')}
-          variant={filter === 'all' ? 'primary' : 'ghost'}
-          size="sm"
-        >
-          Todas ({reviews.length})
-        </BaseButton>
-        <BaseButton
-          onClick={() => setFilter('pending')}
-          variant={filter === 'pending' ? 'primary' : 'ghost'}
-          size="sm"
-        >
-          Pendientes ({pendingCount})
-        </BaseButton>
-        <BaseButton
-          onClick={() => setFilter('approved')}
-          variant={filter === 'approved' ? 'primary' : 'ghost'}
-          size="sm"
-        >
-          Corregidas ({approvedCount})
-        </BaseButton>
-      </div>
-
-      {/* SearchBar */}
+      {/* SearchBar Unificado con Filtros */}
       <SearchBar
         value={searchTerm}
         onChange={setSearchTerm}
         placeholder="Buscar tareas..."
+        filters={[
+          {
+            key: 'status',
+            label: 'Estado',
+            value: filter,
+            onChange: setFilter,
+            options: [
+              { value: 'all', label: `Todas (${reviews.length})` },
+              { value: 'pending', label: `Pendientes (${pendingCount})` },
+              { value: 'approved', label: `Corregidas (${approvedCount})` }
+            ],
+            defaultValue: 'all'
+          }
+        ]}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         className="mb-6"

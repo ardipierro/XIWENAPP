@@ -11,7 +11,8 @@ import {
   BaseEmptyState,
   BaseBadge,
   CategoryBadge,
-  BaseAlert
+  BaseAlert,
+  SearchBar
 } from '../common';
 import { UniversalCard, CardGrid } from '../cards';
 
@@ -20,6 +21,8 @@ function MyCourses({ user, onSelectCourse }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState('all'); // 'all', 'in_progress', 'completed'
+  const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
 
   useEffect(() => {
     // Solo cargar si user y user.uid existen
@@ -79,15 +82,32 @@ function MyCourses({ user, onSelectCourse }) {
   };
 
   const getFilteredContents = () => {
-    switch (filter) {
-      case 'in_progress':
-        return contents.filter(c => c.status === 'in_progress');
-      case 'completed':
-        return contents.filter(c => c.status === 'completed');
-      default:
-        return contents;
+    let filtered = contents;
+
+    // Filtro por estado
+    if (filter === 'in_progress') {
+      filtered = filtered.filter(c => c.status === 'in_progress');
+    } else if (filter === 'completed') {
+      filtered = filtered.filter(c => c.status === 'completed');
     }
+
+    // Filtro por búsqueda
+    if (searchTerm) {
+      const lowerSearch = searchTerm.toLowerCase();
+      filtered = filtered.filter(c =>
+        (c.contentName || '').toLowerCase().includes(lowerSearch)
+      );
+    }
+
+    return filtered;
   };
+
+  // Opciones de filtro para el SearchBar
+  const statusFilterOptions = [
+    { value: 'all', label: `Todos (${contents.length})` },
+    { value: 'in_progress', label: `En Progreso (${contents.filter(c => c.status === 'in_progress').length})` },
+    { value: 'completed', label: `Completados (${contents.filter(c => c.status === 'completed').length})` }
+  ];
 
   const formatDate = (timestamp) => {
     if (!timestamp) return 'Hace tiempo';
@@ -198,37 +218,33 @@ function MyCourses({ user, onSelectCourse }) {
 
       {contents.length > 0 && (
         <>
-          {/* Filters */}
-          <div className="flex gap-2 mb-6 flex-wrap">
-            <BaseButton
-              variant={filter === 'all' ? 'primary' : 'ghost'}
-              size="sm"
-              onClick={() => setFilter('all')}
-            >
-              Todos ({contents.length})
-            </BaseButton>
-            <BaseButton
-              variant={filter === 'in_progress' ? 'primary' : 'ghost'}
-              size="sm"
-              onClick={() => setFilter('in_progress')}
-            >
-              En Progreso ({contents.filter(c => c.status === 'in_progress').length})
-            </BaseButton>
-            <BaseButton
-              variant={filter === 'completed' ? 'primary' : 'ghost'}
-              size="sm"
-              onClick={() => setFilter('completed')}
-            >
-              Completados ({contents.filter(c => c.status === 'completed').length})
-            </BaseButton>
-          </div>
+          {/* SearchBar Unificado con Filtros */}
+          <SearchBar
+            value={searchTerm}
+            onChange={setSearchTerm}
+            placeholder="Buscar contenidos..."
+            filters={[
+              {
+                key: 'status',
+                label: 'Estado',
+                value: filter,
+                onChange: setFilter,
+                options: statusFilterOptions,
+                defaultValue: 'all'
+              }
+            ]}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            viewModes={['grid', 'list']}
+            className="mb-6"
+          />
 
-          {/* Contents Grid */}
+          {/* Contents Grid/List */}
           {filteredContents.length === 0 ? (
             <BaseEmptyState
               icon={BookMarked}
-              title="No hay contenidos en esta categoría"
-              description="Prueba con otro filtro"
+              title="No hay contenidos"
+              description={searchTerm ? `No se encontraron resultados para "${searchTerm}"` : "Prueba con otro filtro"}
               size="sm"
             />
           ) : (
