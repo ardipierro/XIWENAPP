@@ -96,7 +96,7 @@ function TasksTab({ user }) {
     <div className="p-6 space-y-6">
       {/* Resumen */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <div className="border-l-4 rounded-xl p-4" style={{ background: 'var(--color-bg-secondary)', borderLeftColor: 'var(--color-warning)' }}>
+        <div className="rounded-xl p-4" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
           <div className="flex items-center gap-2 mb-1">
             <Clock size={20} strokeWidth={2} style={{ color: 'var(--color-warning)' }} />
             <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>En Revisión</p>
@@ -104,7 +104,7 @@ function TasksTab({ user }) {
           <p className="text-3xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{reviewCount}</p>
         </div>
 
-        <div className="border-l-4 rounded-xl p-4" style={{ background: 'var(--color-bg-secondary)', borderLeftColor: 'var(--color-success)' }}>
+        <div className="rounded-xl p-4" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
           <div className="flex items-center gap-2 mb-1">
             <CheckCircle size={20} strokeWidth={2} style={{ color: 'var(--color-success)' }} />
             <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Corregidas</p>
@@ -112,7 +112,7 @@ function TasksTab({ user }) {
           <p className="text-3xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{correctedCount}</p>
         </div>
 
-        <div className="border-l-4 rounded-xl p-4" style={{ background: 'var(--color-bg-secondary)', borderLeftColor: 'var(--color-border)' }}>
+        <div className="rounded-xl p-4" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
           <div className="flex items-center gap-2 mb-1">
             <FileText size={20} strokeWidth={2} style={{ color: 'var(--color-text-secondary)' }} />
             <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Total</p>

@@ -246,7 +246,6 @@ function StudentSessionsView({ student }) {
               <UniversalCard
                 key={session.id}
                 variant="elevated"
-                className="border-l-4 border-red-500"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">

@@ -138,7 +138,6 @@ function UpcomingClassesBanner({ student }) {
     <UniversalCard
       variant="elevated"
       size="md"
-      className="border-l-4 border-gray-400 dark:border-gray-500"
     >
       <div className="space-y-4">
         {/* Header */}
