@@ -61,8 +61,8 @@ function AudioPlayer({
       return;
     }
 
-    // Si la URL es de tipo /audio/, asumir que no existe y usar TTS
-    if (audioUrl.startsWith('/audio/')) {
+    // Si no hay audioUrl o la URL es de tipo /audio/, usar TTS
+    if (!audioUrl || audioUrl.startsWith('/audio/')) {
       setUseTTS(true);
       setDuration(estimateDuration(text));
       logger.info('🎤 Usando TTS para:', text.substring(0, 30) + '...');
@@ -684,7 +684,7 @@ function AudioPlayer({
 }
 
 AudioPlayer.propTypes = {
-  audioUrl: PropTypes.string.isRequired,
+  audioUrl: PropTypes.string, // Opcional - si no se provee, usa TTS automáticamente
   text: PropTypes.string,
   voice: PropTypes.string,  // Voz específica (ej: 'es-AR-male-1') - DEPRECATED
   voiceConfig: PropTypes.shape({

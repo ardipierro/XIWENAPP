@@ -230,8 +230,8 @@
 
     /* === TEXTOS (3 niveles) === */
     --color-text-primary: #f4f4f5;      /* zinc-100 - Texto principal */
-    --color-text-secondary: #a1a1aa;    /* zinc-400 - Texto secundario */
-    --color-text-muted: #71717a;        /* zinc-500 - Disabled, placeholders */
+    --color-text-secondary: #71717a;    /* zinc-500 - Texto secundario (más oscuro) */
+    --color-text-muted: #52525b;        /* zinc-600 - Disabled, placeholders */
 
     /* === BORDES (2 niveles) === */
     --color-border: #374151;            /* gray-700 - Borde por defecto */

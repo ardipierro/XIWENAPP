@@ -42,24 +42,23 @@ function SortableDiaryEntry({ id, entry, Icon, onClick, canDrag = false }) {
       onClick={onClick}
       className={`
         w-full p-3 rounded-lg text-left
-        bg-gray-50 dark:bg-gray-750
-        border border-gray-200 dark:border-gray-600
+        bg-transparent dark:bg-transparent
         transition-all
         ${canDrag ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'}
         ${isDragging
-          ? 'opacity-50 shadow-lg border-indigo-400 dark:border-indigo-500 z-50'
-          : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+          ? 'opacity-50 shadow-lg z-50'
+          : 'hover:bg-gray-100 dark:hover:bg-gray-800'
         }
       `}
     >
-      <div className="flex items-start gap-3">
-        <Icon size={20} className="text-gray-600 dark:text-gray-400 flex-shrink-0 mt-0.5" />
+      <div className="flex items-center gap-3">
+        <Icon size={20} className="text-gray-500 dark:text-gray-500 flex-shrink-0" />
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-sm text-gray-900 dark:text-white truncate">
+          <p
+            className="font-medium text-sm truncate"
+            style={{ color: '#71717a' }}
+          >
             {entry.contentTitle}
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            {entry.contentType}
           </p>
         </div>
       </div>

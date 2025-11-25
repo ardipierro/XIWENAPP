@@ -6,7 +6,7 @@
  * Soporta modos: lectura, fill-blank, comprensión, ordenar.
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   MessageCircle,
   Volume2,
@@ -127,6 +127,8 @@ function DialogueBubbleSimple({
   const [expanded, setExpanded] = useState(false);
   const isRight = index % 2 === 0;
   const characterColor = getCharacterColor(line.character);
+
+  // Obtener configuración de voz del personaje desde CharacterVoiceManager
   const voiceConfig = getCharacterVoiceConfig(line.character.toLowerCase().replace(/\s+/g, '_'));
 
   // Renderizar texto con blanks

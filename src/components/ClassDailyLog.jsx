@@ -598,7 +598,7 @@ function ClassDailyLog({ logId, user, onBack }) {
       <div
         id={`entry-${index}`}
         key={entry.id}
-        className="min-h-screen p-8 bg-white dark:bg-gray-900 mb-2"
+        className="min-h-screen p-8 bg-gray-100 dark:bg-gray-900 mb-2"
       >
         {/* Header minimalista - para text-blocks solo el menú de opciones */}
         <div className="max-w-5xl mx-auto mb-6">
@@ -628,16 +628,43 @@ function ClassDailyLog({ logId, user, onBack }) {
               </div>
             )}
 
-            {/* Para text-blocks: solo badge y espacio flexible */}
+            {/* Para text-blocks: badge + título editable + fecha en la misma línea */}
             {isTextBlock && (
-              <div className="flex items-center gap-2 flex-1">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
                 <CategoryBadge
                   type="content"
                   value={content.type}
                   size="xs"
                 />
+                {isTeacher ? (
+                  <input
+                    type="text"
+                    value={content.title || 'Bloque de Texto'}
+                    onChange={(e) => {
+                      const updatedEntries = log.entries.map(ent =>
+                        ent.id === entry.id
+                          ? { ...ent, contentTitle: e.target.value, title: e.target.value }
+                          : ent
+                      );
+                      setLog(prev => ({ ...prev, entries: updatedEntries }));
+                      setHasUnsavedChanges(true);
+                    }}
+                    placeholder="Título del bloque..."
+                    style={{
+                      backgroundColor: 'transparent',
+                      color: 'inherit'
+                    }}
+                    className="flex-1 min-w-0 text-base font-semibold
+                               border-0 outline-none
+                               placeholder-gray-400 dark:placeholder-gray-500 truncate"
+                  />
+                ) : (
+                  <h3 className="flex-1 min-w-0 text-base font-semibold text-gray-900 dark:text-white truncate">
+                    {content.title || 'Bloque de Texto'}
+                  </h3>
+                )}
                 {formattedDate && (
-                  <span className="text-xs text-gray-400 dark:text-gray-500">
+                  <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
                     {formattedDate}
                   </span>
                 )}
@@ -814,17 +841,14 @@ function ClassDailyLog({ logId, user, onBack }) {
         {/* Sidebar (Índice) - mismo ancho que menú lateral de la APP (260px) */}
         <div
           className={`
-            bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700
+            bg-white dark:bg-gray-900
             transition-all duration-300 overflow-y-auto flex-shrink-0
             ${sidebarOpen ? 'w-[260px]' : 'w-0'}
           `}
         >
           {sidebarOpen && (
             <div className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                  Índice de Contenidos
-                </h2>
+              <div className="flex items-center justify-end mb-4">
                 <BaseButton
                   variant="ghost"
                   icon={X}

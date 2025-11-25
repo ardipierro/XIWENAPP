@@ -6,7 +6,7 @@
  * Reutiliza DialogueBubble y AudioPlayer del libro interactivo.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   MessageCircle,
   Volume2,
@@ -18,9 +18,12 @@ import {
   Zap,
   Trophy,
   Save,
-  RotateCcw
+  RotateCcw,
+  Plus,
+  Trash2
 } from 'lucide-react';
-import { BaseBadge } from '../common';
+import { BaseBadge, BaseButton } from '../common';
+import CharacterVoiceManager from '../interactive-book/CharacterVoiceManager';
 import logger from '../../utils/logger';
 
 // Configuración por defecto
@@ -66,6 +69,9 @@ const STORAGE_KEY = 'xiwen_dialogues_config';
 function DialoguesConfig({ onSave }) {
   const [config, setConfig] = useState(DEFAULT_CONFIG);
   const [hasChanges, setHasChanges] = useState(false);
+  const [characters, setCharacters] = useState([]);
+  const [newCharacterName, setNewCharacterName] = useState('');
+  const [showAddCharacter, setShowAddCharacter] = useState(false);
 
   // Cargar configuración guardada
   useEffect(() => {
@@ -78,6 +84,93 @@ function DialoguesConfig({ onSave }) {
       logger.error('Error loading dialogues config:', e);
     }
   }, []);
+
+  // Cargar personajes guardados desde CharacterVoiceManager
+  useEffect(() => {
+    loadCharacters();
+  }, []);
+
+  const loadCharacters = () => {
+    try {
+      const saved = localStorage.getItem('xiwen_character_voices');
+      if (saved) {
+        const configs = JSON.parse(saved);
+        const charList = Object.entries(configs).map(([id, data]) => ({
+          id,
+          name: data.name || id
+        }));
+
+        if (charList.length > 0) {
+          setCharacters(charList);
+        } else {
+          // Personajes de ejemplo si no hay ninguno configurado
+          setCharacters([
+            { id: 'mozo', name: 'Mozo' },
+            { id: 'sofia', name: 'Sofía' },
+            { id: 'carlos', name: 'Carlos' }
+          ]);
+        }
+      } else {
+        // Personajes de ejemplo si no hay ninguno configurado
+        setCharacters([
+          { id: 'mozo', name: 'Mozo' },
+          { id: 'sofia', name: 'Sofía' },
+          { id: 'carlos', name: 'Carlos' }
+        ]);
+      }
+    } catch (e) {
+      logger.error('Error loading characters:', e);
+      setCharacters([
+        { id: 'mozo', name: 'Mozo' },
+        { id: 'sofia', name: 'Sofía' },
+        { id: 'carlos', name: 'Carlos' }
+      ]);
+    }
+  };
+
+  const addCharacter = () => {
+    if (!newCharacterName.trim()) return;
+
+    const id = newCharacterName.toLowerCase().replace(/\s+/g, '_');
+
+    // Verificar si ya existe
+    if (characters.find(c => c.id === id)) {
+      alert('Este personaje ya existe');
+      return;
+    }
+
+    const newChar = {
+      id,
+      name: newCharacterName.trim()
+    };
+
+    setCharacters([...characters, newChar]);
+    setNewCharacterName('');
+    setShowAddCharacter(false);
+
+    logger.info('Personaje agregado:', newChar);
+  };
+
+  const removeCharacter = (characterId) => {
+    if (confirm('¿Eliminar este personaje y su configuración de voz?')) {
+      // Eliminar del estado
+      setCharacters(characters.filter(c => c.id !== characterId));
+
+      // Eliminar de localStorage
+      try {
+        const saved = localStorage.getItem('xiwen_character_voices');
+        if (saved) {
+          const configs = JSON.parse(saved);
+          delete configs[characterId];
+          localStorage.setItem('xiwen_character_voices', JSON.stringify(configs));
+        }
+      } catch (e) {
+        logger.error('Error removing character:', e);
+      }
+
+      logger.info('Personaje eliminado:', characterId);
+    }
+  };
 
   // Actualizar config
   const updateConfig = (key, value) => {
@@ -258,7 +351,7 @@ function DialoguesConfig({ onSave }) {
           <h4 className="font-medium" style={{ color: 'var(--color-text-primary)' }}>Audio y TTS</h4>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <label className="flex items-center justify-between p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
             <span className="text-sm" style={{ color: 'var(--color-text-primary)' }}>Habilitar Text-to-Speech</span>
             <input
@@ -278,21 +371,101 @@ function DialoguesConfig({ onSave }) {
               className="w-4 h-4 accent-cyan-500"
             />
           </label>
+        </div>
 
-          <div className="p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 col-span-full">
-            <label className="text-sm mb-2 block" style={{ color: 'var(--color-text-primary)' }}>
-              Velocidad de reproducción: {config.playbackSpeed}x
-            </label>
-            <input
-              type="range"
-              min="0.5"
-              max="2"
-              step="0.1"
-              value={config.playbackSpeed}
-              onChange={(e) => updateConfig('playbackSpeed', parseFloat(e.target.value))}
-              className="w-full accent-cyan-500"
-            />
+        {/* Configuración de voces por personaje */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <User size={16} className="text-purple-500" />
+              <h5 className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                Voces por Personaje
+              </h5>
+              <BaseBadge variant="info" size="sm">
+                {characters.length} personaje{characters.length !== 1 ? 's' : ''}
+              </BaseBadge>
+            </div>
+            <BaseButton
+              size="sm"
+              variant="primary"
+              icon={Plus}
+              onClick={() => setShowAddCharacter(!showAddCharacter)}
+            >
+              Agregar Personaje
+            </BaseButton>
           </div>
+
+          {/* Formulario para agregar personaje */}
+          {showAddCharacter && (
+            <div className="mb-4 p-4 rounded-lg bg-white dark:bg-gray-800 border-2 border-purple-300 dark:border-purple-700">
+              <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+                Nombre del personaje
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newCharacterName}
+                  onChange={(e) => setNewCharacterName(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && addCharacter()}
+                  placeholder="ej: María, Andrés, Camarero..."
+                  className="flex-1 px-3 py-2 rounded border-2"
+                  style={{
+                    backgroundColor: 'var(--color-bg-primary)',
+                    borderColor: 'var(--color-border)',
+                    color: 'var(--color-text-primary)'
+                  }}
+                  autoFocus
+                />
+                <BaseButton
+                  variant="primary"
+                  onClick={addCharacter}
+                  disabled={!newCharacterName.trim()}
+                >
+                  Agregar
+                </BaseButton>
+                <BaseButton
+                  variant="secondary"
+                  onClick={() => {
+                    setShowAddCharacter(false);
+                    setNewCharacterName('');
+                  }}
+                >
+                  Cancelar
+                </BaseButton>
+              </div>
+            </div>
+          )}
+
+          <CharacterVoiceManager
+            characters={characters}
+            alwaysOpen={true}
+            onConfigChange={loadCharacters}
+          />
+
+          {/* Botones para eliminar personajes */}
+          {characters.length > 0 && (
+            <div className="mt-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
+              <div className="text-xs font-semibold mb-2" style={{ color: 'var(--color-text-secondary)' }}>
+                Eliminar personajes
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {characters.map(char => (
+                  <button
+                    key={char.id}
+                    onClick={() => removeCharacter(char.id)}
+                    className="flex items-center gap-1 px-2 py-1 text-xs rounded border transition-colors hover:bg-red-50 hover:border-red-300 dark:hover:bg-red-900/20 dark:hover:border-red-700"
+                    style={{
+                      borderColor: 'var(--color-border)',
+                      color: 'var(--color-text-secondary)'
+                    }}
+                  >
+                    <Trash2 size={12} />
+                    {char.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

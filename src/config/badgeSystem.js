@@ -1132,16 +1132,31 @@ export const DEFAULT_GLOBAL_BADGE_CONFIG = {
  * Obtiene la configuración global de badges
  */
 export function getGlobalBadgeConfig() {
-  const saved = localStorage.getItem(GLOBAL_BADGE_STORAGE_KEY);
-  if (saved) {
-    try {
-      return { ...DEFAULT_GLOBAL_BADGE_CONFIG, ...JSON.parse(saved) };
-    } catch (err) {
-      console.error('Error loading global badge config:', err);
-      return DEFAULT_GLOBAL_BADGE_CONFIG;
+  try {
+    const saved = localStorage.getItem(GLOBAL_BADGE_STORAGE_KEY);
+
+    if (saved && saved !== 'undefined' && saved !== 'null') {
+      const parsed = JSON.parse(saved);
+      const merged = { ...DEFAULT_GLOBAL_BADGE_CONFIG, ...parsed };
+
+      // Log para debugging
+      console.log('✅ Badge config loaded from storage:', {
+        size: merged.size,
+        defaultBadgeStyle: merged.defaultBadgeStyle,
+        borderRadius: merged.borderRadius,
+        colorPalette: merged.colorPalette
+      });
+
+      return merged;
     }
+
+    console.log('⚠️ No saved badge config found, using defaults');
+    return { ...DEFAULT_GLOBAL_BADGE_CONFIG };
+  } catch (err) {
+    console.error('❌ Error loading global badge config:', err);
+    console.error('Saved value:', localStorage.getItem(GLOBAL_BADGE_STORAGE_KEY));
+    return { ...DEFAULT_GLOBAL_BADGE_CONFIG };
   }
-  return DEFAULT_GLOBAL_BADGE_CONFIG;
 }
 
 /**
@@ -1149,11 +1164,36 @@ export function getGlobalBadgeConfig() {
  */
 export function saveGlobalBadgeConfig(config) {
   try {
-    localStorage.setItem(GLOBAL_BADGE_STORAGE_KEY, JSON.stringify(config));
-    window.dispatchEvent(new CustomEvent('globalBadgeConfigChange', { detail: config }));
+    // Merge con config actual (leer directamente de storage sin llamar a la función recursivamente)
+    const savedStr = localStorage.getItem(GLOBAL_BADGE_STORAGE_KEY);
+    let current = { ...DEFAULT_GLOBAL_BADGE_CONFIG };
+
+    if (savedStr && savedStr !== 'undefined' && savedStr !== 'null') {
+      try {
+        current = { ...DEFAULT_GLOBAL_BADGE_CONFIG, ...JSON.parse(savedStr) };
+      } catch (e) {
+        console.warn('Could not parse existing config, using defaults');
+      }
+    }
+
+    const merged = { ...current, ...config };
+    const jsonString = JSON.stringify(merged);
+    localStorage.setItem(GLOBAL_BADGE_STORAGE_KEY, jsonString);
+
+    // Log para debugging
+    console.log('💾 Badge config saved to storage:', {
+      size: merged.size,
+      defaultBadgeStyle: merged.defaultBadgeStyle,
+      borderRadius: merged.borderRadius,
+      colorPalette: merged.colorPalette,
+      storageKey: GLOBAL_BADGE_STORAGE_KEY,
+      saved: jsonString.substring(0, 100) + '...'
+    });
+
+    window.dispatchEvent(new CustomEvent('globalBadgeConfigChange', { detail: merged }));
     return true;
   } catch (err) {
-    console.error('Error saving global badge config:', err);
+    console.error('❌ Error saving global badge config:', err);
     return false;
   }
 }

@@ -260,37 +260,17 @@ export function EnhancedTextEditor({
 
   return (
     <div className="enhanced-text-editor-v3 group relative my-4">
-      {/* Título editable del bloque */}
-      <div className="mb-2">
-        {isEditing ? (
-          <input
-            type="text"
-            value={blockTitle}
-            onChange={(e) => setBlockTitle(e.target.value)}
-            placeholder="Título del bloque..."
-            className="w-full text-lg font-semibold bg-transparent border-b-2 border-gray-300
-                       dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400
-                       outline-none py-1 px-0 text-gray-900 dark:text-white
-                       placeholder-gray-400 dark:placeholder-gray-500"
-          />
-        ) : (
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            {blockTitle}
-          </h3>
-        )}
-      </div>
-
       {/* Botón Editar (solo profesores, al hover) */}
       {isTeacher && !isEditing && (
         <button
           onClick={() => setIsEditing(true)}
           className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100
-                     transition-all duration-200 flex items-center gap-2 px-3 py-2
+                     transition-all duration-200 flex items-center justify-center p-2
                      bg-gray-500 text-white rounded-lg shadow-lg hover:bg-blue-600
                      hover:shadow-xl transform hover:scale-105"
+          title="Editar"
         >
           <Edit2 size={16} />
-          <span className="text-sm font-semibold">Editar</span>
         </button>
       )}
 
@@ -489,7 +469,6 @@ export function EnhancedTextEditor({
                 onClick={handleCancel}
                 title="Cancelar"
                 icon={X}
-                label="Cancelar"
                 variant="ghost"
               />
               <UnifiedToolbarButton
@@ -497,7 +476,6 @@ export function EnhancedTextEditor({
                 disabled={isSaving}
                 title={isSaving ? 'Guardando...' : 'Guardar'}
                 icon={Save}
-                label={isSaving ? 'Guardando...' : 'Guardar'}
                 variant="success"
               />
             </div>
@@ -554,14 +532,6 @@ export function EnhancedTextEditor({
           />
         )}
       </div>
-
-      {/* Footer info */}
-      {!isEditing && isTeacher && (
-        <div className="mt-2 text-xs text-gray-500 dark:text-gray-500 italic opacity-0
-                       group-hover:opacity-100 transition-opacity">
-          💡 Haz clic en "Editar" para formatear texto y dibujar
-        </div>
-      )}
     </div>
   );
 }
