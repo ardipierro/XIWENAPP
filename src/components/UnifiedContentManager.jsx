@@ -324,18 +324,23 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
   };
 
   const handleView = (content) => {
-    logger.info('=== HANDLE VIEW CALLED ===', 'UnifiedContentManager');
-    logger.info('Content title:', content.title);
-    logger.info('Content type:', content.type);
-    logger.info('Content has body:', !!content.body);
-    logger.info('Content has content:', !!content.content);
+    console.log('%c=== EJERCICIO CLICKEADO ===', 'background: red; color: white; font-size: 20px; padding: 10px;');
+    console.log('📝 Título:', content.title);
+    console.log('📦 Tipo:', content.type);
+    console.log('🔍 Tiene body:', !!content.body);
+    console.log('🔍 Tiene content:', !!content.content);
 
     // Log el contenido para debug
     if (content.body && typeof content.body === 'string') {
-      logger.info('Body is string, first 100 chars:', content.body.substring(0, 100));
+      console.log('📄 Body es STRING, primeros 200 caracteres:', content.body.substring(0, 200));
     } else if (content.body && typeof content.body === 'object') {
-      logger.info('Body is object, type:', content.body.type);
-      logger.info('Body has questions:', !!content.body.questions);
+      console.log('📦 Body es OBJETO');
+      console.log('   - type:', content.body.type);
+      console.log('   - tiene questions:', !!content.body.questions);
+      if (content.body.questions) {
+        console.log('   - cantidad de questions:', content.body.questions.length);
+        console.log('   - primera pregunta:', content.body.questions[0]);
+      }
     }
 
     // Tipos de ejercicios interactivos que soporta ExerciseViewerModal
@@ -365,7 +370,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
       (content.body.type === 'open_questions' || content.body.type === 'OPEN_QUESTIONS' ||
        (content.body.questions && Array.isArray(content.body.questions)));
 
-    logger.info('Detection results:', {
+    console.log('🔍 DETECCIÓN:', {
       exerciseType,
       isInteractive,
       hasInteractiveContent,
@@ -373,13 +378,13 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
     });
 
     if (isInteractive || hasInteractiveContent || bodyIsOpenQuestions) {
+      console.log('%c✅ ABRIENDO MODAL INTERACTIVO', 'background: green; color: white; font-size: 16px; padding: 5px;');
       setViewingExercise(content);
       setShowExerciseViewer(true);
-      logger.info('Opening interactive exercise viewer');
     } else {
+      console.log('%c⚠️ ABRIENDO MODAL ESTÁTICO', 'background: orange; color: white; font-size: 16px; padding: 5px;');
       setViewingContent(content);
       setShowViewModal(true);
-      logger.info('Viewing content in static modal');
     }
   };
 
