@@ -592,6 +592,224 @@ export const DEFAULT_BADGE_CONFIG = {
     description: 'Días consecutivos',
     category: 'gamification'
   },
+
+  // ========================================
+  // ESTADOS DE SESIONES (CLASES EN VIVO)
+  // ========================================
+  SESSION_SCHEDULED: {
+    variant: 'default',
+    color: '#71717a',
+    label: 'Programada',
+    icon: '📅',
+    heroicon: 'CalendarIcon',
+    description: 'Sesión programada para el futuro',
+    category: 'session_status'
+  },
+  SESSION_LIVE: {
+    variant: 'danger',
+    color: '#ef4444',
+    label: 'En Vivo',
+    icon: '🔴',
+    heroicon: 'SignalIcon',
+    description: 'Sesión en curso',
+    category: 'session_status'
+  },
+  SESSION_ENDED: {
+    variant: 'success',
+    color: '#10b981',
+    label: 'Finalizada',
+    icon: '✅',
+    heroicon: 'CheckCircleIcon',
+    description: 'Sesión completada',
+    category: 'session_status'
+  },
+  SESSION_CANCELLED: {
+    variant: 'warning',
+    color: '#f59e0b',
+    label: 'Cancelada',
+    icon: '⚠️',
+    heroicon: 'XCircleIcon',
+    description: 'Sesión cancelada',
+    category: 'session_status'
+  },
+
+  // ========================================
+  // ESTADOS DE USUARIO
+  // ========================================
+  USER_ACTIVE: {
+    variant: 'success',
+    color: '#10b981',
+    label: 'Activo',
+    icon: '✅',
+    heroicon: 'CheckCircleIcon',
+    description: 'Usuario activo en el sistema',
+    category: 'user_status'
+  },
+  USER_INACTIVE: {
+    variant: 'default',
+    color: '#71717a',
+    label: 'Inactivo',
+    icon: '⏸️',
+    heroicon: 'PauseCircleIcon',
+    description: 'Usuario inactivo',
+    category: 'user_status'
+  },
+  USER_ONLINE: {
+    variant: 'success',
+    color: '#22c55e',
+    label: 'En línea',
+    icon: '🟢',
+    heroicon: 'SignalIcon',
+    description: 'Usuario conectado',
+    category: 'user_status'
+  },
+  USER_OFFLINE: {
+    variant: 'default',
+    color: '#a1a1aa',
+    label: 'Desconectado',
+    icon: '⚪',
+    heroicon: 'MinusCircleIcon',
+    description: 'Usuario desconectado',
+    category: 'user_status'
+  },
+  USER_SUSPENDED: {
+    variant: 'danger',
+    color: '#ef4444',
+    label: 'Suspendido',
+    icon: '🚫',
+    heroicon: 'NoSymbolIcon',
+    description: 'Usuario suspendido',
+    category: 'user_status'
+  },
+
+  // ========================================
+  // PROVEEDORES DE VIDEO
+  // ========================================
+  PROVIDER_LIVEKIT: {
+    variant: 'success',
+    color: '#10b981',
+    label: 'LiveKit',
+    icon: '📹',
+    heroicon: 'VideoCameraIcon',
+    description: 'Proveedor LiveKit',
+    category: 'video_provider'
+  },
+  PROVIDER_MEET: {
+    variant: 'primary',
+    color: '#4285f4',
+    label: 'Google Meet',
+    icon: '🎦',
+    heroicon: 'VideoCameraIcon',
+    description: 'Google Meet',
+    category: 'video_provider'
+  },
+  PROVIDER_ZOOM: {
+    variant: 'info',
+    color: '#2d8cff',
+    label: 'Zoom',
+    icon: '💻',
+    heroicon: 'ComputerDesktopIcon',
+    description: 'Zoom Meetings',
+    category: 'video_provider'
+  },
+  PROVIDER_VOOV: {
+    variant: 'info',
+    color: '#7c3aed',
+    label: 'VooV',
+    icon: '🎬',
+    heroicon: 'FilmIcon',
+    description: 'Tencent VooV Meeting',
+    category: 'video_provider'
+  },
+  PROVIDER_EXTERNAL: {
+    variant: 'default',
+    color: '#71717a',
+    label: 'Externo',
+    icon: '🔗',
+    heroicon: 'LinkIcon',
+    description: 'Enlace externo',
+    category: 'video_provider'
+  },
+
+  // ========================================
+  // TIPOS DE PROGRAMACIÓN
+  // ========================================
+  SCHEDULE_RECURRING: {
+    variant: 'info',
+    color: '#8b5cf6',
+    label: 'Recurrente',
+    icon: '🔄',
+    heroicon: 'ArrowPathIcon',
+    description: 'Clase programada recurrente',
+    category: 'schedule_type'
+  },
+  SCHEDULE_INSTANT: {
+    variant: 'danger',
+    color: '#ef4444',
+    label: 'Instantánea',
+    icon: '⚡',
+    heroicon: 'BoltIcon',
+    description: 'Clase iniciada al momento',
+    category: 'schedule_type'
+  },
+  SCHEDULE_ONETIME: {
+    variant: 'primary',
+    color: '#5b8fa3',
+    label: 'Única',
+    icon: '📌',
+    heroicon: 'MapPinIcon',
+    description: 'Clase programada única',
+    category: 'schedule_type'
+  },
+
+  // ========================================
+  // ESTADOS DE INSCRIPCIÓN
+  // ========================================
+  ENROLLMENT_ACTIVE: {
+    variant: 'success',
+    color: '#10b981',
+    label: 'Activa',
+    icon: '✅',
+    heroicon: 'CheckCircleIcon',
+    description: 'Inscripción activa',
+    category: 'enrollment_status'
+  },
+  ENROLLMENT_PAUSED: {
+    variant: 'warning',
+    color: '#f59e0b',
+    label: 'Pausada',
+    icon: '⏸️',
+    heroicon: 'PauseCircleIcon',
+    description: 'Inscripción en pausa',
+    category: 'enrollment_status'
+  },
+  ENROLLMENT_CANCELLED: {
+    variant: 'danger',
+    color: '#ef4444',
+    label: 'Cancelada',
+    icon: '❌',
+    heroicon: 'XCircleIcon',
+    description: 'Inscripción cancelada',
+    category: 'enrollment_status'
+  },
+  ENROLLMENT_COMPLETED: {
+    variant: 'info',
+    color: '#06b6d4',
+    label: 'Completada',
+    icon: '🎓',
+    heroicon: 'AcademicCapIcon',
+    description: 'Curso completado',
+    category: 'enrollment_status'
+  },
+  ENROLLMENT_EXPIRED: {
+    variant: 'default',
+    color: '#71717a',
+    label: 'Expirada',
+    icon: '⏰',
+    heroicon: 'ClockIcon',
+    description: 'Inscripción expirada',
+    category: 'enrollment_status'
+  },
 };
 
 // ============================================
@@ -638,6 +856,20 @@ export const EMOJI_TO_HEROICON = {
   '👂': 'EarIcon',
   '🔬': 'BeakerIcon',
   '🌍': 'GlobeAltIcon',
+  // Nuevos iconos para categorías adicionales
+  '📅': 'CalendarIcon',
+  '⏸️': 'PauseCircleIcon',
+  '⚪': 'MinusCircleIcon',
+  '🚫': 'NoSymbolIcon',
+  '📹': 'VideoCameraIcon',
+  '🎦': 'VideoCameraIcon',
+  '💻': 'ComputerDesktopIcon',
+  '🎬': 'FilmIcon',
+  '🔄': 'ArrowPathIcon',
+  '⚡': 'BoltIcon',
+  '📌': 'MapPinIcon',
+  '❌': 'XCircleIcon',
+  '⏰': 'ClockIcon',
 };
 
 // ============================================
@@ -1184,6 +1416,46 @@ export const BADGE_CATEGORIES = {
     systemCategory: true,
     warning: 'Los elementos de gamificación son dinámicos y se calculan automáticamente.',
   },
+  session_status: {
+    label: 'Estados de Sesión',
+    description: 'Estados de las clases en vivo',
+    icon: '📅',
+    allowCustom: true,
+    systemCategory: true,
+    warning: 'Los estados de sesión son funcionales y controlan el flujo de las clases en vivo.',
+  },
+  user_status: {
+    label: 'Estados de Usuario',
+    description: 'Estados de actividad y conexión de usuarios',
+    icon: '👤',
+    allowCustom: true,
+    systemCategory: true,
+    warning: 'Los estados de usuario son funcionales.',
+  },
+  video_provider: {
+    label: 'Proveedores de Video',
+    description: 'Plataformas de videoconferencia',
+    icon: '📹',
+    allowCustom: true,
+    systemCategory: true,
+    warning: 'Los proveedores son fijos y determinan la integración de video.',
+  },
+  schedule_type: {
+    label: 'Tipos de Programación',
+    description: 'Modalidades de programación de clases',
+    icon: '🔄',
+    allowCustom: true,
+    systemCategory: true,
+    warning: 'Los tipos de programación son funcionales.',
+  },
+  enrollment_status: {
+    label: 'Estados de Inscripción',
+    description: 'Estados del ciclo de vida de inscripciones',
+    icon: '📋',
+    allowCustom: true,
+    systemCategory: true,
+    warning: 'Los estados de inscripción controlan acceso a cursos.',
+  },
 };
 
 // ============================================
@@ -1271,6 +1543,49 @@ export const BADGE_MAPPINGS = {
     'level': 'GAMIFICATION_LEVEL',
     'xp': 'GAMIFICATION_XP',
     'streak': 'GAMIFICATION_STREAK',
+  },
+
+  // Session Status → Badge key
+  session_status: {
+    'scheduled': 'SESSION_SCHEDULED',
+    'live': 'SESSION_LIVE',
+    'ended': 'SESSION_ENDED',
+    'cancelled': 'SESSION_CANCELLED',
+  },
+
+  // User Status → Badge key
+  user_status: {
+    'active': 'USER_ACTIVE',
+    'inactive': 'USER_INACTIVE',
+    'online': 'USER_ONLINE',
+    'offline': 'USER_OFFLINE',
+    'suspended': 'USER_SUSPENDED',
+  },
+
+  // Video Provider → Badge key
+  video_provider: {
+    'livekit': 'PROVIDER_LIVEKIT',
+    'meet': 'PROVIDER_MEET',
+    'zoom': 'PROVIDER_ZOOM',
+    'voov': 'PROVIDER_VOOV',
+    'external': 'PROVIDER_EXTERNAL',
+  },
+
+  // Schedule Type → Badge key
+  schedule_type: {
+    'recurring': 'SCHEDULE_RECURRING',
+    'instant': 'SCHEDULE_INSTANT',
+    'one-time': 'SCHEDULE_ONETIME',
+    'onetime': 'SCHEDULE_ONETIME',
+  },
+
+  // Enrollment Status → Badge key
+  enrollment_status: {
+    'active': 'ENROLLMENT_ACTIVE',
+    'paused': 'ENROLLMENT_PAUSED',
+    'cancelled': 'ENROLLMENT_CANCELLED',
+    'completed': 'ENROLLMENT_COMPLETED',
+    'expired': 'ENROLLMENT_EXPIRED',
   },
 };
 
@@ -1393,6 +1708,46 @@ export function getBadgeForHomeworkStatus(status) {
 export function getBadgeForGamification(type) {
   const key = BADGE_MAPPINGS.gamification[type];
   return getBadgeByKey(key) || DEFAULT_BADGE_CONFIG.GAMIFICATION_CREDITS;
+}
+
+/**
+ * Obtiene la configuración de badge para un estado de sesión
+ */
+export function getBadgeForSessionStatus(status) {
+  const key = BADGE_MAPPINGS.session_status[status];
+  return getBadgeByKey(key) || DEFAULT_BADGE_CONFIG.SESSION_SCHEDULED;
+}
+
+/**
+ * Obtiene la configuración de badge para un estado de usuario
+ */
+export function getBadgeForUserStatus(status) {
+  const key = BADGE_MAPPINGS.user_status[status];
+  return getBadgeByKey(key) || DEFAULT_BADGE_CONFIG.USER_ACTIVE;
+}
+
+/**
+ * Obtiene la configuración de badge para un proveedor de video
+ */
+export function getBadgeForVideoProvider(provider) {
+  const key = BADGE_MAPPINGS.video_provider[provider];
+  return getBadgeByKey(key) || DEFAULT_BADGE_CONFIG.PROVIDER_EXTERNAL;
+}
+
+/**
+ * Obtiene la configuración de badge para un tipo de programación
+ */
+export function getBadgeForScheduleType(type) {
+  const key = BADGE_MAPPINGS.schedule_type[type];
+  return getBadgeByKey(key) || DEFAULT_BADGE_CONFIG.SCHEDULE_ONETIME;
+}
+
+/**
+ * Obtiene la configuración de badge para un estado de inscripción
+ */
+export function getBadgeForEnrollmentStatus(status) {
+  const key = BADGE_MAPPINGS.enrollment_status[status];
+  return getBadgeByKey(key) || DEFAULT_BADGE_CONFIG.ENROLLMENT_ACTIVE;
 }
 
 /**

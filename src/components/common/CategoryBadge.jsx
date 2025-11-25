@@ -22,6 +22,11 @@ import {
   getBadgeForRole,
   getBadgeForHomeworkStatus,
   getBadgeForGamification,
+  getBadgeForSessionStatus,
+  getBadgeForUserStatus,
+  getBadgeForVideoProvider,
+  getBadgeForScheduleType,
+  getBadgeForEnrollmentStatus,
   getBadgeByKey,
   getIconLibraryConfig,
   MONOCHROME_PALETTES,
@@ -130,6 +135,21 @@ function CategoryBadge({
           break;
         case 'gamification':
           config = getBadgeForGamification(value);
+          break;
+        case 'session_status':
+          config = getBadgeForSessionStatus(value);
+          break;
+        case 'user_status':
+          config = getBadgeForUserStatus(value);
+          break;
+        case 'video_provider':
+          config = getBadgeForVideoProvider(value);
+          break;
+        case 'schedule_type':
+          config = getBadgeForScheduleType(value);
+          break;
+        case 'enrollment_status':
+          config = getBadgeForEnrollmentStatus(value);
           break;
         case 'custom':
           config = getBadgeByKey(value);
@@ -289,7 +309,7 @@ function hexToRgb(hex) {
 }
 
 CategoryBadge.propTypes = {
-  type: PropTypes.oneOf(['content', 'exercise', 'difficulty', 'cefr', 'status', 'role', 'homework_status', 'gamification', 'custom']),
+  type: PropTypes.oneOf(['content', 'exercise', 'difficulty', 'cefr', 'status', 'role', 'homework_status', 'gamification', 'session_status', 'user_status', 'video_provider', 'schedule_type', 'enrollment_status', 'custom']),
   value: PropTypes.string,
   badgeKey: PropTypes.string,
   size: PropTypes.oneOf(['sm', 'md', 'lg']),

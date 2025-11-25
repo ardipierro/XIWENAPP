@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { BookOpen, Calendar, Clock, Users, Video, CheckCircle, AlertCircle } from 'lucide-react';
 import { getStudentInstances, getTeacherInstances } from '../../../firebase/classInstances';
 import { getTeacherSchedules } from '../../../firebase/recurringSchedules';
+import CategoryBadge from '../../common/CategoryBadge';
 import logger from '../../../utils/logger';
 
 /**
@@ -259,37 +260,47 @@ function SessionCard({ session, isTeacher, userRole }) {
   const getStatusBadge = () => {
     if (isSchedule) {
       return (
-        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 text-xs font-semibold">
-          <BookOpen size={14} strokeWidth={2} />
-          Recurrente
-        </div>
+        <CategoryBadge
+          type="schedule_type"
+          value="recurring"
+          size="sm"
+          showIcon={true}
+        />
       );
     }
 
     if (session.status === 'live') {
       return (
-        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400 text-xs font-semibold animate-pulse">
-          <div className="w-2 h-2 rounded-full bg-red-600"></div>
-          En vivo
+        <div className="animate-pulse">
+          <CategoryBadge
+            type="session_status"
+            value="live"
+            size="sm"
+            showIcon={true}
+          />
         </div>
       );
     }
 
     if (session.status === 'ended') {
       return (
-        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-zinc-100 dark:bg-zinc-900/20 text-zinc-700 dark:text-zinc-400 text-xs font-semibold">
-          <CheckCircle size={14} strokeWidth={2} />
-          Finalizada
-        </div>
+        <CategoryBadge
+          type="session_status"
+          value="ended"
+          size="sm"
+          showIcon={true}
+        />
       );
     }
 
     if (session.status === 'scheduled') {
       return (
-        <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800/20 text-gray-700 dark:text-gray-400 text-xs font-semibold">
-          <Clock size={14} strokeWidth={2} />
-          Programada
-        </div>
+        <CategoryBadge
+          type="session_status"
+          value="scheduled"
+          size="sm"
+          showIcon={true}
+        />
       );
     }
 
@@ -299,20 +310,13 @@ function SessionCard({ session, isTeacher, userRole }) {
   const getProviderBadge = () => {
     if (!session.videoProvider) return null;
 
-    const providers = {
-      livekit: { label: 'LiveKit', color: 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400' },
-      meet: { label: 'Google Meet', color: 'bg-gray-100 dark:bg-gray-800/20 text-gray-700 dark:text-gray-400' },
-      zoom: { label: 'Zoom', color: 'bg-gray-100 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400' },
-      voov: { label: 'VooV', color: 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400' }
-    };
-
-    const provider = providers[session.videoProvider] || { label: session.videoProvider, color: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-400' };
-
     return (
-      <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${provider.color}`}>
-        <Video size={14} strokeWidth={2} />
-        {provider.label}
-      </div>
+      <CategoryBadge
+        type="video_provider"
+        value={session.videoProvider}
+        size="sm"
+        showIcon={true}
+      />
     );
   };
 

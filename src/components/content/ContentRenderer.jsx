@@ -16,9 +16,10 @@ import {
   PenTool,
   BookOpen,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Star
 } from 'lucide-react';
-import { VideoPlayer } from '../common';
+import { VideoPlayer, CategoryBadge } from '../common';
 import { useCardConfig } from '../../contexts/CardConfigContext';
 import logger from '../../utils/logger';
 
@@ -80,7 +81,7 @@ function ContentRenderer({ content, customConfig, interactive = false }) {
   };
 
   /**
-   * Renderiza badges de metadata
+   * Renderiza badges de metadata usando CategoryBadge universal
    */
   const renderMetadataBadges = (data, metadata) => {
     if (!config.showMetadataBadges) return null;
@@ -88,24 +89,38 @@ function ContentRenderer({ content, customConfig, interactive = false }) {
     return (
       <div className="flex flex-wrap gap-2">
         {data.type && (
-          <span className="px-3 py-1 rounded-full text-xs font-medium" style={{ background: 'var(--color-bg-hover)', color: 'var(--color-text-primary)' }}>
-            {getExerciseTypeLabel(data.type)}
-          </span>
+          <CategoryBadge
+            type="exercise"
+            value={data.type}
+            size="sm"
+            showIcon={true}
+          />
         )}
         {(metadata?.difficulty || data.difficulty) && (
-          <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-blue-900/30 text-gray-700 dark:text-gray-300">
-            {getDifficultyLabel(metadata?.difficulty || data.difficulty)}
-          </span>
+          <CategoryBadge
+            type="difficulty"
+            value={metadata?.difficulty || data.difficulty}
+            size="sm"
+            showIcon={true}
+          />
         )}
         {(metadata?.cefrLevel || data.cefrLevel) && (
-          <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
-            {metadata?.cefrLevel || data.cefrLevel}
-          </span>
+          <CategoryBadge
+            type="cefr"
+            value={metadata?.cefrLevel || data.cefrLevel}
+            size="sm"
+            showIcon={true}
+          />
         )}
         {(metadata?.points || data.points) && (
-          <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300">
+          <CategoryBadge
+            badgeKey="GAMIFICATION_XP"
+            size="sm"
+            showIcon={true}
+          >
+            <Star size={12} className="mr-1" />
             {metadata?.points || data.points} puntos
-          </span>
+          </CategoryBadge>
         )}
       </div>
     );
