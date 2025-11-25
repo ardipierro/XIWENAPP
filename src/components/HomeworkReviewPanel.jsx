@@ -9,7 +9,6 @@ import {
   Check,
   Clock,
   AlertCircle,
-  AlertTriangle,
   User,
   Calendar,
   Eye,
@@ -663,8 +662,9 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete, s
 
         // Aplicar border radius global
         const borderRadiusClass =
-          globalConfig.borderRadius === 'square' ? 'rounded-sm' :
+          globalConfig.borderRadius === 'square' ? 'rounded-none' :
           globalConfig.borderRadius === 'pill' ? 'rounded-full' :
+          globalConfig.borderRadius === 'rounded' ? 'rounded-lg' :
           'rounded-lg';
 
         // Aplicar estilo de badge global
@@ -728,7 +728,7 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete, s
               }
             >
               {isProcessing && <RefreshCw size={16} className="animate-spin" />}
-              {isFailed && <AlertTriangle size={16} />}
+              {isFailed && <AlertCircle size={16} />}
               {isTeacherApproved && <Check size={16} />}
               {isAIReady && <Clock size={16} />}
             </div>
