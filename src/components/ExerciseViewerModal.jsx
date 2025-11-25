@@ -8,6 +8,7 @@ import { X, Loader2, Edit2, Maximize2, Minimize2, RotateCcw } from 'lucide-react
 import { BaseModal, BaseButton } from './common';
 import WordHighlightExercise from './container/WordHighlightExercise';
 import logger from '../utils/logger';
+import { parseExerciseFile } from '../utils/exerciseParser.js';
 
 // Lazy load de componentes de ejercicios adicionales
 const DragDropBlanksExercise = lazy(() => import('./container/DragDropBlanksExercise'));
@@ -265,34 +266,44 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
 
       case EXERCISE_TYPES.OPEN_QUESTIONS: {
         // Parsear el contenido para extraer preguntas
-        const { parseExerciseFile } = require('../utils/exerciseParser.js');
-        const exercises = parseExerciseFile(cleanContent, 'General');
-        const openQuestionsData = exercises.find(ex => ex.type === 'open_questions');
+        try {
+          const exercises = parseExerciseFile(cleanContent, 'General');
+          const openQuestionsData = exercises.find(ex => ex.type === 'open_questions');
 
-        if (!openQuestionsData || !openQuestionsData.questions) {
+          if (!openQuestionsData || !openQuestionsData.questions) {
+            return (
+              <div className="text-center py-12">
+                <p style={{ color: 'var(--color-text-secondary)' }}>
+                  No se pudieron parsear las preguntas de respuesta libre.
+                </p>
+                <div className="mt-4 p-4 rounded-lg text-left max-w-md mx-auto" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+                  <pre className="text-xs whitespace-pre-wrap" style={{ color: 'var(--color-text-tertiary)' }}>
+                    {cleanContent?.substring(0, 300)}...
+                  </pre>
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <Suspense fallback={<ExerciseLoader />}>
+              <OpenQuestionsExercise
+                questions={openQuestionsData.questions}
+                config={config || {}}
+                onComplete={handleComplete}
+              />
+            </Suspense>
+          );
+        } catch (error) {
+          logger.error('Error parsing open questions:', error);
           return (
             <div className="text-center py-12">
               <p style={{ color: 'var(--color-text-secondary)' }}>
-                No se pudieron parsear las preguntas de respuesta libre.
+                Error al parsear el ejercicio: {error.message}
               </p>
-              <div className="mt-4 p-4 rounded-lg text-left max-w-md mx-auto" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
-                <pre className="text-xs whitespace-pre-wrap" style={{ color: 'var(--color-text-tertiary)' }}>
-                  {cleanContent?.substring(0, 300)}...
-                </pre>
-              </div>
             </div>
           );
         }
-
-        return (
-          <Suspense fallback={<ExerciseLoader />}>
-            <OpenQuestionsExercise
-              questions={openQuestionsData.questions}
-              config={config || {}}
-              onComplete={handleComplete}
-            />
-          </Suspense>
-        );
       }
 
       default:
