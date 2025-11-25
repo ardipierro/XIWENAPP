@@ -14,13 +14,8 @@ import {
   PenTool,
   Gamepad2,
   Plus,
-  Search,
-  Filter,
-  Grid3x3,
-  List,
   Edit,
   Trash2,
-  Eye,
   Calendar,
   Clock,
   Target,
@@ -43,8 +38,6 @@ import {
 import logger from '../utils/logger';
 import {
   BaseButton,
-  BaseInput,
-  BaseSelect,
   BaseBadge,
   CategoryBadge,
   BaseLoading,
@@ -52,7 +45,8 @@ import {
   BaseEmptyState,
   BaseModal,
   ExpandableModal,
-  VideoPlayer
+  VideoPlayer,
+  SearchBar
 } from './common';
 import { UniversalCard } from './cards';
 import { ContentRenderer } from './content';
@@ -391,52 +385,41 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <BaseInput
-              icon={Search}
-              placeholder="Buscar contenido..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <BaseSelect
-            icon={Filter}
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            options={FILTER_OPTIONS}
-            className="w-full md:w-64"
-          />
-          <BaseSelect
-            icon={Target}
-            value={difficultyFilter}
-            onChange={(e) => setDifficultyFilter(e.target.value)}
-            options={DIFFICULTY_OPTIONS}
-            className="w-full md:w-64"
-          />
-          <BaseSelect
-            icon={FileText}
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            options={STATUS_FILTER_OPTIONS}
-            className="w-full md:w-64"
-          />
-          <div className="flex gap-2">
-            <BaseButton
-              variant={viewMode === 'grid' ? 'primary' : 'secondary'}
-              icon={Grid3x3}
-              onClick={() => setViewMode('grid')}
-              size="sm"
-            />
-            <BaseButton
-              variant={viewMode === 'list' ? 'primary' : 'secondary'}
-              icon={List}
-              onClick={() => setViewMode('list')}
-              size="sm"
-            />
-          </div>
-        </div>
+        {/* SearchBar Unificado con Filtros */}
+        <SearchBar
+          value={searchTerm}
+          onChange={setSearchTerm}
+          placeholder="Buscar contenido..."
+          filters={[
+            {
+              key: 'type',
+              label: 'Tipo',
+              value: typeFilter,
+              onChange: setTypeFilter,
+              options: FILTER_OPTIONS,
+              defaultValue: 'all'
+            },
+            {
+              key: 'difficulty',
+              label: 'Dificultad',
+              value: difficultyFilter,
+              onChange: setDifficultyFilter,
+              options: DIFFICULTY_OPTIONS,
+              defaultValue: 'all'
+            },
+            {
+              key: 'status',
+              label: 'Estado',
+              value: statusFilter,
+              onChange: setStatusFilter,
+              options: STATUS_FILTER_OPTIONS,
+              defaultValue: 'all'
+            }
+          ]}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          viewModes={['grid', 'list']}
+        />
       </div>
 
       {/* Success Alert */}
