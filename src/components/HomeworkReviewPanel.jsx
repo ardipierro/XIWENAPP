@@ -339,38 +339,28 @@ export default function HomeworkReviewPanel({ teacherId }) {
         </div>
       </div>
 
-      {/* Status Filter Tabs */}
-      <div className="flex flex-wrap gap-2 mb-4">
-        <BaseButton
-          onClick={() => setStatusFilter('all')}
-          variant={statusFilter === 'all' ? 'primary' : 'ghost'}
-          size="sm"
-        >
-          Todas ({reviews.length})
-        </BaseButton>
-        <BaseButton
-          onClick={() => setStatusFilter('pending')}
-          variant={statusFilter === 'pending' ? 'primary' : 'ghost'}
-          size="sm"
-        >
-          Pendientes ({pendingCount})
-        </BaseButton>
-        <BaseButton
-          onClick={() => setStatusFilter('approved')}
-          variant={statusFilter === 'approved' ? 'primary' : 'ghost'}
-          size="sm"
-        >
-          Aprobadas ({approvedCount})
-        </BaseButton>
-      </div>
-
-      {/* SearchBar */}
+      {/* SearchBar with Unified Filters */}
       <SearchBar
         value={searchTerm}
         onChange={setSearchTerm}
         placeholder="Buscar correcciones..."
+        filters={[
+          {
+            key: 'status',
+            label: 'Estado',
+            value: statusFilter,
+            onChange: setStatusFilter,
+            options: [
+              { value: 'all', label: `Todas (${reviews.length})` },
+              { value: 'pending', label: `Pendientes (${pendingCount})` },
+              { value: 'approved', label: `Aprobadas (${approvedCount})` }
+            ],
+            defaultValue: 'all'
+          }
+        ]}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
+        viewModes={['grid', 'list']}
         className="mb-6"
       />
 

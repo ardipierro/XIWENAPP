@@ -425,63 +425,26 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
         </div>
       )}
 
-      {/* Filtros rápidos */}
-      <div className="mb-4 flex flex-wrap gap-2">
-        <button
-          onClick={() => setFilterStatus('all')}
-          className={`
-            px-4 py-2 rounded-lg text-sm font-medium transition-all
-            ${filterStatus === 'all'
-              ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
-              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
-            }
-          `}
-        >
-          Todas
-        </button>
-        <button
-          onClick={() => setFilterStatus('live')}
-          className={`
-            px-4 py-2 rounded-lg text-sm font-medium transition-all
-            ${filterStatus === 'live'
-              ? 'bg-green-500 text-white'
-              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
-            }
-          `}
-        >
-          En Vivo
-        </button>
-        <button
-          onClick={() => setFilterStatus('scheduled')}
-          className={`
-            px-4 py-2 rounded-lg text-sm font-medium transition-all
-            ${filterStatus === 'scheduled'
-              ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
-              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
-            }
-          `}
-        >
-          Programadas
-        </button>
-        <button
-          onClick={() => setFilterStatus('ended')}
-          className={`
-            px-4 py-2 rounded-lg text-sm font-medium transition-all
-            ${filterStatus === 'ended'
-              ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
-              : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700'
-            }
-          `}
-        >
-          Finalizadas
-        </button>
-      </div>
-
-      {/* Barra de búsqueda con toggle de vista */}
+      {/* Barra de búsqueda con filtros unificados */}
       <SearchBar
         value={searchTerm}
         onChange={setSearchTerm}
         placeholder="Buscar clases..."
+        filters={[
+          {
+            key: 'status',
+            label: 'Estado',
+            value: filterStatus,
+            onChange: setFilterStatus,
+            options: [
+              { value: 'all', label: `Todas (${sessions.length})` },
+              { value: 'live', label: `En Vivo (${sessions.filter(s => s.status === 'live').length})` },
+              { value: 'scheduled', label: `Programadas (${sessions.filter(s => s.status === 'scheduled').length})` },
+              { value: 'ended', label: `Finalizadas (${sessions.filter(s => s.status === 'ended').length})` }
+            ],
+            defaultValue: 'all'
+          }
+        ]}
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         viewModes={['grid', 'list']}
