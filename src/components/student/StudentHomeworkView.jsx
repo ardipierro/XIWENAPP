@@ -15,7 +15,6 @@ import {
   RefreshCw,
   FileText,
   Calendar,
-  Sparkles,
   Maximize2,
   Camera
 } from 'lucide-react';
@@ -327,26 +326,9 @@ function HomeworkCard({ review, onSelect, viewMode = 'grid' }) {
 
   // List view - Usando UniversalCard layout="row"
   if (viewMode === 'list') {
-    // Construir badges
+    // Construir badges - Solo calificación si está aprobada
     const statusBadges = [];
-    if (isProcessing || isPendingReview) {
-      statusBadges.push(
-        <BaseBadge key="status" variant="primary" icon={Clock} size="sm">
-          EN REVISIÓN
-        </BaseBadge>
-      );
-    } else if (isFailed) {
-      statusBadges.push(
-        <BaseBadge key="status" variant="danger" icon={AlertCircle} size="sm">
-          ERROR
-        </BaseBadge>
-      );
-    } else if (isApproved) {
-      statusBadges.push(
-        <BaseBadge key="status" variant="success" icon={CheckCircle} size="sm">
-          ✓ CORREGIDA
-        </BaseBadge>
-      );
+    if (isApproved) {
       statusBadges.push(
         <BaseBadge key="grade" variant={gradeColor} size="sm">
           {grade}/100
@@ -508,44 +490,19 @@ function HomeworkCard({ review, onSelect, viewMode = 'grid' }) {
           />
         </div>
 
-        {/* Stats or Status Message */}
-        {(isProcessing || isPendingReview) ? (
-          <div className="bg-gray-50 dark:bg-gray-800/20 border-2 border-gray-300 dark:border-gray-500 rounded-lg p-3.5">
-            <div className="flex items-center gap-2.5 text-sm text-blue-800 dark:text-blue-200">
-              <Clock size={18} style={{ color: 'inherit' }} className="flex-shrink-0" strokeWidth={2.5} />
-              <span className="font-bold">En revisión</span>
-            </div>
-            <p className="text-xs text-gray-700 dark:text-gray-300 mt-2 ml-6 font-medium">
-              📝 Tu profesor está revisando tu tarea
-            </p>
-          </div>
-        ) : isFailed ? (
-          <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-600 rounded-lg p-3.5">
-            <div className="flex items-center gap-2.5 text-sm text-red-800 dark:text-red-200">
-              <AlertCircle size={18} style={{ color: 'inherit' }} strokeWidth={2.5} className="flex-shrink-0" />
-              <span className="font-bold">Error al procesar</span>
-            </div>
-            {review.errorMessage && (
-              <p className="text-xs text-red-700 dark:text-red-300 mt-2 ml-6 font-medium">
-                {review.errorMessage}
-              </p>
-            )}
-          </div>
-        ) : isApproved ? (
+        {/* Grade Display - Solo mostrar si está aprobada */}
+        {isApproved && (
           <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Sparkles size={16} style={{ color: 'inherit' }} className="text-green-600 dark:text-green-400" />
-                <span className="text-sm font-medium text-green-900 dark:text-green-100">
-                  Calificación:
-                </span>
-              </div>
+              <span className="text-sm font-medium text-green-900 dark:text-green-100">
+                Calificación:
+              </span>
               <BaseBadge variant={gradeColor} size="lg">
                 {grade}/100
               </BaseBadge>
             </div>
           </div>
-        ) : null}
+        )}
       </div>
     </BaseCard>
   );
