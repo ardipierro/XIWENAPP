@@ -128,13 +128,38 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
 
     // Detectar tipo de ejercicio y obtener contenido limpio
     // Soportar tanto 'content' como 'body' para compatibilidad
-    const exerciseContent = exercise.content || exercise.body || '';
+    let exerciseContent = exercise.content || exercise.body || '';
+
+    // Si el contenido es un objeto/JSON (ya parseado), intentar convertirlo a texto o usarlo directamente
+    if (typeof exerciseContent === 'object') {
+      logger.info('Exercise content is already parsed JSON', 'ExerciseViewerModal');
+
+      // Si es un ejercicio de tipo open_questions ya parseado
+      if (exerciseContent.type === 'open_questions' || exerciseContent.type === 'OPEN_QUESTIONS') {
+        setExerciseType(EXERCISE_TYPES.OPEN_QUESTIONS);
+        setCleanContent(exerciseContent); // Guardar el objeto completo
+        logger.info(`Exercise type detected: ${EXERCISE_TYPES.OPEN_QUESTIONS}`, 'ExerciseViewerModal');
+        return;
+      }
+
+      // Si tiene questions directamente
+      if (exerciseContent.questions && Array.isArray(exerciseContent.questions)) {
+        setExerciseType(EXERCISE_TYPES.OPEN_QUESTIONS);
+        setCleanContent(exerciseContent);
+        logger.info(`Exercise type detected: ${EXERCISE_TYPES.OPEN_QUESTIONS} (from questions array)`, 'ExerciseViewerModal');
+        return;
+      }
+
+      // Intentar stringificar para procesarlo como texto
+      exerciseContent = JSON.stringify(exerciseContent);
+    }
+
     const { type, cleanContent: content } = detectExerciseType(exerciseContent);
     setExerciseType(type);
     setCleanContent(content);
 
     logger.info(`Exercise content source: ${exercise.content ? 'content' : 'body'}`, 'ExerciseViewerModal');
-    logger.info(`Exercise content length: ${exerciseContent.length}`, 'ExerciseViewerModal');
+    logger.info(`Exercise content length: ${typeof exerciseContent === 'string' ? exerciseContent.length : 'object'}`, 'ExerciseViewerModal');
 
     // Cargar configuración según el tipo
     if (type === EXERCISE_TYPES.HIGHLIGHT) {
@@ -270,7 +295,21 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
         );
 
       case EXERCISE_TYPES.OPEN_QUESTIONS: {
-        // Parsear el contenido para extraer preguntas
+        // Si cleanContent ya es un objeto parseado con las preguntas, usarlo directamente
+        if (typeof cleanContent === 'object' && cleanContent.questions) {
+          logger.info('Using already parsed open questions data', 'ExerciseViewerModal');
+          return (
+            <Suspense fallback={<ExerciseLoader />}>
+              <OpenQuestionsExercise
+                questions={cleanContent.questions}
+                config={config || {}}
+                onComplete={handleComplete}
+              />
+            </Suspense>
+          );
+        }
+
+        // Si es texto plano, parsearlo
         try {
           const exercises = parseExerciseFile(cleanContent, 'General');
           const openQuestionsData = exercises.find(ex => ex.type === 'open_questions');
@@ -283,7 +322,7 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
                 </p>
                 <div className="mt-4 p-4 rounded-lg text-left max-w-md mx-auto" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
                   <pre className="text-xs whitespace-pre-wrap" style={{ color: 'var(--color-text-tertiary)' }}>
-                    {cleanContent?.substring(0, 300)}...
+                    {typeof cleanContent === 'string' ? cleanContent?.substring(0, 300) : JSON.stringify(cleanContent, null, 2).substring(0, 300)}...
                   </pre>
                 </div>
               </div>
@@ -306,6 +345,11 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
               <p style={{ color: 'var(--color-text-secondary)' }}>
                 Error al parsear el ejercicio: {error.message}
               </p>
+              <div className="mt-4 p-4 rounded-lg text-left max-w-md mx-auto" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+                <pre className="text-xs whitespace-pre-wrap" style={{ color: 'var(--color-text-tertiary)' }}>
+                  {typeof cleanContent === 'string' ? cleanContent : JSON.stringify(cleanContent, null, 2)}
+                </pre>
+              </div>
             </div>
           );
         }
