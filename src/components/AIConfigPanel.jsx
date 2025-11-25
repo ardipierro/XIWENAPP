@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Lightbulb, Filter, Settings, Play, CheckCircle, Edit3, Image as ImageIcon, Layers, Sparkles } from 'lucide-react';
+import { Lightbulb, Filter, Settings, Play, CheckCircle, Edit3, Image as ImageIcon, Layers, Sparkles, Eye } from 'lucide-react';
 import { getAIConfig, saveAIConfig } from '../firebase/aiConfig';
 import { getAllCorrectionProfiles } from '../firebase/correctionProfiles';
 import logger from '../utils/logger';
@@ -25,6 +25,7 @@ import SelectionSpeakerConfig from './SelectionSpeakerConfig';
 import PromptBasedProfileEditor from './homework/PromptBasedProfileEditor';
 import ImageTaskModal from './ImageTaskModal';
 import TranslatorConfigCard from './settings/TranslatorConfigCard';
+import ContentDisplayModal from './settings/ContentDisplayModal';
 import { ExerciseBuilderModal } from './exercisebuilder/ExerciseBuilderModal';
 import { AI_FUNCTIONS, AI_CATEGORIES } from '../constants/aiFunctions';
 import { IMAGE_GENERATION_TASKS } from '../utils/imageGenerationTasks';
@@ -60,6 +61,9 @@ function AIConfigPanel() {
   // Estado para modal "Crear Nueva"
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedConfigType, setSelectedConfigType] = useState('');
+
+  // Estado para modal de visualización de contenidos
+  const [showContentModal, setShowContentModal] = useState(false);
 
   // Get current user and role
   const { user, userRole} = useAuth();
@@ -382,6 +386,22 @@ function AIConfigPanel() {
       });
     }
 
+    // Agregar Visualización de Contenidos (siempre disponible)
+    functions.push({
+      id: 'content_display',
+      name: 'Visualización de Contenidos',
+      description: 'Controla cómo se muestran ejercicios y lecciones en modales',
+      icon: Eye,
+      category: 'tools',
+      isContentDisplayConfig: true,
+      defaultConfig: {
+        enabled: true,
+        mode: 'compact',
+        showMetadataBadges: true,
+        showInstructions: true
+      }
+    });
+
     return functions;
   };
 
@@ -580,6 +600,19 @@ function AIConfigPanel() {
               );
             }
 
+            // Si es la configuración de visualización de contenidos
+            if (func.isContentDisplayConfig) {
+              return (
+                <AIFunctionCard
+                  key={func.id}
+                  aiFunction={func}
+                  config={func.defaultConfig}
+                  onConfigure={() => setShowContentModal(true)}
+                  viewMode="grid"
+                />
+              );
+            }
+
             // Función de IA normal
             return (
               <AIFunctionCard
@@ -643,6 +676,19 @@ function AIConfigPanel() {
                   aiFunction={func}
                   config={func.defaultConfig}
                   onConfigure={handleConfigureExerciseBuilder}
+                  viewMode="list"
+                />
+              );
+            }
+
+            // Si es la configuración de visualización de contenidos
+            if (func.isContentDisplayConfig) {
+              return (
+                <AIFunctionCard
+                  key={func.id}
+                  aiFunction={func}
+                  config={func.defaultConfig}
+                  onConfigure={() => setShowContentModal(true)}
                   viewMode="list"
                 />
               );
@@ -840,6 +886,12 @@ function AIConfigPanel() {
           onClose={() => setShowExerciseBuilder(false)}
         />
       )}
+
+      {/* Content Display Modal */}
+      <ContentDisplayModal
+        isOpen={showContentModal}
+        onClose={() => setShowContentModal(false)}
+      />
     </div>
   );
 }

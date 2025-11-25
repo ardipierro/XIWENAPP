@@ -30,7 +30,7 @@ import {
   PageHeader,
   SearchBar
 } from '../common';
-import { UniversalCard } from '../cards';
+import { UniversalCard, CardGrid } from '../cards';
 import ImageLightbox from '../common/ImageLightbox';
 import ImageOverlay from '../homework/ImageOverlay';
 import StudentFeedbackView from '../StudentFeedbackView';
@@ -255,7 +255,19 @@ export default function StudentHomeworkView({ user }) {
         )
       ) : (
         /* Homework cards */
-        <div className={viewMode === 'grid' ? 'grid gap-4 md:grid-cols-2 lg:grid-cols-3' : 'flex flex-col gap-4'}>
+        viewMode === 'grid' ? (
+        <CardGrid columnsType="default" gap="gap-4">
+          {filteredReviews.map(review => (
+            <HomeworkCard
+              key={review.id}
+              review={review}
+              onSelect={() => handleSelectReview(review)}
+              viewMode={viewMode}
+            />
+          ))}
+        </CardGrid>
+        ) : (
+        <div className="flex flex-col gap-4">
           {filteredReviews.map(review => (
             <HomeworkCard
               key={review.id}
@@ -265,6 +277,7 @@ export default function StudentHomeworkView({ user }) {
             />
           ))}
         </div>
+        )
       )}
 
       {/* Upload Modal */}

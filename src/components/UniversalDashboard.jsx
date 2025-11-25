@@ -18,6 +18,7 @@ import ViewAsBanner from './ViewAsBanner';
 import { BaseLoading } from './common';
 import { UniversalCard } from './cards';
 import { ResponsiveGrid } from './common';
+import { getGridColumnsClass } from './cards/cardConfig';
 import {
   Layers,
   BookOpen,
@@ -209,7 +210,7 @@ function HomeView({ user, onNavigate }) {
               <BaseLoading size="sm" text="Cargando progreso..." />
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className={`${getGridColumnsClass('default')} gap-4`}>
               {/* Tarjeta de Nivel */}
               <div className="bg-indigo-50 dark:bg-indigo-950/20 rounded-lg p-4 border border-indigo-200 dark:border-indigo-800">
                 <div className="flex items-center gap-3">
@@ -260,7 +261,7 @@ function HomeView({ user, onNavigate }) {
       )}
 
       {/* Tarjetas de acceso */}
-      <ResponsiveGrid size="md" gap="4">
+      <div className={`${getGridColumnsClass('default')} gap-4`}>
         {visibleCards.map((card) => (
           <UniversalCard
             key={card.path}
@@ -272,7 +273,7 @@ function HomeView({ user, onNavigate }) {
             onClick={() => onNavigate && onNavigate(card.path)}
           />
         ))}
-      </ResponsiveGrid>
+      </div>
     </div>
   );
 }

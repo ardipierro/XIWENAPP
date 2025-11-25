@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 import { CreditCard, Plus, Sparkles, Search, Grid3x3, List, Eye, Edit, Trash2, Play, Download, Share2, Award, Trophy, BarChart3 } from 'lucide-react';
 import { BaseButton, BaseInput, BaseCard, BaseBadge, CategoryBadge, BaseLoading, BaseAlert, BaseEmptyState, BaseModal, BaseTabs } from './common';
-import { CardDeleteButton } from './cards';
+import { CardDeleteButton, CardGrid } from './cards'; // Grid unificado
 import { useCardConfig } from '../contexts/CardConfigContext';
 import FlashCardGeneratorModal from './FlashCardGeneratorModal';
 import FlashCardViewer from './FlashCardViewer';
@@ -301,10 +301,8 @@ export function FlashCardManager({ user }) {
             </div>
           }
         />
-      ) : (
-        <div className={viewMode === 'grid'
-          ? 'grid-responsive-cards gap-4'
-          : 'flex flex-col gap-3'}>
+      ) : viewMode === 'grid' ? (
+        <CardGrid columnsType="default" gap="gap-4">
           {filteredCollections.map(collection => (
             <BaseCard
               key={collection.id}
@@ -386,6 +384,34 @@ export function FlashCardManager({ user }) {
                     />
                   )}
                 </div>
+              </div>
+            </BaseCard>
+          ))}
+        </CardGrid>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {filteredCollections.map(collection => (
+            <BaseCard
+              key={collection.id}
+              className="group hover:shadow-lg transition-all duration-200"
+            >
+              <div className="p-4 flex items-center gap-4">
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
+                    {collection.name}
+                  </h3>
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                    {collection.cardCount || collection.cards?.length || 0} tarjetas
+                  </p>
+                </div>
+                <BaseButton
+                  variant="primary"
+                  icon={Play}
+                  size="sm"
+                  onClick={() => handlePracticeCollection(collection.id)}
+                >
+                  Practicar
+                </BaseButton>
               </div>
             </BaseCard>
           ))}

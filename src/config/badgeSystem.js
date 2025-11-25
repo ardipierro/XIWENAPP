@@ -554,7 +554,7 @@ export const DEFAULT_BADGE_CONFIG = {
   },
 
   // ========================================
-  // GAMIFICACIÓN (Créditos, XP, Nivel)
+  // SISTEMA DE CRÉDITOS (Clases)
   // ========================================
   GAMIFICATION_CREDITS: {
     variant: 'success',
@@ -562,9 +562,13 @@ export const DEFAULT_BADGE_CONFIG = {
     label: 'Créditos',
     icon: '💰',
     heroicon: 'CurrencyDollarIcon',
-    description: 'Créditos disponibles',
-    category: 'gamification'
+    description: 'Créditos disponibles para clases',
+    category: 'credits'
   },
+
+  // ========================================
+  // GAMIFICACIÓN (XP, Nivel)
+  // ========================================
   GAMIFICATION_LEVEL: {
     variant: 'info',
     color: '#a78bfa',
@@ -1175,6 +1179,14 @@ export const BADGE_CATEGORIES = {
     allowCustom: true,
     systemCategory: true,
     warning: 'Los estados del sistema de corrección son funcionales. Los badges custom son solo para personalización visual.',
+  },
+  credits: {
+    label: 'Sistema de Créditos',
+    description: 'Créditos disponibles para asistir a clases',
+    icon: '💰',
+    allowCustom: true,
+    systemCategory: true,
+    warning: 'El sistema de créditos es funcional y controla el acceso a clases. Este badge muestra los créditos disponibles del estudiante.',
   },
   gamification: {
     label: 'Gamificación',

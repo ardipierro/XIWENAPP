@@ -43,7 +43,22 @@ function useBadgeConfig() {
 
   // Cargar configuración al montar
   useEffect(() => {
-    const loaded = getBadgeConfig();
+    let loaded = getBadgeConfig();
+
+    // MIGRACIÓN AUTOMÁTICA: Mover GAMIFICATION_CREDITS de 'gamification' a 'credits'
+    if (loaded.GAMIFICATION_CREDITS && loaded.GAMIFICATION_CREDITS.category === 'gamification') {
+      logger.info('🔄 Migrando badge GAMIFICATION_CREDITS de gamification a credits');
+      loaded = {
+        ...loaded,
+        GAMIFICATION_CREDITS: {
+          ...loaded.GAMIFICATION_CREDITS,
+          category: 'credits'
+        }
+      };
+      // Guardar la configuración migrada
+      saveBadgeConfig(loaded);
+    }
+
     setConfig(loaded);
     applyBadgeColors(loaded);
   }, []);

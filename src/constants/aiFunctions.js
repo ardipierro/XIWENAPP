@@ -25,7 +25,8 @@ import {
   Image,
   Palette,
   Sparkles,
-  Volume2
+  Volume2,
+  Eye
 } from 'lucide-react';
 
 /**
@@ -597,6 +598,20 @@ Sé preciso, constructivo y educativo. Tu objetivo es ayudar al estudiante a mej
       selectedVoiceId: 'es-AR-female-1', // Voz por defecto
       allowStudentSelection: false, // Permitir que alumnos elijan voz
       autoCache: true // Cachear automáticamente
+    }
+  },
+  {
+    id: 'content_display',
+    name: 'Visualización de Contenidos',
+    description: 'Controla cómo se muestran ejercicios y lecciones en modales',
+    icon: Eye,
+    category: 'tools',
+    isContentDisplayConfig: true, // Flag especial para identificar esta configuración
+    defaultConfig: {
+      enabled: true,
+      mode: 'compact', // 'compact' | 'detailed'
+      showMetadataBadges: true,
+      showInstructions: true
     }
   }
 ];

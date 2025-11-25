@@ -118,8 +118,8 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
   return (
     <>
       {/* TopBar - Mobile First: 48px (móvil) → 56px (md) → 64px (lg) */}
-      {/* Safe area: top-[max(env(safe-area-inset-top),20px)] para móviles que no reportan safe-area */}
-      {/* En desktop (lg:) usamos top-0 porque no hay barra de estado que interfiera */}
+      {/* Safe area con espacio extra para tablets/iPads */}
+      {/* Móvil: 24px min, Tablet: 36px min, Desktop: sin safe-area */}
       <header
         className={`topbar fixed left-0 right-0 z-50
                    h-12 md:h-14 lg:h-16
@@ -127,8 +127,8 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
                    border-b border-zinc-200 dark:border-zinc-800
                    transition-all duration-300
                    ${hasBanner
-                     ? 'top-[calc(38px+max(env(safe-area-inset-top),20px))] sm:top-[calc(44px+max(env(safe-area-inset-top),20px))] lg:top-[44px]'
-                     : 'top-[max(env(safe-area-inset-top),20px)] lg:top-0'}`}
+                     ? 'top-[calc(38px+max(env(safe-area-inset-top),24px))] md:top-[calc(44px+max(env(safe-area-inset-top),36px))] lg:top-[44px]'
+                     : 'top-[max(env(safe-area-inset-top),24px)] md:top-[max(env(safe-area-inset-top),36px)] lg:top-0'}`}
       >
         <div className="flex items-center justify-between h-full px-3 md:px-5">
           {/* Sección Izquierda: Menú Hamburguesa + Logo o Back Button */}

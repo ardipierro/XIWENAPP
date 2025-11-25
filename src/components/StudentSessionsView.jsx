@@ -21,7 +21,7 @@ import {
 import { getStudentInstances, getLiveInstances } from '../firebase/classInstances';
 import { getUserCredits } from '../firebase/credits';
 import { BaseEmptyState, BaseLoading, BaseButton, BaseBadge, BaseAlert } from './common';
-import { UniversalCard } from './cards';
+import { UniversalCard, CardGrid } from './cards';
 
 /**
  * Vista de sesiones de clase para estudiantes
@@ -241,7 +241,7 @@ function StudentSessionsView({ student }) {
             <Play size={20} className="text-red-500" />
             Clases en Vivo Ahora
           </h2>
-          <div className="grid-responsive-cards gap-4">
+          <CardGrid columnsType="default" gap="gap-4">
             {liveSessions.map(session => (
               <UniversalCard
                 key={session.id}
@@ -283,7 +283,7 @@ function StudentSessionsView({ student }) {
                 </div>
               </UniversalCard>
             ))}
-          </div>
+          </CardGrid>
         </div>
       )}
 
@@ -301,7 +301,7 @@ function StudentSessionsView({ student }) {
             <Calendar size={20} />
             Clases Programadas
           </h2>
-          <div className="grid-responsive-cards gap-4">
+          <CardGrid columnsType="default" gap="gap-4">
             {sessions.map(session => {
               const isProcessing = processingSession === session.id;
               const isLive = session.status === 'live';
@@ -387,7 +387,7 @@ function StudentSessionsView({ student }) {
                 </UniversalCard>
               );
             })}
-          </div>
+          </CardGrid>
         </div>
       )}
 

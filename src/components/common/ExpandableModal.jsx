@@ -20,6 +20,7 @@ import logger from '../../utils/logger';
  * @param {node} icon - Icono opcional en el header (Lucide icon component)
  * @param {node} children - Contenido del modal
  * @param {node} footer - Footer custom (buttons, actions)
+ * @param {node} headerActions - Botones/acciones adicionales en el header (entre expandir y cerrar)
  * @param {string} size - Tamaño del modal: 'sm', 'md', 'lg', 'xl' (solo cuando NO está fullscreen)
  * @param {boolean} showCloseButton - Mostrar botón X de cerrar (default: true)
  * @param {boolean} closeOnOverlayClick - Cerrar al hacer click fuera (default: true)
@@ -35,6 +36,7 @@ function ExpandableModal({
   icon: Icon,
   children,
   footer,
+  headerActions,
   size = 'lg',
   showCloseButton = true,
   closeOnOverlayClick = true,
@@ -181,6 +183,13 @@ function ExpandableModal({
                   <Maximize2 size={20} strokeWidth={2.5} />
                 )}
               </button>
+
+              {/* Custom Header Actions */}
+              {headerActions && (
+                <div className="flex items-center gap-2 shrink-0">
+                  {headerActions}
+                </div>
+              )}
 
               {/* Close button */}
               {showCloseButton && (

@@ -41,12 +41,11 @@ import {
   BaseAlert,
   BaseBadge,
   BaseEmptyState,
-  ImageLightbox,
-  ResponsiveGrid
+  ImageLightbox
 } from './common';
 import CategoryBadge from './common/CategoryBadge';
 import { getBadgeByKey, getContrastText } from '../config/badgeSystem';
-import { CardDeleteButton, UniversalCard } from './cards';
+import { CardDeleteButton, UniversalCard, CardGrid } from './cards';
 import { useCardConfig } from '../contexts/CardConfigContext';
 import CorrectionReviewPanel from './homework/CorrectionReviewPanel';
 import HighlightedTranscription from './homework/HighlightedTranscription';
@@ -391,13 +390,14 @@ export default function HomeworkReviewPanel({ teacherId }) {
           />
         )
       ) : viewMode === 'grid' ? (
-        <ResponsiveGrid size="md" gap="4">
+        <CardGrid columnsType="default" gap="gap-4">
           {filteredReviews.map(review => (
             <ReviewCard
               key={review.id}
               review={review}
               onSelect={() => handleSelectReview(review)}
               viewMode={viewMode}
+              showDeleteButtons={showDeleteButtons}
               onCancel={async (reviewId) => {
                 const result = await cancelProcessingReview(reviewId);
                 if (result.success) {
@@ -418,7 +418,7 @@ export default function HomeworkReviewPanel({ teacherId }) {
               }}
             />
           ))}
-        </ResponsiveGrid>
+        </CardGrid>
       ) : (
         <div className="flex flex-col gap-4">
           {filteredReviews.map(review => (
@@ -427,6 +427,7 @@ export default function HomeworkReviewPanel({ teacherId }) {
               review={review}
               onSelect={() => handleSelectReview(review)}
               viewMode={viewMode}
+              showDeleteButtons={showDeleteButtons}
               onCancel={async (reviewId) => {
                 const result = await cancelProcessingReview(reviewId);
                 if (result.success) {
@@ -498,7 +499,7 @@ export default function HomeworkReviewPanel({ teacherId }) {
 /**
  * Review Card Component
  */
-function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete }) {
+function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete, showDeleteButtons }) {
   const grade = review.suggestedGrade || 0;
   const gradeColor = grade >= 90 ? 'success' : grade >= 70 ? 'primary' : grade >= 50 ? 'warning' : 'danger';
 

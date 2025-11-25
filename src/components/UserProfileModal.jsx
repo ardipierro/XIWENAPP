@@ -552,6 +552,9 @@ function UserProfileModal({
                 {/* Badge de Créditos */}
                 {credits && (() => {
                   const badgeConfig = getBadgeByKey('GAMIFICATION_CREDITS');
+                  // Chequear si el badge está enabled
+                  if (badgeConfig?.enabled === false) return null;
+
                   const bgColor = badgeConfig?.color || '#10b981';
                   const badgeStyles = getBadgeStyles(bgColor);
                   return (
@@ -571,6 +574,9 @@ function UserProfileModal({
                   <>
                     {(() => {
                       const badgeConfig = getBadgeByKey('GAMIFICATION_LEVEL');
+                      // Chequear si el badge está enabled
+                      if (badgeConfig?.enabled === false) return null;
+
                       const bgColor = badgeConfig?.color || '#a78bfa';
                       const badgeStyles = getBadgeStyles(bgColor);
                       return (
@@ -586,6 +592,9 @@ function UserProfileModal({
                     })()}
                     {(() => {
                       const badgeConfig = getBadgeByKey('GAMIFICATION_XP');
+                      // Chequear si el badge está enabled
+                      if (badgeConfig?.enabled === false) return null;
+
                       const bgColor = badgeConfig?.color || '#f59e0b';
                       const badgeStyles = getBadgeStyles(bgColor);
                       return (
@@ -599,8 +608,11 @@ function UserProfileModal({
                         </span>
                       );
                     })()}
-                    {gamification.streakDays > 0 && (() => {
+                    {(() => {
                       const badgeConfig = getBadgeByKey('GAMIFICATION_STREAK');
+                      // Chequear si el badge está enabled
+                      if (badgeConfig?.enabled === false) return null;
+
                       const bgColor = badgeConfig?.color || '#ef4444';
                       const badgeStyles = getBadgeStyles(bgColor);
                       return (
@@ -610,7 +622,7 @@ function UserProfileModal({
                           style={badgeStyles}
                         >
                           {renderBadgeIcon('GAMIFICATION_STREAK', '🔥', badgeStyles.color)}
-                          {gamification.streakDays} días
+                          {gamification.streakDays || 0} días
                         </span>
                       );
                     })()}

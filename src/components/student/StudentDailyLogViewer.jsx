@@ -22,7 +22,7 @@ import {
 } from '../common';
 import PageHeader from '../common/PageHeader';
 import SearchBar from '../common/SearchBar';
-import { UniversalCard } from '../cards';
+import { UniversalCard, CardGrid } from '../cards';
 import ClassDailyLog from '../ClassDailyLog';
 
 function StudentDailyLogViewer({ user }) {
@@ -126,9 +126,19 @@ function StudentDailyLogViewer({ user }) {
 
       {/* Logs Grid */}
       {!loading && !error && filteredLogs.length > 0 && (
-        <div className={`
-          ${viewMode === 'grid' ? 'grid-responsive-cards gap-4' : 'grid grid-cols-1 gap-4'}
-        `}>
+        viewMode === 'grid' ? (
+        <CardGrid columnsType="default" gap="gap-4">
+          {filteredLogs.map((log) => (
+            <LogCard
+              key={log.id}
+              log={log}
+              viewMode={viewMode}
+              onClick={() => handleOpenLog(log.id)}
+            />
+          ))}
+        </CardGrid>
+        ) : (
+        <div className="flex flex-col gap-4">
           {filteredLogs.map((log) => (
             <LogCard
               key={log.id}
@@ -138,6 +148,7 @@ function StudentDailyLogViewer({ user }) {
             />
           ))}
         </div>
+        )
       )}
     </div>
   );

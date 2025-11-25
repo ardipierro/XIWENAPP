@@ -583,7 +583,6 @@ export default function UniversalUserManager({ user, userRole }) {
                       )}
                     </div>
                   </th>
-                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -651,22 +650,6 @@ export default function UniversalUserManager({ user, userRole }) {
                           : 'N/A'
                         }
                       </span>
-                    </td>
-                    <td>
-                      <div className="flex gap-2">
-                        {can('delete-users') && (
-                          <BaseButton
-                            onClick={() => {
-                              setUserToDelete(userItem);
-                              setShowDeleteConfirm(true);
-                            }}
-                            variant="danger"
-                            size="sm"
-                            icon={Trash2}
-                            title="Eliminar usuario"
-                          />
-                        )}
-                      </div>
                     </td>
                   </tr>
                 ))}

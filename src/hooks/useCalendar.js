@@ -279,7 +279,7 @@ export function useUpcomingEvents(userId, userRole) {
  */
 export function useCalendarNavigation(initialDate = new Date()) {
   const [currentDate, setCurrentDate] = useState(initialDate);
-  const [view, setView] = useState('month'); // 'month', 'week', 'day'
+  const [view, setView] = useState('week'); // 'month', 'week', 'day'
 
   const goToToday = useCallback(() => {
     setCurrentDate(new Date());

@@ -57,7 +57,20 @@ function ContentRenderer({ content, customConfig, interactive = false }) {
       return content.type;
     }
 
-    if (content.type === 'video' && content.body?.includes('youtube.com')) {
+    // Video: Si el tipo es video, o si detectamos URLs de video
+    if (content.type === 'video') {
+      return 'video';
+    }
+
+    const videoUrl = content.url || content.body;
+    if (videoUrl && (
+      videoUrl.includes('youtube.com') ||
+      videoUrl.includes('youtu.be') ||
+      videoUrl.includes('vimeo.com') ||
+      videoUrl.endsWith('.mp4') ||
+      videoUrl.endsWith('.webm') ||
+      videoUrl.includes('.m3u8')
+    )) {
       return 'video';
     }
 

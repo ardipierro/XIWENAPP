@@ -31,8 +31,8 @@ export const AI_PROVIDERS = [
   {
     id: 'openai',
     name: 'OpenAI',
-    description: 'ChatGPT, DALL-E 3, Whisper',
-    services: ['ChatGPT (GPT-4, GPT-4o)', 'DALL-E 3', 'Whisper'],
+    description: 'GPT-4, DALL-E 3, Whisper',
+    services: ['GPT-4 / GPT-4o', 'DALL-E 3', 'Whisper'],
     icon: Bot,
     emoji: '🤖',
     color: 'emerald',

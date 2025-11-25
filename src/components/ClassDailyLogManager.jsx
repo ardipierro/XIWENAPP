@@ -38,7 +38,7 @@ import {
 } from './common';
 import PageHeader from './common/PageHeader';
 import SearchBar from './common/SearchBar';
-import { UniversalCard } from './cards';
+import { UniversalCard, CardGrid } from './cards';
 import ClassDailyLog from './ClassDailyLog';
 import EditLogModal from './EditLogModal';
 
@@ -226,8 +226,8 @@ function ClassDailyLogManager({ user }) {
             description={`No hay diarios que coincidan con "${searchTerm}"`}
           />
         )
-      ) : (
-        <div className={viewMode === 'grid' ? 'grid-responsive-cards gap-6' : 'flex flex-col gap-3'}>
+      ) : viewMode === 'grid' ? (
+        <CardGrid columnsType="default" gap="gap-6">
           {filteredLogs.map((log) => (
             <LogCard
               key={log.id}
@@ -235,7 +235,20 @@ function ClassDailyLogManager({ user }) {
               onOpen={handleOpenLog}
               onEdit={handleEditLog}
               onDelete={handleDeleteLog}
-              layout={viewMode === 'list' ? 'horizontal' : 'vertical'}
+              layout="vertical"
+            />
+          ))}
+        </CardGrid>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {filteredLogs.map((log) => (
+            <LogCard
+              key={log.id}
+              log={log}
+              onOpen={handleOpenLog}
+              onEdit={handleEditLog}
+              onDelete={handleDeleteLog}
+              layout="horizontal"
             />
           ))}
         </div>
@@ -402,7 +415,7 @@ function LogCard({ log, onOpen, onEdit, onDelete, layout = 'vertical' }) {
           variant="primary"
           icon={Play}
           size={layout === 'horizontal' ? 'sm' : 'md'}
-          onClick={() => onOpen(log.id)}
+          onClick={(e) => { e.stopPropagation(); onOpen(log.id); }}
           fullWidth={layout === 'vertical'}
         >
           Abrir
@@ -410,6 +423,7 @@ function LogCard({ log, onOpen, onEdit, onDelete, layout = 'vertical' }) {
       ]}
       onDelete={() => onDelete(log.id)}
       deleteConfirmMessage={`¿Eliminar diario "${log.name}"?`}
+      onClick={() => onOpen(log.id)}
       hover
     />
   );

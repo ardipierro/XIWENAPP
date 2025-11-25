@@ -13,7 +13,7 @@ import {
   CategoryBadge,
   BaseAlert
 } from '../common';
-import { UniversalCard } from '../cards';
+import { UniversalCard, CardGrid } from '../cards';
 
 function MyCourses({ user, onSelectCourse }) {
   const [contents, setContents] = useState([]);
@@ -232,7 +232,7 @@ function MyCourses({ user, onSelectCourse }) {
               size="sm"
             />
           ) : (
-            <div className="grid-responsive-cards gap-6">
+            <CardGrid columnsType="default" gap="gap-6">
               {filteredContents.map(content => {
                 const progressPercent = content.progress || 0;
 
@@ -285,7 +285,7 @@ function MyCourses({ user, onSelectCourse }) {
                   </UniversalCard>
                 );
               })}
-            </div>
+            </CardGrid>
           )}
         </>
       )}

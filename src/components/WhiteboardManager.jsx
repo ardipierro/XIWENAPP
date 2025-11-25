@@ -25,7 +25,7 @@ import SearchBar from './common/SearchBar';
 import ConfirmModal from './ConfirmModal';
 import WhiteboardAssignmentModal from './WhiteboardAssignmentModal';
 import BaseButton from './common/BaseButton';
-import { UniversalCard } from './cards';
+import { UniversalCard, CardGrid } from './cards';
 import { BaseBadge } from './common';
 
 /**
@@ -198,7 +198,7 @@ function WhiteboardManager({ onOpenWhiteboard, onLoadSession, onBack, onGoLive }
         </div>
       ) : viewMode === 'grid' ? (
         /* Vista Grid */
-        <div className="grid-responsive-cards gap-4">
+        <CardGrid columnsType="default" gap="gap-4">
           {filteredSessions.map((session) => {
             const slideCount = session.slides?.length || 0;
             const lastModified = formatDate(session.updatedAt);
@@ -252,7 +252,7 @@ function WhiteboardManager({ onOpenWhiteboard, onLoadSession, onBack, onGoLive }
               />
             );
           })}
-        </div>
+        </CardGrid>
       ) : (
         /* Vista Lista */
         <div className="flex flex-col gap-3">

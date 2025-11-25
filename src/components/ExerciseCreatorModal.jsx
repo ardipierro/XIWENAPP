@@ -22,7 +22,7 @@ const AI_PROVIDERS = [
   { value: 'claude', label: 'Anthropic (Claude)' },
   { value: 'grok', label: 'Grok' },
   { value: 'gemini', label: 'Gemini' },
-  { value: 'openai', label: 'ChatGPT' }
+  { value: 'openai', label: 'OpenAI' }
 ];
 
 /**

@@ -86,10 +86,10 @@ export function scanCardUsage() {
           context: 'Cards de clases en vivo activas'
         },
         {
-          file: 'src/components/ClassScheduleManager.jsx',
-          component: 'ScheduleCard',
-          line: 302,
-          context: 'Clases programadas en calendario'
+          file: 'src/components/ClassSessionManager.jsx',
+          component: 'SessionCard',
+          line: 633,
+          context: 'Clases programadas y sesiones'
         },
         {
           file: 'src/components/UnifiedCalendar.jsx',

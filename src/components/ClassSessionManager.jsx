@@ -35,10 +35,9 @@ import {
   BaseBadge,
   BaseLoading,
   BaseEmptyState,
-  BaseAlert,
-  ResponsiveGrid
+  BaseAlert
 } from './common';
-import { UniversalCard } from './cards';
+import { UniversalCard, CardGrid } from './cards';
 
 /**
  * Gestor de Clases Unificadas
@@ -509,7 +508,7 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
           }
         />
       ) : viewMode === 'grid' ? (
-        <ResponsiveGrid size="md" gap="6">
+        <CardGrid columnsType="default" gap="gap-6">
           {filteredSessions.map(session => {
             // Preparar badges según el estado
             const badges = [
@@ -646,6 +645,8 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
                 onClick={() => {
                   if (session.status === 'live' && onJoinSession) {
                     onJoinSession(session);
+                  } else {
+                    openEditModal(session);
                   }
                 }}
                 onDelete={() => handleDelete(session)}
@@ -653,7 +654,7 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
               />
             );
           })}
-        </ResponsiveGrid>
+        </CardGrid>
       ) : (
         /* Vista de Lista (layout="row") */
         <div className="flex flex-col gap-4">
@@ -783,6 +784,8 @@ function ClassSessionManager({ user, onJoinSession, initialEditSessionId, onClea
                 onClick={() => {
                   if (session.status === 'live' && onJoinSession) {
                     onJoinSession(session);
+                  } else {
+                    openEditModal(session);
                   }
                 }}
                 onDelete={() => handleDelete(session)}

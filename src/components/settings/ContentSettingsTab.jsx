@@ -6,7 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import { Languages, BookOpen, Palette, Sparkles, Save, Eye } from 'lucide-react';
-import { BaseAlert, BaseButton } from '../common';
+import { BaseAlert, BaseButton, BaseBadge } from '../common';
 import { UniversalCard } from '../cards';
 import TranslatorConfigCard from './TranslatorConfigCard';
 import { useCardConfig } from '../../contexts/CardConfigContext';
@@ -149,7 +149,7 @@ function ContentSettingsTab() {
       )}
 
       {/* Tarjetas de Configuración */}
-      <div className="w-full space-y-6">
+      <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
 
         {/* TARJETA 1: Traductor Visual */}
         <TranslatorConfigCard
@@ -262,7 +262,7 @@ function ContentSettingsTab() {
           icon={Palette}
           title="Personalización Avanzada"
           description="Colores, animaciones y efectos visuales"
-          badge={{ text: 'Próximamente', variant: 'info' }}
+          badge={<BaseBadge variant="info" size="sm">Próximamente</BaseBadge>}
         >
           <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
             <p className="text-sm text-purple-700 dark:text-purple-300">

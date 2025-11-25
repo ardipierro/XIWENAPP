@@ -36,7 +36,6 @@ const DEFAULT_COMPONENT_MAPPING = {
   'TeacherDashboard': 'default',
   'StudentDashboard': 'default',
   'LiveClassRoom': 'class',
-  'ClassScheduleManager': 'class',
   'UnifiedCalendar': 'class',
 };
 

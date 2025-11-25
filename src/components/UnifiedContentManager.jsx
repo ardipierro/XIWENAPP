@@ -19,6 +19,7 @@ import {
   Grid3x3,
   List,
   Edit,
+  Edit2,
   Trash2,
   Eye,
   Calendar,
@@ -54,7 +55,7 @@ import {
   ExpandableModal,
   VideoPlayer
 } from './common';
-import { UniversalCard } from './cards';
+import { UniversalCard, CardGrid } from './cards';
 import { ContentRenderer } from './content';
 import CreateContentModal from './CreateContentModal';
 import ExerciseCreatorModal from './ExerciseCreatorModal';
@@ -483,11 +484,22 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
             </BaseButton>
           }
         />
+      ) : viewMode === 'grid' ? (
+        <CardGrid columnsType="default" gap="gap-4">
+          {filteredContents.map((content) => (
+            <ContentCard
+              key={content.id}
+              content={content}
+              viewMode={viewMode}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onView={handleView}
+              isNew={content.id === newlyCreatedId}
+            />
+          ))}
+        </CardGrid>
       ) : (
-        <div className={viewMode === 'grid'
-          ? 'grid-responsive-cards gap-4'
-          : 'space-y-4'
-        }>
+        <div className="space-y-4">
           {filteredContents.map((content) => (
             <ContentCard
               key={content.id}
@@ -541,6 +553,34 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
         }}
         title={viewingContent?.title || 'Contenido'}
         icon={viewingContent ? CONTENT_TYPE_CONFIG[viewingContent.type]?.icon : BookOpen}
+        headerActions={
+          viewingContent && (
+            <button
+              className="flex items-center justify-center w-9 h-9 rounded-lg active:scale-95 transition-all"
+              style={{
+                background: 'var(--color-bg-tertiary)',
+                color: 'var(--color-text-secondary)',
+                border: '1px solid var(--color-border)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--color-bg-hover)';
+                e.currentTarget.style.color = 'var(--color-text-primary)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'var(--color-bg-tertiary)';
+                e.currentTarget.style.color = 'var(--color-text-secondary)';
+              }}
+              onClick={() => {
+                setShowViewModal(false);
+                handleEdit(viewingContent);
+              }}
+              aria-label="Editar contenido"
+              title="Editar contenido"
+            >
+              <Edit2 size={20} strokeWidth={2.5} />
+            </button>
+          )
+        }
       >
         {viewingContent && <ContentRenderer content={viewingContent} />}
       </ExpandableModal>
@@ -553,6 +593,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
           setViewingExercise(null);
         }}
         exercise={viewingExercise}
+        onEdit={handleEdit}
       />
     </div>
   );
@@ -700,10 +741,6 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
         badges={listBadges}
         onClick={() => onView(content)}
         className={isNew ? 'border-green-500 shadow-lg shadow-green-500/20' : ''}
-        actions={[
-          <BaseButton key="edit" variant="ghost" icon={Edit} size="lg" onClick={() => onEdit(content)} />,
-          <BaseButton key="delete" variant="ghost" icon={Trash2} size="lg" onClick={() => onDelete(content.id)} />
-        ]}
       >
         {/* Metadata personalizada */}
         <div className="flex items-center gap-3 text-xs text-gray-600 dark:text-gray-400 mt-1">
@@ -800,12 +837,8 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
     });
   }
 
-  // Preparar actions (SOLO botón editar - el delete button se maneja con onDelete)
-  const contentActions = [
-    <BaseButton key="edit" variant="secondary" icon={Edit} onClick={() => onEdit(content)} fullWidth>
-      Editar
-    </BaseButton>
-  ];
+  // No hay actions - todo se maneja en los modales
+  const contentActions = [];
 
   // Tags van en children (no son badges del sistema)
   const hasTags = content.metadata?.tags?.length > 0;

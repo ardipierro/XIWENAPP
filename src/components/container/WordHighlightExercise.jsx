@@ -25,8 +25,6 @@ import {
   Trophy,
   Volume2,
   VolumeX,
-  Maximize2,
-  Minimize2,
   Play,
   Pause,
   Square
@@ -50,7 +48,7 @@ import {
  * Componente wrapper para ejercicios de marcar palabras
  * Parsea texto con asteriscos y permite clickear palabras
  */
-function WordHighlightExercise({ text, config, onComplete }) {
+function WordHighlightExercise({ text, config, onComplete, onActionsChange }) {
   const [clickedWords, setClickedWords] = useState(new Set());
   const [score, setScore] = useState(0);
   const [feedback, setFeedback] = useState(null);
@@ -72,9 +70,6 @@ function WordHighlightExercise({ text, config, onComplete }) {
 
   // Estado para sonidos (toggle manual del usuario)
   const [soundMuted, setSoundMuted] = useState(false);
-
-  // Estado para expandir/colapsar el ejercicio
-  const [isExpanded, setIsExpanded] = useState(false);
 
   // Refs para intervals
   const timerRef = useRef(null);
@@ -806,18 +801,23 @@ function WordHighlightExercise({ text, config, onComplete }) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  /**
+   * Notificar acciones al padre (para footer del modal)
+   */
+  useEffect(() => {
+    if (onActionsChange) {
+      onActionsChange({
+        handleReset,
+        handleCheck,
+        handleComplete,
+        isFinished,
+        gameSettings
+      });
+    }
+  }, [isFinished, gameSettings.feedbackMode, onActionsChange]);
+
   return (
-    <div
-      className={`p-6 rounded-lg transition-all duration-300 ${
-        isExpanded
-          ? 'fixed inset-4 z-50 overflow-auto'
-          : 'w-full max-w-4xl mx-auto'
-      }`}
-      style={{
-        backgroundColor: 'var(--color-bg-primary)',
-        boxShadow: isExpanded ? '0 0 0 9999px rgba(0,0,0,0.5)' : 'none'
-      }}
-    >
+    <div className="w-full p-6">
       {/* Estilos para animaciones */}
       <style>{`
         @keyframes pulse-glow {
@@ -831,25 +831,8 @@ function WordHighlightExercise({ text, config, onComplete }) {
       `}</style>
 
       {/* Header con puntuación y timer */}
-      <div className="flex items-center justify-between mb-6 pb-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
-        <div>
-          <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            Marca los verbos
-          </h3>
-          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-            Haz clic en las palabras que sean verbos
-          </p>
-        </div>
-
+      <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          {/* Expand/Collapse toggle */}
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="p-2 rounded-lg transition-colors bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50"
-            title={isExpanded ? 'Salir de pantalla completa' : 'Expandir a pantalla completa'}
-          >
-            {isExpanded ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
-          </button>
 
           {/* Sound toggle */}
           <button
@@ -947,6 +930,7 @@ function WordHighlightExercise({ text, config, onComplete }) {
               </div>
             </div>
           )}
+
         </div>
       </div>
 
@@ -1085,32 +1069,6 @@ function WordHighlightExercise({ text, config, onComplete }) {
           </div>
         </div>
       )}
-
-      {/* Botones de acción */}
-      <div className="flex gap-3 justify-end">
-        <BaseButton
-          variant="secondary"
-          onClick={handleReset}
-        >
-          Reintentar
-        </BaseButton>
-
-        {gameSettings.feedbackMode !== 'instant' && !isFinished ? (
-          <BaseButton
-            variant="primary"
-            onClick={handleCheck}
-          >
-            Comprobar
-          </BaseButton>
-        ) : (
-          <BaseButton
-            variant="primary"
-            onClick={handleComplete}
-          >
-            {isFinished ? 'Continuar' : 'Finalizar'}
-          </BaseButton>
-        )}
-      </div>
 
       {/* Estadísticas */}
       <div className="mt-4 pt-4 border-t flex gap-6 text-sm" style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-secondary)' }}>

@@ -22,6 +22,7 @@ import { X } from 'lucide-react';
  * @param {node} icon - Icono opcional en el header (Lucide icon component)
  * @param {node} children - Contenido del modal
  * @param {node} footer - Footer custom (buttons, actions)
+ * @param {node} headerActions - Botones/acciones adicionales en el header (antes del botón cerrar)
  * @param {string} size - Tamaño del modal: 'sm', 'md', 'lg', 'xl', 'full', 'fullscreen'
  * @param {boolean} showCloseButton - Mostrar botón X de cerrar
  * @param {boolean} closeOnOverlayClick - Cerrar al hacer click fuera
@@ -38,6 +39,7 @@ function BaseModal({
   icon: Icon,
   children,
   footer,
+  headerActions,
   size = 'md',
   showCloseButton = true,
   closeOnOverlayClick = true,
@@ -176,6 +178,12 @@ function BaseModal({
                 </h3>
               )}
             </div>
+            {/* Header Actions */}
+            {headerActions && (
+              <div className="flex items-center gap-2 shrink-0">
+                {headerActions}
+              </div>
+            )}
             {/* Close button */}
             {showCloseButton && (
               <button

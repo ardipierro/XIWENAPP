@@ -60,12 +60,6 @@ const COMPONENT_INFO = {
     icon: '🎥',
     recommendedVariant: 'class'
   },
-  'ClassScheduleManager': {
-    label: 'Programación de Clases',
-    description: 'Tarjetas en el calendario de clases',
-    icon: '📅',
-    recommendedVariant: 'class'
-  },
   'UnifiedCalendar': {
     label: 'Calendario Unificado',
     description: 'Eventos y clases en el calendario',

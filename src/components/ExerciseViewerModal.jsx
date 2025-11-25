@@ -3,9 +3,9 @@
  * @module components/ExerciseViewerModal
  */
 
-import { useState, useEffect, lazy, Suspense } from 'react';
-import { X, Loader2 } from 'lucide-react';
-import { BaseModal } from './common';
+import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
+import { X, Loader2, Edit2, Maximize2, Minimize2, RotateCcw } from 'lucide-react';
+import { BaseModal, BaseButton } from './common';
 import WordHighlightExercise from './container/WordHighlightExercise';
 import logger from '../utils/logger';
 
@@ -80,11 +80,13 @@ function detectExerciseType(content) {
 /**
  * Modal para visualizar ejercicios interactivos
  */
-function ExerciseViewerModal({ isOpen, onClose, exercise }) {
+function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
   const [exerciseType, setExerciseType] = useState(null);
   const [cleanContent, setCleanContent] = useState('');
   const [config, setConfig] = useState(null);
   const [result, setResult] = useState(null);
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [exerciseActions, setExerciseActions] = useState(null);
 
   useEffect(() => {
     if (!exercise) return;
@@ -132,6 +134,23 @@ function ExerciseViewerModal({ isOpen, onClose, exercise }) {
   };
 
   /**
+   * Abrir modal de edición
+   */
+  const handleEdit = () => {
+    if (onEdit) {
+      handleClose();
+      onEdit(exercise);
+    }
+  };
+
+  /**
+   * Callback para recibir acciones de los componentes de ejercicio
+   */
+  const handleActionsChange = useCallback((actions) => {
+    setExerciseActions(actions);
+  }, []);
+
+  /**
    * Renderizar wrapper según el tipo
    */
   const renderExercise = () => {
@@ -160,6 +179,7 @@ function ExerciseViewerModal({ isOpen, onClose, exercise }) {
             text={cleanContent}
             config={config}
             onComplete={handleComplete}
+            onActionsChange={handleActionsChange}
           />
         );
 
@@ -170,6 +190,7 @@ function ExerciseViewerModal({ isOpen, onClose, exercise }) {
               text={cleanContent}
               config={config}
               onComplete={handleComplete}
+              onActionsChange={handleActionsChange}
             />
           </Suspense>
         );
@@ -181,6 +202,7 @@ function ExerciseViewerModal({ isOpen, onClose, exercise }) {
               text={cleanContent}
               config={config}
               onComplete={handleComplete}
+              onActionsChange={handleActionsChange}
             />
           </Suspense>
         );
@@ -198,44 +220,202 @@ function ExerciseViewerModal({ isOpen, onClose, exercise }) {
 
   if (!exercise) return null;
 
+  /**
+   * Renderizar footer con botones de acción
+   */
+  const renderFooter = () => {
+    if (!exerciseActions) return null;
+
+    const {
+      handleReset,
+      handleCheck,
+      handleComplete,
+      isFinished,
+      gameSettings,
+      filledCount,
+      totalBlanks,
+      placedCount,
+      results
+    } = exerciseActions;
+
+    // Para WordHighlightExercise
+    if (gameSettings) {
+      return (
+        <>
+          <BaseButton
+            variant="secondary"
+            icon={RotateCcw}
+            onClick={handleReset}
+          >
+            Reintentar
+          </BaseButton>
+
+          {gameSettings.feedbackMode !== 'instant' && !isFinished ? (
+            <BaseButton
+              variant="primary"
+              onClick={handleCheck}
+            >
+              Comprobar
+            </BaseButton>
+          ) : (
+            <BaseButton
+              variant="primary"
+              onClick={handleComplete}
+            >
+              {isFinished ? 'Continuar' : 'Finalizar'}
+            </BaseButton>
+          )}
+        </>
+      );
+    }
+
+    // Para FillInBlanksExercise
+    if (typeof filledCount !== 'undefined') {
+      return (
+        <>
+          <BaseButton
+            variant="secondary"
+            icon={RotateCcw}
+            onClick={handleReset}
+          >
+            Reiniciar
+          </BaseButton>
+
+          {!isFinished ? (
+            <BaseButton
+              variant="primary"
+              onClick={handleCheck}
+              disabled={filledCount < totalBlanks}
+            >
+              Comprobar
+            </BaseButton>
+          ) : (
+            <BaseButton
+              variant="primary"
+              onClick={() => handleComplete && handleComplete(results)}
+            >
+              Continuar
+            </BaseButton>
+          )}
+        </>
+      );
+    }
+
+    // Para DragDropBlanksExercise
+    if (typeof placedCount !== 'undefined') {
+      return (
+        <>
+          <BaseButton
+            variant="secondary"
+            icon={RotateCcw}
+            onClick={handleReset}
+          >
+            Reiniciar
+          </BaseButton>
+
+          {!isFinished ? (
+            <BaseButton
+              variant="primary"
+              onClick={handleCheck}
+              disabled={placedCount < totalBlanks}
+            >
+              Comprobar
+            </BaseButton>
+          ) : (
+            <BaseButton
+              variant="primary"
+              onClick={() => handleComplete && handleComplete(results)}
+            >
+              Continuar
+            </BaseButton>
+          )}
+        </>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <BaseModal
       isOpen={isOpen}
       onClose={handleClose}
       title={exercise.title || 'Ejercicio Interactivo'}
-      size="xl"
-    >
-      <div className="space-y-6">
-        {/* Descripción del ejercicio */}
-        {exercise.description && (
-          <div className="pb-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
-            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-              {exercise.description}
-            </p>
-          </div>
-        )}
-
-        {/* Ejercicio interactivo */}
-        {renderExercise()}
-
-        {/* Resultado final */}
-        {result && (
-          <div
-            className="mt-6 p-6 rounded-lg text-center"
-            style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+      size={isExpanded ? 'fullscreen' : 'xl'}
+      noPadding={true}
+      footer={renderFooter()}
+      headerActions={
+        <>
+          {/* Botón Expandir */}
+          <button
+            className="flex items-center justify-center w-9 h-9 rounded-lg active:scale-95 transition-all"
+            style={{
+              background: 'var(--color-bg-tertiary)',
+              color: 'var(--color-text-secondary)',
+              border: '1px solid var(--color-border)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'var(--color-bg-hover)';
+              e.currentTarget.style.color = 'var(--color-text-primary)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'var(--color-bg-tertiary)';
+              e.currentTarget.style.color = 'var(--color-text-secondary)';
+            }}
+            onClick={() => setIsExpanded(!isExpanded)}
+            aria-label={isExpanded ? 'Contraer' : 'Expandir a pantalla completa'}
+            title={isExpanded ? 'Contraer' : 'Expandir'}
           >
-            <h3 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
-              ¡Ejercicio Completado!
-            </h3>
-            <div className="text-4xl font-bold mb-4" style={{ color: result.score >= 0 ? '#10b981' : '#ef4444' }}>
-              {result.score} puntos
-            </div>
-            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-              Marcaste {result.totalClicks} palabra{result.totalClicks !== 1 ? 's' : ''}
-            </p>
+            {isExpanded ? <Minimize2 size={20} strokeWidth={2.5} /> : <Maximize2 size={20} strokeWidth={2.5} />}
+          </button>
+
+          {/* Botón Editar */}
+          {onEdit && (
+            <button
+              className="flex items-center justify-center w-9 h-9 rounded-lg active:scale-95 transition-all"
+              style={{
+                background: 'var(--color-bg-tertiary)',
+                color: 'var(--color-text-secondary)',
+                border: '1px solid var(--color-border)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'var(--color-bg-hover)';
+                e.currentTarget.style.color = 'var(--color-text-primary)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'var(--color-bg-tertiary)';
+                e.currentTarget.style.color = 'var(--color-text-secondary)';
+              }}
+              onClick={handleEdit}
+              aria-label="Editar ejercicio"
+              title="Editar ejercicio"
+            >
+              <Edit2 size={20} strokeWidth={2.5} />
+            </button>
+          )}
+        </>
+      }
+    >
+      {/* Ejercicio interactivo - sin contenedor extra */}
+      {renderExercise()}
+
+      {/* Resultado final */}
+      {result && (
+        <div
+          className="mx-6 mb-6 mt-6 p-6 rounded-lg text-center"
+          style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+        >
+          <h3 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+            ¡Ejercicio Completado!
+          </h3>
+          <div className="text-4xl font-bold mb-4" style={{ color: result.score >= 0 ? '#10b981' : '#ef4444' }}>
+            {result.score} puntos
           </div>
-        )}
-      </div>
+          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+            Marcaste {result.totalClicks} palabra{result.totalClicks !== 1 ? 's' : ''}
+          </p>
+        </div>
+      )}
     </BaseModal>
   );
 }

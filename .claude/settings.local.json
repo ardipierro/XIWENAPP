@@ -178,7 +178,11 @@
       "Bash(del \"src\\components\\student\\MyAssignments.jsx\")",
       "Bash(del \"src\\components\\student\\MyAssignmentsView.jsx\")",
       "Bash(del \"src\\components\\StudentAssignmentsView.jsx\")",
-      "Bash(del \"src\\components\\AssignmentManager.jsx\")"
+      "Bash(del \"src\\components\\AssignmentManager.jsx\")",
+      "Bash(del \"C:\\Users\\ardip\\OneDrive\\XIWEN 2025\\XIWENAPP\\src\\components\\SlidePackageGenerator.jsx\")",
+      "Bash(tasklist:*)",
+      "Bash(/dev/null)",
+      "Bash(del \"C:\\Users\\ardip\\OneDrive\\XIWEN 2025\\XIWENAPP\\src\\components\\ClassScheduleManager.jsx\")"
     ],
     "deny": [],
     "ask": []

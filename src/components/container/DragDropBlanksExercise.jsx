@@ -26,7 +26,7 @@ import logger from '../../utils/logger';
 /**
  * Componente de ejercicio Drag and Drop
  */
-function DragDropBlanksExercise({ text, config, onComplete }) {
+function DragDropBlanksExercise({ text, config, onComplete, onActionsChange }) {
   const [placedWords, setPlacedWords] = useState({});
   const [draggedWord, setDraggedWord] = useState(null);
   const [feedback, setFeedback] = useState(null);
@@ -281,23 +281,28 @@ function DragDropBlanksExercise({ text, config, onComplete }) {
 
   const results = showResults ? calculateResults() : null;
 
-  return (
-    <div className="w-full max-w-4xl mx-auto p-6 rounded-lg" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6 pb-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
-        <div>
-          <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            Arrastra las palabras
-          </h3>
-          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-            Coloca cada palabra en su lugar correcto
-          </p>
-        </div>
+  /**
+   * Notificar acciones al padre (para footer del modal)
+   */
+  useEffect(() => {
+    if (onActionsChange) {
+      onActionsChange({
+        handleReset,
+        handleCheck,
+        isFinished,
+        placedCount: Object.keys(placedWords).length,
+        totalBlanks: parsedContent.blanks.length,
+        results
+      });
+    }
+  }, [isFinished, placedWords, onActionsChange]);
 
-        <div className="flex items-center gap-4">
-          <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-            {Object.keys(placedWords).length} / {parsedContent.blanks.length} colocadas
-          </div>
+  return (
+    <div className="w-full p-6">
+      {/* Header */}
+      <div className="flex items-center justify-end mb-6">
+        <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+          {Object.keys(placedWords).length} / {parsedContent.blanks.length} colocadas
         </div>
       </div>
 
@@ -423,33 +428,6 @@ function DragDropBlanksExercise({ text, config, onComplete }) {
         </div>
       </div>
 
-      {/* Botones de acción */}
-      <div className="flex gap-3 justify-end">
-        <BaseButton
-          variant="secondary"
-          icon={RotateCcw}
-          onClick={handleReset}
-        >
-          Reiniciar
-        </BaseButton>
-
-        {!isFinished ? (
-          <BaseButton
-            variant="primary"
-            onClick={handleCheck}
-            disabled={Object.keys(placedWords).length < parsedContent.blanks.length}
-          >
-            Comprobar
-          </BaseButton>
-        ) : (
-          <BaseButton
-            variant="primary"
-            onClick={() => onComplete && onComplete(results)}
-          >
-            Continuar
-          </BaseButton>
-        )}
-      </div>
     </div>
   );
 }

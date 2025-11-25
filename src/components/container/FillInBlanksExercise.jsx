@@ -27,7 +27,7 @@ import logger from '../../utils/logger';
 /**
  * Componente de ejercicio Fill in the Blanks
  */
-function FillInBlanksExercise({ text, config, onComplete }) {
+function FillInBlanksExercise({ text, config, onComplete, onActionsChange }) {
   const [answers, setAnswers] = useState({});
   const [feedback, setFeedback] = useState(null);
   const [isFinished, setIsFinished] = useState(false);
@@ -267,23 +267,28 @@ function FillInBlanksExercise({ text, config, onComplete }) {
   const results = showResults ? calculateResults() : null;
   const filledCount = Object.values(answers).filter(a => a && a.trim()).length;
 
-  return (
-    <div className="w-full max-w-4xl mx-auto p-6 rounded-lg" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6 pb-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
-        <div>
-          <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-            Completa los espacios
-          </h3>
-          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-            Escribe la palabra correcta en cada espacio
-          </p>
-        </div>
+  /**
+   * Notificar acciones al padre (para footer del modal)
+   */
+  useEffect(() => {
+    if (onActionsChange) {
+      onActionsChange({
+        handleReset,
+        handleCheck,
+        isFinished,
+        filledCount,
+        totalBlanks: parsedContent.blanks.length,
+        results
+      });
+    }
+  }, [isFinished, filledCount, onActionsChange]);
 
-        <div className="flex items-center gap-4">
-          <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-            {filledCount} / {parsedContent.blanks.length} completados
-          </div>
+  return (
+    <div className="w-full p-6">
+      {/* Header */}
+      <div className="flex items-center justify-end mb-6">
+        <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+          {filledCount} / {parsedContent.blanks.length} completados
         </div>
       </div>
 
@@ -421,33 +426,6 @@ function FillInBlanksExercise({ text, config, onComplete }) {
         </div>
       )}
 
-      {/* Botones de acción */}
-      <div className="flex gap-3 justify-end">
-        <BaseButton
-          variant="secondary"
-          icon={RotateCcw}
-          onClick={handleReset}
-        >
-          Reiniciar
-        </BaseButton>
-
-        {!isFinished ? (
-          <BaseButton
-            variant="primary"
-            onClick={handleCheck}
-            disabled={filledCount < parsedContent.blanks.length}
-          >
-            Comprobar
-          </BaseButton>
-        ) : (
-          <BaseButton
-            variant="primary"
-            onClick={() => onComplete && onComplete(results)}
-          >
-            Continuar
-          </BaseButton>
-        )}
-      </div>
     </div>
   );
 }

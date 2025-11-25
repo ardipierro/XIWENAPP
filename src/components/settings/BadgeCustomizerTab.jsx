@@ -87,6 +87,7 @@ function BadgeCustomizerTab({ user }) {
     feature: false,
     role: false,
     homework_status: false,
+    credits: false,
     gamification: false,
   });
 
