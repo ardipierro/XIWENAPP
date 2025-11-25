@@ -314,7 +314,7 @@ export default function HomeworkReviewPanel({ teacherId }) {
             <ClipboardList className="w-6 h-6 text-primary-600 dark:text-primary-400" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Revisar Correcciones</h1>
+            <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Tareas</h1>
             <p className="text-sm text-zinc-500 dark:text-zinc-400">{reviews.length} {reviews.length === 1 ? 'tarea' : 'tareas'}</p>
           </div>
         </div>

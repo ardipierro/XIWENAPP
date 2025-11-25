@@ -278,10 +278,10 @@ export default function SimpleHomeworkModal({
       style={{ zIndex: 'var(--z-modal-backdrop)' }}
     >
       <div
-        className="rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
+        className="rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col"
         style={{
           zIndex: 'var(--z-modal)',
-          background: 'var(--color-bg-secondary)',
+          background: 'var(--color-bg-primary)',
           border: '1px solid var(--color-border)'
         }}
       >
