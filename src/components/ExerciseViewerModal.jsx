@@ -127,9 +127,14 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
     if (!exercise) return;
 
     // Detectar tipo de ejercicio y obtener contenido limpio
-    const { type, cleanContent: content } = detectExerciseType(exercise.content);
+    // Soportar tanto 'content' como 'body' para compatibilidad
+    const exerciseContent = exercise.content || exercise.body || '';
+    const { type, cleanContent: content } = detectExerciseType(exerciseContent);
     setExerciseType(type);
     setCleanContent(content);
+
+    logger.info(`Exercise content source: ${exercise.content ? 'content' : 'body'}`, 'ExerciseViewerModal');
+    logger.info(`Exercise content length: ${exerciseContent.length}`, 'ExerciseViewerModal');
 
     // Cargar configuración según el tipo
     if (type === EXERCISE_TYPES.HIGHLIGHT) {
@@ -210,7 +215,7 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
           </p>
           <div className="mt-4 p-4 rounded-lg text-left max-w-md mx-auto" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
             <pre className="text-xs whitespace-pre-wrap" style={{ color: 'var(--color-text-tertiary)' }}>
-              {exercise.content?.substring(0, 200)}...
+              {(exercise.content || exercise.body || '')?.substring(0, 200)}...
             </pre>
           </div>
         </div>
