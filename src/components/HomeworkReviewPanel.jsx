@@ -46,6 +46,7 @@ import {
   ImageLightbox
 } from './common';
 import CategoryBadge from './common/CategoryBadge';
+import { getBadgeByKey, getContrastText, getGlobalBadgeConfig } from '../config/badgeSystem';
 import { CardDeleteButton, UniversalCard, CardGrid } from './cards';
 import { useCardConfig } from '../contexts/CardConfigContext';
 import CorrectionReviewPanel from './homework/CorrectionReviewPanel';
@@ -491,6 +492,23 @@ export default function HomeworkReviewPanel({ teacherId }) {
  * Review Card Component
  */
 function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete, showDeleteButtons }) {
+  const [badgeConfigKey, setBadgeConfigKey] = useState(0);
+
+  // Escuchar cambios en la configuración global de badges
+  useEffect(() => {
+    const handleBadgeConfigChange = () => {
+      setBadgeConfigKey(k => k + 1);
+    };
+
+    window.addEventListener('globalBadgeConfigChange', handleBadgeConfigChange);
+    window.addEventListener('xiwen_badge_config_changed', handleBadgeConfigChange);
+
+    return () => {
+      window.removeEventListener('globalBadgeConfigChange', handleBadgeConfigChange);
+      window.removeEventListener('xiwen_badge_config_changed', handleBadgeConfigChange);
+    };
+  }, []);
+
   const grade = review.suggestedGrade || 0;
   const gradeColor = grade >= 90 ? 'success' : grade >= 70 ? 'primary' : grade >= 50 ? 'warning' : 'danger';
 
@@ -632,33 +650,91 @@ function ReviewCard({ review, onSelect, viewMode = 'grid', onCancel, onDelete, s
         </div>
       )}
 
-      {/* Status Icon - Top right corner (badge configurable desde sistema universal) */}
-      {(isProcessing || isFailed || isTeacherApproved || isAIReady) && (
-        <div className="absolute top-2 right-2 z-10">
-          <div
-            className="inline-flex items-center justify-center w-8 h-8 rounded-full shadow-md transition-all hover:scale-110"
-            title={
-              isProcessing ? 'Procesando' :
-              isFailed ? 'Error' :
-              isTeacherApproved ? 'Aprobado' :
-              'Pendiente revisión'
-            }
-          >
-            <CategoryBadge
-              badgeKey={
-                isProcessing ? 'HOMEWORK_PROCESSING' :
-                isFailed ? 'HOMEWORK_ERROR' :
-                isTeacherApproved ? 'HOMEWORK_APPROVED' :
-                'HOMEWORK_PENDING'
+      {/* Status Icon - Top right corner (configurable desde sistema universal de badges) */}
+      {(isProcessing || isFailed || isTeacherApproved || isAIReady) && (() => {
+        const badgeKey = isProcessing ? 'HOMEWORK_PROCESSING' :
+                         isFailed ? 'HOMEWORK_ERROR' :
+                         isTeacherApproved ? 'HOMEWORK_APPROVED' :
+                         'HOMEWORK_PENDING';
+
+        const badgeConfig = getBadgeByKey(badgeKey);
+        const globalConfig = getGlobalBadgeConfig();
+        const bgColor = badgeConfig?.color || '#7a8fa8';
+
+        // Aplicar border radius global
+        const borderRadiusClass =
+          globalConfig.borderRadius === 'square' ? 'rounded-sm' :
+          globalConfig.borderRadius === 'pill' ? 'rounded-full' :
+          'rounded-lg';
+
+        // Aplicar estilo de badge global
+        const badgeStyle = globalConfig.defaultBadgeStyle || 'solid';
+        let styleProps = {};
+
+        switch (badgeStyle) {
+          case 'solid':
+            styleProps = {
+              backgroundColor: bgColor,
+              color: getContrastText(bgColor),
+              border: 'none'
+            };
+            break;
+          case 'outline':
+            styleProps = {
+              backgroundColor: 'transparent',
+              color: bgColor,
+              border: `2px solid ${bgColor}`
+            };
+            break;
+          case 'soft':
+            styleProps = {
+              backgroundColor: `${bgColor}20`,
+              color: bgColor,
+              border: 'none'
+            };
+            break;
+          case 'glass':
+            styleProps = {
+              backgroundColor: `${bgColor}40`,
+              color: getContrastText(bgColor),
+              backdropFilter: 'blur(8px)',
+              border: `1px solid ${bgColor}60`
+            };
+            break;
+          case 'gradient':
+            styleProps = {
+              background: `linear-gradient(135deg, ${bgColor} 0%, ${bgColor}cc 100%)`,
+              color: getContrastText(bgColor),
+              border: 'none'
+            };
+            break;
+          default:
+            styleProps = {
+              backgroundColor: bgColor,
+              color: getContrastText(bgColor)
+            };
+        }
+
+        return (
+          <div className="absolute top-2 right-2 z-10">
+            <div
+              className={`inline-flex items-center justify-center w-8 h-8 ${borderRadiusClass} shadow-md transition-all hover:scale-110 cursor-pointer`}
+              style={styleProps}
+              title={
+                isProcessing ? 'Procesando' :
+                isFailed ? 'Error' :
+                isTeacherApproved ? 'Aprobado' :
+                'Pendiente revisión'
               }
-              showLabel={false}
-              showIcon={true}
-              size="md"
-              className="!p-0 !w-full !h-full !rounded-full !shadow-md"
-            />
+            >
+              {isProcessing && <RefreshCw size={16} className="animate-spin" />}
+              {isFailed && <AlertTriangle size={16} />}
+              {isTeacherApproved && <Check size={16} />}
+              {isAIReady && <Clock size={16} />}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       <div className="space-y-3">
         {/* Student Info */}
