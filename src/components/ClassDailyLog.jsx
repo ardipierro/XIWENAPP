@@ -297,9 +297,11 @@ function ClassDailyLog({ logId, user, onBack }) {
     };
 
     // Solo actualizar si realmente cambió (comparación simple por serialización)
-    const newConfigStr = JSON.stringify(newConfig, (key, value) =>
-      typeof value === 'function' ? value.toString() : value
-    );
+    // Nota: Excluimos 'icon' porque contiene JSX (React elements con referencias circulares)
+    const newConfigStr = JSON.stringify(newConfig, (key, value) => {
+      if (key === 'icon') return undefined; // Excluir JSX icons
+      return typeof value === 'function' ? value.toString() : value;
+    });
 
     if (lastConfigRef.current !== newConfigStr) {
       lastConfigRef.current = newConfigStr;
