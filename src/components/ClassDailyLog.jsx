@@ -22,7 +22,7 @@ import {
 import {
   Plus,
   Save,
-  Menu,
+  MoreVertical,
   X,
   ChevronLeft,
   ChevronRight,
@@ -34,7 +34,8 @@ import {
   FileText,
   Clock,
   Users,
-  Activity
+  Activity,
+  Edit2
 } from 'lucide-react';
 import { useTopBar } from '../contexts/TopBarContext';
 import { useViewAs } from '../contexts/ViewAsContext';
@@ -62,6 +63,7 @@ import {
   VideoPlayer
 } from './common';
 import ContentSelectorModal from './ContentSelectorModal';
+import EditLogModal from './EditLogModal';
 import {
   UnifiedExerciseRenderer,
   EnhancedTextEditor,
@@ -102,6 +104,7 @@ function ClassDailyLog({ logId, user, onBack }) {
   const { updateTopBar, resetTopBar, hideSidebar, showSidebar } = useTopBar();
   const { isViewingAs } = useViewAs();
   const contentSelectorModal = useModal();
+  const editLogModal = useModal();
   const autoSaveIntervalRef = useRef(null);
   const scrollContainerRef = useRef(null);
   const unsubscribeRef = useRef(null);
@@ -220,50 +223,64 @@ function ClassDailyLog({ logId, user, onBack }) {
 
   // Configurar TopBar del app con botones dinámicos
   // FIX: NO incluir JSX inline (crea nuevas referencias), solo iconName strings
+  // Handler para abrir modal de edición
+  const handleOpenEditModal = useCallback(() => {
+    editLogModal.open();
+  }, [editLogModal]);
+
   const topBarActions = useMemo(() => {
     if (!logMeta.name) return [];
 
     const actions = [];
 
-    // Botones solo para profesores
+    // Botones solo para profesores (solo iconos, sin labels)
     if (isTeacher) {
       actions.push({
         key: 'add-content',
-        label: 'Agregar Contenido',
         iconName: 'Plus',
         onClick: handleOpenModal,
-        variant: 'primary'
+        variant: 'primary',
+        title: 'Agregar Contenido'
       });
 
       actions.push({
         key: 'save',
-        label: saving ? 'Guardando...' : 'Guardar',
         iconName: 'Save',
         onClick: handleSave,
         disabled: saving,
-        variant: 'secondary'
+        variant: 'secondary',
+        title: saving ? 'Guardando...' : 'Guardar'
       });
 
-      if (logMeta.status === 'active') {
-        actions.push({
-          key: 'end-log',
-          label: 'Finalizar Clase',
-          onClick: handleEndLog,
-          variant: 'danger'
-        });
-      }
+      actions.push({
+        key: 'edit-log',
+        iconName: 'Edit2',
+        onClick: handleOpenEditModal,
+        variant: 'secondary',
+        title: 'Editar diario (nombre y alumnos)'
+      });
+
+      // Botón Finalizar Clase - OCULTO por ahora (la lógica se mantiene para uso futuro)
+      // if (logMeta.status === 'active') {
+      //   actions.push({
+      //     key: 'end-log',
+      //     label: 'Finalizar Clase',
+      //     onClick: handleEndLog,
+      //     variant: 'danger'
+      //   });
+      // }
     }
 
-    // Botón de índice
+    // Botón de índice (3 puntos)
     actions.push({
       key: 'toggle-sidebar',
-      label: sidebarOpen ? 'Cerrar Índice' : 'Índice',
-      iconName: 'Menu',
-      onClick: toggleSidebar
+      iconName: 'MoreVertical',
+      onClick: toggleSidebar,
+      title: sidebarOpen ? 'Cerrar Índice' : 'Índice'
     });
 
     return actions;
-  }, [logMeta.status, logMeta.name, isTeacher, saving, sidebarOpen, handleOpenModal, handleSave, handleEndLog, toggleSidebar]);
+  }, [logMeta.status, logMeta.name, isTeacher, saving, sidebarOpen, handleOpenModal, handleSave, handleOpenEditModal, toggleSidebar]);
 
   // Aplicar configuración a TopBar cuando cambien los actions o metadata
   // FIX: Usar ref para evitar actualizar si el contenido no cambió realmente
@@ -462,8 +479,10 @@ function ClassDailyLog({ logId, user, onBack }) {
         return matches
           ? {
               ...entry,
+              contentTitle: data.title || entry.contentTitle, // Actualizar título en la entrada
               contentData: {
                 ...entry.contentData,
+                title: data.title || entry.contentData?.title, // Actualizar título en contentData
                 html: data.content,
                 drawings: data.drawings // Guardar trazos de lápiz
               },
@@ -477,7 +496,7 @@ function ClassDailyLog({ logId, user, onBack }) {
         updatedAt: Date.now()
       });
 
-      logger.info('✏️ Bloque de texto actualizado (con dibujos)');
+      logger.info('✏️ Bloque de texto actualizado (con título y dibujos)');
       setHasUnsavedChanges(true);
     } catch (err) {
       logger.error('Error actualizando bloque de texto:', err);
@@ -571,37 +590,58 @@ function ClassDailyLog({ logId, user, onBack }) {
       ? addedDate.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
       : '';
 
+    // Para text-blocks, el título se maneja dentro del EnhancedTextEditor
+    const isTextBlock = content.type === 'text-block';
+
     return (
       <div
         id={`entry-${index}`}
         key={entry.id}
         className="min-h-screen p-8 bg-white dark:bg-gray-900 mb-2"
       >
-        {/* Header minimalista - todo en una línea */}
+        {/* Header minimalista - para text-blocks solo el menú de opciones */}
         <div className="max-w-5xl mx-auto mb-6">
           <div className="flex items-center justify-between gap-3">
-            {/* Lado izquierdo: Icono + Título + Subtítulo + Fecha + Badge */}
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-              <Icon size={18} className="text-gray-500 dark:text-gray-400 flex-shrink-0" />
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white truncate">
-                {content.title}
-              </h2>
-              {content.subtitle && (
-                <span className="text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
-                  {content.subtitle}
-                </span>
-              )}
-              {formattedDate && (
-                <span className="text-xs text-gray-400 dark:text-gray-500 hidden sm:block">
-                  {formattedDate}
-                </span>
-              )}
-              <CategoryBadge
-                type="content"
-                value={content.type}
-                size="xs"
-              />
-            </div>
+            {/* Lado izquierdo: Icono + Título + Subtítulo + Fecha + Badge (oculto para text-blocks) */}
+            {!isTextBlock && (
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <Icon size={18} className="text-gray-500 dark:text-gray-400 flex-shrink-0" />
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white truncate">
+                  {content.title}
+                </h2>
+                {content.subtitle && (
+                  <span className="text-sm text-gray-500 dark:text-gray-400 hidden sm:block">
+                    {content.subtitle}
+                  </span>
+                )}
+                {formattedDate && (
+                  <span className="text-xs text-gray-400 dark:text-gray-500 hidden sm:block">
+                    {formattedDate}
+                  </span>
+                )}
+                <CategoryBadge
+                  type="content"
+                  value={content.type}
+                  size="xs"
+                />
+              </div>
+            )}
+
+            {/* Para text-blocks: solo badge y espacio flexible */}
+            {isTextBlock && (
+              <div className="flex items-center gap-2 flex-1">
+                <CategoryBadge
+                  type="content"
+                  value={content.type}
+                  size="xs"
+                />
+                {formattedDate && (
+                  <span className="text-xs text-gray-400 dark:text-gray-500">
+                    {formattedDate}
+                  </span>
+                )}
+              </div>
+            )}
 
             {/* Lado derecho: Menú de opciones (solo profesores) */}
             {isTeacher && (
@@ -615,7 +655,7 @@ function ClassDailyLog({ logId, user, onBack }) {
             )}
           </div>
 
-          {content.description && (
+          {content.description && !isTextBlock && (
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 ml-7">
               {content.description}
             </p>
@@ -633,12 +673,13 @@ function ClassDailyLog({ logId, user, onBack }) {
   const renderContentBody = (content) => {
     switch (content.type) {
       case 'text-block':
-        // Nuevo: Bloque de texto editable con características avanzadas
+        // Nuevo: Bloque de texto editable con características avanzadas y título editable
         return (
           <EnhancedTextEditor
             blockId={content.id}
             initialContent={content.html || '<p>Escribe aquí...</p>'}
             initialDrawings={content.drawings || '[]'}
+            initialTitle={content.title || 'Bloque de Texto'}
             isTeacher={isTeacher}
             onSave={handleUpdateTextBlock}
           />
@@ -872,6 +913,16 @@ function ClassDailyLog({ logId, user, onBack }) {
           isOpen={contentSelectorModal.isOpen}
           onClose={contentSelectorModal.close}
           onSelect={handleAddContent}
+          teacherId={user.uid}
+        />
+      )}
+
+      {/* Edit Log Modal (nombre y alumnos asignados) */}
+      {isTeacher && (
+        <EditLogModal
+          isOpen={editLogModal.isOpen}
+          onClose={editLogModal.close}
+          log={log}
           teacherId={user.uid}
         />
       )}
