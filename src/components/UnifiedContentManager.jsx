@@ -324,6 +324,20 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
   };
 
   const handleView = (content) => {
+    logger.info('=== HANDLE VIEW CALLED ===', 'UnifiedContentManager');
+    logger.info('Content title:', content.title);
+    logger.info('Content type:', content.type);
+    logger.info('Content has body:', !!content.body);
+    logger.info('Content has content:', !!content.content);
+
+    // Log el contenido para debug
+    if (content.body && typeof content.body === 'string') {
+      logger.info('Body is string, first 100 chars:', content.body.substring(0, 100));
+    } else if (content.body && typeof content.body === 'object') {
+      logger.info('Body is object, type:', content.body.type);
+      logger.info('Body has questions:', !!content.body.questions);
+    }
+
     // Tipos de ejercicios interactivos que soporta ExerciseViewerModal
     const interactiveExerciseTypes = [
       'ai_generated',
@@ -340,19 +354,32 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
     const isInteractive = interactiveExerciseTypes.includes(exerciseType);
 
     // También detectar por contenido (prefijos #marcar, #arrastrar, #completar, #dialogo, #respuesta_libre o asteriscos)
-    const hasInteractiveContent = content.content && (
-      /^#(marcar|arrastrar|completar|dialogo|diálogo|respuesta_libre|respuesta-libre|open_questions|open-questions)/i.test(content.content.trim()) ||
-      /\*[^*]+\*/g.test(content.content)
+    const contentText = content.content || '';
+    const hasInteractiveContent = contentText && (
+      /^#(marcar|arrastrar|completar|dialogo|diálogo|respuesta_libre|respuesta-libre|open_questions|open-questions)/i.test(contentText.trim()) ||
+      /\*[^*]+\*/g.test(contentText)
     );
 
-    if (isInteractive || hasInteractiveContent) {
+    // También detectar si el body es un objeto con type='open_questions'
+    const bodyIsOpenQuestions = content.body && typeof content.body === 'object' &&
+      (content.body.type === 'open_questions' || content.body.type === 'OPEN_QUESTIONS' ||
+       (content.body.questions && Array.isArray(content.body.questions)));
+
+    logger.info('Detection results:', {
+      exerciseType,
+      isInteractive,
+      hasInteractiveContent,
+      bodyIsOpenQuestions
+    });
+
+    if (isInteractive || hasInteractiveContent || bodyIsOpenQuestions) {
       setViewingExercise(content);
       setShowExerciseViewer(true);
-      logger.info('Opening interactive exercise viewer:', content);
+      logger.info('Opening interactive exercise viewer');
     } else {
       setViewingContent(content);
       setShowViewModal(true);
-      logger.info('Viewing content:', content);
+      logger.info('Viewing content in static modal');
     }
   };
 
