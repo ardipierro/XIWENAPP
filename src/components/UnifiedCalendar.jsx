@@ -14,7 +14,7 @@ import { useState, useEffect } from 'react';
 import logger from '../utils/logger';
 import { useCalendar, useCalendarNavigation } from '../hooks/useCalendar';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, MapPin, Plus, Video, List, Grid } from 'lucide-react';
-import { BaseLoading, BaseButton, BaseSelect } from './common';
+import { BaseLoading, BaseButton, BaseSelect, CategoryBadge } from './common';
 import EventDetailModal from './EventDetailModal';
 import ClassSessionModal from './ClassSessionModal';
 import { startClassSession, endClassSession, updateClassSession } from '../firebase/classSessions';
@@ -502,9 +502,6 @@ function MobileEventCard({ event, onClick }) {
     >
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2 flex-1">
-          {event.type === 'session' && event.status === 'live' && (
-            <span className="inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-          )}
           {event.type === 'session' && event.mode === 'live' && event.status !== 'live' && (
             <Video size={16} strokeWidth={2} />
           )}
@@ -513,9 +510,14 @@ function MobileEventCard({ event, onClick }) {
           </h4>
         </div>
         {event.type === 'session' && event.status === 'live' && (
-          <span className="text-xs px-2 py-1 bg-red-500 text-white rounded-full font-medium shrink-0">
-            EN VIVO
-          </span>
+          <div className="animate-pulse shrink-0">
+            <CategoryBadge
+              type="session_status"
+              value="live"
+              size="sm"
+              showIcon={true}
+            />
+          </div>
         )}
       </div>
 
@@ -827,9 +829,14 @@ function EventCard({ event, compact = false, onClick }) {
         </div>
         <div className="flex gap-1 items-center">
           {event.type === 'session' && event.status === 'live' && (
-            <span className="text-xs px-2 py-1 bg-red-500 text-white rounded font-medium">
-              EN VIVO
-            </span>
+            <div className="animate-pulse">
+              <CategoryBadge
+                type="session_status"
+                value="live"
+                size="sm"
+                showIcon={true}
+              />
+            </div>
           )}
           <span className="text-xs px-2 py-1 bg-white dark:bg-gray-800 rounded">
             {event.type === 'session' ? 'Sesión' : event.type === 'class' ? 'Clase' : event.type === 'assignment' ? 'Tarea' : 'Evento'}

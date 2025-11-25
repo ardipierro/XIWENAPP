@@ -12,7 +12,7 @@
 
 import { useState, useEffect } from 'react';
 import { Clock, MapPin, Users, Video, Calendar, PenTool, FileText, Play, StopCircle } from 'lucide-react';
-import { BaseModal, BaseButton, BaseBadge } from './common';
+import { BaseModal, BaseButton, BaseBadge, CategoryBadge } from './common';
 import logger from '../utils/logger';
 
 /**
@@ -60,25 +60,23 @@ export default function EventDetailModal({
   const getStatusBadge = () => {
     if (event.type !== 'session') return null;
 
-    const statusConfig = {
-      live: { label: 'EN VIVO', color: 'red', pulse: true },
-      scheduled: { label: 'Programada', color: 'blue', pulse: false },
-      ended: { label: 'Finalizada', color: 'gray', pulse: false },
-      cancelled: { label: 'Cancelada', color: 'yellow', pulse: false }
-    };
-
-    const config = statusConfig[event.status] || statusConfig.scheduled;
-
     return (
       <div className="flex items-center gap-2">
-        <BaseBadge variant={config.color === 'red' ? 'danger' : config.color === 'gray' ? 'secondary' : 'info'}>
-          {config.pulse && <span className="inline-block w-2 h-2 bg-red-500 rounded-full animate-pulse mr-1" />}
-          {config.label}
-        </BaseBadge>
+        <div className={event.status === 'live' ? 'animate-pulse' : ''}>
+          <CategoryBadge
+            type="session_status"
+            value={event.status || 'scheduled'}
+            size="sm"
+            showIcon={true}
+          />
+        </div>
         {event.mode && (
-          <BaseBadge variant="outline">
-            {event.mode === 'live' ? 'Live' : 'Asíncrona'}
-          </BaseBadge>
+          <CategoryBadge
+            type="schedule_type"
+            value={event.mode === 'live' ? 'instant' : 'onetime'}
+            size="sm"
+            showIcon={true}
+          />
         )}
       </div>
     );

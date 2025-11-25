@@ -9,7 +9,7 @@
  */
 
 import { useState, useMemo, useRef } from 'react';
-import { BaseBadge } from '../common';
+import { BaseBadge, CategoryBadge } from '../common';
 import { useCardConfig } from '../../contexts/CardConfigContext';
 import UserAvatar from '../UserAvatar';
 import CardDeleteButton from './CardDeleteButton';
@@ -346,20 +346,21 @@ export function UniversalCard({
 
   /**
    * Render Live Indicator (variant='class')
+   * Usa CategoryBadge del sistema universal de badges
    */
   const renderLiveIndicator = () => {
     if (!showLiveIndicator || !variantConfig.showLiveIndicator) return null;
 
     return (
-      <div
-        className="absolute top-3 left-3 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500 text-white text-xs font-bold shadow-lg"
-      >
-        <span
-          className={`w-2 h-2 rounded-full bg-white ${
-            variantConfig.liveIndicatorPulse ? 'animate-pulse' : ''
-          }`}
-        />
-        <span>{liveText}</span>
+      <div className={`absolute top-3 left-3 z-20 shadow-lg ${variantConfig.liveIndicatorPulse ? 'animate-pulse' : ''}`}>
+        <CategoryBadge
+          type="session_status"
+          value="live"
+          size="sm"
+          showIcon={true}
+        >
+          {liveText}
+        </CategoryBadge>
       </div>
     );
   };
