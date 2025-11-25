@@ -37,7 +37,7 @@ import StudentFeedbackView from '../StudentFeedbackView';
 import ManualHomeworkUpload from '../homework/ManualHomeworkUpload';
 import StudentCameraUpload from '../homework/StudentCameraUpload';
 import { getReviewsByStudent, REVIEW_STATUS } from '../../firebase/homework_reviews';
-import { getBadgeByKey, getContrastText } from '../../config/badgeSystem';
+import { getBadgeByKey, getContrastText, getGlobalBadgeConfig } from '../../config/badgeSystem';
 import logger from '../../utils/logger';
 
 /**
@@ -397,45 +397,86 @@ function HomeworkCard({ review, onSelect, viewMode = 'grid' }) {
       }`}
     >
       <div className="space-y-3">
-        {/* Status Badge - Top Right */}
+        {/* Status Badge - Top Right (configurable desde sistema universal) */}
         <div className="absolute top-2 right-2 z-10">
-          {(isProcessing || isPendingReview) ? (() => {
-            const badgeConfig = getBadgeByKey('HOMEWORK_PENDING');
+          {(isProcessing || isPendingReview || isFailed || isApproved) && (() => {
+            const badgeKey = isFailed ? 'HOMEWORK_ERROR' :
+                             isApproved ? 'HOMEWORK_APPROVED' :
+                             'HOMEWORK_PENDING';
+
+            const badgeConfig = getBadgeByKey(badgeKey);
+            const globalConfig = getGlobalBadgeConfig();
             const bgColor = badgeConfig?.color || '#f59e0b';
+
+            // Aplicar border radius global
+            const borderRadiusClass =
+              globalConfig.borderRadius === 'square' ? 'rounded-sm' :
+              globalConfig.borderRadius === 'pill' ? 'rounded-full' :
+              globalConfig.borderRadius === 'rounded' ? 'rounded-lg' :
+              'rounded-full';
+
+            // Aplicar estilo de badge global
+            const badgeStyle = globalConfig.defaultBadgeStyle || 'solid';
+            let styleProps = {};
+
+            switch (badgeStyle) {
+              case 'solid':
+                styleProps = {
+                  backgroundColor: bgColor,
+                  color: getContrastText(bgColor),
+                  border: 'none'
+                };
+                break;
+              case 'outline':
+                styleProps = {
+                  backgroundColor: 'transparent',
+                  color: bgColor,
+                  border: `2px solid ${bgColor}`
+                };
+                break;
+              case 'soft':
+                styleProps = {
+                  backgroundColor: `${bgColor}20`,
+                  color: bgColor,
+                  border: 'none'
+                };
+                break;
+              case 'glass':
+                styleProps = {
+                  backgroundColor: `${bgColor}40`,
+                  color: getContrastText(bgColor),
+                  backdropFilter: 'blur(8px)',
+                  border: `1px solid ${bgColor}60`
+                };
+                break;
+              case 'gradient':
+                styleProps = {
+                  background: `linear-gradient(135deg, ${bgColor} 0%, ${bgColor}cc 100%)`,
+                  color: getContrastText(bgColor),
+                  border: 'none'
+                };
+                break;
+              default:
+                styleProps = {
+                  backgroundColor: bgColor,
+                  color: getContrastText(bgColor)
+                };
+            }
+
             return (
               <div
-                className="px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5"
-                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
+                className={`px-3 py-1.5 ${borderRadiusClass} shadow-lg flex items-center gap-1.5 transition-all hover:scale-105`}
+                style={styleProps}
               >
-                <Clock size={14} style={{ color: 'inherit' }} />
-                <span className="text-xs font-semibold">EN REVISIÓN</span>
+                {(isProcessing || isPendingReview) && <Clock size={14} />}
+                {isFailed && <AlertCircle size={14} />}
+                {isApproved && <CheckCircle size={14} />}
+                <span className="text-xs font-semibold">
+                  {isFailed ? 'ERROR' : isApproved ? '✓ CORREGIDA' : 'EN REVISIÓN'}
+                </span>
               </div>
             );
-          })() : isFailed ? (() => {
-            const badgeConfig = getBadgeByKey('HOMEWORK_ERROR');
-            const bgColor = badgeConfig?.color || '#dc2626';
-            return (
-              <div
-                className="px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5"
-                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
-              >
-                <AlertCircle size={14} style={{ color: 'inherit' }} />
-                <span className="text-xs font-semibold">ERROR</span>
-              </div>
-            );
-          })() : isApproved ? (() => {
-            const badgeConfig = getBadgeByKey('HOMEWORK_APPROVED');
-            const bgColor = badgeConfig?.color || '#10b981';
-            return (
-              <div
-                className="px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5"
-                style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
-              >
-                <CheckCircle size={14} style={{ color: 'inherit' }} />
-                <span className="text-xs font-semibold">✓ CORREGIDA</span>
-              </div>
-            );
-          })() : null}
+          })()}
         </div>
 
         {/* Date Info */}
@@ -575,13 +616,20 @@ function HomeworkDetailModal({ review, studentId, onClose }) {
         size="xl"
       >
         <div className="space-y-6">
-          {/* Status Alert - Solo mostrar "En revisión" si NO está aprobada */}
+          {/* Status Alert - Solo mostrar "En revisión" si NO está aprobada (configurable) */}
           {isUnderReview && (() => {
             const badgeConfig = getBadgeByKey('HOMEWORK_PENDING');
+            const globalConfig = getGlobalBadgeConfig();
             const bgColor = badgeConfig?.color || '#f59e0b';
+
+            const borderRadiusClass =
+              globalConfig.borderRadius === 'square' ? 'rounded-none' :
+              globalConfig.borderRadius === 'pill' ? 'rounded-full' :
+              'rounded-lg';
+
             return (
               <div
-                className="px-4 py-3 rounded-lg flex items-center gap-3"
+                className={`px-4 py-3 ${borderRadiusClass} flex items-center gap-3`}
                 style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
               >
                 <Clock size={20} strokeWidth={2.5} />
@@ -595,13 +643,20 @@ function HomeworkDetailModal({ review, studentId, onClose }) {
             );
           })()}
 
-          {/* Approved Alert */}
+          {/* Approved Alert (configurable) */}
           {isApproved && (() => {
             const badgeConfig = getBadgeByKey('HOMEWORK_APPROVED');
+            const globalConfig = getGlobalBadgeConfig();
             const bgColor = badgeConfig?.color || '#10b981';
+
+            const borderRadiusClass =
+              globalConfig.borderRadius === 'square' ? 'rounded-none' :
+              globalConfig.borderRadius === 'pill' ? 'rounded-full' :
+              'rounded-lg';
+
             return (
               <div
-                className="px-4 py-3 rounded-lg flex items-center gap-3"
+                className={`px-4 py-3 ${borderRadiusClass} flex items-center gap-3`}
                 style={{ backgroundColor: bgColor, color: getContrastText(bgColor) }}
               >
                 <CheckCircle size={20} strokeWidth={2.5} />
