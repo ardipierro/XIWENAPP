@@ -6,6 +6,53 @@
  */
 
 const { onCall, HttpsError } = require('firebase-functions/v2/https');
+const admin = require('firebase-admin');
+
+// ============================================================================
+// CREDENTIAL HELPERS
+// ============================================================================
+
+/**
+ * Get API key for a provider
+ * Priority: User credential (Firestore) > Backend credential (Secret Manager)
+ */
+async function getAPIKey(userId, providerId) {
+  // 1. Try to get user credential from Firestore (ai_credentials collection)
+  try {
+    const credentialDoc = await admin.firestore()
+      .collection('ai_credentials')
+      .doc(providerId.toLowerCase())
+      .get();
+
+    if (credentialDoc.exists) {
+      const data = credentialDoc.data();
+      if (data.apiKey && data.apiKey.trim()) {
+        console.log(`[getAPIKey] Using user credential for ${providerId}`);
+        return data.apiKey.trim();
+      }
+    }
+  } catch (error) {
+    console.warn(`[getAPIKey] Error reading user credential for ${providerId}:`, error.message);
+  }
+
+  // 2. Fallback to backend credential (Secret Manager)
+  const envKeyMap = {
+    'openai': 'OPENAI_API_KEY',
+    'gemini': 'GEMINI_API_KEY',
+    'google': 'GEMINI_API_KEY',
+    'grok': 'GROK_API_KEY',
+    'claude': 'CLAUDE_API_KEY',
+    'anthropic': 'CLAUDE_API_KEY'
+  };
+
+  const envKey = envKeyMap[providerId.toLowerCase()];
+  if (envKey && process.env[envKey]) {
+    console.log(`[getAPIKey] Using backend credential for ${providerId}`);
+    return process.env[envKey];
+  }
+
+  return null;
+}
 
 // ============================================================================
 // AI PROVIDER HELPERS
@@ -14,11 +61,11 @@ const { onCall, HttpsError } = require('firebase-functions/v2/https');
 /**
  * Call OpenAI API
  */
-async function callOpenAI(prompt, config) {
-  const apiKey = process.env.OPENAI_API_KEY;
+async function callOpenAI(prompt, config, userId) {
+  const apiKey = await getAPIKey(userId, 'openai');
 
   if (!apiKey) {
-    throw new HttpsError('failed-precondition', 'OpenAI API key not configured');
+    throw new HttpsError('failed-precondition', 'No hay credencial de OpenAI configurada. Por favor, configura tu API key en el panel de Credenciales.');
   }
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -51,11 +98,11 @@ async function callOpenAI(prompt, config) {
 /**
  * Call Google Gemini API
  */
-async function callGemini(prompt, config) {
-  const apiKey = process.env.GEMINI_API_KEY;
+async function callGemini(prompt, config, userId) {
+  const apiKey = await getAPIKey(userId, 'gemini');
 
   if (!apiKey) {
-    throw new HttpsError('failed-precondition', 'Gemini API key not configured');
+    throw new HttpsError('failed-precondition', 'No hay credencial de Google Gemini configurada. Por favor, configura tu API key en el panel de Credenciales.');
   }
 
   // Use v1 API (stable) with gemini-pro or gemini-1.5-pro
@@ -94,11 +141,11 @@ async function callGemini(prompt, config) {
 /**
  * Call xAI Grok API
  */
-async function callGrok(prompt, config) {
-  const apiKey = process.env.GROK_API_KEY;
+async function callGrok(prompt, config, userId) {
+  const apiKey = await getAPIKey(userId, 'grok');
 
   if (!apiKey) {
-    throw new HttpsError('failed-precondition', 'Grok API key not configured');
+    throw new HttpsError('failed-precondition', 'No hay credencial de Grok configurada. Por favor, configura tu API key en el panel de Credenciales.');
   }
 
   const response = await fetch('https://api.x.ai/v1/chat/completions', {
@@ -131,11 +178,11 @@ async function callGrok(prompt, config) {
 /**
  * Call Anthropic Claude API
  */
-async function callClaude(prompt, config) {
-  const apiKey = process.env.CLAUDE_API_KEY;
+async function callClaude(prompt, config, userId) {
+  const apiKey = await getAPIKey(userId, 'claude');
 
   if (!apiKey) {
-    throw new HttpsError('failed-precondition', 'Claude API key not configured');
+    throw new HttpsError('failed-precondition', 'No hay credencial de Claude configurada. Por favor, configura tu API key en el panel de Credenciales.');
   }
 
   console.log('[Claude] Config received:', { model: config.model, maxTokens: config.maxTokens, temperature: config.temperature });
@@ -213,22 +260,23 @@ exports.callAI = onCall({
 
   try {
     let response;
+    const userId = request.auth.uid;
 
     switch (provider.toLowerCase()) {
       case 'openai':
-        response = await callOpenAI(prompt, config || {});
+        response = await callOpenAI(prompt, config || {}, userId);
         break;
 
       case 'gemini':
-        response = await callGemini(prompt, config || {});
+        response = await callGemini(prompt, config || {}, userId);
         break;
 
       case 'grok':
-        response = await callGrok(prompt, config || {});
+        response = await callGrok(prompt, config || {}, userId);
         break;
 
       case 'claude':
-        response = await callClaude(prompt, config || {});
+        response = await callClaude(prompt, config || {}, userId);
         break;
 
       default:
