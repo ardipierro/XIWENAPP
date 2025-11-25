@@ -791,26 +791,33 @@
     color: var(--color-success);
   }
 
-  /* Alerts */
+  /* Alerts - diseño minimalista sin border-left */
   .alert {
-    @apply p-4 rounded-md border-l-4 mb-4;
+    @apply p-4 rounded-lg mb-4;
+    border: 1px solid var(--color-border);
   }
 
   .alert-success {
-    @apply bg-green-100 border-success text-green-800;
+    background: var(--color-success-light, #dcfce7);
+    border-color: var(--color-success);
+    color: #047857;
   }
 
   .alert-warning {
-    @apply bg-amber-100 border-warning text-amber-800;
+    background: var(--color-warning-light, #fef3c7);
+    border-color: var(--color-warning);
+    color: #92400e;
   }
 
   .alert-error {
-    @apply bg-red-100 border-error text-red-800;
+    background: var(--color-danger-light, #fee2e2);
+    border-color: var(--color-danger);
+    color: #b91c1c;
   }
 
   .alert-info {
-    @apply border-info;
-    background: var(--color-info-bg);
+    background: var(--color-bg-secondary);
+    border-color: var(--color-border);
     color: var(--color-text-primary);
   }
 

@@ -480,10 +480,10 @@ function InfoTableDisplay({ data = {}, config = {} }) {
       {/* Notas */}
       {mergedConfig.showNotes && notes.length > 0 && (
         <div
-          className="mt-4 p-4 rounded-lg border-l-4"
+          className="mt-4 p-4 rounded-lg"
           style={{
             backgroundColor: mergedConfig.noteColor,
-            borderLeftColor: mergedConfig.noteBorderColor
+            border: `1px solid ${mergedConfig.noteBorderColor}`
           }}
         >
           {notes.map((note, idx) => (

@@ -674,10 +674,10 @@ function ComponentShowcase({ isDark }) {
     <div className="max-w-6xl mx-auto space-y-12">
       {/* Info Banner */}
       <div
-        className={`p-6 rounded-lg border-l-4`}
+        className={`p-6 rounded-lg`}
         style={{
           backgroundColor: 'var(--color-info)15',
-          borderColor: 'var(--color-info)'
+          border: '1px solid var(--color-info)'
         }}
       >
         <div className="flex items-start gap-3">

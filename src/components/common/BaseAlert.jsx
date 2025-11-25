@@ -15,7 +15,6 @@ import { CheckCircle, AlertTriangle, AlertCircle, Info, X } from 'lucide-react';
  * @param {boolean} dismissible - Permite cerrar la alerta
  * @param {function} onDismiss - Callback al cerrar
  * @param {node} icon - Icono personalizado (sobreescribe el default)
- * @param {boolean} border - Mostrar borde izquierdo grueso
  * @param {string} className - Clases CSS adicionales
  */
 function BaseAlert({
@@ -25,7 +24,6 @@ function BaseAlert({
   dismissible = false,
   onDismiss,
   icon: CustomIcon,
-  border = true,
   className = '',
 }) {
   // Variant styles with CSS variables
@@ -34,34 +32,30 @@ function BaseAlert({
       success: {
         containerBg: 'var(--color-success-light, #dcfce7)',
         borderColor: 'var(--color-success, #10b981)',
-        borderLeft: 'var(--color-success-dark, #059669)',
         iconColor: 'var(--color-success-dark, #059669)',
-        titleColor: '#065f46', // Green 900 - Better contrast
-        textColor: '#047857', // Green 700 - Better contrast
+        titleColor: '#065f46',
+        textColor: '#047857',
         defaultIcon: CheckCircle,
       },
       danger: {
         containerBg: 'var(--color-danger-light, #fee2e2)',
         borderColor: 'var(--color-danger, #ef4444)',
-        borderLeft: 'var(--color-danger-dark, #dc2626)',
         iconColor: 'var(--color-danger-dark, #dc2626)',
-        titleColor: '#991b1b', // Red 900 - Better contrast
-        textColor: '#b91c1c', // Red 700 - Better contrast
+        titleColor: '#991b1b',
+        textColor: '#b91c1c',
         defaultIcon: AlertCircle,
       },
       warning: {
         containerBg: 'var(--color-warning-light, #fef3c7)',
         borderColor: 'var(--color-warning, #f59e0b)',
-        borderLeft: 'var(--color-warning-dark, #d97706)',
         iconColor: 'var(--color-warning-dark, #d97706)',
-        titleColor: '#78350f', // Amber 900 - Better contrast
-        textColor: '#92400e', // Amber 800 - Better contrast
+        titleColor: '#78350f',
+        textColor: '#92400e',
         defaultIcon: AlertTriangle,
       },
       info: {
         containerBg: 'var(--color-bg-secondary)',
         borderColor: 'var(--color-border)',
-        borderLeft: 'var(--color-primary)',
         iconColor: 'var(--color-primary)',
         titleColor: 'var(--color-text-primary)',
         textColor: 'var(--color-text-secondary)',
@@ -76,12 +70,10 @@ function BaseAlert({
 
   return (
     <div
-      className={`rounded-lg border p-4 ${className}`}
+      className={`rounded-lg p-4 ${className}`}
       style={{
         backgroundColor: config.containerBg,
-        borderColor: config.borderColor,
-        borderLeftWidth: border ? '4px' : undefined,
-        borderLeftColor: border ? config.borderLeft : undefined
+        border: `1px solid ${config.borderColor}`,
       }}
     >
       <div className="flex items-start gap-3">

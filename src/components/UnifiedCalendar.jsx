@@ -496,7 +496,7 @@ function MobileEventCard({ event, onClick }) {
       onClick={onClick}
       className={`
         w-full min-h-tap-md p-4 text-left
-        rounded-lg border-l-4 ${color}
+        rounded-lg border ${color}
         active:opacity-80 transition-opacity
       `}
     >
@@ -791,7 +791,7 @@ function EventCard({ event, compact = false, onClick }) {
     return (
       <div
         onClick={onClick}
-        className={`p-2 rounded border-l-4 ${color} cursor-pointer hover:opacity-80 transition-opacity`}
+        className={`p-2 rounded border ${color} cursor-pointer hover:opacity-80 transition-opacity`}
       >
         <div className="flex items-center gap-1 mb-1">
           {event.type === 'session' && event.status === 'live' && (
@@ -815,7 +815,7 @@ function EventCard({ event, compact = false, onClick }) {
   return (
     <div
       onClick={onClick}
-      className={`p-4 rounded-lg border-l-4 ${color} cursor-pointer hover:opacity-80 transition-opacity`}
+      className={`p-4 rounded-lg border ${color} cursor-pointer hover:opacity-80 transition-opacity`}
     >
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2 flex-1">
