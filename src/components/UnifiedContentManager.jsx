@@ -330,16 +330,18 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
       'word-highlight',
       'drag-drop',
       'fill-blanks',
-      'dialogues'
+      'dialogues',
+      'open-questions',
+      'open_questions'
     ];
 
     // Verificar si es un ejercicio interactivo por metadata o por contenido
     const exerciseType = content.metadata?.exerciseType;
     const isInteractive = interactiveExerciseTypes.includes(exerciseType);
 
-    // También detectar por contenido (prefijos #marcar, #arrastrar, #completar, #dialogo o asteriscos)
+    // También detectar por contenido (prefijos #marcar, #arrastrar, #completar, #dialogo, #respuesta_libre o asteriscos)
     const hasInteractiveContent = content.content && (
-      /^#(marcar|arrastrar|completar|dialogo|diálogo)/i.test(content.content.trim()) ||
+      /^#(marcar|arrastrar|completar|dialogo|diálogo|respuesta_libre|respuesta-libre|open_questions|open-questions)/i.test(content.content.trim()) ||
       /\*[^*]+\*/g.test(content.content)
     );
 
