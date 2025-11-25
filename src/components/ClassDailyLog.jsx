@@ -222,7 +222,6 @@ function ClassDailyLog({ logId, user, onBack }) {
   }, [contentSelectorModal]);
 
   // Configurar TopBar del app con botones dinámicos
-  // FIX: NO incluir JSX inline (crea nuevas referencias), solo iconName strings
   // Handler para abrir modal de edición
   const handleOpenEditModal = useCallback(() => {
     editLogModal.open();
@@ -237,7 +236,7 @@ function ClassDailyLog({ logId, user, onBack }) {
     if (isTeacher) {
       actions.push({
         key: 'add-content',
-        iconName: 'Plus',
+        icon: <Plus size={18} strokeWidth={2} />,
         onClick: handleOpenModal,
         variant: 'primary',
         title: 'Agregar Contenido'
@@ -245,7 +244,7 @@ function ClassDailyLog({ logId, user, onBack }) {
 
       actions.push({
         key: 'save',
-        iconName: 'Save',
+        icon: <Save size={18} strokeWidth={2} />,
         onClick: handleSave,
         disabled: saving,
         variant: 'secondary',
@@ -254,7 +253,7 @@ function ClassDailyLog({ logId, user, onBack }) {
 
       actions.push({
         key: 'edit-log',
-        iconName: 'Edit2',
+        icon: <Edit2 size={18} strokeWidth={2} />,
         onClick: handleOpenEditModal,
         variant: 'secondary',
         title: 'Editar diario (nombre y alumnos)'
@@ -274,7 +273,7 @@ function ClassDailyLog({ logId, user, onBack }) {
     // Botón de índice (3 puntos)
     actions.push({
       key: 'toggle-sidebar',
-      iconName: 'MoreVertical',
+      icon: <MoreVertical size={18} strokeWidth={2} />,
       onClick: toggleSidebar,
       title: sidebarOpen ? 'Cerrar Índice' : 'Índice'
     });
