@@ -15,6 +15,7 @@ import {
   RefreshCw,
   FileText,
   Calendar,
+  Sparkles,
   Maximize2,
   Camera
 } from 'lucide-react';
