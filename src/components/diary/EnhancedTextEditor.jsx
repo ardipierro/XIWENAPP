@@ -32,7 +32,10 @@ import { StrokeWidthSelector } from './StrokeWidthSelector';
 import { exportToPDF } from '../../utils/pdfExport';
 
 /**
- * EnhancedTextEditor V5.0 - FIX: Loop Infinito y Renders Multiplicados
+ * EnhancedTextEditor V5.1 - Título Editable
+ *
+ * MEJORAS V5.1:
+ * ✅ Título editable: El profesor puede personalizar el título del bloque
  *
  * MEJORAS V5.0 (CRÍTICAS):
  * ✅ FIX: Loop infinito resuelto - onStrokesChange memoizada
@@ -69,6 +72,7 @@ import { exportToPDF } from '../../utils/pdfExport';
 export function EnhancedTextEditor({
   initialContent = '<p>Escribe aquí...</p>',
   initialDrawings = '[]',
+  initialTitle = 'Bloque de Texto',
   onSave,
   isTeacher = false,
   blockId,
@@ -77,6 +81,7 @@ export function EnhancedTextEditor({
   const [isEditing, setIsEditing] = useState(autoEdit);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState(null);
+  const [blockTitle, setBlockTitle] = useState(initialTitle);
 
   // Smart color memory - cada herramienta recuerda su último color
   const [textColor, setTextColor] = useState('#000000');
@@ -210,6 +215,7 @@ export function EnhancedTextEditor({
         blockId,
         content: html,
         drawings,
+        title: blockTitle, // Incluir título editable
         updatedAt: Date.now()
       });
       setIsEditing(false);
@@ -231,6 +237,7 @@ export function EnhancedTextEditor({
     } catch {
       setDrawingStrokes([]);
     }
+    setBlockTitle(initialTitle); // Restaurar título original
     setIsEditing(false);
     setDrawingMode(false);
     setSaveError(null);
@@ -253,6 +260,26 @@ export function EnhancedTextEditor({
 
   return (
     <div className="enhanced-text-editor-v3 group relative my-4">
+      {/* Título editable del bloque */}
+      <div className="mb-2">
+        {isEditing ? (
+          <input
+            type="text"
+            value={blockTitle}
+            onChange={(e) => setBlockTitle(e.target.value)}
+            placeholder="Título del bloque..."
+            className="w-full text-lg font-semibold bg-transparent border-b-2 border-gray-300
+                       dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400
+                       outline-none py-1 px-0 text-gray-900 dark:text-white
+                       placeholder-gray-400 dark:placeholder-gray-500"
+          />
+        ) : (
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            {blockTitle}
+          </h3>
+        )}
+      </div>
+
       {/* Botón Editar (solo profesores, al hover) */}
       {isTeacher && !isEditing && (
         <button

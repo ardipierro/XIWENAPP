@@ -159,7 +159,7 @@ function ContentSelectorModal({ isOpen, onClose, onSelect, teacherId }) {
                 id: `text-block-${Date.now()}`,
                 type: 'text-block',
                 title: 'Bloque de Texto',
-                description: 'Bloque de texto editable',
+                // Sin description - el título es editable directamente en el editor
                 html: '<p>Escribe aquí tus notas o instrucciones...</p>',
                 createdAt: Date.now()
               };
