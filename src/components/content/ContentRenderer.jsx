@@ -155,6 +155,81 @@ function ContentRenderer({ content, customConfig, interactive = false }) {
       );
     }
 
+    // Detectar tipo de ejercicio
+    const exerciseType = exerciseData.type || content.metadata?.exerciseType;
+
+    // Renderizar ejercicios de RESPUESTA LIBRE / OPEN QUESTIONS
+    if (exerciseType === 'open_questions' || exerciseType === 'OPEN_QUESTIONS') {
+      return (
+        <div className="space-y-6">
+          {/* Metadata badges */}
+          {renderMetadataBadges(exerciseData, content.metadata)}
+
+          {/* Título del ejercicio */}
+          {exerciseData.title && (
+            <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
+              <h4 className="text-lg font-semibold text-purple-900 dark:text-purple-100 flex items-center gap-2">
+                <PenTool size={20} />
+                {exerciseData.title}
+              </h4>
+            </div>
+          )}
+
+          {/* Preguntas de respuesta libre */}
+          {exerciseData.questions && exerciseData.questions.length > 0 && (
+            <div className="space-y-4">
+              <h4 className="text-base font-semibold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+                <FileText size={18} />
+                Preguntas ({exerciseData.questions.length})
+              </h4>
+              {exerciseData.questions.map((q, index) => (
+                <div
+                  key={index}
+                  className="p-4 rounded-lg border"
+                  style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-secondary)' }}
+                >
+                  {/* Pregunta */}
+                  <div className="flex items-start gap-3 mb-3">
+                    <span
+                      className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-white"
+                      style={{ backgroundColor: 'var(--color-primary, #8b5cf6)' }}
+                    >
+                      {index + 1}
+                    </span>
+                    <p className="text-base font-medium pt-1" style={{ color: 'var(--color-text-primary)' }}>
+                      {q.question}
+                    </p>
+                  </div>
+
+                  {/* Respuesta esperada (si existe) */}
+                  {q.answer && (
+                    <div className="ml-11 mt-2 p-3 rounded bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                      <p className="text-sm">
+                        <span className="font-semibold text-green-700 dark:text-green-300">
+                          Respuesta esperada:
+                        </span>
+                        <span className="ml-2 text-green-600 dark:text-green-400">
+                          {q.answer}
+                        </span>
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Nota informativa */}
+          <div className="p-4 rounded-lg border" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-tertiary)' }}>
+            <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+              ℹ️ Este es un ejercicio de respuesta libre. Los estudiantes escribirán sus propias respuestas.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    // Renderizar ejercicios estándar (opción múltiple, etc.)
     return (
       <div className="space-y-6">
         {/* Metadata badges (si está habilitado) */}
