@@ -6,7 +6,7 @@
  * Soporta modos: lectura, fill-blank, comprensión, ordenar.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   MessageCircle,
   Volume2,
