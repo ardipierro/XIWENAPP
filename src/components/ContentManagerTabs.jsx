@@ -11,7 +11,7 @@ import BaseTabs from './common/BaseTabs';
 import UnifiedContentManager from './UnifiedContentManager';
 import AIConfigPanel from './AIConfigPanel';
 import ContainerConfig from './ContainerConfig';
-import InteractiveBookViewer from './InteractiveBookViewer';
+// import InteractiveBookViewer from './InteractiveBookViewer'; // TEMPORALMENTE DESHABILITADO
 import FlashCardManager from './FlashCardManager';
 import { usePermissions } from '../hooks/usePermissions';
 
@@ -44,12 +44,13 @@ const TABS = [
     icon: CreditCard,
     permission: 'create-content', // Mismo permiso que contenidos
   },
-  {
-    id: 'libro-ade1',
-    label: 'Libro ADE 1',
-    icon: BookOpen,
-    permission: 'create-content', // Mismo permiso que contenidos
-  },
+  // TEMPORALMENTE DESHABILITADO - Será eliminado próximamente
+  // {
+  //   id: 'libro-ade1',
+  //   label: 'Libro ADE 1',
+  //   icon: BookOpen,
+  //   permission: 'create-content',
+  // },
   // TEMPORALMENTE DESHABILITADO
   // {
   //   id: 'visor-contenidos',
@@ -90,8 +91,8 @@ export function ContentManagerTabs({ user, userRole }) {
         return <ContainerConfig />;
       case 'flashcards':
         return <FlashCardManager user={user} />;
-      case 'libro-ade1':
-        return <InteractiveBookViewer />;
+      // case 'libro-ade1':
+      //   return <InteractiveBookViewer />;
       default:
         return null;
     }
