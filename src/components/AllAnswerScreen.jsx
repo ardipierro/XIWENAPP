@@ -16,13 +16,12 @@ function AllAnswerScreen({
   timePerQuestion,
   unlimitedTime,
   gameMode,
+  optionsLayout = '2cols', // '1col' o '2cols'
   setScreen,
   saveGameToHistory
 }) {
   // Respuestas de cada alumno para la pregunta actual (array de índices para múltiples respuestas)
   const [studentAnswers, setStudentAnswers] = useState({})
-  // Índice del alumno que debe responder ahora (orden rotativo)
-  const [currentAnsweringIndex, setCurrentAnsweringIndex] = useState(0)
   // Estado: 'waiting' = esperando iniciar, 'answering' = recolectando respuestas, 'revealed' = mostrando resultados
   const [phase, setPhase] = useState('waiting')
   // Tiempo restante
@@ -32,6 +31,8 @@ function AllAnswerScreen({
   // Pausa
   const [isPaused, setIsPaused] = useState(false)
   const [pausedTime, setPausedTime] = useState(0)
+  // Flag para saber si es la primera pregunta (solo mostrar "Listos" al inicio)
+  const [gameStarted, setGameStarted] = useState(false)
 
   const validStudents = students.filter(s => s.trim())
   const currentQuestion = parsedQuestions[currentQuestionIndex]
@@ -47,15 +48,18 @@ function AllAnswerScreen({
   }
 
   const rotatedStudents = getRotatedStudents()
-  const currentAnsweringStudent = rotatedStudents[currentAnsweringIndex]
 
   // Resetear estado cuando cambia la pregunta
   useEffect(() => {
     setStudentAnswers({})
-    setCurrentAnsweringIndex(0)
-    setPhase('waiting') // Empieza en espera
+    // Solo mostrar pantalla de espera en la primera pregunta
+    if (gameStarted) {
+      setPhase('answering')
+      setQuestionStartTime(Date.now())
+    } else {
+      setPhase('waiting')
+    }
     setTimeLeft(timePerQuestion)
-    setQuestionStartTime(null)
     setIsPaused(false)
     setPausedTime(0)
   }, [currentQuestionIndex, timePerQuestion])
@@ -112,6 +116,7 @@ function AllAnswerScreen({
 
   // Iniciar el juego
   const handleStart = () => {
+    setGameStarted(true)
     setPhase('answering')
     setQuestionStartTime(Date.now())
   }
@@ -131,7 +136,7 @@ function AllAnswerScreen({
     setIsPaused(!isPaused)
   }
 
-  // Marcar/desmarcar respuesta de un alumno (toggle para múltiples respuestas)
+  // Marcar/desmarcar respuesta de un alumno (cualquier alumno puede responder en cualquier momento)
   const handleAnswer = (student, answerIndex) => {
     if (phase !== 'answering' || isPaused) return
 
@@ -152,27 +157,22 @@ function AllAnswerScreen({
           }
         }
       } else {
-        // Respuesta única
-        return {
-          ...prev,
-          [student]: [answerIndex]
+        // Respuesta única: reemplazar
+        if (currentAnswers.includes(answerIndex)) {
+          // Si ya estaba seleccionada, deseleccionar
+          return {
+            ...prev,
+            [student]: []
+          }
+        } else {
+          return {
+            ...prev,
+            [student]: [answerIndex]
+          }
         }
       }
     })
   }
-
-  // Confirmar respuesta del alumno actual y pasar al siguiente
-  const confirmAnswer = (student) => {
-    if (currentAnsweringIndex < rotatedStudents.length - 1) {
-      setCurrentAnsweringIndex(currentAnsweringIndex + 1)
-    }
-  }
-
-  // Verificar si todos respondieron (al menos seleccionaron algo)
-  const allAnswered = rotatedStudents.every(student => {
-    const answers = studentAnswers[student]
-    return answers && answers.length > 0
-  })
 
   // Verificar si las respuestas son correctas
   const checkAnswerCorrect = (studentAnswerArray) => {
@@ -267,14 +267,14 @@ function AllAnswerScreen({
               )}
             </h3>
             <div className="flex items-center gap-3">
-              {!unlimitedTime && (
+              {!unlimitedTime && phase !== 'waiting' && (
                 <div className={`text-2xl font-bold ${timeLeft <= 10 ? 'text-red-500' : 'text-gray-700 dark:text-gray-300'}`}>
                   {String(timeLeft).padStart(2, '0')} seg.
                   {isPaused && <span className="text-orange-500 text-base ml-2">(Pausado)</span>}
                 </div>
               )}
 
-              {/* Botón Iniciar/Pausar */}
+              {/* Botón Iniciar (solo primera vez) */}
               {phase === 'waiting' && (
                 <button
                   onClick={handleStart}
@@ -284,6 +284,7 @@ function AllAnswerScreen({
                 </button>
               )}
 
+              {/* Botón Pausar/Reanudar */}
               {phase === 'answering' && !unlimitedTime && (
                 <button
                   onClick={togglePause}
@@ -297,6 +298,16 @@ function AllAnswerScreen({
                 </button>
               )}
 
+              {/* Botón Revelar (siempre disponible durante answering) */}
+              {phase === 'answering' && !isPaused && (
+                <button
+                  onClick={handleReveal}
+                  className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold"
+                >
+                  Revelar
+                </button>
+              )}
+
               <button
                 onClick={endGame}
                 className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold"
@@ -307,7 +318,7 @@ function AllAnswerScreen({
           </div>
         </div>
 
-        {/* Pantalla de espera */}
+        {/* Pantalla de espera (solo primera vez) */}
         {phase === 'waiting' && (
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 mb-6 text-center">
             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
@@ -320,7 +331,7 @@ function AllAnswerScreen({
               onClick={handleStart}
               className="px-12 py-4 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold text-2xl"
             >
-              Iniciar Pregunta
+              Iniciar Juego
             </button>
           </div>
         )}
@@ -333,8 +344,8 @@ function AllAnswerScreen({
                 {currentQuestion.question}
               </h2>
 
-              {/* Opciones de referencia */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+              {/* Opciones de referencia - FUENTE MÁS GRANDE */}
+              <div className={`grid gap-4 mb-6 ${optionsLayout === '1col' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
                 {currentQuestion.options.map((option, index) => {
                   const isCorrectOption = correctAnswers.includes(index)
                   const optionExplanation = currentQuestion.optionExplanations?.[index]
@@ -342,7 +353,7 @@ function AllAnswerScreen({
                   return (
                     <div
                       key={index}
-                      className={`p-3 rounded-lg border-2 ${
+                      className={`p-4 rounded-lg border-2 ${
                         phase === 'revealed' && isCorrectOption
                           ? 'bg-green-100 dark:bg-green-900 border-green-500'
                           : phase === 'revealed' && !isCorrectOption
@@ -351,15 +362,15 @@ function AllAnswerScreen({
                       }`}
                     >
                       <div>
-                        <span className="font-bold text-lg">{String.fromCharCode(65 + index)}.</span>{' '}
-                        <span className="text-gray-800 dark:text-gray-200">{option}</span>
+                        <span className="font-bold text-xl">{String.fromCharCode(65 + index)}.</span>{' '}
+                        <span className="text-xl text-gray-800 dark:text-gray-200">{option}</span>
                         {phase === 'revealed' && isCorrectOption && (
-                          <span className="ml-2 text-green-600 dark:text-green-400 font-bold">✓</span>
+                          <span className="ml-2 text-green-600 dark:text-green-400 font-bold text-xl">✓</span>
                         )}
                       </div>
                       {/* Justificación inline de esta opción */}
                       {phase === 'revealed' && optionExplanation && (
-                        <p className={`mt-2 text-sm italic ${
+                        <p className={`mt-2 text-base italic ${
                           isCorrectOption
                             ? 'text-green-700 dark:text-green-300'
                             : 'text-red-700 dark:text-red-300'
@@ -375,8 +386,8 @@ function AllAnswerScreen({
               {/* Justificación general (solo después de revelar) */}
               {phase === 'revealed' && currentQuestion.explanation && (
                 <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-300 dark:border-blue-700 rounded-lg">
-                  <h4 className="font-bold text-blue-800 dark:text-blue-300 mb-2">Explicación general:</h4>
-                  <p className="text-blue-700 dark:text-blue-200">{currentQuestion.explanation}</p>
+                  <h4 className="font-bold text-blue-800 dark:text-blue-300 mb-2 text-lg">Explicación:</h4>
+                  <p className="text-blue-700 dark:text-blue-200 text-lg">{currentQuestion.explanation}</p>
                 </div>
               )}
             </div>
@@ -387,16 +398,15 @@ function AllAnswerScreen({
                 {phase === 'answering'
                   ? isPaused
                     ? 'Juego pausado'
-                    : `Turno de responder: ${currentAnsweringStudent || 'Todos respondieron'}`
+                    : 'Respuestas de los alumnos'
                   : 'Resultados'
                 }
               </h3>
 
               <div className="space-y-3">
-                {rotatedStudents.map((student, studentIndex) => {
+                {rotatedStudents.map((student) => {
                   const answers = studentAnswers[student] || []
                   const hasAnswered = answers.length > 0
-                  const isCurrentTurn = phase === 'answering' && studentIndex === currentAnsweringIndex && !isPaused
                   const isCorrect = phase === 'revealed' && checkAnswerCorrect(answers)
                   const isIncorrect = phase === 'revealed' && hasAnswered && !isCorrect
 
@@ -404,9 +414,7 @@ function AllAnswerScreen({
                     <div
                       key={student}
                       className={`p-4 rounded-lg border-2 ${
-                        isCurrentTurn
-                          ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-500'
-                          : isCorrect
+                        isCorrect
                           ? 'bg-green-50 dark:bg-green-900/30 border-green-500'
                           : isIncorrect
                           ? 'bg-red-50 dark:bg-red-900/30 border-red-500'
@@ -414,23 +422,13 @@ function AllAnswerScreen({
                       }`}
                     >
                       <div className="flex items-center justify-between flex-wrap gap-3">
-                        {/* Nombre y puntaje */}
-                        <div className="flex items-center gap-3">
-                          <span className="font-semibold text-lg text-gray-900 dark:text-white">
-                            {student}
-                          </span>
-                          <span className="text-sm text-gray-500 dark:text-gray-400">
-                            ({scores[student] || 0} pts)
-                          </span>
-                          {isCurrentTurn && (
-                            <span className="px-2 py-1 bg-blue-500 text-white text-xs font-bold rounded-full">
-                              SU TURNO
-                            </span>
-                          )}
-                        </div>
+                        {/* Nombre del alumno */}
+                        <span className="font-semibold text-lg text-gray-900 dark:text-white min-w-[100px]">
+                          {student}
+                        </span>
 
                         {/* Botones de respuesta */}
-                        <div className="flex gap-2 items-center">
+                        <div className="flex gap-2 items-center flex-1 justify-center">
                           {currentQuestion.options.map((_, optIndex) => {
                             const isSelected = answers.includes(optIndex)
                             const isCorrectOption = correctAnswers.includes(optIndex)
@@ -441,8 +439,8 @@ function AllAnswerScreen({
                               <button
                                 key={optIndex}
                                 onClick={() => handleAnswer(student, optIndex)}
-                                disabled={phase === 'revealed' || (phase === 'answering' && studentIndex !== currentAnsweringIndex) || isPaused}
-                                className={`w-12 h-12 rounded-lg font-bold text-lg transition-all ${
+                                disabled={phase === 'revealed' || isPaused}
+                                className={`w-14 h-14 rounded-lg font-bold text-xl transition-all ${
                                   showAsCorrect && isSelected
                                     ? 'bg-green-500 text-white ring-4 ring-green-300'
                                     : showAsCorrect
@@ -451,7 +449,7 @@ function AllAnswerScreen({
                                     ? 'bg-red-500 text-white'
                                     : isSelected
                                     ? 'bg-blue-500 text-white'
-                                    : phase === 'answering' && studentIndex === currentAnsweringIndex && !isPaused
+                                    : phase === 'answering' && !isPaused
                                     ? 'bg-gray-200 dark:bg-gray-600 hover:bg-blue-400 hover:text-white text-gray-800 dark:text-gray-200'
                                     : 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
                                 }`}
@@ -460,32 +458,33 @@ function AllAnswerScreen({
                               </button>
                             )
                           })}
-
-                          {/* Botón confirmar (para pasar al siguiente alumno) */}
-                          {phase === 'answering' && studentIndex === currentAnsweringIndex && hasAnswered && !isPaused && (
-                            <button
-                              onClick={() => confirmAnswer(student)}
-                              className="ml-2 px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold text-sm"
-                            >
-                              OK
-                            </button>
-                          )}
                         </div>
 
-                        {/* Resultado */}
-                        {phase === 'revealed' && (
-                          <div className="text-lg font-bold">
-                            {!hasAnswered ? (
-                              <span className="text-gray-400">No respondió</span>
-                            ) : isCorrect ? (
-                              <span className="text-green-600">+1 punto</span>
-                            ) : gameMode === 'penalty' ? (
-                              <span className="text-red-600">-1 punto</span>
-                            ) : (
-                              <span className="text-red-600">0 puntos</span>
-                            )}
-                          </div>
-                        )}
+                        {/* Puntaje a la derecha */}
+                        <div className="text-right min-w-[80px]">
+                          <span className={`text-2xl font-bold ${
+                            phase === 'revealed' && isCorrect
+                              ? 'text-green-600'
+                              : phase === 'revealed' && isIncorrect
+                              ? 'text-red-600'
+                              : 'text-gray-700 dark:text-gray-300'
+                          }`}>
+                            {scores[student] || 0} pts
+                          </span>
+                          {phase === 'revealed' && (
+                            <div className="text-sm">
+                              {!hasAnswered ? (
+                                <span className="text-gray-400">-</span>
+                              ) : isCorrect ? (
+                                <span className="text-green-600">+1</span>
+                              ) : gameMode === 'penalty' ? (
+                                <span className="text-red-600">-1</span>
+                              ) : (
+                                <span className="text-red-600">+0</span>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )
@@ -493,18 +492,9 @@ function AllAnswerScreen({
               </div>
             </div>
 
-            {/* Botones de acción */}
-            <div className="flex gap-4 justify-center">
-              {phase === 'answering' && allAnswered && !isPaused && (
-                <button
-                  onClick={handleReveal}
-                  className="px-8 py-4 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold text-xl"
-                >
-                  Revelar Resultados
-                </button>
-              )}
-
-              {phase === 'revealed' && (
+            {/* Botón siguiente pregunta */}
+            {phase === 'revealed' && (
+              <div className="flex gap-4 justify-center">
                 <button
                   onClick={handleNextQuestion}
                   className="px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold text-xl"
@@ -514,34 +504,10 @@ function AllAnswerScreen({
                     : 'Siguiente Pregunta'
                   }
                 </button>
-              )}
-            </div>
+              </div>
+            )}
           </>
         )}
-
-        {/* Tanteador general */}
-        <div className="mt-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Puntajes</h3>
-          <div className="flex flex-wrap gap-4 justify-center">
-            {validStudents
-              .sort((a, b) => (scores[b] || 0) - (scores[a] || 0))
-              .map((student, index) => (
-                <div
-                  key={student}
-                  className={`px-4 py-2 rounded-lg ${
-                    index === 0 && (scores[student] || 0) > 0
-                      ? 'bg-yellow-100 dark:bg-yellow-900 border-2 border-yellow-500'
-                      : 'bg-gray-100 dark:bg-gray-700'
-                  }`}
-                >
-                  <span className="font-semibold text-gray-900 dark:text-white">{student}</span>
-                  <span className="ml-2 text-xl font-bold text-gray-700 dark:text-gray-300">
-                    {scores[student] || 0}
-                  </span>
-                </div>
-              ))}
-          </div>
-        </div>
       </div>
     </div>
   )
