@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Probar Parser de Ejercicios</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 1200px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .card {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 300px;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 14px;
+      resize: vertical;
+    }
+    button {
+      background: #4285f4;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-right: 10px;
+    }
+    button:hover {
+      background: #3367d6;
+    }
+    pre {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+    .success { color: #0f9d58; }
+    .error { color: #db4437; }
+    .warning { color: #f4b400; }
+    .result-box {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 8px;
+      border: 2px solid #ddd;
+    }
+    .result-box.success {
+      background: #e6f4ea;
+      border-color: #0f9d58;
+    }
+    .result-box.error {
+      background: #fce8e6;
+      border-color: #db4437;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🧪 Probar Parser de Ejercicios</h1>
+    <p>Pega tu texto de ejercicio aquí y verifica cómo lo parsea el sistema.</p>
+
+    <textarea id="exercise-text" placeholder="Pega tu ejercicio aquí...">#RESPUESTA_LIBRE
+1. ¿De dónde es Ling y cuántos años tiene?
+2. ¿Hace cuánto tiempo vive Ling en Argentina?
+3. ¿En qué barrio está la escuela donde estudia Ling?
+4. ¿A qué hora termina Ling la escuela cada día?
+5. ¿Qué estudia Ling en el instituto privado por la tarde?
+6. ¿Por qué a Ling le cuesta entender a veces a los argentinos?
+7. ¿Qué tareas hace Ling en el restaurante familiar durante el fin de semana?
+8. ¿Cómo va Ling al restaurante y cuánto tarda en llegar?
+9. ¿Qué le gusta hacer a Ling en su tiempo libre? Menciona al menos dos actividades.
+10. ¿Con quién sale Ling los viernes a la noche cuando no trabaja?
+11. ¿Cuáles son los platos argentinos que más le gustan a Ling?
+12. ¿Por qué crees que Ling está ahorrando dinero? Explica tu respuesta usando información del texto.</textarea>
+
+    <div style="margin-top: 15px;">
+      <button onclick="parseExercise()">Parsear Ejercicio</button>
+      <button onclick="loadExample()">Cargar Ejemplo</button>
+      <button onclick="clearText()">Limpiar</button>
+    </div>
+
+    <div id="result"></div>
+  </div>
+
+  <script type="module">
+    // Importar el parser
+    import { parseExerciseFile, EXERCISE_TYPES } from './src/utils/exerciseParser.js';
+
+    window.parseExercise = function() {
+      const text = document.getElementById('exercise-text').value;
+      const resultDiv = document.getElementById('result');
+
+      if (!text.trim()) {
+        resultDiv.innerHTML = '<div class="result-box error"><p class="error">❌ Por favor, ingresa un texto para parsear</p></div>';
+        return;
+      }
+
+      resultDiv.innerHTML = '<div class="result-box"><p>🔄 Parseando...</p></div>';
+
+      try {
+        const exercises = parseExerciseFile(text, 'General');
+
+        if (!exercises || exercises.length === 0) {
+          resultDiv.innerHTML = `
+            <div class="result-box error">
+              <h3 class="error">❌ No se pudo parsear el ejercicio</h3>
+              <p>El parser no detectó ningún ejercicio válido en el texto.</p>
+              <h4>Formatos soportados:</h4>
+              <ul>
+                <li><code>#RESPUESTA_LIBRE</code> seguido de preguntas numeradas</li>
+                <li>Preguntas numeradas sin marcador (auto-detecta)</li>
+                <li><code>P:</code> pregunta, <code>R:</code> respuesta</li>
+              </ul>
+            </div>
+          `;
+          return;
+        }
+
+        // Mostrar resultados
+        let html = '<div class="result-box success">';
+        html += `<h3 class="success">✅ Ejercicio Parseado Exitosamente</h3>`;
+        html += `<p><strong>Tipo detectado:</strong> <code>${exercises[0].type}</code></p>`;
+        html += `<p><strong>Total de ejercicios/secciones:</strong> ${exercises.length}</p>`;
+
+        exercises.forEach((ex, index) => {
+          html += '<hr>';
+          html += `<h4>Ejercicio ${index + 1}</h4>`;
+          html += '<pre>' + JSON.stringify(ex, null, 2) + '</pre>';
+
+          if (ex.type === 'open_questions' || ex.type === 'OPEN_QUESTIONS') {
+            html += `<div style="margin-top: 15px; padding: 15px; background: #e6f4ea; border-radius: 6px;">`;
+            html += `<p class="success"><strong>✅ Tipo correcto: OPEN_QUESTIONS</strong></p>`;
+            html += `<p>Total de preguntas: <strong>${ex.questions?.length || 0}</strong></p>`;
+            html += `</div>`;
+          }
+        });
+
+        html += '<hr>';
+        html += '<h4>JSON para guardar en Firestore:</h4>';
+        html += '<p style="font-size: 12px; color: #666;">Este es el JSON que debería guardarse en el campo <code>body</code> del contenido:</p>';
+        html += '<pre>' + JSON.stringify(exercises[0], null, 2) + '</pre>';
+
+        html += '</div>';
+        resultDiv.innerHTML = html;
+
+      } catch (error) {
+        resultDiv.innerHTML = `
+          <div class="result-box error">
+            <h3 class="error">❌ Error al Parsear</h3>
+            <p>${error.message}</p>
+            <pre>${error.stack}</pre>
+          </div>
+        `;
+      }
+    };
+
+    window.loadExample = function() {
+      const example = `#RESPUESTA_LIBRE
+1. ¿De dónde es Ling y cuántos años tiene?
+2. ¿Hace cuánto tiempo vive Ling en Argentina?
+3. ¿En qué barrio está la escuela donde estudia Ling?`;
+
+      document.getElementById('exercise-text').value = example;
+      parseExercise();
+    };
+
+    window.clearText = function() {
+      document.getElementById('exercise-text').value = '';
+      document.getElementById('result').innerHTML = '';
+    };
+
+    // Auto-parsear al cargar si hay texto
+    window.addEventListener('load', () => {
+      const text = document.getElementById('exercise-text').value;
+      if (text.trim()) {
+        parseExercise();
+      }
+    });
+  </script>
+</body>
+</html>
