@@ -33,6 +33,8 @@ function AllAnswerScreen({
   const [pausedTime, setPausedTime] = useState(0)
   // Flag para saber si es la primera pregunta (solo mostrar "Listos" al inicio)
   const [gameStarted, setGameStarted] = useState(false)
+  // Guardar el delta de puntos por alumno para mostrar después de revelar
+  const [scoreDeltas, setScoreDeltas] = useState({})
 
   const validStudents = students.filter(s => s.trim())
   const currentQuestion = parsedQuestions[currentQuestionIndex]
@@ -52,6 +54,7 @@ function AllAnswerScreen({
   // Resetear estado cuando cambia la pregunta
   useEffect(() => {
     setStudentAnswers({})
+    setScoreDeltas({})
     // Solo mostrar pantalla de espera en la primera pregunta
     if (gameStarted) {
       setPhase('answering')
@@ -136,54 +139,61 @@ function AllAnswerScreen({
     setIsPaused(!isPaused)
   }
 
-  // Marcar/desmarcar respuesta de un alumno (cualquier alumno puede responder en cualquier momento)
+  // Marcar/desmarcar respuesta de un alumno - SIEMPRE permite múltiples selecciones
   const handleAnswer = (student, answerIndex) => {
     if (phase !== 'answering' || isPaused) return
 
     setStudentAnswers(prev => {
       const currentAnswers = prev[student] || []
 
-      if (isMultipleAnswer) {
-        // Múltiples respuestas: toggle
-        if (currentAnswers.includes(answerIndex)) {
-          return {
-            ...prev,
-            [student]: currentAnswers.filter(i => i !== answerIndex)
-          }
-        } else {
-          return {
-            ...prev,
-            [student]: [...currentAnswers, answerIndex]
-          }
+      // Siempre permitir toggle de múltiples respuestas
+      if (currentAnswers.includes(answerIndex)) {
+        return {
+          ...prev,
+          [student]: currentAnswers.filter(i => i !== answerIndex)
         }
       } else {
-        // Respuesta única: reemplazar
-        if (currentAnswers.includes(answerIndex)) {
-          // Si ya estaba seleccionada, deseleccionar
-          return {
-            ...prev,
-            [student]: []
-          }
-        } else {
-          return {
-            ...prev,
-            [student]: [answerIndex]
-          }
+        return {
+          ...prev,
+          [student]: [...currentAnswers, answerIndex]
         }
       }
     })
   }
 
-  // Verificar si las respuestas son correctas
-  const checkAnswerCorrect = (studentAnswerArray) => {
-    if (!studentAnswerArray || studentAnswerArray.length === 0) return false
+  // Calcular puntuación para un alumno
+  // Retorna: { isExactMatch, hasCorrect, hasWrong, delta }
+  const calculateScore = (studentAnswerArray) => {
+    if (!studentAnswerArray || studentAnswerArray.length === 0) {
+      return { isExactMatch: false, hasCorrect: false, hasWrong: false, delta: 0 }
+    }
 
-    // Ordenar ambos arrays para comparar
-    const sortedStudent = [...studentAnswerArray].sort()
-    const sortedCorrect = [...correctAnswers].sort()
+    const correctSelected = studentAnswerArray.filter(ans => correctAnswers.includes(ans))
+    const wrongSelected = studentAnswerArray.filter(ans => !correctAnswers.includes(ans))
 
-    if (sortedStudent.length !== sortedCorrect.length) return false
-    return sortedStudent.every((val, idx) => val === sortedCorrect[idx])
+    const hasCorrect = correctSelected.length > 0
+    const hasWrong = wrongSelected.length > 0
+
+    // Acierto exacto: todas las correctas seleccionadas Y ninguna incorrecta
+    const isExactMatch = correctSelected.length === correctAnswers.length && wrongSelected.length === 0
+
+    let delta = 0
+    if (isExactMatch) {
+      // Acierto exacto: +1
+      delta = 1
+    } else if (hasWrong) {
+      // Tiene alguna incorrecta: penalización
+      if (gameMode === 'penalty') {
+        delta = -0.5 // Penalización parcial por "cubrir apuestas"
+      } else {
+        delta = 0
+      }
+    } else {
+      // Solo correctas pero no todas: sin puntos (no penaliza pero no suma)
+      delta = 0
+    }
+
+    return { isExactMatch, hasCorrect, hasWrong, delta }
   }
 
   // Revelar resultados
@@ -194,24 +204,26 @@ function AllAnswerScreen({
     const newScores = { ...scores }
     const newQuestionsAnswered = { ...questionsAnswered }
     const newResponseTimes = { ...responseTimes }
+    const newDeltas = {}
 
     let anyCorrect = false
     let anyIncorrect = false
 
     rotatedStudents.forEach(student => {
       const answers = studentAnswers[student] || []
-      const isCorrect = checkAnswerCorrect(answers)
+      const result = calculateScore(answers)
 
       newQuestionsAnswered[student] = (newQuestionsAnswered[student] || 0) + 1
       newResponseTimes[student] = (newResponseTimes[student] || 0) + responseTime / rotatedStudents.length
 
-      if (isCorrect) {
-        newScores[student] = (newScores[student] || 0) + 1
+      // Aplicar delta
+      newScores[student] = Math.max(0, (newScores[student] || 0) + result.delta)
+      newDeltas[student] = result.delta
+
+      if (result.isExactMatch) {
         anyCorrect = true
-      } else if (answers.length > 0 && gameMode === 'penalty') {
-        newScores[student] = Math.max(0, (newScores[student] || 0) - 1)
-        anyIncorrect = true
-      } else if (answers.length > 0) {
+      }
+      if (answers.length > 0 && !result.isExactMatch) {
         anyIncorrect = true
       }
     })
@@ -219,6 +231,7 @@ function AllAnswerScreen({
     setScores(newScores)
     setQuestionsAnswered(newQuestionsAnswered)
     setResponseTimes(newResponseTimes)
+    setScoreDeltas(newDeltas)
 
     // Reproducir sonido según resultados
     if (anyCorrect) {
@@ -253,78 +266,15 @@ function AllAnswerScreen({
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8" style={{ background: 'var(--color-bg-secondary)' }}>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-6">
       <div className="max-w-5xl mx-auto">
-        {/* Header con tiempo y controles */}
-        <div className="rounded-2xl border p-4 md:p-6 mb-6" style={{ background: 'var(--color-bg-primary)', borderColor: 'var(--color-border)' }}>
-          <div className="flex justify-between items-center flex-wrap gap-3">
-            <h3 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-              Pregunta {currentQuestionIndex + 1} de {parsedQuestions.length}
-              {isMultipleAnswer && (
-                <span className="ml-2 text-sm bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-2 py-1 rounded">
-                  Múltiple respuesta
-                </span>
-              )}
-            </h3>
-            <div className="flex items-center gap-3">
-              {!unlimitedTime && phase !== 'waiting' && (
-                <div className="text-2xl font-bold" style={{ color: timeLeft <= 10 ? '#ef4444' : 'var(--color-text-primary)' }}>
-                  {String(timeLeft).padStart(2, '0')} seg.
-                  {isPaused && <span className="text-orange-500 text-base ml-2">(Pausado)</span>}
-                </div>
-              )}
-
-              {/* Botón Iniciar (solo primera vez) */}
-              {phase === 'waiting' && (
-                <button
-                  onClick={handleStart}
-                  className="px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold"
-                >
-                  Iniciar
-                </button>
-              )}
-
-              {/* Botón Pausar/Reanudar */}
-              {phase === 'answering' && !unlimitedTime && (
-                <button
-                  onClick={togglePause}
-                  className={`px-4 py-2 rounded-lg font-semibold ${
-                    isPaused
-                      ? 'bg-green-500 hover:bg-green-600 text-white'
-                      : 'bg-orange-500 hover:bg-orange-600 text-white'
-                  }`}
-                >
-                  {isPaused ? 'Reanudar' : 'Pausar'}
-                </button>
-              )}
-
-              {/* Botón Revelar (siempre disponible durante answering) */}
-              {phase === 'answering' && !isPaused && (
-                <button
-                  onClick={handleReveal}
-                  className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold"
-                >
-                  Revelar
-                </button>
-              )}
-
-              <button
-                onClick={endGame}
-                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold"
-              >
-                Terminar
-              </button>
-            </div>
-          </div>
-        </div>
-
         {/* Pantalla de espera (solo primera vez) */}
         {phase === 'waiting' && (
-          <div className="rounded-2xl border p-8 mb-6 text-center" style={{ background: 'var(--color-bg-primary)', borderColor: 'var(--color-border)' }}>
-            <h2 className="text-3xl font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 text-center">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
               ¿Listos?
             </h2>
-            <p className="text-xl mb-6" style={{ color: 'var(--color-text-secondary)' }}>
+            <p className="text-xl text-gray-600 dark:text-gray-400 mb-6">
               Presiona "Iniciar" cuando todos estén preparados
             </p>
             <button
@@ -336,69 +286,122 @@ function AllAnswerScreen({
           </div>
         )}
 
-        {/* Pregunta (solo visible cuando no está en espera) */}
+        {/* TODO EL JUEGO EN UN SOLO CONTENEDOR */}
         {phase !== 'waiting' && (
-          <>
-            <div className="rounded-2xl border p-6 md:p-8 mb-6" style={{ background: 'var(--color-bg-primary)', borderColor: 'var(--color-border)' }}>
-              <h2 className="text-2xl md:text-3xl font-semibold mb-6" style={{ color: 'var(--color-text-primary)' }}>
-                {currentQuestion.question}
-              </h2>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 md:p-8">
+            {/* Header con tiempo y controles */}
+            <div className="flex justify-between items-center flex-wrap gap-3 mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                Pregunta {currentQuestionIndex + 1} de {parsedQuestions.length}
+                {isMultipleAnswer && (
+                  <span className="ml-2 text-sm bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-2 py-1 rounded">
+                    Múltiple respuesta
+                  </span>
+                )}
+              </h3>
+              <div className="flex items-center gap-3">
+                {!unlimitedTime && (
+                  <div className={`text-2xl font-bold ${timeLeft <= 10 ? 'text-red-500' : 'text-gray-700 dark:text-gray-300'}`}>
+                    {String(timeLeft).padStart(2, '0')} seg.
+                    {isPaused && <span className="text-orange-500 text-base ml-2">(Pausado)</span>}
+                  </div>
+                )}
 
-              {/* Opciones de referencia - FUENTE MÁS GRANDE */}
-              <div className={`grid gap-4 mb-6 ${optionsLayout === '1col' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
-                {currentQuestion.options.map((option, index) => {
-                  const isCorrectOption = correctAnswers.includes(index)
-                  const optionExplanation = currentQuestion.optionExplanations?.[index]
+                {/* Botón Pausar/Reanudar */}
+                {phase === 'answering' && !unlimitedTime && (
+                  <button
+                    onClick={togglePause}
+                    className={`px-4 py-2 rounded-lg font-semibold ${
+                      isPaused
+                        ? 'bg-green-500 hover:bg-green-600 text-white'
+                        : 'bg-orange-500 hover:bg-orange-600 text-white'
+                    }`}
+                  >
+                    {isPaused ? 'Reanudar' : 'Pausar'}
+                  </button>
+                )}
 
-                  return (
-                    <div
-                      key={index}
-                      className={`p-4 rounded-lg border-2 ${
-                        phase === 'revealed' && isCorrectOption
-                          ? 'bg-green-100 dark:bg-green-900 border-green-500'
-                          : phase === 'revealed' && !isCorrectOption
-                          ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700'
-                          : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'
-                      }`}
-                    >
-                      <div>
-                        <span className="font-bold text-xl">{String.fromCharCode(65 + index)}.</span>{' '}
-                        <span className="text-xl" style={{ color: phase === 'revealed' && (isCorrectOption || (currentQuestion.correctAnswers && currentQuestion.correctAnswers.includes(index))) ? 'inherit' : 'var(--color-text-primary)' }}>{option}</span>
-                        {phase === 'revealed' && isCorrectOption && (
-                          <span className="ml-2 text-green-600 dark:text-green-400 font-bold text-xl">✓</span>
-                        )}
-                      </div>
-                      {/* Justificación inline de esta opción */}
-                      {phase === 'revealed' && optionExplanation && (
-                        <p className={`mt-2 text-base italic ${
-                          isCorrectOption
-                            ? 'text-green-700 dark:text-green-300'
-                            : 'text-red-700 dark:text-red-300'
-                        }`}>
-                          → {optionExplanation}
-                        </p>
-                      )}
-                    </div>
-                  )
-                })}
+                {/* Botón Revelar (siempre disponible durante answering) */}
+                {phase === 'answering' && !isPaused && (
+                  <button
+                    onClick={handleReveal}
+                    className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold"
+                  >
+                    Revelar
+                  </button>
+                )}
+
+                <button
+                  onClick={endGame}
+                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold"
+                >
+                  Terminar
+                </button>
               </div>
-
-              {/* Justificación general (solo después de revelar) */}
-              {phase === 'revealed' && currentQuestion.explanation && (
-                <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-300 dark:border-blue-700 rounded-lg">
-                  <h4 className="font-bold text-blue-800 dark:text-blue-300 mb-2 text-lg">Explicación:</h4>
-                  <p className="text-blue-700 dark:text-blue-200 text-lg">{currentQuestion.explanation}</p>
-                </div>
-              )}
             </div>
 
+            {/* Pregunta */}
+            <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white mb-6">
+              {currentQuestion.question}
+            </h2>
+
+            {/* Opciones de referencia - FUENTE MUY GRANDE */}
+            <div className={`grid gap-4 mb-6 ${optionsLayout === '1col' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
+              {currentQuestion.options.map((option, index) => {
+                const isCorrectOption = correctAnswers.includes(index)
+                const optionExplanation = currentQuestion.optionExplanations?.[index]
+
+                return (
+                  <div
+                    key={index}
+                    className={`p-4 rounded-lg border-2 ${
+                      phase === 'revealed' && isCorrectOption
+                        ? 'bg-green-100 dark:bg-green-900 border-green-500'
+                        : phase === 'revealed' && !isCorrectOption
+                        ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700'
+                        : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'
+                    }`}
+                  >
+                    <div>
+                      <span className="font-bold text-2xl">{String.fromCharCode(65 + index)}.</span>{' '}
+                      <span className="text-2xl text-gray-800 dark:text-gray-200">{option}</span>
+                      {phase === 'revealed' && isCorrectOption && (
+                        <span className="ml-2 text-green-600 dark:text-green-400 font-bold text-2xl">✓</span>
+                      )}
+                    </div>
+                    {/* Justificación inline de esta opción - MISMO TAMAÑO */}
+                    {phase === 'revealed' && optionExplanation && (
+                      <p className={`mt-3 text-xl italic ${
+                        isCorrectOption
+                          ? 'text-green-700 dark:text-green-300'
+                          : 'text-red-700 dark:text-red-300'
+                      }`}>
+                        → {optionExplanation}
+                      </p>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Justificación general (solo después de revelar) - MISMO TAMAÑO */}
+            {phase === 'revealed' && currentQuestion.explanation && (
+              <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-300 dark:border-blue-700 rounded-lg">
+                <h4 className="font-bold text-blue-800 dark:text-blue-300 mb-2 text-xl">Explicación:</h4>
+                <p className="text-blue-700 dark:text-blue-200 text-xl">{currentQuestion.explanation}</p>
+              </div>
+            )}
+
+            {/* Separador visual */}
+            <div className="border-t border-gray-200 dark:border-gray-700 my-6"></div>
+
             {/* Panel de respuestas por alumno */}
-            <div className="rounded-2xl border p-6 mb-6" style={{ background: 'var(--color-bg-primary)', borderColor: 'var(--color-border)' }}>
-              <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 {phase === 'answering'
                   ? isPaused
                     ? 'Juego pausado'
-                    : 'Respuestas de los alumnos'
+                    : 'Respuestas de los alumnos (pueden marcar varias)'
                   : 'Resultados'
                 }
               </h3>
@@ -407,8 +410,10 @@ function AllAnswerScreen({
                 {rotatedStudents.map((student) => {
                   const answers = studentAnswers[student] || []
                   const hasAnswered = answers.length > 0
-                  const isCorrect = phase === 'revealed' && checkAnswerCorrect(answers)
-                  const isIncorrect = phase === 'revealed' && hasAnswered && !isCorrect
+                  const result = phase === 'revealed' ? calculateScore(answers) : null
+                  const isCorrect = result?.isExactMatch
+                  const isIncorrect = hasAnswered && !isCorrect && phase === 'revealed'
+                  const delta = scoreDeltas[student] || 0
 
                   return (
                     <div
@@ -423,7 +428,7 @@ function AllAnswerScreen({
                     >
                       <div className="flex items-center justify-between flex-wrap gap-3">
                         {/* Nombre del alumno */}
-                        <span className="font-semibold text-lg min-w-[100px]" style={{ color: 'var(--color-text-primary)' }}>
+                        <span className="font-semibold text-lg text-gray-900 dark:text-white min-w-[100px]">
                           {student}
                         </span>
 
@@ -475,12 +480,12 @@ function AllAnswerScreen({
                             <div className="text-sm">
                               {!hasAnswered ? (
                                 <span className="text-gray-400">-</span>
-                              ) : isCorrect ? (
-                                <span className="text-green-600">+1</span>
-                              ) : gameMode === 'penalty' ? (
-                                <span className="text-red-600">-1</span>
+                              ) : delta > 0 ? (
+                                <span className="text-green-600">+{delta}</span>
+                              ) : delta < 0 ? (
+                                <span className="text-red-600">{delta}</span>
                               ) : (
-                                <span className="text-red-600">+0</span>
+                                <span className="text-orange-500">+0</span>
                               )}
                             </div>
                           )}
@@ -494,7 +499,7 @@ function AllAnswerScreen({
 
             {/* Botón siguiente pregunta */}
             {phase === 'revealed' && (
-              <div className="flex gap-4 justify-center">
+              <div className="flex gap-4 justify-center mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
                 <button
                   onClick={handleNextQuestion}
                   className="px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold text-xl"
@@ -506,7 +511,7 @@ function AllAnswerScreen({
                 </button>
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
     </div>
