@@ -53,13 +53,17 @@ const safeAsync = async (fn, options = {}) => {
 };
 
 /**
- * Voice Preview Player - dentro del input
+ * Voice Preview Player - dentro del input (estilo WhatsApp moderno)
  */
 function VoicePreviewPlayer({ audioUrl, duration }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
   const audioRef = useRef(null);
+  const waveformRef = useRef(null);
+
+  // Waveform heights (mismo patrón que en burbujas)
+  const waveformHeights = [6, 10, 14, 11, 16, 13, 18, 11, 14, 8, 20, 13, 16, 10, 14, 18, 11, 22, 13, 10, 16, 14, 11, 18, 8, 13, 10];
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -110,7 +114,7 @@ function VoicePreviewPlayer({ audioUrl, duration }) {
     setIsPlaying(!isPlaying);
   };
 
-  const handleProgressClick = (e) => {
+  const handleWaveformClick = (e) => {
     const audio = audioRef.current;
     if (!audio || !audioDuration || !isFinite(audioDuration)) return;
     const rect = e.currentTarget.getBoundingClientRect();
@@ -133,30 +137,40 @@ function VoicePreviewPlayer({ audioUrl, duration }) {
     : 0;
 
   return (
-    <div className="voice-preview-player">
+    <div className="voice-preview-modern">
       <audio ref={audioRef} src={audioUrl} preload="metadata" />
+
+      {/* Play/Pause button */}
       <button
         type="button"
         onClick={togglePlayPause}
-        className="preview-play-btn"
+        className="preview-play-modern"
         title={isPlaying ? 'Pausar' : 'Reproducir'}
       >
-        {isPlaying ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
+        {isPlaying ? <Pause size={18} /> : <Play size={18} className="ml-0.5" />}
       </button>
-      <div className="preview-progress-container">
+
+      {/* Waveform + time */}
+      <div className="preview-waveform-container">
         <div
-          className="preview-progress-bar"
-          onClick={handleProgressClick}
+          ref={waveformRef}
+          className="preview-waveform"
+          onClick={handleWaveformClick}
         >
-          <div
-            className="preview-progress-fill"
-            style={{ width: `${progress}%`, transition: 'width 0.05s linear' }}
-          />
+          {waveformHeights.map((height, i) => {
+            const played = (i / waveformHeights.length) * 100 <= progress;
+            return (
+              <div
+                key={i}
+                className={`preview-waveform-bar ${played ? 'played' : ''}`}
+                style={{ height: `${height}px` }}
+              />
+            );
+          })}
         </div>
-        <div className="preview-time">
-          <span>{formatTime(currentTime)}</span>
-          <span>{formatTime(audioDuration)}</span>
-        </div>
+        <span className="preview-time-modern">
+          {formatTime(currentTime)} / {formatTime(audioDuration)}
+        </span>
       </div>
     </div>
   );
@@ -1516,12 +1530,17 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false}) 
             {/* Textarea / Timer / Player */}
             <div className="textarea-wrapper">
               {isRecordingVoice ? (
-                /* Grabando: mostrar timer GRANDE Y NEGRITA */
+                /* Grabando: timer moderno con waveform animado */
                 <div className="voice-recording-timer">
                   <span className="recording-indicator"></span>
                   <span className="timer-text">
                     {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}
                   </span>
+                  <div className="recording-waveform">
+                    {[...Array(15)].map((_, i) => (
+                      <div key={i} className="recording-waveform-bar" />
+                    ))}
+                  </div>
                 </div>
               ) : voiceBlob ? (
                 /* Preview del audio listo para enviar */
@@ -1619,7 +1638,7 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false}) 
                   onClick={stopRecording}
                   title="Detener grabación"
                 >
-                  <Square size={22} />
+                  <Square size={18} />
                 </button>
                 <button
                   type="button"
@@ -1627,31 +1646,31 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false}) 
                   onClick={cancelRecording}
                   title="Cancelar"
                 >
-                  <X size={22} />
+                  <X size={18} />
                 </button>
               </>
             ) : voiceBlob ? (
-              /* Audio listo: Send + Cancel */
+              /* Audio listo: Send + Delete */
               <>
                 <button
                   type="submit"
-                  className="send-button"
+                  className="voice-send-button"
                   disabled={sending || uploading}
                   title="Enviar audio"
                 >
                   {uploading ? (
                     <div className="spinner-small"></div>
                   ) : (
-                    <Send size={22} />
+                    <Send size={18} />
                   )}
                 </button>
                 <button
                   type="button"
-                  className="voice-cancel-button"
+                  className="voice-delete-button"
                   onClick={cancelRecording}
-                  title="Cancelar"
+                  title="Eliminar"
                 >
-                  <X size={22} />
+                  <Trash2 size={18} />
                 </button>
               </>
             ) : newMessage.trim() || selectedFile || editingMessage ? (
