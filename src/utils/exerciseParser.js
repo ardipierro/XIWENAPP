@@ -68,12 +68,12 @@ export function parseExerciseFile(text, category) {
                trimmedSection.startsWith('#OPEN_QUESTIONS') ||
                trimmedSection.startsWith('[OPEN_QUESTIONS]')) {
       currentType = EXERCISE_TYPES.OPEN_QUESTIONS;
-      continue;
+      // Don't continue - parse this section as open questions
     } else if (trimmedSection.startsWith('#TABLA_INFO') ||
                trimmedSection.startsWith('#INFO_TABLE') ||
                trimmedSection.startsWith('[INFO_TABLE]')) {
       currentType = EXERCISE_TYPES.INFO_TABLE;
-      continue;
+      // Don't continue - parse this section as info table
     }
 
     // Auto-detect numbered questions format (1. 2. 3. etc.)

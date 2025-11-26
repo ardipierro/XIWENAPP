@@ -1,6 +1,7 @@
 /**
  * @fileoverview Exercise Viewer Modal - Visualización interactiva de ejercicios
  * @module components/ExerciseViewerModal
+ * @updated 2025-11-25 - Fixed exercise.body priority
  */
 
 import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
@@ -128,14 +129,32 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
 
     console.log('%c=== EXERCISE VIEWER MODAL ===', 'background: blue; color: white; font-size: 16px; padding: 5px;');
     console.log('📝 Exercise title:', exercise.title);
+    console.log('🔍 Available fields:', Object.keys(exercise));
 
-    // Detectar tipo de ejercicio y obtener contenido limpio
-    // Soportar tanto 'content' como 'body' para compatibilidad
-    let exerciseContent = exercise.content || exercise.body || '';
+    // Prioridad: body (objeto parseado) > content (texto) > rawContent
+    // Los ejercicios creados por AI se guardan como objeto parseado en 'body'
+    let exerciseContent = null;
+
+    if (exercise.body && typeof exercise.body === 'object' && !Array.isArray(exercise.body)) {
+      console.log('✅ Using exercise.body (parsed object)');
+      exerciseContent = exercise.body;
+    } else if (exercise.content) {
+      console.log('✅ Using exercise.content');
+      exerciseContent = exercise.content;
+    } else if (exercise.rawContent) {
+      console.log('✅ Using exercise.rawContent');
+      exerciseContent = exercise.rawContent;
+    } else {
+      console.log('❌ No content found in exercise');
+      exerciseContent = '';
+    }
 
     console.log('📄 Content type:', typeof exerciseContent);
     console.log('📏 Content length:', typeof exerciseContent === 'string' ? exerciseContent.length : 'N/A');
-    if (typeof exerciseContent === 'string') {
+    if (typeof exerciseContent === 'object') {
+      console.log('📦 Content object keys:', Object.keys(exerciseContent));
+      console.log('📦 Content object:', exerciseContent);
+    } else if (typeof exerciseContent === 'string') {
       console.log('📝 Content preview (first 300 chars):', exerciseContent.substring(0, 300));
     }
 
