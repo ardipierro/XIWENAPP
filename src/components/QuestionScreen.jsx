@@ -384,8 +384,7 @@ function QuestionScreen({
           <div className="mb-6">
             {!hasStarted && isPaused && !showFeedback && !unlimitedTime ? (
               <div className="bg-gray-100 dark:bg-gray-700 border-2 border-gray-400 dark:border-gray-600 rounded-lg p-8 text-center">
-                <h3 style={{ fontSize: `${1.5 * scale}rem` }} className="font-bold text-gray-900 dark:text-white mb-2">Juego en Pausa</h3>
-                <p style={{ fontSize: `${scale}rem` }} className="text-gray-700 dark:text-gray-300">Presiona "Iniciar" cuando estén listos</p>
+                <p style={{ fontSize: `${1.25 * scale}rem` }} className="text-gray-700 dark:text-gray-300">Presiona "Iniciar" cuando estén listos</p>
               </div>
             ) : (
               <>
