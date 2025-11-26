@@ -35,6 +35,7 @@ function GameContainer({ onBack }) {
   const [gameMode, setGameMode] = useState('classic');
   const [repeatMode, setRepeatMode] = useState('shuffle');
   const [turnMode, setTurnMode] = useState('turns'); // 'turns' = por turnos, 'all' = todos responden
+  const [optionsLayout, setOptionsLayout] = useState('2cols'); // '1col' o '2cols'
 
   // Historial
   const [gameHistory, setGameHistory] = useState([]);
@@ -292,6 +293,7 @@ function GameContainer({ onBack }) {
           timePerQuestion={timePerQuestion}
           unlimitedTime={unlimitedTime}
           gameMode={gameMode}
+          optionsLayout={optionsLayout}
           setScreen={setScreen}
           saveGameToHistory={saveGameToHistory}
         />
@@ -353,6 +355,8 @@ function GameContainer({ onBack }) {
       setGameMode={setGameMode}
       turnMode={turnMode}
       setTurnMode={setTurnMode}
+      optionsLayout={optionsLayout}
+      setOptionsLayout={setOptionsLayout}
       questionsByCategory={questionsByCategory}
       setQuestionsByCategory={setQuestionsByCategory}
       selectedCategory={selectedCategory}

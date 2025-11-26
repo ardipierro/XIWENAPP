@@ -18,6 +18,8 @@ function SetupScreen({
   setGameMode,
   turnMode,
   setTurnMode,
+  optionsLayout,
+  setOptionsLayout,
   questionsByCategory,
   setQuestionsByCategory,
   selectedCategory,
@@ -60,24 +62,21 @@ function SetupScreen({
     }
   }
 
-  // Función para agregar alumno seleccionado a la partida
-  const addSelectedStudent = () => {
-    const student = availableStudents.find(s => s.id === selectedStudentId)
-    if (!student) {
-      alert('Por favor selecciona un alumno')
-      return
-    }
+  // Función para agregar alumno - se llama automáticamente al seleccionar
+  const handleStudentSelect = (studentId) => {
+    if (!studentId) return
+
+    const student = availableStudents.find(s => s.id === studentId)
+    if (!student) return
 
     // Verificar si ya está en la lista
     const studentExists = students.some(s => s.trim().toLowerCase() === student.name.toLowerCase())
     if (studentExists) {
-      alert(`${student.name} ya está en la lista`)
-      return
+      return // Ya está, no hacer nada
     }
 
-    // Agregar alumno
+    // Agregar alumno automáticamente
     setStudents([...students, student.name])
-    setSelectedStudentId('') // Limpiar selección
   }
 
   // Función para remover alumno de la partida
@@ -194,33 +193,23 @@ function SetupScreen({
           </div>
 
           <div className="bg-white dark:bg-gray-900 p-4 rounded-lg mb-4">
-            <div className="flex gap-2">
-              <BaseSelect
-                value={selectedStudentId}
-                onChange={(e) => setSelectedStudentId(e.target.value)}
-                options={[
-                  { value: '', label: '-- Selecciona un alumno --' },
-                  ...availableStudents.map(student => ({
+            <BaseSelect
+              value=""
+              onChange={(e) => handleStudentSelect(e.target.value)}
+              options={[
+                { value: '', label: '-- Selecciona un alumno para agregar --' },
+                ...availableStudents
+                  .filter(student => !students.some(s => s.trim().toLowerCase() === student.name.toLowerCase()))
+                  .map(student => ({
                     value: student.id,
                     label: `${student.name}${student.grade ? ` (${student.grade}${student.section || ''})` : ''}`
                   }))
-                ]}
-                label="Seleccionar alumno para agregar a la partida"
-                disabled={loadingStudents}
-                error={errorStudents}
-              />
-              <div className="flex items-end">
-                <BaseButton
-                  variant="success"
-                  onClick={addSelectedStudent}
-                  icon={Plus}
-                  disabled={loadingStudents || !selectedStudentId}
-                >
-                  Agregar
-                </BaseButton>
-              </div>
-            </div>
-            
+              ]}
+              label="Agregar alumno (selecciona para agregar automáticamente)"
+              disabled={loadingStudents}
+              error={errorStudents}
+            />
+
             {availableStudents.length === 0 && (
               <p className="mt-3 text-sm text-orange-600 bg-orange-50 p-3 rounded-lg flex items-center gap-2">
                 <AlertTriangle size={18} strokeWidth={2} className="inline-icon flex-shrink-0" /> No hay alumnos creados. Ve al Panel del Profesor → Gestionar Alumnos para crear el primero.
@@ -380,6 +369,20 @@ function SetupScreen({
               label="Modo de participación"
             />
           </div>
+
+          {turnMode === 'all' && (
+            <div className="mb-4">
+              <BaseSelect
+                value={optionsLayout}
+                onChange={(e) => setOptionsLayout(e.target.value)}
+                options={[
+                  { value: '2cols', label: '2 columnas (respuestas cortas)' },
+                  { value: '1col', label: '1 columna (respuestas largas)' }
+                ]}
+                label="Layout de opciones"
+              />
+            </div>
+          )}
 
           <div className="mb-4">
             <BaseSelect
