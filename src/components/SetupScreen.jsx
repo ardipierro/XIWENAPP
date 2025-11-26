@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Target, BookOpen, Trash2, Plus, Check, AlertTriangle, Settings, Clock } from 'lucide-react'
+import { Target, BookOpen, Trash2, Plus, Check, AlertTriangle, Settings, Clock, ZoomIn } from 'lucide-react'
 import HistoryModal from './HistoryModal'
 import { loadStudents } from '../firebase/firestore'
 import logger from '../utils/logger'
@@ -26,7 +26,9 @@ function SetupScreen({
   setGameHistory,
   parseQuestions,
   startGame,
-  onBack
+  onBack,
+  fontScale = 100,
+  setFontScale
 }) {
   const [showHistory, setShowHistory] = useState(false)
   const [newCategoryName, setNewCategoryName] = useState('')
@@ -424,6 +426,46 @@ function SetupScreen({
               />
             </div>
           )}
+
+          {/* Control de tamaño de fuente */}
+          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
+              <ZoomIn size={18} strokeWidth={2} className="inline-icon" />
+              Tamaño de fuente: {fontScale}%
+              <span className="text-gray-500 font-normal ml-2">(para pantalla completa)</span>
+            </label>
+            <input
+              type="range"
+              min="80"
+              max="200"
+              step="10"
+              value={fontScale}
+              onChange={(e) => setFontScale && setFontScale(parseInt(e.target.value))}
+              className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
+            />
+            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+              <span>80%</span>
+              <span>100% (normal)</span>
+              <span>150%</span>
+              <span>200%</span>
+            </div>
+            <div className="mt-3 flex gap-2">
+              {[80, 100, 120, 150, 200].map(size => (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => setFontScale && setFontScale(size)}
+                  className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                    fontScale === size
+                      ? 'bg-gray-700 text-white dark:bg-gray-300 dark:text-gray-900'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  {size}%
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* ============================================ */}

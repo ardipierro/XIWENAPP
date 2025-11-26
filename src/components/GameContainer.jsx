@@ -33,6 +33,7 @@ function GameContainer({ onBack }) {
   const [unlimitedTime, setUnlimitedTime] = useState(false);
   const [gameMode, setGameMode] = useState('classic');
   const [repeatMode, setRepeatMode] = useState('shuffle');
+  const [fontScale, setFontScale] = useState(100); // Porcentaje de escala de fuente (100 = normal)
 
   // Historial
   const [gameHistory, setGameHistory] = useState([]);
@@ -261,6 +262,7 @@ function GameContainer({ onBack }) {
         repeatMode={repeatMode}
         setScreen={setScreen}
         saveGameToHistory={saveGameToHistory}
+        fontScale={fontScale}
       />
     );
   }
@@ -303,6 +305,8 @@ function GameContainer({ onBack }) {
       parseQuestions={parseQuestions}
       startGame={startGame}
       onBack={onBack}
+      fontScale={fontScale}
+      setFontScale={setFontScale}
     />
   );
 }
