@@ -16,6 +16,8 @@ function SetupScreen({
   setUnlimitedTime,
   gameMode,
   setGameMode,
+  turnMode,
+  setTurnMode,
   questionsByCategory,
   setQuestionsByCategory,
   selectedCategory,
@@ -134,30 +136,27 @@ function SetupScreen({
       reader.onload = (event) => {
         const content = event.target.result
         const lines = content.split('\n')
-        
-        let categoryName = ''
-        let categoryQuestions = []
-        const newCategories = { ...questionsByCategory }
-        
-        for (const line of lines) {
-          const trimmedLine = line.trim()
-          
-          if (trimmedLine.startsWith('::')) {
-            if (categoryName && categoryQuestions.length > 0) {
-              newCategories[categoryName] = categoryQuestions.join('\n')
-            }
-            categoryName = trimmedLine.substring(2).trim()
-            categoryQuestions = []
-          } else if (trimmedLine) {
-            categoryQuestions.push(trimmedLine)
-          }
+
+        // Usar el nombre del archivo (sin extensión) como nombre
+        const fileName = file.name.replace(/\.[^/.]+$/, '')
+
+        // Filtrar líneas vacías
+        const questionLines = lines
+          .map(line => line.trim())
+          .filter(line => line.length > 0)
+
+        if (questionLines.length > 0) {
+          const newCategories = { ...questionsByCategory }
+          newCategories[fileName] = questionLines.join('\n')
+          setQuestionsByCategory(newCategories)
+          setSelectedCategory(fileName)
+
+          // Contar preguntas parseadas para feedback
+          const parsed = parseQuestions(questionLines.join('\n'))
+          alert(`Se importaron ${parsed.length} preguntas de "${fileName}"`)
+        } else {
+          alert('El archivo está vacío')
         }
-        
-        if (categoryName && categoryQuestions.length > 0) {
-          newCategories[categoryName] = categoryQuestions.join('\n')
-        }
-        
-        setQuestionsByCategory(newCategories)
       }
       reader.readAsText(file)
     }
@@ -372,28 +371,42 @@ function SetupScreen({
 
           <div className="mb-4">
             <BaseSelect
+              value={turnMode}
+              onChange={(e) => setTurnMode(e.target.value)}
+              options={[
+                { value: 'turns', label: 'Por Turnos (cada alumno responde una pregunta)' },
+                { value: 'all', label: 'Todos Responden (todos responden la misma pregunta)' }
+              ]}
+              label="Modo de participación"
+            />
+          </div>
+
+          <div className="mb-4">
+            <BaseSelect
               value={gameMode}
               onChange={(e) => setGameMode(e.target.value)}
               options={[
                 { value: 'classic', label: 'Clásico (solo puntos positivos)' },
                 { value: 'penalty', label: 'Con Penalización (-1 por error)' }
               ]}
-              label="Modo de juego"
+              label="Modo de puntuación"
             />
           </div>
 
-          <div className="mb-4">
-            <BaseSelect
-              value={repeatMode}
-              onChange={(e) => setRepeatMode(e.target.value)}
-              options={[
-                { value: 'shuffle', label: 'Reinserción aleatoria (pregunta incorrecta vuelve al mazo)' },
-                { value: 'repeat', label: 'Repetir hasta correcta (no avanza hasta responder bien)' },
-                { value: 'none', label: 'Sin repetición (una sola vez cada pregunta)' }
-              ]}
-              label="Repetición de preguntas"
-            />
-          </div>
+          {turnMode === 'turns' && (
+            <div className="mb-4">
+              <BaseSelect
+                value={repeatMode}
+                onChange={(e) => setRepeatMode(e.target.value)}
+                options={[
+                  { value: 'shuffle', label: 'Reinserción aleatoria (pregunta incorrecta vuelve al mazo)' },
+                  { value: 'repeat', label: 'Repetir hasta correcta (no avanza hasta responder bien)' },
+                  { value: 'none', label: 'Sin repetición (una sola vez cada pregunta)' }
+                ]}
+                label="Repetición de preguntas"
+              />
+            </div>
+          )}
 
           <div className="mb-4">
             <label className="flex items-center cursor-pointer">
