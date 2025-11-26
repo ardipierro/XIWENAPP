@@ -59,6 +59,12 @@ function GameContainer({ onBack }) {
     }
   };
 
+  // Función para quitar letra inicial (A., B., etc.) si ya viene en el texto
+  const removeLeadingLetter = (text) => {
+    // Quita patrones como "A.", "A)", "A ", "a.", "a)", "a " al inicio
+    return text.replace(/^[A-Da-d][\.\)\s]\s*/, '').trim();
+  };
+
   // Función para parsear preguntas desde texto
   const parseQuestions = (text, category) => {
     const parsedQuestions = [];
@@ -68,42 +74,56 @@ function GameContainer({ onBack }) {
       .map(line => line.trim())
       .filter(line => line.length > 0); // Eliminar líneas vacías
 
-    // Procesar cada grupo de 5 líneas (1 pregunta + 4 opciones)
-    for (let i = 0; i < allLines.length; i += 5) {
-      // Verificar que hay al menos 5 líneas disponibles
-      if (i + 4 < allLines.length) {
-        const questionText = allLines[i];
-        const options = [
-          allLines[i + 1],
-          allLines[i + 2],
-          allLines[i + 3],
-          allLines[i + 4]
-        ];
+    let i = 0;
+    while (i < allLines.length) {
+      const questionText = allLines[i];
+      i++;
 
-        // Buscar la opción que empieza con asterisco
-        const correctAnswerText = options.find((opt) =>
-          opt.startsWith('*') || opt.includes('(correcta)')
-        );
+      // Recolectar opciones (hasta 4, o hasta encontrar :: o nueva pregunta)
+      const options = [];
+      const correctIndices = [];
 
-        if (correctAnswerText) {
-          // Limpiar las opciones (quitar asterisco y marcas)
-          const cleanOptions = options.map((opt) =>
-            opt.replace(/^\*/, '').replace(/\(correcta\)/g, '').trim()
-          );
+      while (i < allLines.length && options.length < 4) {
+        const line = allLines[i];
 
-          // Encontrar el índice de la respuesta correcta
-          const correctAnswerCleaned = correctAnswerText.replace(/^\*/, '').replace(/\(correcta\)/g, '').trim();
-          const correctIndex = cleanOptions.findIndex(opt => opt === correctAnswerCleaned);
-
-          if (correctIndex !== -1) {
-            parsedQuestions.push({
-              question: questionText,
-              options: cleanOptions,
-              correct: correctIndex,
-              category: category
-            });
-          }
+        // Si empieza con :: es justificación, salir del loop de opciones
+        if (line.startsWith('::')) {
+          break;
         }
+
+        // Detectar si es una opción (puede empezar con * para correcta)
+        const isCorrect = line.startsWith('*') || line.includes('(correcta)');
+        let optionText = line.replace(/^\*/, '').replace(/\(correcta\)/g, '').trim();
+
+        // Quitar letra inicial si ya viene (A., B., etc.)
+        optionText = removeLeadingLetter(optionText);
+
+        if (optionText) {
+          if (isCorrect) {
+            correctIndices.push(options.length);
+          }
+          options.push(optionText);
+        }
+        i++;
+      }
+
+      // Buscar justificación (línea que empieza con ::)
+      let explanation = null;
+      if (i < allLines.length && allLines[i].startsWith('::')) {
+        explanation = allLines[i].substring(2).trim();
+        i++;
+      }
+
+      // Validar que tenemos al menos 2 opciones y al menos 1 respuesta correcta
+      if (options.length >= 2 && correctIndices.length > 0) {
+        parsedQuestions.push({
+          question: questionText,
+          options: options,
+          // Si hay múltiples correctas, guardar array; si es una sola, guardar el índice
+          correct: correctIndices.length === 1 ? correctIndices[0] : correctIndices,
+          explanation: explanation,
+          category: category
+        });
       }
     }
 

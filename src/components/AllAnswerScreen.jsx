@@ -19,19 +19,26 @@ function AllAnswerScreen({
   setScreen,
   saveGameToHistory
 }) {
-  // Respuestas de cada alumno para la pregunta actual (null = no respondió)
+  // Respuestas de cada alumno para la pregunta actual (array de índices para múltiples respuestas)
   const [studentAnswers, setStudentAnswers] = useState({})
   // Índice del alumno que debe responder ahora (orden rotativo)
   const [currentAnsweringIndex, setCurrentAnsweringIndex] = useState(0)
-  // Estado: 'answering' = recolectando respuestas, 'revealed' = mostrando resultados
-  const [phase, setPhase] = useState('answering')
+  // Estado: 'waiting' = esperando iniciar, 'answering' = recolectando respuestas, 'revealed' = mostrando resultados
+  const [phase, setPhase] = useState('waiting')
   // Tiempo restante
   const [timeLeft, setTimeLeft] = useState(timePerQuestion)
   // Tiempo de inicio de la pregunta
-  const [questionStartTime, setQuestionStartTime] = useState(Date.now())
+  const [questionStartTime, setQuestionStartTime] = useState(null)
+  // Pausa
+  const [isPaused, setIsPaused] = useState(false)
+  const [pausedTime, setPausedTime] = useState(0)
 
   const validStudents = students.filter(s => s.trim())
   const currentQuestion = parsedQuestions[currentQuestionIndex]
+
+  // Determinar si la pregunta tiene múltiples respuestas correctas
+  const isMultipleAnswer = currentQuestion && Array.isArray(currentQuestion.correct)
+  const correctAnswers = isMultipleAnswer ? currentQuestion.correct : [currentQuestion?.correct]
 
   // El orden de respuesta rota según el número de pregunta
   const getRotatedStudents = () => {
@@ -46,14 +53,16 @@ function AllAnswerScreen({
   useEffect(() => {
     setStudentAnswers({})
     setCurrentAnsweringIndex(0)
-    setPhase('answering')
+    setPhase('waiting') // Empieza en espera
     setTimeLeft(timePerQuestion)
-    setQuestionStartTime(Date.now())
+    setQuestionStartTime(null)
+    setIsPaused(false)
+    setPausedTime(0)
   }, [currentQuestionIndex, timePerQuestion])
 
   // Timer
   useEffect(() => {
-    if (phase === 'answering' && !unlimitedTime && timeLeft > 0) {
+    if (phase === 'answering' && !unlimitedTime && timeLeft > 0 && !isPaused) {
       const timer = setTimeout(() => {
         setTimeLeft(timeLeft - 1)
       }, 1000)
@@ -62,7 +71,7 @@ function AllAnswerScreen({
       // Tiempo agotado, revelar resultados
       handleReveal()
     }
-  }, [timeLeft, phase, unlimitedTime])
+  }, [timeLeft, phase, unlimitedTime, isPaused])
 
   // Sonidos
   const playCorrectSound = () => {
@@ -101,29 +110,87 @@ function AllAnswerScreen({
     }
   }
 
-  // Marcar respuesta de un alumno
+  // Iniciar el juego
+  const handleStart = () => {
+    setPhase('answering')
+    setQuestionStartTime(Date.now())
+  }
+
+  // Pausar/reanudar
+  const togglePause = () => {
+    if (isPaused) {
+      // Reanudar - ajustar el tiempo de inicio
+      if (pausedTime > 0 && questionStartTime) {
+        const pauseDuration = Date.now() - pausedTime
+        setQuestionStartTime(questionStartTime + pauseDuration)
+      }
+    } else {
+      // Pausar
+      setPausedTime(Date.now())
+    }
+    setIsPaused(!isPaused)
+  }
+
+  // Marcar/desmarcar respuesta de un alumno (toggle para múltiples respuestas)
   const handleAnswer = (student, answerIndex) => {
-    if (phase !== 'answering') return
+    if (phase !== 'answering' || isPaused) return
 
-    setStudentAnswers(prev => ({
-      ...prev,
-      [student]: answerIndex
-    }))
+    setStudentAnswers(prev => {
+      const currentAnswers = prev[student] || []
 
-    // Avanzar al siguiente alumno que debe responder
+      if (isMultipleAnswer) {
+        // Múltiples respuestas: toggle
+        if (currentAnswers.includes(answerIndex)) {
+          return {
+            ...prev,
+            [student]: currentAnswers.filter(i => i !== answerIndex)
+          }
+        } else {
+          return {
+            ...prev,
+            [student]: [...currentAnswers, answerIndex]
+          }
+        }
+      } else {
+        // Respuesta única
+        return {
+          ...prev,
+          [student]: [answerIndex]
+        }
+      }
+    })
+  }
+
+  // Confirmar respuesta del alumno actual y pasar al siguiente
+  const confirmAnswer = (student) => {
     if (currentAnsweringIndex < rotatedStudents.length - 1) {
       setCurrentAnsweringIndex(currentAnsweringIndex + 1)
     }
   }
 
-  // Verificar si todos respondieron
-  const allAnswered = rotatedStudents.every(student => studentAnswers[student] !== undefined)
+  // Verificar si todos respondieron (al menos seleccionaron algo)
+  const allAnswered = rotatedStudents.every(student => {
+    const answers = studentAnswers[student]
+    return answers && answers.length > 0
+  })
+
+  // Verificar si las respuestas son correctas
+  const checkAnswerCorrect = (studentAnswerArray) => {
+    if (!studentAnswerArray || studentAnswerArray.length === 0) return false
+
+    // Ordenar ambos arrays para comparar
+    const sortedStudent = [...studentAnswerArray].sort()
+    const sortedCorrect = [...correctAnswers].sort()
+
+    if (sortedStudent.length !== sortedCorrect.length) return false
+    return sortedStudent.every((val, idx) => val === sortedCorrect[idx])
+  }
 
   // Revelar resultados
   const handleReveal = () => {
     setPhase('revealed')
 
-    const responseTime = (Date.now() - questionStartTime) / 1000
+    const responseTime = questionStartTime ? (Date.now() - questionStartTime) / 1000 : 0
     const newScores = { ...scores }
     const newQuestionsAnswered = { ...questionsAnswered }
     const newResponseTimes = { ...responseTimes }
@@ -132,8 +199,8 @@ function AllAnswerScreen({
     let anyIncorrect = false
 
     rotatedStudents.forEach(student => {
-      const answer = studentAnswers[student]
-      const isCorrect = answer === currentQuestion.correct
+      const answers = studentAnswers[student] || []
+      const isCorrect = checkAnswerCorrect(answers)
 
       newQuestionsAnswered[student] = (newQuestionsAnswered[student] || 0) + 1
       newResponseTimes[student] = (newResponseTimes[student] || 0) + responseTime / rotatedStudents.length
@@ -141,8 +208,10 @@ function AllAnswerScreen({
       if (isCorrect) {
         newScores[student] = (newScores[student] || 0) + 1
         anyCorrect = true
-      } else if (answer !== undefined && gameMode === 'penalty') {
+      } else if (answers.length > 0 && gameMode === 'penalty') {
         newScores[student] = Math.max(0, (newScores[student] || 0) - 1)
+        anyIncorrect = true
+      } else if (answers.length > 0) {
         anyIncorrect = true
       }
     })
@@ -188,16 +257,46 @@ function AllAnswerScreen({
       <div className="max-w-5xl mx-auto">
         {/* Header con tiempo y controles */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 md:p-6 mb-6">
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center flex-wrap gap-3">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
               Pregunta {currentQuestionIndex + 1} de {parsedQuestions.length}
+              {isMultipleAnswer && (
+                <span className="ml-2 text-sm bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-2 py-1 rounded">
+                  Múltiple respuesta
+                </span>
+              )}
             </h3>
             <div className="flex items-center gap-3">
               {!unlimitedTime && (
                 <div className={`text-2xl font-bold ${timeLeft <= 10 ? 'text-red-500' : 'text-gray-700 dark:text-gray-300'}`}>
                   {String(timeLeft).padStart(2, '0')} seg.
+                  {isPaused && <span className="text-orange-500 text-base ml-2">(Pausado)</span>}
                 </div>
               )}
+
+              {/* Botón Iniciar/Pausar */}
+              {phase === 'waiting' && (
+                <button
+                  onClick={handleStart}
+                  className="px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold"
+                >
+                  Iniciar
+                </button>
+              )}
+
+              {phase === 'answering' && !unlimitedTime && (
+                <button
+                  onClick={togglePause}
+                  className={`px-4 py-2 rounded-lg font-semibold ${
+                    isPaused
+                      ? 'bg-green-500 hover:bg-green-600 text-white'
+                      : 'bg-orange-500 hover:bg-orange-600 text-white'
+                  }`}
+                >
+                  {isPaused ? 'Reanudar' : 'Pausar'}
+                </button>
+              )}
+
               <button
                 onClick={endGame}
                 className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold"
@@ -208,150 +307,198 @@ function AllAnswerScreen({
           </div>
         </div>
 
-        {/* Pregunta */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 md:p-8 mb-6">
-          <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white mb-6">
-            {currentQuestion.question}
-          </h2>
-
-          {/* Opciones de referencia */}
-          <div className="grid grid-cols-2 gap-3 mb-6">
-            {currentQuestion.options.map((option, index) => (
-              <div
-                key={index}
-                className={`p-3 rounded-lg border-2 ${
-                  phase === 'revealed' && index === currentQuestion.correct
-                    ? 'bg-green-100 dark:bg-green-900 border-green-500'
-                    : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'
-                }`}
-              >
-                <span className="font-bold text-lg">{String.fromCharCode(65 + index)}.</span>{' '}
-                <span className="text-gray-800 dark:text-gray-200">{option}</span>
-              </div>
-            ))}
+        {/* Pantalla de espera */}
+        {phase === 'waiting' && (
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 mb-6 text-center">
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              ¿Listos?
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-400 mb-6">
+              Presiona "Iniciar" cuando todos estén preparados
+            </p>
+            <button
+              onClick={handleStart}
+              className="px-12 py-4 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold text-2xl"
+            >
+              Iniciar Pregunta
+            </button>
           </div>
-        </div>
+        )}
 
-        {/* Panel de respuestas por alumno */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            {phase === 'answering'
-              ? `Turno de responder: ${currentAnsweringStudent || 'Todos respondieron'}`
-              : 'Resultados'
-            }
-          </h3>
+        {/* Pregunta (solo visible cuando no está en espera) */}
+        {phase !== 'waiting' && (
+          <>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 md:p-8 mb-6">
+              <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white mb-6">
+                {currentQuestion.question}
+              </h2>
 
-          <div className="space-y-3">
-            {rotatedStudents.map((student, studentIndex) => {
-              const answer = studentAnswers[student]
-              const hasAnswered = answer !== undefined
-              const isCurrentTurn = phase === 'answering' && studentIndex === currentAnsweringIndex
-              const isCorrect = phase === 'revealed' && answer === currentQuestion.correct
-              const isIncorrect = phase === 'revealed' && hasAnswered && answer !== currentQuestion.correct
-
-              return (
-                <div
-                  key={student}
-                  className={`p-4 rounded-lg border-2 ${
-                    isCurrentTurn
-                      ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-500'
-                      : isCorrect
-                      ? 'bg-green-50 dark:bg-green-900/30 border-green-500'
-                      : isIncorrect
-                      ? 'bg-red-50 dark:bg-red-900/30 border-red-500'
-                      : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'
-                  }`}
-                >
-                  <div className="flex items-center justify-between flex-wrap gap-3">
-                    {/* Nombre y puntaje */}
-                    <div className="flex items-center gap-3">
-                      <span className="font-semibold text-lg text-gray-900 dark:text-white">
-                        {student}
-                      </span>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        ({scores[student] || 0} pts)
-                      </span>
-                      {isCurrentTurn && (
-                        <span className="px-2 py-1 bg-blue-500 text-white text-xs font-bold rounded-full">
-                          SU TURNO
-                        </span>
-                      )}
+              {/* Opciones de referencia */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+                {currentQuestion.options.map((option, index) => {
+                  const isCorrectOption = correctAnswers.includes(index)
+                  return (
+                    <div
+                      key={index}
+                      className={`p-3 rounded-lg border-2 ${
+                        phase === 'revealed' && isCorrectOption
+                          ? 'bg-green-100 dark:bg-green-900 border-green-500'
+                          : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'
+                      }`}
+                    >
+                      <span className="font-bold text-lg">{String.fromCharCode(65 + index)}.</span>{' '}
+                      <span className="text-gray-800 dark:text-gray-200">{option}</span>
                     </div>
+                  )
+                })}
+              </div>
 
-                    {/* Botones de respuesta */}
-                    <div className="flex gap-2">
-                      {currentQuestion.options.map((_, optIndex) => {
-                        const isSelected = answer === optIndex
-                        const showAsCorrect = phase === 'revealed' && optIndex === currentQuestion.correct
-                        const showAsWrong = phase === 'revealed' && isSelected && optIndex !== currentQuestion.correct
+              {/* Justificación (solo después de revelar) */}
+              {phase === 'revealed' && currentQuestion.explanation && (
+                <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-300 dark:border-blue-700 rounded-lg">
+                  <h4 className="font-bold text-blue-800 dark:text-blue-300 mb-2">Explicación:</h4>
+                  <p className="text-blue-700 dark:text-blue-200">{currentQuestion.explanation}</p>
+                </div>
+              )}
+            </div>
 
-                        return (
-                          <button
-                            key={optIndex}
-                            onClick={() => handleAnswer(student, optIndex)}
-                            disabled={phase === 'revealed' || (phase === 'answering' && studentIndex !== currentAnsweringIndex)}
-                            className={`w-12 h-12 rounded-lg font-bold text-lg transition-all ${
-                              showAsCorrect
-                                ? 'bg-green-500 text-white'
-                                : showAsWrong
-                                ? 'bg-red-500 text-white'
-                                : isSelected
-                                ? 'bg-blue-500 text-white'
-                                : phase === 'answering' && studentIndex === currentAnsweringIndex
-                                ? 'bg-gray-200 dark:bg-gray-600 hover:bg-blue-400 hover:text-white text-gray-800 dark:text-gray-200'
-                                : 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
-                            }`}
-                          >
-                            {String.fromCharCode(65 + optIndex)}
-                          </button>
-                        )
-                      })}
-                    </div>
+            {/* Panel de respuestas por alumno */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                {phase === 'answering'
+                  ? isPaused
+                    ? 'Juego pausado'
+                    : `Turno de responder: ${currentAnsweringStudent || 'Todos respondieron'}`
+                  : 'Resultados'
+                }
+              </h3>
 
-                    {/* Resultado */}
-                    {phase === 'revealed' && (
-                      <div className="text-lg font-bold">
-                        {!hasAnswered ? (
-                          <span className="text-gray-400">No respondió</span>
-                        ) : isCorrect ? (
-                          <span className="text-green-600">+1 punto</span>
-                        ) : gameMode === 'penalty' ? (
-                          <span className="text-red-600">-1 punto</span>
-                        ) : (
-                          <span className="text-red-600">0 puntos</span>
+              <div className="space-y-3">
+                {rotatedStudents.map((student, studentIndex) => {
+                  const answers = studentAnswers[student] || []
+                  const hasAnswered = answers.length > 0
+                  const isCurrentTurn = phase === 'answering' && studentIndex === currentAnsweringIndex && !isPaused
+                  const isCorrect = phase === 'revealed' && checkAnswerCorrect(answers)
+                  const isIncorrect = phase === 'revealed' && hasAnswered && !isCorrect
+
+                  return (
+                    <div
+                      key={student}
+                      className={`p-4 rounded-lg border-2 ${
+                        isCurrentTurn
+                          ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-500'
+                          : isCorrect
+                          ? 'bg-green-50 dark:bg-green-900/30 border-green-500'
+                          : isIncorrect
+                          ? 'bg-red-50 dark:bg-red-900/30 border-red-500'
+                          : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between flex-wrap gap-3">
+                        {/* Nombre y puntaje */}
+                        <div className="flex items-center gap-3">
+                          <span className="font-semibold text-lg text-gray-900 dark:text-white">
+                            {student}
+                          </span>
+                          <span className="text-sm text-gray-500 dark:text-gray-400">
+                            ({scores[student] || 0} pts)
+                          </span>
+                          {isCurrentTurn && (
+                            <span className="px-2 py-1 bg-blue-500 text-white text-xs font-bold rounded-full">
+                              SU TURNO
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Botones de respuesta */}
+                        <div className="flex gap-2 items-center">
+                          {currentQuestion.options.map((_, optIndex) => {
+                            const isSelected = answers.includes(optIndex)
+                            const isCorrectOption = correctAnswers.includes(optIndex)
+                            const showAsCorrect = phase === 'revealed' && isCorrectOption
+                            const showAsWrong = phase === 'revealed' && isSelected && !isCorrectOption
+
+                            return (
+                              <button
+                                key={optIndex}
+                                onClick={() => handleAnswer(student, optIndex)}
+                                disabled={phase === 'revealed' || (phase === 'answering' && studentIndex !== currentAnsweringIndex) || isPaused}
+                                className={`w-12 h-12 rounded-lg font-bold text-lg transition-all ${
+                                  showAsCorrect && isSelected
+                                    ? 'bg-green-500 text-white ring-4 ring-green-300'
+                                    : showAsCorrect
+                                    ? 'bg-green-500 text-white'
+                                    : showAsWrong
+                                    ? 'bg-red-500 text-white'
+                                    : isSelected
+                                    ? 'bg-blue-500 text-white'
+                                    : phase === 'answering' && studentIndex === currentAnsweringIndex && !isPaused
+                                    ? 'bg-gray-200 dark:bg-gray-600 hover:bg-blue-400 hover:text-white text-gray-800 dark:text-gray-200'
+                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
+                                }`}
+                              >
+                                {String.fromCharCode(65 + optIndex)}
+                              </button>
+                            )
+                          })}
+
+                          {/* Botón confirmar (para pasar al siguiente alumno) */}
+                          {phase === 'answering' && studentIndex === currentAnsweringIndex && hasAnswered && !isPaused && (
+                            <button
+                              onClick={() => confirmAnswer(student)}
+                              className="ml-2 px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold text-sm"
+                            >
+                              OK
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Resultado */}
+                        {phase === 'revealed' && (
+                          <div className="text-lg font-bold">
+                            {!hasAnswered ? (
+                              <span className="text-gray-400">No respondió</span>
+                            ) : isCorrect ? (
+                              <span className="text-green-600">+1 punto</span>
+                            ) : gameMode === 'penalty' ? (
+                              <span className="text-red-600">-1 punto</span>
+                            ) : (
+                              <span className="text-red-600">0 puntos</span>
+                            )}
+                          </div>
                         )}
                       </div>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
 
-        {/* Botones de acción */}
-        <div className="flex gap-4 justify-center">
-          {phase === 'answering' && allAnswered && (
-            <button
-              onClick={handleReveal}
-              className="px-8 py-4 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold text-xl"
-            >
-              Revelar Resultados
-            </button>
-          )}
+            {/* Botones de acción */}
+            <div className="flex gap-4 justify-center">
+              {phase === 'answering' && allAnswered && !isPaused && (
+                <button
+                  onClick={handleReveal}
+                  className="px-8 py-4 bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold text-xl"
+                >
+                  Revelar Resultados
+                </button>
+              )}
 
-          {phase === 'revealed' && (
-            <button
-              onClick={handleNextQuestion}
-              className="px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold text-xl"
-            >
-              {currentQuestionIndex + 1 >= parsedQuestions.length
-                ? 'Ver Resultados Finales'
-                : 'Siguiente Pregunta'
-              }
-            </button>
-          )}
-        </div>
+              {phase === 'revealed' && (
+                <button
+                  onClick={handleNextQuestion}
+                  className="px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold text-xl"
+                >
+                  {currentQuestionIndex + 1 >= parsedQuestions.length
+                    ? 'Ver Resultados Finales'
+                    : 'Siguiente Pregunta'
+                  }
+                </button>
+              )}
+            </div>
+          </>
+        )}
 
         {/* Tanteador general */}
         <div className="mt-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
