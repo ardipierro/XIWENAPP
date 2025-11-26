@@ -348,19 +348,21 @@ function UserProfileModal({
       });
     }
 
-    // Tab de Créditos - Todos los usuarios
-    tabs.push({
-      id: 'credits',
-      label: 'Créditos',
-      icon: CreditCard,
-      component: (
-        <CreditsTab
-          user={normalizedUser}
-          currentUser={currentUser || normalizedUser}
-          onUpdate={onUpdate}
-        />
-      )
-    });
+    // Tab de Créditos - Solo para NO estudiantes (teachers, admins, guardians)
+    if (!isStudent) {
+      tabs.push({
+        id: 'credits',
+        label: 'Créditos',
+        icon: CreditCard,
+        component: (
+          <CreditsTab
+            user={normalizedUser}
+            currentUser={currentUser || normalizedUser}
+            onUpdate={onUpdate}
+          />
+        )
+      });
+    }
 
     // Tab de Contenidos - Solo Estudiantes
     if (isStudent) {
@@ -783,7 +785,6 @@ function UserProfileModal({
         {/* Footer - SIEMPRE VISIBLE */}
         <div
           className="flex items-center justify-end gap-3 px-6 py-5 shrink-0"
-          style={{ borderTop: '1px solid var(--color-border)' }}
         >
             {activeTab === 'info' && (
               <>

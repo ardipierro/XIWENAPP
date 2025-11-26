@@ -574,6 +574,11 @@ function HomeworkDetailModal({ review, studentId, onClose }) {
         onClose={onClose}
         title="Detalle de Tarea"
         size="xl"
+        footer={
+          <BaseButton variant="primary" onClick={onClose}>
+            Cerrar
+          </BaseButton>
+        }
       >
         <div className="space-y-6">
           {/* Status Alert - Solo mostrar "En revisión" si NO está aprobada (configurable) */}
@@ -705,13 +710,6 @@ function HomeworkDetailModal({ review, studentId, onClose }) {
               <HomeworkCorrectionView review={review} />
             </div>
           )}
-
-          {/* Close Button */}
-          <div className="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
-            <BaseButton variant="primary" onClick={onClose}>
-              Cerrar
-            </BaseButton>
-          </div>
         </div>
       </BaseModal>
 

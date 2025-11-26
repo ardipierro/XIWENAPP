@@ -23,7 +23,6 @@ import logger from '../../../utils/logger';
 function TasksTab({ user }) {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, review, corrected
   const [badgeConfigVersion, setBadgeConfigVersion] = useState(0);
 
   useEffect(() => {
@@ -61,28 +60,6 @@ function TasksTab({ user }) {
     }
   };
 
-  const getFilteredReviews = () => {
-    if (filter === 'all') return reviews;
-    if (filter === 'review') {
-      // En revisión: procesando o pendiente de revisión del profesor
-      return reviews.filter(r =>
-        r.status === REVIEW_STATUS.PROCESSING ||
-        r.status === REVIEW_STATUS.PENDING_REVIEW
-      );
-    }
-    if (filter === 'corrected') {
-      // Corregidas: aprobadas por el profesor
-      return reviews.filter(r => r.status === REVIEW_STATUS.APPROVED);
-    }
-    return reviews;
-  };
-
-  const filteredReviews = getFilteredReviews();
-  const reviewCount = reviews.filter(r =>
-    r.status === REVIEW_STATUS.PROCESSING ||
-    r.status === REVIEW_STATUS.PENDING_REVIEW
-  ).length;
-  const correctedCount = reviews.filter(r => r.status === REVIEW_STATUS.APPROVED).length;
 
   if (loading) {
     return (
@@ -94,116 +71,10 @@ function TasksTab({ user }) {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Resumen */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <div className="rounded-xl p-4" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-          <div className="flex items-center gap-2 mb-1">
-            <Clock size={20} strokeWidth={2} style={{ color: 'var(--color-warning)' }} />
-            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>En Revisión</p>
-          </div>
-          <p className="text-3xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{reviewCount}</p>
-        </div>
-
-        <div className="rounded-xl p-4" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-          <div className="flex items-center gap-2 mb-1">
-            <CheckCircle size={20} strokeWidth={2} style={{ color: 'var(--color-success)' }} />
-            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Corregidas</p>
-          </div>
-          <p className="text-3xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{correctedCount}</p>
-        </div>
-
-        <div className="rounded-xl p-4" style={{ background: 'var(--color-bg-secondary)', border: '1px solid var(--color-border)' }}>
-          <div className="flex items-center gap-2 mb-1">
-            <FileText size={20} strokeWidth={2} style={{ color: 'var(--color-text-secondary)' }} />
-            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Total</p>
-          </div>
-          <p className="text-3xl font-bold" style={{ color: 'var(--color-text-primary)' }}>{reviews.length}</p>
-        </div>
-      </div>
-
-      {/* Filtros */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <button
-          onClick={() => setFilter('all')}
-          className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-          style={filter === 'all' ? {
-            background: 'var(--color-text-primary)',
-            color: 'var(--color-bg-primary)',
-          } : {
-            background: 'transparent',
-            color: 'var(--color-text-secondary)',
-          }}
-          onMouseEnter={(e) => {
-            if (filter !== 'all') {
-              e.currentTarget.style.background = 'var(--color-bg-tertiary)';
-              e.currentTarget.style.color = 'var(--color-text-primary)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (filter !== 'all') {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = 'var(--color-text-secondary)';
-            }
-          }}
-        >
-          Todas ({reviews.length})
-        </button>
-        <button
-          onClick={() => setFilter('review')}
-          className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-          style={filter === 'review' ? {
-            background: 'var(--color-text-primary)',
-            color: 'var(--color-bg-primary)',
-          } : {
-            background: 'transparent',
-            color: 'var(--color-text-secondary)',
-          }}
-          onMouseEnter={(e) => {
-            if (filter !== 'review') {
-              e.currentTarget.style.background = 'var(--color-bg-tertiary)';
-              e.currentTarget.style.color = 'var(--color-text-primary)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (filter !== 'review') {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = 'var(--color-text-secondary)';
-            }
-          }}
-        >
-          En Revisión ({reviewCount})
-        </button>
-        <button
-          onClick={() => setFilter('corrected')}
-          className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-          style={filter === 'corrected' ? {
-            background: 'var(--color-text-primary)',
-            color: 'var(--color-bg-primary)',
-          } : {
-            background: 'transparent',
-            color: 'var(--color-text-secondary)',
-          }}
-          onMouseEnter={(e) => {
-            if (filter !== 'corrected') {
-              e.currentTarget.style.background = 'var(--color-bg-tertiary)';
-              e.currentTarget.style.color = 'var(--color-text-primary)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (filter !== 'corrected') {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = 'var(--color-text-secondary)';
-            }
-          }}
-        >
-          Corregidas ({correctedCount})
-        </button>
-      </div>
-
       {/* Lista de tareas */}
-      {filteredReviews.length > 0 ? (
+      {reviews.length > 0 ? (
         <div className="space-y-3">
-          {filteredReviews.map((review) => (
+          {reviews.map((review) => (
             <HomeworkCard key={review.id} review={review} badgeConfigVersion={badgeConfigVersion} />
           ))}
         </div>
@@ -217,10 +88,10 @@ function TasksTab({ user }) {
         >
           <FileText size={48} strokeWidth={2} className="mx-auto mb-4" style={{ color: 'var(--color-text-muted)' }} />
           <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
-            No hay tareas {filter !== 'all' ? filter === 'review' ? 'en revisión' : 'corregidas' : ''}
+            No hay tareas
           </h3>
           <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-            {filter === 'review' ? '¡Excelente! Todas tus tareas están corregidas' : 'Aún no has enviado tareas'}
+            Aún no has enviado tareas
           </p>
         </div>
       )}
@@ -248,11 +119,10 @@ function HomeworkCard({ review, badgeConfigVersion }) {
       return (
         <div
           key={`badge-${badgeConfigVersion}`}
-          className={`flex items-center gap-1 ${getBadgeSizeClasses()} rounded-full font-semibold`}
+          className="flex items-center justify-center w-8 h-8 rounded-full"
           style={badgeStyles}
         >
-          <CheckCircle size={14} strokeWidth={2} style={{ color: 'inherit' }} />
-          Corregida
+          <CheckCircle size={18} strokeWidth={2.5} style={{ color: 'inherit' }} />
         </div>
       );
     }
@@ -263,11 +133,10 @@ function HomeworkCard({ review, badgeConfigVersion }) {
       return (
         <div
           key={`badge-${badgeConfigVersion}`}
-          className={`flex items-center gap-1 ${getBadgeSizeClasses()} rounded-full font-semibold`}
+          className="flex items-center justify-center w-8 h-8 rounded-full"
           style={badgeStyles}
         >
-          <AlertCircle size={14} strokeWidth={2} style={{ color: 'inherit' }} />
-          Error
+          <AlertCircle size={18} strokeWidth={2.5} style={{ color: 'inherit' }} />
         </div>
       );
     }
@@ -278,11 +147,10 @@ function HomeworkCard({ review, badgeConfigVersion }) {
       return (
         <div
           key={`badge-${badgeConfigVersion}`}
-          className={`flex items-center gap-1 ${getBadgeSizeClasses()} rounded-full font-semibold`}
+          className="flex items-center justify-center w-8 h-8 rounded-full"
           style={badgeStyles}
         >
-          <Clock size={14} strokeWidth={2} style={{ color: 'inherit' }} />
-          En Revisión
+          <Clock size={18} strokeWidth={2.5} style={{ color: 'inherit' }} />
         </div>
       );
     }

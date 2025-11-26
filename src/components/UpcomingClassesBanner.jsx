@@ -1,19 +1,19 @@
 /**
  * @fileoverview Upcoming Classes Banner - Banner para mostrar próximas clases
- * Muestra las próximas 2-3 clases del estudiante en un banner destacado
+ * Muestra las próximas 2 clases del estudiante en un banner destacado
  * @module components/UpcomingClassesBanner
  */
 
 import logger from '../utils/logger';
 import { useState, useEffect } from 'react';
-import { Calendar, Clock, Video, ChevronRight, BookOpen } from 'lucide-react';
+import { Clock, Video, ChevronRight, BookOpen } from 'lucide-react';
 import { getStudentInstances } from '../firebase/classInstances';
 import { BaseLoading, BaseBadge } from './common';
 import { UniversalCard } from './cards';
 
 /**
  * Banner de próximas clases
- * Muestra las próximas 2-3 clases programadas del estudiante
+ * Muestra las próximas 2 clases programadas del estudiante
  */
 function UpcomingClassesBanner({ student }) {
   const [upcomingClasses, setUpcomingClasses] = useState([]);
@@ -67,7 +67,7 @@ function UpcomingClassesBanner({ student }) {
           const dateB = b.scheduledStart?.toDate ? b.scheduledStart.toDate() : new Date(0);
           return dateA - dateB;
         })
-        .slice(0, 3); // Tomar solo las primeras 3
+        .slice(0, 2); // Tomar solo las primeras 2
 
       setUpcomingClasses(futureSessions);
     } catch (error) {
@@ -104,21 +104,6 @@ function UpcomingClassesBanner({ student }) {
     }
   };
 
-  const getVideoProviderIcon = (provider) => {
-    switch (provider) {
-      case 'livekit':
-        return '📹';
-      case 'meet':
-        return '🎥';
-      case 'zoom':
-        return '💻';
-      case 'voov':
-        return '📞';
-      default:
-        return '🎓';
-    }
-  };
-
   if (loading) {
     return (
       <UniversalCard variant="default" size="md">
@@ -141,16 +126,11 @@ function UpcomingClassesBanner({ student }) {
     >
       <div className="space-y-4">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Calendar size={24} className="text-gray-600 dark:text-gray-400" />
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-              Próximas Clases
-            </h2>
-          </div>
-          <BaseBadge variant="info">
-            {upcomingClasses.length} {upcomingClasses.length === 1 ? 'clase' : 'clases'}
-          </BaseBadge>
+        <div className="flex items-center gap-2">
+          <Video size={24} className="text-gray-600 dark:text-gray-400" />
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+            Próximas Clases
+          </h2>
         </div>
 
         {/* Lista de clases */}
@@ -160,16 +140,11 @@ function UpcomingClassesBanner({ student }) {
               key={classItem.id}
               className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/20 dark:to-gray-700/20 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
             >
-              {/* Emoji/Icon */}
-              <div className="flex-shrink-0 text-3xl">
-                {classItem.status === 'live' ? '🔴' : getVideoProviderIcon(classItem.videoProvider)}
-              </div>
-
               {/* Info */}
               <div className="flex-1 min-w-0">
                 {/* Nombre de la clase */}
                 <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-                  {classItem.name}
+                  {classItem.name || classItem.scheduleName || 'Clase sin nombre'}
                 </h3>
 
                 {/* Fecha y hora */}

@@ -8,17 +8,15 @@ import logger from '../utils/logger';
 import { useState, useEffect } from 'react';
 import {
   Calendar,
-  CreditCard,
   CheckCircle,
   AlertTriangle,
   BookOpen,
   Clock,
   Video,
-  Info,
   Play,
   Users
 } from 'lucide-react';
-import { getStudentInstances, getLiveInstances } from '../firebase/classInstances';
+import { getStudentInstances } from '../firebase/classInstances';
 import { getUserCredits } from '../firebase/credits';
 import { BaseEmptyState, BaseLoading, BaseButton, BaseBadge, BaseAlert } from './common';
 import { UniversalCard, CardGrid } from './cards';
@@ -29,7 +27,6 @@ import { UniversalCard, CardGrid } from './cards';
  */
 function StudentSessionsView({ student }) {
   const [sessions, setSessions] = useState([]);
-  const [liveSessions, setLiveSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [credits, setCredits] = useState(null);
   const [message, setMessage] = useState({ type: '', text: '' });
@@ -52,14 +49,10 @@ function StudentSessionsView({ student }) {
       // Obtener sesiones del estudiante (asignadas) - NUEVO SISTEMA
       const studentSessions = await getStudentInstances(student.uid || student.id);
 
-      // Obtener sesiones en vivo (para ver si puede unirse) - NUEVO SISTEMA
-      const currentLiveSessions = await getLiveInstances();
-
       logger.debug('📊 Sesiones del estudiante:', {
         studentId: student.uid || student.id,
         studentName: student.name,
-        totalSessions: studentSessions.length,
-        liveSessions: currentLiveSessions.length
+        totalSessions: studentSessions.length
       });
 
       // Filtrar sesiones futuras y ordenar por fecha
@@ -90,9 +83,6 @@ function StudentSessionsView({ student }) {
       });
 
       setSessions(futureSessions);
-      setLiveSessions(currentLiveSessions.filter(ls =>
-        studentSessions.some(s => s.id === ls.id)
-      ));
     } catch (error) {
       logger.error('Error al cargar datos:', error);
       showMessage('error', 'Error al cargar clases');
@@ -199,28 +189,15 @@ function StudentSessionsView({ student }) {
 
   return (
     <div className="p-4 md:p-6 space-y-6">
-      {/* Header con créditos */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <Calendar size={28} />
-            Clases
-          </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            {sessions.length} {sessions.length === 1 ? 'clase disponible' : 'clases disponibles'}
-          </p>
-        </div>
-
-        {/* Credits Badge */}
-        <div className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700">
-          <CreditCard size={24} className="text-gray-600 dark:text-gray-400" />
-          <div>
-            <div className="text-2xl font-bold text-gray-600 dark:text-gray-400">
-              {credits?.availableCredits || 0}
-            </div>
-            <div className="text-xs text-gray-600 dark:text-gray-400">Créditos disponibles</div>
-          </div>
-        </div>
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <Calendar size={28} />
+          Clases
+        </h1>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+          {sessions.length} {sessions.length === 1 ? 'clase disponible' : 'clases disponibles'}
+        </p>
       </div>
 
       {/* Message Alert */}
@@ -235,14 +212,14 @@ function StudentSessionsView({ student }) {
       )}
 
       {/* Live Sessions Section */}
-      {liveSessions.length > 0 && (
+      {sessions.filter(s => s.status === 'live').length > 0 && (
         <div className="space-y-3">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
             <Play size={20} className="text-red-500" />
             Clases en Vivo Ahora
           </h2>
           <CardGrid columnsType="default" gap="gap-4">
-            {liveSessions.map(session => (
+            {sessions.filter(s => s.status === 'live').map(session => (
               <UniversalCard
                 key={session.id}
                 variant="elevated"
@@ -265,10 +242,6 @@ function StudentSessionsView({ student }) {
                         <Users size={16} />
                         {session.assignedStudents?.length || 0} estudiantes
                       </span>
-                      <span className="flex items-center gap-1">
-                        <CreditCard size={16} />
-                        {session.creditCost || 1} crédito{(session.creditCost || 1) !== 1 ? 's' : ''}
-                      </span>
                     </div>
                   </div>
                   <BaseButton
@@ -287,21 +260,16 @@ function StudentSessionsView({ student }) {
       )}
 
       {/* Scheduled Sessions */}
-      {sessions.length === 0 ? (
+      {sessions.filter(s => s.status !== 'live').length === 0 && sessions.filter(s => s.status === 'live').length === 0 ? (
         <BaseEmptyState
           icon={BookOpen}
           title="No hay clases programadas"
           description="Tus próximas clases aparecerán aquí cuando sean programadas por tu profesor"
           size="lg"
         />
-      ) : (
-        <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-            <Calendar size={20} />
-            Clases Programadas
-          </h2>
-          <CardGrid columnsType="default" gap="gap-4">
-            {sessions.map(session => {
+      ) : sessions.filter(s => s.status !== 'live').length > 0 ? (
+        <CardGrid columnsType="default" gap="gap-4">
+            {sessions.filter(s => s.status !== 'live').map(session => {
               const isProcessing = processingSession === session.id;
               const isLive = session.status === 'live';
 
@@ -309,7 +277,6 @@ function StudentSessionsView({ student }) {
                 <UniversalCard
                   key={session.id}
                   variant="default"
-                  hover
                   badges={[getSessionBadge(session)]}
                 >
                   <div className="space-y-3">
@@ -364,12 +331,6 @@ function StudentSessionsView({ student }) {
                       </div>
                     )}
 
-                    {/* Credits */}
-                    <div className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                      <CreditCard size={16} />
-                      <span>{session.creditCost || 1} crédito{(session.creditCost || 1) !== 1 ? 's' : ''}</span>
-                    </div>
-
                     {/* Action Button */}
                     {isLive && (
                       <BaseButton
@@ -387,35 +348,7 @@ function StudentSessionsView({ student }) {
               );
             })}
           </CardGrid>
-        </div>
-      )}
-
-      {/* Info Box */}
-      <BaseAlert variant="info">
-        <div className="space-y-2">
-          <h4 className="font-semibold flex items-center gap-2">
-            <Info size={18} /> ¿Cómo funciona?
-          </h4>
-          <ul className="space-y-1 text-sm">
-            <li className="flex items-start gap-2">
-              <span className="text-gray-600 dark:text-gray-400 mt-0.5">•</span>
-              <span>Las clases <strong>en vivo</strong> aparecen cuando tu profesor las inicia</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-gray-600 dark:text-gray-400 mt-0.5">•</span>
-              <span>Al unirte, se deduce <strong>automáticamente</strong> el costo en créditos</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-gray-600 dark:text-gray-400 mt-0.5">•</span>
-              <span>Las clases <strong>recurrentes</strong> se repiten cada semana en los días indicados</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-gray-600 dark:text-gray-400 mt-0.5">•</span>
-              <span>Si no tienes créditos suficientes, no podrás unirte a la clase</span>
-            </li>
-          </ul>
-        </div>
-      </BaseAlert>
+      ) : null}
     </div>
   );
 }

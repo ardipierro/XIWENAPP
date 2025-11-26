@@ -181,12 +181,19 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
       id: event.id,
       title: event.title,
       hasSessionData: !!event.sessionData,
-      scheduleId: event.sessionData?.scheduleId || 'NO SCHEDULE ID'
+      scheduleId: event.sessionData?.scheduleId || 'NO SCHEDULE ID',
+      userRole: userRole
     }, 'UnifiedCalendar');
 
-    // Si es una sesión de clase, abrir modal de edición completo
+    // Si es una sesión de clase, solo abrir modal de edición para profesores/admins
     if (event.type === 'session') {
-      // Extraer los datos de la sesión original y combinarlos con datos del evento
+      // Estudiantes NO pueden editar clases, solo verlas en el calendario
+      if (userRole === 'student') {
+        logger.info('Student clicked on session - no action (read-only)', 'UnifiedCalendar');
+        return; // No hacer nada para estudiantes
+      }
+
+      // Solo profesores y admins pueden editar
       const sessionData = event.sessionData || {};
 
       // Crear objeto de sesión con la estructura que espera el modal
@@ -377,18 +384,18 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
 
       {/* Mobile: List or Simplified Calendar */}
       {isMobile && mobileView === 'list' && (
-        <MobileListView events={events} onEventClick={handleEventClick} />
+        <MobileListView events={events} onEventClick={handleEventClick} userRole={userRole} />
       )}
       {isMobile && mobileView === 'calendar' && (
-        <DayView currentDate={currentDate} events={events} onEventClick={handleEventClick} />
+        <DayView currentDate={currentDate} events={events} onEventClick={handleEventClick} userRole={userRole} />
       )}
 
       {/* Desktop: Calendar Views */}
       {!isMobile && (
         <>
-          {view === 'month' && <MonthView currentDate={currentDate} events={events} onEventClick={handleEventClick} />}
-          {view === 'week' && <WeekView currentDate={currentDate} events={events} onEventClick={handleEventClick} />}
-          {view === 'day' && <DayView currentDate={currentDate} events={events} onEventClick={handleEventClick} />}
+          {view === 'month' && <MonthView currentDate={currentDate} events={events} onEventClick={handleEventClick} userRole={userRole} />}
+          {view === 'week' && <WeekView currentDate={currentDate} events={events} onEventClick={handleEventClick} userRole={userRole} />}
+          {view === 'day' && <DayView currentDate={currentDate} events={events} onEventClick={handleEventClick} userRole={userRole} />}
         </>
       )}
 
@@ -421,7 +428,7 @@ export default function UnifiedCalendar({ userId, userRole, onCreateSession, onJ
 /**
  * Mobile List View - Shows all upcoming events in a list
  */
-function MobileListView({ events, onEventClick }) {
+function MobileListView({ events, onEventClick, userRole }) {
   const now = new Date();
   const sortedEvents = [...events]
     .filter(event => {
@@ -467,7 +474,12 @@ function MobileListView({ events, onEventClick }) {
           </h3>
           <div className="space-y-2">
             {dateEvents.map((event, index) => (
-              <MobileEventCard key={index} event={event} onClick={() => onEventClick(event)} />
+              <MobileEventCard
+                key={index}
+                event={event}
+                onClick={() => onEventClick(event)}
+                userRole={userRole}
+              />
             ))}
           </div>
         </div>
@@ -479,7 +491,7 @@ function MobileListView({ events, onEventClick }) {
 /**
  * Mobile Event Card - Touch-optimized event card
  */
-function MobileEventCard({ event, onClick }) {
+function MobileEventCard({ event, onClick, userRole }) {
   const typeColors = {
     session: event.status === 'live'
       ? 'bg-red-100 dark:bg-red-900 border-red-500'
@@ -491,13 +503,17 @@ function MobileEventCard({ event, onClick }) {
 
   const color = typeColors[event.type] || typeColors.event;
 
+  // Deshabilitar click para estudiantes en sesiones
+  const isClickable = !(event.type === 'session' && userRole === 'student');
+
   return (
     <button
-      onClick={onClick}
+      onClick={isClickable ? onClick : undefined}
       className={`
         w-full min-h-tap-md p-4 text-left
         rounded-lg border ${color}
-        active:opacity-80 transition-opacity
+        ${isClickable ? 'active:opacity-80' : 'opacity-75 cursor-default'}
+        transition-opacity
       `}
     >
       <div className="flex items-start justify-between mb-2">
@@ -545,7 +561,7 @@ function MobileEventCard({ event, onClick }) {
   );
 }
 
-function MonthView({ currentDate, events, onEventClick }) {
+function MonthView({ currentDate, events, onEventClick, userRole }) {
   const [selectedDate, setSelectedDate] = useState(null);
 
   const year = currentDate.getFullYear();
@@ -637,14 +653,16 @@ function MonthView({ currentDate, events, onEventClick }) {
                   {day}
                 </div>
                 <div className="space-y-1">
-                  {dayEvents.slice(0, 3).map((event, index) => (
+                  {dayEvents.slice(0, 3).map((event, index) => {
+                    const isClickable = !(event.type === 'session' && userRole === 'student');
+                    return (
                     <div
                       key={index}
                       onClick={(e) => {
                         e.stopPropagation();
-                        onEventClick(event);
+                        if (isClickable) onEventClick(event);
                       }}
-                      className={`text-xs px-1 py-0.5 rounded truncate cursor-pointer hover:opacity-80 transition-opacity flex items-center gap-1 ${
+                      className={`text-xs px-1 py-0.5 rounded truncate ${isClickable ? 'cursor-pointer hover:opacity-80' : 'cursor-default opacity-75'} transition-opacity flex items-center gap-1 ${
                         event.type === 'session'
                           ? event.status === 'live'
                             ? 'bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 font-medium'
@@ -664,7 +682,8 @@ function MonthView({ currentDate, events, onEventClick }) {
                       )}
                       {event.title}
                     </div>
-                  ))}
+                    );
+                  })}
                   {dayEvents.length > 3 && (
                     <div className="text-xs text-gray-500 dark:text-gray-400">
                       +{dayEvents.length - 3} más
@@ -680,7 +699,7 @@ function MonthView({ currentDate, events, onEventClick }) {
   );
 }
 
-function WeekView({ currentDate, events, onEventClick }) {
+function WeekView({ currentDate, events, onEventClick, userRole }) {
   const weekDays = [];
   const startOfWeek = new Date(currentDate);
   startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
@@ -714,7 +733,7 @@ function WeekView({ currentDate, events, onEventClick }) {
               </div>
               <div className="space-y-2">
                 {dayEvents.map((event, idx) => (
-                  <EventCard key={idx} event={event} compact onClick={() => onEventClick(event)} />
+                  <EventCard key={idx} event={event} compact onClick={() => onEventClick(event)} userRole={userRole} />
                 ))}
               </div>
             </div>
@@ -725,7 +744,7 @@ function WeekView({ currentDate, events, onEventClick }) {
   );
 }
 
-function DayView({ currentDate, events, onEventClick }) {
+function DayView({ currentDate, events, onEventClick, userRole }) {
   const dayEvents = events.filter(event => {
     const eventDate = event.startDate?.toDate?.();
     return eventDate?.toDateString() === currentDate.toDateString();
@@ -767,7 +786,7 @@ function DayView({ currentDate, events, onEventClick }) {
       ) : (
         <div className="space-y-3">
           {dayEvents.map((event, index) => (
-            <EventCard key={index} event={event} onClick={() => onEventClick(event)} />
+            <EventCard key={index} event={event} onClick={() => onEventClick(event)} userRole={userRole} />
           ))}
         </div>
       )}
@@ -775,7 +794,7 @@ function DayView({ currentDate, events, onEventClick }) {
   );
 }
 
-function EventCard({ event, compact = false, onClick }) {
+function EventCard({ event, compact = false, onClick, userRole }) {
   const typeColors = {
     session: event.status === 'live'
       ? 'bg-red-100 dark:bg-red-900 border-red-500 text-red-900 dark:text-red-100'
@@ -787,11 +806,14 @@ function EventCard({ event, compact = false, onClick }) {
 
   const color = typeColors[event.type] || typeColors.event;
 
+  // Deshabilitar click para estudiantes en sesiones
+  const isClickable = !(event.type === 'session' && userRole === 'student');
+
   if (compact) {
     return (
       <div
-        onClick={onClick}
-        className={`p-2 rounded border ${color} cursor-pointer hover:opacity-80 transition-opacity`}
+        onClick={isClickable ? onClick : undefined}
+        className={`p-2 rounded border ${color} ${isClickable ? 'cursor-pointer hover:opacity-80' : 'cursor-default opacity-75'} transition-opacity`}
       >
         <div className="flex items-center gap-1 mb-1">
           {event.type === 'session' && event.status === 'live' && (
@@ -814,8 +836,8 @@ function EventCard({ event, compact = false, onClick }) {
 
   return (
     <div
-      onClick={onClick}
-      className={`p-4 rounded-lg border ${color} cursor-pointer hover:opacity-80 transition-opacity`}
+      onClick={isClickable ? onClick : undefined}
+      className={`p-4 rounded-lg border ${color} ${isClickable ? 'cursor-pointer hover:opacity-80' : 'cursor-default opacity-75'} transition-opacity`}
     >
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2 flex-1">

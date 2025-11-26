@@ -189,39 +189,41 @@ export default function ManualHomeworkUpload({ teacherId, userRole, preselectedS
         </BaseAlert>
       )}
 
-      {/* Student Selector */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Estudiante (opcional)
-        </label>
-        <select
-          value={selectedStudentId}
-          onChange={(e) => setSelectedStudentId(e.target.value)}
-          disabled={uploading}
-          className="input w-full"
-        >
-          <option value="">⚠️ Sin asignar (asignar después)</option>
-          {students.length > 0 ? (
-            students.map(student => (
-              <option key={student.id} value={student.id}>
-                👤 {student.name || student.email}
-              </option>
-            ))
+      {/* Student Selector - Only show for teachers/admins */}
+      {userRole !== 'student' && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Estudiante (opcional)
+          </label>
+          <select
+            value={selectedStudentId}
+            onChange={(e) => setSelectedStudentId(e.target.value)}
+            disabled={uploading}
+            className="input w-full"
+          >
+            <option value="">⚠️ Sin asignar (asignar después)</option>
+            {students.length > 0 ? (
+              students.map(student => (
+                <option key={student.id} value={student.id}>
+                  👤 {student.name || student.email}
+                </option>
+              ))
+            ) : (
+              <option value="" disabled>No hay estudiantes disponibles</option>
+            )}
+          </select>
+          {!selectedStudentId ? (
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 font-medium bg-amber-50 dark:bg-amber-900/20 p-2 rounded">
+              ⚠️ Esta tarea aparecerá como "Sin asignar" hasta que la asignes a un estudiante
+            </p>
           ) : (
-            <option value="" disabled>No hay estudiantes disponibles</option>
+            <p className="text-xs text-green-600 dark:text-green-400 mt-2 font-medium bg-green-50 dark:bg-green-900/20 p-2 rounded flex items-center gap-1">
+              <span>✅</span>
+              <span>Se asignará a: <strong>{students.find(s => s.id === selectedStudentId)?.name || students.find(s => s.id === selectedStudentId)?.email}</strong></span>
+            </p>
           )}
-        </select>
-        {!selectedStudentId ? (
-          <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 font-medium bg-amber-50 dark:bg-amber-900/20 p-2 rounded">
-            ⚠️ Esta tarea aparecerá como "Sin asignar" hasta que la asignes a un estudiante
-          </p>
-        ) : (
-          <p className="text-xs text-green-600 dark:text-green-400 mt-2 font-medium bg-green-50 dark:bg-green-900/20 p-2 rounded flex items-center gap-1">
-            <span>✅</span>
-            <span>Se asignará a: <strong>{students.find(s => s.id === selectedStudentId)?.name || students.find(s => s.id === selectedStudentId)?.email}</strong></span>
-          </p>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Image Upload */}
       <div>
@@ -281,8 +283,8 @@ export default function ManualHomeworkUpload({ teacherId, userRole, preselectedS
         )}
       </div>
 
-      {/* Upload Summary */}
-      {selectedFile && (
+      {/* Upload Summary - Only show for teachers/admins */}
+      {selectedFile && userRole !== 'student' && (
         <div className="bg-gray-50 dark:bg-gray-800/20 border border-gray-200 dark:border-gray-600 rounded-lg p-4">
           <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-2">
             📋 Resumen de la tarea a enviar
@@ -326,7 +328,7 @@ export default function ManualHomeworkUpload({ teacherId, userRole, preselectedS
           fullWidth
         >
           <Upload size={18} />
-          {uploading ? 'Subiendo...' : 'Enviar a Corrección IA'}
+          {uploading ? 'Subiendo...' : 'Enviar Tarea'}
         </BaseButton>
       </div>
     </div>

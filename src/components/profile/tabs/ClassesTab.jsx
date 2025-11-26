@@ -19,7 +19,6 @@ import logger from '../../../utils/logger';
 function ClassesTab({ user, userRole }) {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, scheduled, live, ended
 
   useEffect(() => {
     loadSessions();
@@ -65,21 +64,6 @@ function ClassesTab({ user, userRole }) {
     }
   };
 
-  const getFilteredSessions = () => {
-    if (filter === 'all') return sessions;
-    if (filter === 'scheduled') return sessions.filter(s => !s.isSchedule && s.status === 'scheduled');
-    if (filter === 'live') return sessions.filter(s => !s.isSchedule && s.status === 'live');
-    if (filter === 'ended') return sessions.filter(s => !s.isSchedule && s.status === 'ended');
-    return sessions;
-  };
-
-  const filteredSessions = getFilteredSessions();
-
-  // Contar por estado
-  const scheduledCount = sessions.filter(s => !s.isSchedule && s.status === 'scheduled').length;
-  const liveCount = sessions.filter(s => !s.isSchedule && s.status === 'live').length;
-  const endedCount = sessions.filter(s => !s.isSchedule && s.status === 'ended').length;
-  const schedulesCount = sessions.filter(s => s.isSchedule).length;
 
   if (loading) {
     return (
@@ -94,120 +78,10 @@ function ClassesTab({ user, userRole }) {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Filtros */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <button
-          onClick={() => setFilter('all')}
-          className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-          style={filter === 'all' ? {
-            background: 'var(--color-text-primary)',
-            color: 'var(--color-bg-primary)',
-          } : {
-            background: 'transparent',
-            color: 'var(--color-text-secondary)',
-          }}
-          onMouseEnter={(e) => {
-            if (filter !== 'all') {
-              e.currentTarget.style.background = 'var(--color-bg-tertiary)';
-              e.currentTarget.style.color = 'var(--color-text-primary)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (filter !== 'all') {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = 'var(--color-text-secondary)';
-            }
-          }}
-        >
-          Todas ({sessions.length})
-        </button>
-        {scheduledCount > 0 && (
-          <button
-            onClick={() => setFilter('scheduled')}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-            style={filter === 'scheduled' ? {
-              background: 'var(--color-text-primary)',
-              color: 'var(--color-bg-primary)',
-            } : {
-              background: 'transparent',
-              color: 'var(--color-text-secondary)',
-            }}
-            onMouseEnter={(e) => {
-              if (filter !== 'scheduled') {
-                e.currentTarget.style.background = 'var(--color-bg-tertiary)';
-                e.currentTarget.style.color = 'var(--color-text-primary)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (filter !== 'scheduled') {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = 'var(--color-text-secondary)';
-              }
-            }}
-          >
-            Programadas ({scheduledCount})
-          </button>
-        )}
-        {liveCount > 0 && (
-          <button
-            onClick={() => setFilter('live')}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-            style={filter === 'live' ? {
-              background: 'var(--color-text-primary)',
-              color: 'var(--color-bg-primary)',
-            } : {
-              background: 'transparent',
-              color: 'var(--color-text-secondary)',
-            }}
-            onMouseEnter={(e) => {
-              if (filter !== 'live') {
-                e.currentTarget.style.background = 'var(--color-bg-tertiary)';
-                e.currentTarget.style.color = 'var(--color-text-primary)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (filter !== 'live') {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = 'var(--color-text-secondary)';
-              }
-            }}
-          >
-            En vivo ({liveCount})
-          </button>
-        )}
-        {endedCount > 0 && (
-          <button
-            onClick={() => setFilter('ended')}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-            style={filter === 'ended' ? {
-              background: 'var(--color-text-primary)',
-              color: 'var(--color-bg-primary)',
-            } : {
-              background: 'transparent',
-              color: 'var(--color-text-secondary)',
-            }}
-            onMouseEnter={(e) => {
-              if (filter !== 'ended') {
-                e.currentTarget.style.background = 'var(--color-bg-tertiary)';
-                e.currentTarget.style.color = 'var(--color-text-primary)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (filter !== 'ended') {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = 'var(--color-text-secondary)';
-              }
-            }}
-          >
-            Finalizadas ({endedCount})
-          </button>
-        )}
-      </div>
-
       {/* Lista de sesiones */}
-      {filteredSessions.length > 0 ? (
+      {sessions.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {filteredSessions.map((session) => (
+          {sessions.map((session) => (
             <SessionCard
               key={session.id}
               session={session}
@@ -226,7 +100,7 @@ function ClassesTab({ user, userRole }) {
         >
           <BookOpen size={48} strokeWidth={2} className="mx-auto mb-4" style={{ color: 'var(--color-text-muted)' }} />
           <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
-            No hay clases {filter !== 'all' ? getFilterLabel(filter) : ''}
+            No hay clases
           </h3>
           <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
             {userRole === 'student'
@@ -237,18 +111,6 @@ function ClassesTab({ user, userRole }) {
       )}
     </div>
   );
-}
-
-/**
- * Obtener etiqueta de filtro
- */
-function getFilterLabel(filter) {
-  const labels = {
-    scheduled: 'programadas',
-    live: 'en vivo',
-    ended: 'finalizadas'
-  };
-  return labels[filter] || filter;
 }
 
 /**

@@ -625,67 +625,6 @@ function ImageOverlay({
           </svg>
         )}
       </div>
-
-      {/* Enhanced Debug info (only in development) - Collapsible */}
-      {import.meta.env.DEV && (
-        <div
-          data-debug-panel
-          className="absolute bottom-2 right-2 bg-black/95 text-white text-[10px] rounded z-10 font-mono max-w-[280px] pointer-events-auto"
-        >
-          {/* Header - clickable */}
-          <div
-            className="flex items-center justify-between gap-2 p-2 cursor-pointer hover:bg-white/10 rounded-t"
-            onClick={() => setDebugExpanded(!debugExpanded)}
-          >
-            <div className="font-bold text-[11px] flex items-center gap-1">
-              🐛 Debug Info
-              {!debugExpanded && debugInfo && (
-                <span className={`ml-1 ${highlights.length > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  ({debugInfo.matched}/{debugInfo.attempted})
-                </span>
-              )}
-            </div>
-            {debugExpanded ? <ChevronDown size={12} /> : <ChevronUp size={12} />}
-          </div>
-
-          {/* Expandable content */}
-          {debugExpanded && (
-            <div className="px-2 pb-2 space-y-0.5 border-t border-white/20">
-              <div className="mt-1.5">Words: {words.length}</div>
-              <div>Errors: {errors.length}</div>
-              <div className={`font-bold ${highlights.length > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                Highlights: {highlights.length}
-              </div>
-              {debugInfo && (
-                <>
-                  <div>Matched: {debugInfo.matched}/{debugInfo.attempted}</div>
-                  <div>Filtered: {debugInfo.filteredByType}</div>
-                  <div className="text-yellow-300">
-                    Unmatched: {debugInfo.unmatched?.length || 0}
-                  </div>
-                </>
-              )}
-              <div className="pt-1 border-t border-white/10">
-                <div>Zoom: {(zoom * 100).toFixed(0)}%</div>
-                <div>Display: {imageDimensions.width}x{imageDimensions.height}</div>
-                <div className="text-xs text-gray-400">
-                  Natural: {imageNaturalDimensions.width}x{imageNaturalDimensions.height}
-                </div>
-              </div>
-              {debugInfo && debugInfo.unmatched?.length > 0 && (
-                <div className="pt-1 border-t border-white/10">
-                  <div className="text-yellow-300 mb-1">Unmatched (sample):</div>
-                  {debugInfo.unmatched.slice(0, 2).map((err, idx) => (
-                    <div key={idx} className="text-[9px] truncate">
-                      • {err.errorText}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }

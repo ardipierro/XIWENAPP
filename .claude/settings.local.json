@@ -182,7 +182,11 @@
       "Bash(del \"C:\\Users\\ardip\\OneDrive\\XIWEN 2025\\XIWENAPP\\src\\components\\SlidePackageGenerator.jsx\")",
       "Bash(tasklist:*)",
       "Bash(/dev/null)",
-      "Bash(del \"C:\\Users\\ardip\\OneDrive\\XIWEN 2025\\XIWENAPP\\src\\components\\ClassScheduleManager.jsx\")"
+      "Bash(del \"C:\\Users\\ardip\\OneDrive\\XIWEN 2025\\XIWENAPP\\src\\components\\ClassScheduleManager.jsx\")",
+      "Bash(start check-credential.html)",
+      "Bash(start \"https://console.firebase.google.com/project/xiwen-app-2026/firestore/data/~2Fai_credentials~2Fopenai\")",
+      "Bash(start test-parser.html)",
+      "Bash(del /q nul 2)"
     ],
     "deny": [],
     "ask": []

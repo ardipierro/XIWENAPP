@@ -97,8 +97,8 @@ function StudentDailyLogViewer({ user }) {
         value={searchTerm}
         onChange={setSearchTerm}
         placeholder="Buscar por nombre, profesor o curso..."
+        viewMode={viewMode}
         onViewModeChange={setViewMode}
-        currentViewMode={viewMode}
       />
 
       {/* Loading State */}
@@ -183,21 +183,19 @@ function LogCard({ log, viewMode, onClick }) {
     {
       icon: Users,
       label: 'Contenidos',
-      value: log.entries?.length || 0,
-      variant: 'indigo'
+      value: log.entries?.length || 0
     },
     {
       icon: Calendar,
       label: 'Creado',
-      value: formattedDate,
-      variant: 'gray'
+      value: formattedDate
     }
   ];
 
   // Badges
   const badges = [
     {
-      text: statusBadge.text,
+      children: statusBadge.text,
       variant: statusBadge.variant
     }
   ];
@@ -205,7 +203,7 @@ function LogCard({ log, viewMode, onClick }) {
   // Agregar curso si existe
   if (log.courseName) {
     badges.push({
-      text: log.courseName,
+      children: log.courseName,
       variant: 'blue'
     });
   }

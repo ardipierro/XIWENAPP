@@ -16,7 +16,6 @@ import logger from '../../../utils/logger';
 function ContentTab({ user }) {
   const [contents, setContents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, lesson, reading, video, link, exercise
 
   useEffect(() => {
     loadContents();
@@ -43,15 +42,6 @@ function ContentTab({ user }) {
     }
   };
 
-  const getFilteredContents = () => {
-    if (filter === 'all') return contents;
-    return contents.filter(c => c.contentData?.type === filter);
-  };
-
-  const filteredContents = getFilteredContents();
-
-  // Contar por tipo
-  const countByType = (type) => contents.filter(c => c.contentData?.type === type).length;
 
   if (loading) {
     return (
@@ -66,147 +56,10 @@ function ContentTab({ user }) {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Filtros por tipo */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <button
-          onClick={() => setFilter('all')}
-          className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-          style={filter === 'all' ? {
-            background: 'var(--color-text-primary)',
-            color: 'var(--color-bg-primary)',
-          } : {
-            background: 'transparent',
-            color: 'var(--color-text-secondary)',
-          }}
-          onMouseEnter={(e) => {
-            if (filter !== 'all') {
-              e.currentTarget.style.background = 'var(--color-bg-tertiary)';
-              e.currentTarget.style.color = 'var(--color-text-primary)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (filter !== 'all') {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = 'var(--color-text-secondary)';
-            }
-          }}
-        >
-          Todos ({contents.length})
-        </button>
-        {countByType('lesson') > 0 && (
-          <button
-            onClick={() => setFilter('lesson')}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-            style={filter === 'lesson' ? {
-              background: 'var(--color-text-primary)',
-              color: 'var(--color-bg-primary)',
-            } : {
-              background: 'transparent',
-              color: 'var(--color-text-secondary)',
-            }}
-            onMouseEnter={(e) => {
-              if (filter !== 'lesson') {
-                e.currentTarget.style.background = 'var(--color-bg-tertiary)';
-                e.currentTarget.style.color = 'var(--color-text-primary)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (filter !== 'lesson') {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = 'var(--color-text-secondary)';
-              }
-            }}
-          >
-            Lecciones ({countByType('lesson')})
-          </button>
-        )}
-        {countByType('reading') > 0 && (
-          <button
-            onClick={() => setFilter('reading')}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-            style={filter === 'reading' ? {
-              background: 'var(--color-text-primary)',
-              color: 'var(--color-bg-primary)',
-            } : {
-              background: 'transparent',
-              color: 'var(--color-text-secondary)',
-            }}
-            onMouseEnter={(e) => {
-              if (filter !== 'reading') {
-                e.currentTarget.style.background = 'var(--color-bg-tertiary)';
-                e.currentTarget.style.color = 'var(--color-text-primary)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (filter !== 'reading') {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = 'var(--color-text-secondary)';
-              }
-            }}
-          >
-            Lecturas ({countByType('reading')})
-          </button>
-        )}
-        {countByType('video') > 0 && (
-          <button
-            onClick={() => setFilter('video')}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-            style={filter === 'video' ? {
-              background: 'var(--color-text-primary)',
-              color: 'var(--color-bg-primary)',
-            } : {
-              background: 'transparent',
-              color: 'var(--color-text-secondary)',
-            }}
-            onMouseEnter={(e) => {
-              if (filter !== 'video') {
-                e.currentTarget.style.background = 'var(--color-bg-tertiary)';
-                e.currentTarget.style.color = 'var(--color-text-primary)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (filter !== 'video') {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = 'var(--color-text-secondary)';
-              }
-            }}
-          >
-            Videos ({countByType('video')})
-          </button>
-        )}
-        {countByType('exercise') > 0 && (
-          <button
-            onClick={() => setFilter('exercise')}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200"
-            style={filter === 'exercise' ? {
-              background: 'var(--color-text-primary)',
-              color: 'var(--color-bg-primary)',
-            } : {
-              background: 'transparent',
-              color: 'var(--color-text-secondary)',
-            }}
-            onMouseEnter={(e) => {
-              if (filter !== 'exercise') {
-                e.currentTarget.style.background = 'var(--color-bg-tertiary)';
-                e.currentTarget.style.color = 'var(--color-text-primary)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (filter !== 'exercise') {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = 'var(--color-text-secondary)';
-              }
-            }}
-          >
-            Ejercicios ({countByType('exercise')})
-          </button>
-        )}
-      </div>
-
       {/* Lista de contenidos */}
-      {filteredContents.length > 0 ? (
+      {contents.length > 0 ? (
         <div className="space-y-3">
-          {filteredContents.map((content) => (
+          {contents.map((content) => (
             <ContentCard key={content.id} content={content} />
           ))}
         </div>
@@ -223,29 +76,12 @@ function ContentTab({ user }) {
             No hay contenidos asignados
           </h3>
           <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-            {filter === 'all'
-              ? 'Aún no tienes contenidos asignados por tus profesores'
-              : `No tienes ${getFilterLabel(filter)} asignados`
-            }
+            Aún no tienes contenidos asignados por tus profesores
           </p>
         </div>
       )}
     </div>
   );
-}
-
-/**
- * Obtener etiqueta de filtro
- */
-function getFilterLabel(filter) {
-  const labels = {
-    lesson: 'lecciones',
-    reading: 'lecturas',
-    video: 'videos',
-    link: 'enlaces',
-    exercise: 'ejercicios'
-  };
-  return labels[filter] || filter;
 }
 
 /**

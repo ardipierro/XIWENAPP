@@ -8,7 +8,6 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import {
-  X,
   Maximize2,
   Edit3,
   Check,
@@ -20,8 +19,7 @@ import {
   ArrowRight,
   Lightbulb
 } from 'lucide-react';
-import { createPortal } from 'react-dom';
-import { BaseButton, BaseAlert, BaseLoading } from '../common';
+import { BaseButton, BaseAlert, BaseModal } from '../common';
 import ImageOverlay from './ImageOverlay';
 import ImageLightbox from '../common/ImageLightbox';
 import { getStudentsByTeacher } from '../../firebase/users';
@@ -272,26 +270,30 @@ export default function SimpleHomeworkModal({
   const grade = isEditingFeedback ? editedGrade : currentReview.suggestedGrade || 0;
   const gradeColor = grade >= 80 ? 'text-green-600' : grade >= 60 ? 'text-amber-600' : 'text-red-600';
 
-  const modalContent = (
-    <div
-      className="fixed inset-0 flex items-center justify-center p-4 bg-black/50 dark:bg-black/70 backdrop-blur-sm"
-      style={{ zIndex: 'var(--z-modal-backdrop)' }}
-    >
-      <div
-        className="rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col"
-        style={{
-          zIndex: 'var(--z-modal)',
-          background: 'var(--color-bg-primary)',
-          border: '1px solid var(--color-border)'
-        }}
+  return (
+    <>
+      <BaseModal
+        isOpen={true}
+        onClose={onClose}
+        title="Revisión de Tarea"
+        icon={User}
+        size="lg"
+        noPadding={true}
+        footer={
+          <BaseButton
+            variant="primary"
+            onClick={handleApprove}
+            disabled={isApproving || isProcessing || isReanalyzing || isFailed}
+            loading={isApproving}
+          >
+            <Check className="w-5 h-5" />
+            {isApproving ? 'Aprobando...' : 'Aprobar y Publicar'}
+          </BaseButton>
+        }
       >
-
-        {/* Header - Student name/selector */}
-        <div
-          className="flex items-center justify-between p-4"
-          style={{ borderBottom: '1px solid var(--color-border)' }}
-        >
-          <div className="flex items-center gap-3 flex-1 min-w-0">
+        <div className="px-6 py-6 space-y-4">
+          {/* Student selector at top of content */}
+          <div className="flex items-center gap-3 p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
             <User className="w-5 h-5 text-zinc-400 flex-shrink-0" />
             {loadingStudents ? (
               <span className="text-sm text-zinc-500">Cargando...</span>
@@ -299,7 +301,7 @@ export default function SimpleHomeworkModal({
               <select
                 value={selectedStudentId}
                 onChange={handleStudentChange}
-                className="flex-1 min-w-0 px-2 py-1 text-sm font-medium bg-transparent border-none focus:ring-0 text-zinc-900 dark:text-white cursor-pointer hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded"
+                className="flex-1 min-w-0 px-2 py-1 text-sm font-medium bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-600 rounded text-zinc-900 dark:text-white cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800"
               >
                 <option value="">Sin asignar</option>
                 {students.map(s => (
@@ -308,16 +310,6 @@ export default function SimpleHomeworkModal({
               </select>
             )}
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
-          >
-            <X className="w-5 h-5 text-zinc-500" />
-          </button>
-        </div>
-
-        {/* Content - Scrollable */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
 
           {/* Alerts */}
           {error && (
@@ -530,21 +522,7 @@ export default function SimpleHomeworkModal({
             )}
           </div>
         </div>
-
-        {/* Footer - Actions */}
-        <div className="p-4 border-t border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800">
-          <BaseButton
-            variant="primary"
-            fullWidth
-            onClick={handleApprove}
-            disabled={isApproving || isProcessing || isReanalyzing || isFailed}
-            loading={isApproving}
-          >
-            <Check className="w-5 h-5" />
-            {isApproving ? 'Aprobando...' : 'Aprobar y Publicar'}
-          </BaseButton>
-        </div>
-      </div>
+      </BaseModal>
 
       {/* Lightbox */}
       <ImageLightbox
@@ -560,8 +538,6 @@ export default function SimpleHomeworkModal({
         useWavyUnderline={visualSettings.useWavyUnderline}
         showCorrectionText={visualSettings.showCorrectionText}
       />
-    </div>
+    </>
   );
-
-  return createPortal(modalContent, document.body);
 }
