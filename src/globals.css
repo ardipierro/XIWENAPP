@@ -2479,11 +2479,11 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 
 .conversation-item.selected {
   background: var(--color-bg-tertiary);
-  border-left: 3px solid #00a884;
+  border-left: 3px solid var(--color-primary);
 }
 
 .conversation-item.unread {
-  background: rgba(0, 168, 132, 0.05);
+  background: rgba(var(--color-primary-rgb, 91, 107, 143), 0.08);
 }
 
 .conversation-item.unread .conversation-name {
@@ -2816,8 +2816,8 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 }
 
 /* ============================================
-   MESSAGE BUBBLES - WHATSAPP STYLE
-   Diseño minimalista y compacto
+   MESSAGE BUBBLES - MINIMAL COMPACT STYLE
+   Usa colores de la app
    ============================================ */
 
 .message-bubble-container {
@@ -2832,14 +2832,13 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   flex-direction: row-reverse;
 }
 
-/* Avatar oculto por defecto para look más limpio */
 .message-avatar {
   width: 24px;
   height: 24px;
   border-radius: 50%;
   background: var(--color-accent);
   color: white;
-  display: none; /* Oculto por defecto */
+  display: none;
   align-items: center;
   justify-content: center;
   font-size: 11px;
@@ -2847,7 +2846,6 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   flex-shrink: 0;
 }
 
-/* Mostrar avatar solo en grupos o cuando es necesario */
 .message-bubble-container.show-avatar .message-avatar {
   display: flex;
 }
@@ -2855,63 +2853,39 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 .message-bubble {
   max-width: 75%;
   min-width: 60px;
-  padding: 6px 7px 8px 9px;
-  border-radius: 7.5px;
+  padding: 6px 8px 6px 10px;
+  border-radius: 12px;
   position: relative;
-  box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
-/* Cola del globo - Mensaje propio (derecha) */
+/* Mensaje propio - color primary de la app */
 .message-bubble-container.own .message-bubble {
-  background: #d9fdd3;
-  color: #111b21;
-  border-top-right-radius: 7.5px;
-  border-bottom-right-radius: 0;
+  background: var(--color-primary, #5b6b8f);
+  color: white;
+  border-bottom-right-radius: 4px;
 }
 
-.message-bubble-container.own .message-bubble::after {
-  content: '';
-  position: absolute;
-  right: -8px;
-  bottom: 0;
-  width: 8px;
-  height: 13px;
-  background: #d9fdd3;
-  clip-path: polygon(0 0, 0 100%, 100% 100%);
-}
-
-/* Cola del globo - Mensaje de otros (izquierda) */
+/* Mensaje de otros - fondo sutil */
 .message-bubble-container.other .message-bubble {
-  background: #ffffff;
-  color: #111b21;
-  border-top-left-radius: 7.5px;
-  border-bottom-left-radius: 0;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border-bottom-left-radius: 4px;
 }
 
-.message-bubble-container.other .message-bubble::before {
-  content: '';
-  position: absolute;
-  left: -8px;
-  bottom: 0;
-  width: 8px;
-  height: 13px;
-  background: #ffffff;
-  clip-path: polygon(100% 0, 0 100%, 100% 100%);
-}
-
-/* Nombre del sender - Solo primera burbuja de una secuencia */
+/* Nombre del sender */
 .message-sender {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 500;
-  color: #06cf9c;
-  margin-bottom: 1px;
-  display: none; /* Oculto en chats 1:1 */
+  color: var(--color-primary);
+  margin-bottom: 2px;
+  display: none;
 }
 
-/* Contenido del mensaje con tiempo inline */
+/* Contenido del mensaje */
 .message-content {
-  font-size: 14.2px;
-  line-height: 19px;
+  font-size: 14px;
+  line-height: 1.35;
   word-wrap: break-word;
   white-space: pre-wrap;
   overflow-wrap: break-word;
@@ -2919,27 +2893,25 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   padding: 0;
 }
 
-/* Tiempo INLINE - flota a la derecha del texto */
+/* Tiempo inline */
 .message-time-inline {
   float: right;
   font-size: 11px;
-  color: rgba(17, 27, 33, 0.45);
   margin-left: 8px;
-  margin-top: 4px;
+  margin-top: 3px;
   display: flex;
   align-items: center;
   gap: 2px;
-  height: 15px;
 }
 
+/* Tiempo en mensajes propios (blanco semitransparente) */
 .message-bubble-container.own .message-time-inline {
-  color: rgba(17, 27, 33, 0.45);
+  color: rgba(255, 255, 255, 0.7);
 }
 
-/* Espacio invisible para que el tiempo no se pegue al texto */
-.message-content::after {
-  content: '\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0';
-  visibility: hidden;
+/* Tiempo en mensajes de otros */
+.message-bubble-container.other .message-time-inline {
+  color: var(--color-text-tertiary);
 }
 
 /* Checkmarks */
@@ -2949,27 +2921,23 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 }
 
 .message-status-inline .status-icon {
-  width: 16px;
-  height: 11px;
+  width: 14px;
+  height: 14px;
 }
 
-.message-status-inline .status-icon.sent {
-  color: rgba(17, 27, 33, 0.45);
-}
-
+.message-status-inline .status-icon.sent,
 .message-status-inline .status-icon.delivered {
-  color: rgba(17, 27, 33, 0.45);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .message-status-inline .status-icon.read {
-  color: #53bdeb;
+  color: var(--color-accent, #53bdeb);
 }
 
-/* Legacy message-time para compatibilidad */
+/* Legacy message-time */
 .message-time {
   font-size: 11px;
-  opacity: 0.45;
-  margin-top: 0;
+  color: var(--color-text-tertiary);
 }
 
 @keyframes messageSlideIn {
@@ -2984,19 +2952,15 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 }
 
 /* ============================================
-   MESSAGE INPUT - WHATSAPP STYLE COMPACT
+   MESSAGE INPUT - COMPACT STYLE (APP COLORS)
    ============================================ */
 .message-input-container {
   display: flex;
   flex-direction: column;
   gap: 0;
   padding: 8px 12px;
-  background: #f0f2f5;
-  border-top: none;
-}
-
-.dark .message-input-container {
-  background: #202c33;
+  background: var(--color-bg-secondary);
+  border-top: 1px solid var(--color-border);
 }
 
 .input-row {
@@ -3014,44 +2978,39 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 
 .message-input {
   flex: 1;
-  padding: 9px 12px;
-  border: none;
-  border-radius: 8px;
-  font-size: 15px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  font-size: 14px;
   color: var(--color-text-primary);
-  background: #ffffff;
+  background: var(--color-bg-primary);
   resize: none;
-  min-height: 42px;
+  min-height: 40px;
   max-height: 100px;
   font-family: inherit;
   line-height: 20px;
-  box-shadow: none;
-}
-
-.dark .message-input {
-  background: #2a3942;
-  color: #e9edef;
 }
 
 .message-input::placeholder {
-  color: #667781;
+  color: var(--color-text-tertiary);
 }
 
 .message-input:focus {
   outline: none;
+  border-color: var(--color-primary);
 }
 
-/* Botón enviar circular WhatsApp */
+/* Botón enviar circular */
 .send-button {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   padding: 0;
-  background: #00a884;
+  background: var(--color-primary, #5b6b8f);
   color: white;
   border: none;
   border-radius: 50%;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3059,8 +3018,8 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 }
 
 .send-button:hover:not(:disabled) {
-  background: #017561;
-  transform: none;
+  background: var(--color-primary-dark, #4a5a7a);
+  transform: scale(1.05);
 }
 
 .send-button:disabled {
@@ -3070,15 +3029,15 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 
 /* Botón micrófono circular */
 .voice-button {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   padding: 0;
-  background: #00a884;
+  background: var(--color-primary, #5b6b8f);
   color: white;
   border: none;
   border-radius: 50%;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3086,7 +3045,8 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 }
 
 .voice-button:hover {
-  background: #017561;
+  background: var(--color-primary-dark, #4a5a7a);
+  transform: scale(1.05);
 }
 
 /* Botones internos del input */
@@ -3116,7 +3076,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   background: transparent;
   border: none;
   border-radius: 50%;
-  color: #54656f;
+  color: var(--color-text-secondary);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -3124,12 +3084,8 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   transition: color 0.15s;
 }
 
-.dark .inner-input-btn {
-  color: #8696a0;
-}
-
 .inner-input-btn:hover {
-  color: #00a884;
+  color: var(--color-primary);
 }
 
 /* ===== New Message Modal ===== */
@@ -3629,12 +3585,8 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     flex-shrink: 0 !important;
     padding: 6px 8px !important;
     margin: 0 !important;
-    background: #f0f2f5 !important;
-    border: none !important;
-  }
-
-  .dark .message-input-container {
-    background: #202c33 !important;
+    background: var(--color-bg-secondary) !important;
+    border-top: 1px solid var(--color-border) !important;
   }
 
   /* Input row mobile - compacto */
@@ -3649,7 +3601,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     background: transparent !important;
   }
 
-  /* Input mobile - redondeado WhatsApp */
+  /* Input mobile */
   .message-input {
     flex: 1 !important;
     min-height: 40px !important;
@@ -3658,15 +3610,10 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     padding: 10px 12px !important;
     font-size: 16px !important;
     resize: none !important;
-    border: none !important;
-    border-radius: 21px !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: 20px !important;
     line-height: 20px !important;
-    background: #ffffff !important;
-  }
-
-  .dark .message-input {
-    background: #2a3942 !important;
-    color: #e9edef !important;
+    background: var(--color-bg-primary) !important;
   }
 
   /* Botones circulares mobile */
@@ -3782,40 +3729,32 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   background: rgba(99, 102, 241, 0.1);
 }
 
-/* Dark mode - WhatsApp style bubbles */
+/* Dark mode bubbles - APP COLORS */
 .dark .message-bubble-container.own .message-bubble {
-  background: #005c4b;
-  color: #e9edef;
-}
-
-.dark .message-bubble-container.own .message-bubble::after {
-  background: #005c4b;
+  background: var(--color-primary, #5b6b8f);
+  color: white;
 }
 
 .dark .message-bubble-container.other .message-bubble {
-  background: #202c33;
-  color: #e9edef;
-}
-
-.dark .message-bubble-container.other .message-bubble::before {
-  background: #202c33;
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
 }
 
 .dark .message-time {
-  color: rgba(233, 237, 239, 0.6);
+  color: var(--color-text-tertiary);
 }
 
 .dark .message-bubble-container.own .message-time {
-  color: rgba(233, 237, 239, 0.6);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .dark .message-status .status-icon.sent,
 .dark .message-status .status-icon.delivered {
-  color: rgba(233, 237, 239, 0.6);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .dark .message-status .status-icon.read {
-  color: #53bdeb;
+  color: var(--color-accent, #53bdeb);
 }
 
 /* ===== Typing Indicator ===== */
@@ -4037,33 +3976,6 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 
 .inner-input-btn:disabled {
   opacity: 0.3;
-  cursor: not-allowed;
-}
-
-/* Ajuste del voice-button para que sea igual al send-button */
-.voice-button {
-  min-width: 48px;
-  min-height: 48px;
-  padding: 12px;
-  background: var(--color-primary, #5b6b8f);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.voice-button:hover:not(:disabled) {
-  background: var(--color-primary-dark, #4a5a7a);
-  transform: translateY(-2px);
-}
-
-.voice-button:disabled {
-  opacity: 0.5;
   cursor: not-allowed;
 }
 
@@ -6786,50 +6698,43 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 }
 
 /* ============================================
-   AUDIO PLAYER - WHATSAPP WAVEFORM STYLE
-   Compacto con ondas visuales
+   AUDIO PLAYER - COMPACT WAVEFORM (APP COLORS)
    ============================================ */
 
 .attachment-audio-modern {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0;
-  min-width: 200px;
+  padding: 4px 0;
+  min-width: 180px;
 }
 
-/* Botón play/pause circular pequeño */
+/* Botón play/pause */
 .audio-play-btn-modern {
   flex-shrink: 0;
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.15s;
+  transition: all 0.15s;
   background: transparent;
-  color: #54656f;
+  color: rgba(255, 255, 255, 0.9);
 }
 
-/* En mensajes propios (fondo verde) */
 .message-bubble-container.own .audio-play-btn-modern {
-  color: #3b775f;
+  color: rgba(255, 255, 255, 0.9);
 }
 
-/* En mensajes de otros (fondo blanco) */
 .message-bubble-container.other .audio-play-btn-modern {
-  color: #54656f;
+  color: var(--color-primary);
 }
 
 .audio-play-btn-modern:hover {
   transform: scale(1.1);
-}
-
-.audio-play-btn-modern:active {
-  transform: scale(0.95);
 }
 
 /* Contenedor de waveform + tiempo */
@@ -6838,107 +6743,67 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  min-width: 120px;
+  min-width: 100px;
 }
 
 /* Waveform con barras */
 .audio-progress-modern {
-  height: 26px;
+  height: 24px;
   display: flex;
   align-items: center;
   gap: 2px;
   cursor: pointer;
-  position: relative;
 }
 
 /* Barra individual del waveform */
 .audio-waveform-bar {
   width: 3px;
   border-radius: 1.5px;
-  background: rgba(17, 27, 33, 0.3);
+  background: rgba(255, 255, 255, 0.4);
   transition: background 0.1s;
 }
 
-/* Barras reproducidas */
 .audio-waveform-bar.played {
-  background: #3b775f;
+  background: rgba(255, 255, 255, 0.9);
 }
 
 /* En mensajes de otros */
 .message-bubble-container.other .audio-waveform-bar {
-  background: rgba(17, 27, 33, 0.25);
+  background: rgba(0, 0, 0, 0.15);
 }
 
 .message-bubble-container.other .audio-waveform-bar.played {
-  background: #00a884;
+  background: var(--color-primary);
 }
 
-/* Fallback: barra de progreso simple si no hay waveform */
-.audio-progress-bar-simple {
-  height: 4px;
-  background: rgba(17, 27, 33, 0.2);
-  border-radius: 2px;
-  overflow: hidden;
-  cursor: pointer;
-  flex: 1;
-}
-
-.message-bubble-container.own .audio-progress-bar-simple {
-  background: rgba(59, 119, 95, 0.3);
-}
-
-.progress-fill-modern {
-  height: 100%;
-  background: #3b775f;
-  border-radius: 2px;
-  transition: width 0.1s linear;
-}
-
-.message-bubble-container.other .progress-fill-modern {
-  background: #00a884;
-}
-
-/* Tiempo del audio inline */
+/* Tiempo del audio */
 .audio-time-modern {
   display: flex;
   align-items: center;
   gap: 4px;
   font-size: 11px;
-  color: rgba(17, 27, 33, 0.6);
-  margin-top: 0;
+  color: rgba(255, 255, 255, 0.7);
 }
 
-.message-bubble-container.own .audio-time-modern {
-  color: rgba(17, 27, 33, 0.6);
+.message-bubble-container.other .audio-time-modern {
+  color: var(--color-text-tertiary);
 }
 
 /* Dark mode audio */
-.dark .audio-play-btn-modern {
-  color: rgba(233, 237, 239, 0.7);
-}
-
-.dark .message-bubble-container.own .audio-play-btn-modern {
-  color: rgba(233, 237, 239, 0.8);
-}
-
 .dark .audio-waveform-bar {
-  background: rgba(233, 237, 239, 0.3);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .dark .audio-waveform-bar.played {
-  background: #00a884;
+  background: rgba(255, 255, 255, 0.9);
 }
 
-.dark .audio-progress-bar-simple {
-  background: rgba(233, 237, 239, 0.2);
+.dark .message-bubble-container.other .audio-waveform-bar {
+  background: rgba(255, 255, 255, 0.2);
 }
 
-.dark .progress-fill-modern {
-  background: #00a884;
-}
-
-.dark .audio-time-modern {
-  color: rgba(233, 237, 239, 0.6);
+.dark .message-bubble-container.other .audio-waveform-bar.played {
+  background: var(--color-primary);
 }
 
 /* ============================================
@@ -7002,45 +6867,196 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
    VOICE RECORDER INTEGRADO EN EL INPUT
    ============================================ */
 
-/* Timer de grabación - grande y negrita dentro del textarea */
+/* ==============================================
+   VOICE RECORDING MODERNO - Timer con waveform animado
+   ============================================== */
+
 .voice-recording-timer {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
+  justify-content: flex-start;
+  gap: 12px;
   height: 100%;
-  min-height: 50px;
-  padding: 1rem;
-  background: var(--color-bg-primary);
+  min-height: 44px;
+  padding: 8px 16px;
+  background: var(--color-bg-secondary);
+  border-radius: 22px;
 }
 
 .recording-indicator {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: #ef4444;
-  animation: pulse-red 1.5s ease-in-out infinite;
+  animation: pulse-red 1s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
 }
 
 @keyframes pulse-red {
   0%, 100% {
     opacity: 1;
     transform: scale(1);
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
   }
   50% {
-    opacity: 0.6;
-    transform: scale(1.2);
+    opacity: 0.8;
+    transform: scale(1.15);
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.7);
   }
 }
 
 .timer-text {
-  font-size: 1.5rem;
-  font-weight: 700;
-  font-family: ui-monospace, 'Cascadia Code', monospace;
-  color: #ef4444;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: ui-monospace, 'SF Mono', monospace;
+  color: var(--color-text-primary);
+  letter-spacing: 0.02em;
+  min-width: 45px;
 }
 
-/* Preview player dentro del textarea */
+/* Waveform animado durante grabación */
+.recording-waveform {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  height: 24px;
+}
+
+.recording-waveform-bar {
+  width: 3px;
+  border-radius: 1.5px;
+  background: var(--color-primary);
+  animation: recording-wave 0.8s ease-in-out infinite;
+}
+
+.recording-waveform-bar:nth-child(1) { animation-delay: 0s; }
+.recording-waveform-bar:nth-child(2) { animation-delay: 0.1s; }
+.recording-waveform-bar:nth-child(3) { animation-delay: 0.2s; }
+.recording-waveform-bar:nth-child(4) { animation-delay: 0.15s; }
+.recording-waveform-bar:nth-child(5) { animation-delay: 0.25s; }
+.recording-waveform-bar:nth-child(6) { animation-delay: 0.1s; }
+.recording-waveform-bar:nth-child(7) { animation-delay: 0.3s; }
+.recording-waveform-bar:nth-child(8) { animation-delay: 0.05s; }
+.recording-waveform-bar:nth-child(9) { animation-delay: 0.2s; }
+.recording-waveform-bar:nth-child(10) { animation-delay: 0.35s; }
+.recording-waveform-bar:nth-child(11) { animation-delay: 0.15s; }
+.recording-waveform-bar:nth-child(12) { animation-delay: 0.25s; }
+.recording-waveform-bar:nth-child(13) { animation-delay: 0.1s; }
+.recording-waveform-bar:nth-child(14) { animation-delay: 0.3s; }
+.recording-waveform-bar:nth-child(15) { animation-delay: 0.2s; }
+
+@keyframes recording-wave {
+  0%, 100% {
+    height: 6px;
+    opacity: 0.6;
+  }
+  50% {
+    height: 20px;
+    opacity: 1;
+  }
+}
+
+/* Dark mode */
+.dark .voice-recording-timer {
+  background: var(--color-bg-tertiary);
+}
+
+.dark .timer-text {
+  color: var(--color-text-primary);
+}
+
+/* ==============================================
+   VOICE PREVIEW MODERNO - Estilo waveform
+   ============================================== */
+
+.voice-preview-modern {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  background: var(--color-bg-secondary);
+  border-radius: 22px;
+}
+
+.preview-play-modern {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.preview-play-modern:hover {
+  transform: scale(1.05);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+}
+
+.preview-play-modern:active {
+  transform: scale(0.98);
+}
+
+.preview-waveform-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.preview-waveform {
+  height: 24px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  cursor: pointer;
+}
+
+.preview-waveform-bar {
+  width: 3px;
+  border-radius: 1.5px;
+  background: var(--color-text-muted);
+  opacity: 0.4;
+  transition: all 0.1s ease;
+}
+
+.preview-waveform-bar.played {
+  background: var(--color-primary);
+  opacity: 1;
+}
+
+.preview-time-modern {
+  font-size: 11px;
+  color: var(--color-text-secondary);
+  font-family: ui-monospace, 'SF Mono', monospace;
+  letter-spacing: 0.02em;
+}
+
+/* Dark mode */
+.dark .voice-preview-modern {
+  background: var(--color-bg-tertiary);
+}
+
+.dark .preview-waveform-bar {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.dark .preview-waveform-bar.played {
+  background: var(--color-primary);
+  opacity: 1;
+}
+
+/* Legacy styles for backwards compatibility */
 .voice-preview-player {
   display: flex;
   align-items: center;
@@ -7056,7 +7072,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   width: 2rem;
   height: 2rem;
   border-radius: 50%;
-  background: var(--color-primary, #6366f1);
+  background: var(--color-primary);
   color: white;
   border: none;
   display: flex;
@@ -7093,7 +7109,7 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 
 .preview-progress-fill {
   height: 100%;
-  background: var(--color-primary, #6366f1);
+  background: var(--color-primary);
   border-radius: 2px;
 }
 
@@ -7104,41 +7120,106 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   color: var(--color-text-secondary);
 }
 
-/* Botones de voz contextuales */
+/* ==============================================
+   BOTONES DE VOZ CONTEXTUALES - Compactos y modernos
+   ============================================== */
+
 .voice-stop-button {
-  min-width: 48px;
-  height: 48px;
+  min-width: 40px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: #f97316;
+  background: var(--color-warning);
   color: white;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .voice-stop-button:hover {
-  background: #ea580c;
+  background: var(--color-warning-dark);
   transform: scale(1.05);
 }
 
+.voice-stop-button:active {
+  transform: scale(0.95);
+}
+
 .voice-cancel-button {
-  min-width: 48px;
-  height: 48px;
+  min-width: 40px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: var(--color-bg-tertiary);
-  color: var(--color-text-primary);
+  color: var(--color-text-secondary);
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .voice-cancel-button:hover {
-  background: var(--color-bg-secondary);
+  background: var(--color-bg-hover);
+  color: var(--color-text-primary);
+}
+
+.voice-cancel-button:active {
+  transform: scale(0.95);
+}
+
+/* Voice send button - verde success */
+.voice-send-button {
+  min-width: 40px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-success);
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.voice-send-button:hover {
+  background: var(--color-success-dark);
   transform: scale(1.05);
+}
+
+.voice-send-button:active {
+  transform: scale(0.95);
+}
+
+/* Voice delete button - rojo para eliminar preview */
+.voice-delete-button {
+  min-width: 40px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-error-bg);
+  color: var(--color-error);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.voice-delete-button:hover {
+  background: var(--color-error);
+  color: white;
+}
+
+.voice-delete-button:active {
+  transform: scale(0.95);
 }
