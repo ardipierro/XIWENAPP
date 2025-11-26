@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import SetupScreen from './SetupScreen';
 import QuestionScreen from './QuestionScreen';
+import AllAnswerScreen from './AllAnswerScreen';
 import ResultsScreen from './ResultsScreen';
 import {
   loadCategories,
@@ -33,6 +34,7 @@ function GameContainer({ onBack }) {
   const [unlimitedTime, setUnlimitedTime] = useState(false);
   const [gameMode, setGameMode] = useState('classic');
   const [repeatMode, setRepeatMode] = useState('shuffle');
+  const [turnMode, setTurnMode] = useState('turns'); // 'turns' = por turnos, 'all' = todos responden
 
   // Historial
   const [gameHistory, setGameHistory] = useState([]);
@@ -240,6 +242,31 @@ function GameContainer({ onBack }) {
 
   // Renderizar pantalla correspondiente
   if (gameState === 'playing') {
+    // Modo "Todos Responden"
+    if (turnMode === 'all') {
+      return (
+        <AllAnswerScreen
+          students={students}
+          parsedQuestions={parsedQuestions}
+          setParsedQuestions={setParsedQuestions}
+          currentQuestionIndex={currentQuestionIndex}
+          setCurrentQuestionIndex={setCurrentQuestionIndex}
+          scores={scores}
+          setScores={setScores}
+          questionsAnswered={questionsAnswered}
+          setQuestionsAnswered={setQuestionsAnswered}
+          responseTimes={responseTimes}
+          setResponseTimes={setResponseTimes}
+          timePerQuestion={timePerQuestion}
+          unlimitedTime={unlimitedTime}
+          gameMode={gameMode}
+          setScreen={setScreen}
+          saveGameToHistory={saveGameToHistory}
+        />
+      );
+    }
+
+    // Modo "Por Turnos" (original)
     return (
       <QuestionScreen
         students={students}
@@ -292,6 +319,8 @@ function GameContainer({ onBack }) {
       setUnlimitedTime={setUnlimitedTime}
       gameMode={gameMode}
       setGameMode={setGameMode}
+      turnMode={turnMode}
+      setTurnMode={setTurnMode}
       questionsByCategory={questionsByCategory}
       setQuestionsByCategory={setQuestionsByCategory}
       selectedCategory={selectedCategory}
