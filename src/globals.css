@@ -2818,13 +2818,21 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   overflow-y: auto;
 }
 
+/* Conversation item wrapper for swipe */
+.conversation-item-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
 .conversation-item {
   display: flex;
   gap: 12px;
-  padding: 16px 20px;
+  padding: 12px 16px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: transform 0.15s, background 0.15s;
   border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-primary);
+  position: relative;
 }
 
 .conversation-item:hover {
@@ -2833,11 +2841,109 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 
 .conversation-item.selected {
   background: var(--color-bg-tertiary);
-  border-left: 4px solid var(--color-primary, #5b6b8f);
+  border-left: 3px solid #00a884;
 }
 
 .conversation-item.unread {
-  background: rgba(99, 102, 241, 0.05);
+  background: rgba(0, 168, 132, 0.05);
+}
+
+.conversation-item.unread .conversation-name {
+  font-weight: 700;
+}
+
+/* Menu button en conversation item */
+.conversation-menu-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.conversation-item:hover .conversation-menu-btn {
+  opacity: 1;
+}
+
+.conversation-menu-btn:hover {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+}
+
+/* Context menu */
+.conversation-context-menu {
+  position: absolute;
+  right: 8px;
+  top: 100%;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 150px;
+  overflow: hidden;
+  z-index: 1000;
+  animation: slideDown 0.15s ease-out;
+}
+
+.conversation-context-menu button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.conversation-context-menu button:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.conversation-context-menu button.delete-action {
+  color: #ef4444;
+}
+
+.conversation-context-menu button.delete-action:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Swipe action */
+.swipe-action {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.swipe-action.delete {
+  background: #ef4444;
+  color: white;
+}
+
+.swipe-action.archive {
+  background: #3b82f6;
+  color: white;
 }
 
 .conversation-avatar {
@@ -3071,75 +3177,160 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   font-size: 14px;
 }
 
-/* Message Bubble */
+/* ============================================
+   MESSAGE BUBBLES - WHATSAPP STYLE
+   Diseño minimalista y compacto
+   ============================================ */
+
 .message-bubble-container {
   display: flex;
-  gap: 10px;
+  gap: 4px;
   align-items: flex-end;
-  animation: messageSlideIn 0.2s ease;
+  margin-bottom: 2px;
+  padding: 0 12px;
 }
 
 .message-bubble-container.own {
   flex-direction: row-reverse;
 }
 
+/* Avatar oculto por defecto para look más limpio */
 .message-avatar {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: var(--color-accent);
   color: white;
-  display: flex;
+  display: none; /* Oculto por defecto */
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 700;
   flex-shrink: 0;
 }
 
+/* Mostrar avatar solo en grupos o cuando es necesario */
+.message-bubble-container.show-avatar .message-avatar {
+  display: flex;
+}
+
 .message-bubble {
-  max-width: 60%;
-  min-width: 80px;
-  padding: 8px 12px; /* Padding más generoso para mejor legibilidad */
-  border-radius: 16px;
+  max-width: 75%;
+  min-width: 60px;
+  padding: 6px 7px 8px 9px;
+  border-radius: 7.5px;
   position: relative;
-  display: inline-block;
-  width: auto;
+  box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
 }
 
+/* Cola del globo - Mensaje propio (derecha) */
 .message-bubble-container.own .message-bubble {
-  background: var(--color-primary, #5b6b8f);
-  color: white;
-  border-bottom-right-radius: 4px;
+  background: #d9fdd3;
+  color: #111b21;
+  border-top-right-radius: 7.5px;
+  border-bottom-right-radius: 0;
 }
 
+.message-bubble-container.own .message-bubble::after {
+  content: '';
+  position: absolute;
+  right: -8px;
+  bottom: 0;
+  width: 8px;
+  height: 13px;
+  background: #d9fdd3;
+  clip-path: polygon(0 0, 0 100%, 100% 100%);
+}
+
+/* Cola del globo - Mensaje de otros (izquierda) */
 .message-bubble-container.other .message-bubble {
-  background: var(--color-bg-secondary);
-  color: var(--color-text-primary);
-  border-bottom-left-radius: 4px;
+  background: #ffffff;
+  color: #111b21;
+  border-top-left-radius: 7.5px;
+  border-bottom-left-radius: 0;
 }
 
+.message-bubble-container.other .message-bubble::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  bottom: 0;
+  width: 8px;
+  height: 13px;
+  background: #ffffff;
+  clip-path: polygon(100% 0, 0 100%, 100% 100%);
+}
+
+/* Nombre del sender - Solo primera burbuja de una secuencia */
 .message-sender {
-  font-size: 12px;
-  font-weight: 600;
-  margin-bottom: 4px; /* Espacio adecuado entre nombre y mensaje */
-  opacity: 0.8;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #06cf9c;
+  margin-bottom: 1px;
+  display: none; /* Oculto en chats 1:1 */
 }
 
+/* Contenido del mensaje con tiempo inline */
 .message-content {
-  font-size: 14px;
-  line-height: 1.4; /* Más legible y natural */
+  font-size: 14.2px;
+  line-height: 19px;
   word-wrap: break-word;
   white-space: pre-wrap;
   overflow-wrap: break-word;
-  max-width: 100%;
   margin: 0;
   padding: 0;
 }
 
+/* Tiempo INLINE - flota a la derecha del texto */
+.message-time-inline {
+  float: right;
+  font-size: 11px;
+  color: rgba(17, 27, 33, 0.45);
+  margin-left: 8px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 15px;
+}
+
+.message-bubble-container.own .message-time-inline {
+  color: rgba(17, 27, 33, 0.45);
+}
+
+/* Espacio invisible para que el tiempo no se pegue al texto */
+.message-content::after {
+  content: '\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0\00a0';
+  visibility: hidden;
+}
+
+/* Checkmarks */
+.message-status-inline {
+  display: inline-flex;
+  align-items: center;
+}
+
+.message-status-inline .status-icon {
+  width: 16px;
+  height: 11px;
+}
+
+.message-status-inline .status-icon.sent {
+  color: rgba(17, 27, 33, 0.45);
+}
+
+.message-status-inline .status-icon.delivered {
+  color: rgba(17, 27, 33, 0.45);
+}
+
+.message-status-inline .status-icon.read {
+  color: #53bdeb;
+}
+
+/* Legacy message-time para compatibilidad */
 .message-time {
-  font-size: 11px; /* Restaurado al tamaño original */
-  opacity: 0.7;
+  font-size: 11px;
+  opacity: 0.45;
   margin-top: 0;
 }
 
@@ -3154,57 +3345,153 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   }
 }
 
-/* Message Input */
+/* ============================================
+   MESSAGE INPUT - WHATSAPP STYLE COMPACT
+   ============================================ */
 .message-input-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 20px;
-  border-top: 1px solid var(--color-border);
-  background: var(--color-bg-secondary);
+  gap: 0;
+  padding: 8px 12px;
+  background: #f0f2f5;
+  border-top: none;
+}
+
+.dark .message-input-container {
+  background: #202c33;
+}
+
+.input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.textarea-wrapper {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .message-input {
   flex: 1;
-  padding: 12px 16px;
-  border: 2px solid var(--color-border);
-  border-radius: 12px;
-  font-size: 14px;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
   color: var(--color-text-primary);
-  background: var(--color-bg-primary);
-  resize: vertical;
-  min-height: 80px;
-  max-height: 200px;
+  background: #ffffff;
+  resize: none;
+  min-height: 42px;
+  max-height: 100px;
   font-family: inherit;
-  line-height: 1.5;
+  line-height: 20px;
+  box-shadow: none;
+}
+
+.dark .message-input {
+  background: #2a3942;
+  color: #e9edef;
+}
+
+.message-input::placeholder {
+  color: #667781;
 }
 
 .message-input:focus {
   outline: none;
-  border-color: var(--color-primary, #5b6b8f);
 }
 
+/* Botón enviar circular WhatsApp */
 .send-button {
-  padding: 12px 16px;
-  background: var(--color-primary, #5b6b8f);
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  background: #00a884;
   color: white;
   border: none;
-  border-radius: 12px;
+  border-radius: 50%;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .send-button:hover:not(:disabled) {
-  background: var(--color-primary-dark, #4a5a7a);
-  transform: translateY(-2px);
+  background: #017561;
+  transform: none;
 }
 
 .send-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Botón micrófono circular */
+.voice-button {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  background: #00a884;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.voice-button:hover {
+  background: #017561;
+}
+
+/* Botones internos del input */
+.inner-input-buttons {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+}
+
+.inner-buttons-left,
+.inner-buttons-right {
+  display: flex;
+  gap: 4px;
+  pointer-events: auto;
+}
+
+.inner-input-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  color: #54656f;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s;
+}
+
+.dark .inner-input-btn {
+  color: #8696a0;
+}
+
+.inner-input-btn:hover {
+  color: #00a884;
 }
 
 /* ===== New Message Modal ===== */
@@ -3693,107 +3980,108 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     /* SOLO ESTE ELEMENTO HACE SCROLL */
   }
 
-  /* Message bubbles */
+  /* Message bubbles - Mobile más anchas */
   .message-bubble {
     max-width: 85%;
   }
 
-  /* ===== INPUT CONTAINER - Fixed height al final, pegado al bottom ===== */
+  /* ===== INPUT CONTAINER MOBILE - WhatsApp Style ===== */
   .message-input-container {
     position: relative !important;
     flex-shrink: 0 !important;
-    padding: 0 !important;
+    padding: 6px 8px !important;
     margin: 0 !important;
-    background: var(--color-bg-secondary);
+    background: #f0f2f5 !important;
     border: none !important;
-    border-top: 1px solid var(--color-border);
-    border-bottom: none !important;
   }
 
-  /* Input area mobile - 1 fila simplificada */
-  .input-area-mobile {
-    margin: 0 !important;
-    padding: 0 !important;
+  .dark .message-input-container {
+    background: #202c33 !important;
   }
 
-  /* Una sola fila: Emoji + Textarea + Send */
+  /* Input row mobile - compacto */
   .input-row {
     display: flex !important;
     align-items: center !important;
-    gap: 8px !important;
-    padding: 12px 16px !important;
-    min-height: 60px !important;
-    max-height: 60px !important;
+    gap: 6px !important;
+    padding: 0 !important;
+    min-height: auto !important;
+    max-height: none !important;
     margin: 0 !important;
-    background: var(--color-bg-secondary) !important;
-  }
-
-  .input-action-btn {
-    min-width: 44px !important;
-    min-height: 44px !important;
-    padding: 10px !important;
     background: transparent !important;
-    border: none !important;
-    border-radius: 10px !important;
-    color: var(--color-text-primary) !important;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    flex-shrink: 0 !important;
   }
 
-  .input-action-btn:active {
-    background: var(--color-bg-tertiary) !important;
-    transform: scale(0.95);
-  }
-
-  .input-action-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
+  /* Input mobile - redondeado WhatsApp */
   .message-input {
     flex: 1 !important;
-    min-height: 36px !important;
-    max-height: 36px !important;
-    height: 36px !important;
-    padding: 8px 12px !important;
-    font-size: 16px !important; /* Evitar zoom en iOS */
+    min-height: 40px !important;
+    max-height: 100px !important;
+    height: auto !important;
+    padding: 10px 12px !important;
+    font-size: 16px !important;
     resize: none !important;
-    border: 1px solid var(--color-border) !important;
-    border-radius: 18px !important;
+    border: none !important;
+    border-radius: 21px !important;
     line-height: 20px !important;
-    overflow: hidden !important;
+    background: #ffffff !important;
   }
 
+  .dark .message-input {
+    background: #2a3942 !important;
+    color: #e9edef !important;
+  }
+
+  /* Botones circulares mobile */
   .send-button,
   .voice-button {
-    min-width: 44px !important;
-    min-height: 44px !important;
-    padding: 10px !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    min-height: 40px !important;
+    padding: 0 !important;
     flex-shrink: 0 !important;
+    border-radius: 50% !important;
   }
 
-  /* Textarea wrapper en mobile */
+  /* Textarea wrapper mobile */
   .textarea-wrapper {
     flex: 1 !important;
+    position: relative !important;
   }
 
+  /* Input SIN padding excesivo - botones están fuera */
   .textarea-wrapper .message-input {
-    padding: 8px 70px 8px 45px !important; /* Espacio para botones internos en mobile */
+    padding: 10px 40px 10px 12px !important;
   }
 
-  /* Botones internos en mobile */
+  /* Botones internos solo emoji a la derecha */
   .inner-input-buttons {
-    padding: 0 8px !important;
+    position: absolute !important;
+    right: 4px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    left: auto !important;
+    bottom: auto !important;
+    padding: 0 !important;
+    display: flex !important;
+    gap: 0 !important;
+  }
+
+  .inner-buttons-left {
+    display: none !important; /* Ocultar emoji en móvil */
+  }
+
+  .inner-buttons-right {
+    display: flex !important;
+    gap: 2px !important;
   }
 
   .inner-input-btn {
-    padding: 4px !important;
+    width: 32px !important;
+    height: 32px !important;
     min-width: 32px !important;
     min-height: 32px !important;
+    padding: 0 !important;
   }
 
   /* Reply/Edit bars */
@@ -3856,8 +4144,40 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   background: rgba(99, 102, 241, 0.1);
 }
 
+/* Dark mode - WhatsApp style bubbles */
+.dark .message-bubble-container.own .message-bubble {
+  background: #005c4b;
+  color: #e9edef;
+}
+
+.dark .message-bubble-container.own .message-bubble::after {
+  background: #005c4b;
+}
+
 .dark .message-bubble-container.other .message-bubble {
-  background: var(--color-bg-tertiary);
+  background: #202c33;
+  color: #e9edef;
+}
+
+.dark .message-bubble-container.other .message-bubble::before {
+  background: #202c33;
+}
+
+.dark .message-time {
+  color: rgba(233, 237, 239, 0.6);
+}
+
+.dark .message-bubble-container.own .message-time {
+  color: rgba(233, 237, 239, 0.6);
+}
+
+.dark .message-status .status-icon.sent,
+.dark .message-status .status-icon.delivered {
+  color: rgba(233, 237, 239, 0.6);
+}
+
+.dark .message-status .status-icon.read {
+  color: #53bdeb;
 }
 
 /* ===== Typing Indicator ===== */
@@ -4736,27 +5056,51 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   background: var(--color-bg-secondary);
 }
 
-/* ===== Message Footer (Time + Checkmarks) ===== */
+/* ===== Message Footer - INLINE WHATSAPP STYLE ===== */
 .message-footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 4px;
-  margin-top: 4px; /* Separación consistente del contenido */
-  white-space: nowrap;
-  font-size: 11px;
-  opacity: 0.8;
-}
-
-.message-time {
-  color: var(--color-text-tertiary);
+  float: right;
   display: inline-flex;
   align-items: center;
   gap: 3px;
+  margin-left: 8px;
+  margin-top: 3px;
+  font-size: 11px;
+  line-height: 15px;
+  white-space: nowrap;
+  position: relative;
+  bottom: -3px;
+}
+
+.message-time {
+  color: rgba(17, 27, 33, 0.45);
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
   white-space: nowrap;
 }
 
-/* Color más claro para mensajes propios (sobre fondo azul) */
+/* Status icons más pequeños */
+.message-status {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 1px;
+}
+
+.message-status .status-icon {
+  width: 16px;
+  height: 11px;
+}
+
+.message-status .status-icon.sent,
+.message-status .status-icon.delivered {
+  color: rgba(17, 27, 33, 0.45);
+}
+
+.message-status .status-icon.read {
+  color: #53bdeb;
+}
+
+/* Igual en mensajes propios (fondo verde claro) */
 .message-bubble-container.own .message-time {
   color: rgba(255, 255, 255, 0.75);
 }
@@ -5268,18 +5612,19 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   }
 }
 
-/* ===== Message Reactions ===== */
+/* ===== Message Reactions - Compact WhatsApp Style ===== */
 .message-reactions {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 8px;
+  gap: 2px;
+  margin-top: 4px;
+  margin-bottom: -2px;
 }
 
 .reaction-item {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   padding: 4px 8px;
   background: var(--color-bg-tertiary);
   border: 2px solid var(--color-border);
@@ -6803,100 +7148,159 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
 }
 
 /* ============================================
-   AUDIO PLAYER SIMPLE - USA COLORES DE LA BURBUJA
+   AUDIO PLAYER - WHATSAPP WAVEFORM STYLE
+   Compacto con ondas visuales
    ============================================ */
 
 .attachment-audio-modern {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 0;
-  /* SIN background propio - usa el color de la burbuja */
+  gap: 8px;
+  padding: 0;
+  min-width: 200px;
 }
 
-/* Botón play/pause - adapta a contexto del mensaje */
+/* Botón play/pause circular pequeño */
 .audio-play-btn-modern {
   flex-shrink: 0;
-  width: 2rem;
-  height: 2rem;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
-  background: rgba(255, 255, 255, 0.25);
-  color: white;
+  transition: transform 0.15s;
+  background: transparent;
+  color: #54656f;
 }
 
-/* En mensajes de otros, usar el color primario */
+/* En mensajes propios (fondo verde) */
+.message-bubble-container.own .audio-play-btn-modern {
+  color: #3b775f;
+}
+
+/* En mensajes de otros (fondo blanco) */
 .message-bubble-container.other .audio-play-btn-modern {
-  background: var(--color-primary, #5b6b8f);
-  color: white;
+  color: #54656f;
 }
 
 .audio-play-btn-modern:hover {
-  opacity: 0.9;
-  transform: scale(1.05);
+  transform: scale(1.1);
 }
 
 .audio-play-btn-modern:active {
   transform: scale(0.95);
 }
 
-/* Contenedor de progreso y tiempo */
+/* Contenedor de waveform + tiempo */
 .audio-progress-container {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  min-width: 100px;
+  gap: 2px;
+  min-width: 120px;
 }
 
-/* Barra de progreso VISIBLE */
+/* Waveform con barras */
 .audio-progress-modern {
-  height: 4px;
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 2px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
   cursor: pointer;
-  overflow: hidden;
+  position: relative;
 }
 
-/* En mensajes propios (fondo azul) */
-.message-bubble-container.own .audio-progress-modern {
-  background: rgba(255, 255, 255, 0.3);
+/* Barra individual del waveform */
+.audio-waveform-bar {
+  width: 3px;
+  border-radius: 1.5px;
+  background: rgba(17, 27, 33, 0.3);
+  transition: background 0.1s;
+}
+
+/* Barras reproducidas */
+.audio-waveform-bar.played {
+  background: #3b775f;
 }
 
 /* En mensajes de otros */
-.message-bubble-container.other .audio-progress-modern {
-  background: rgba(0, 0, 0, 0.1);
+.message-bubble-container.other .audio-waveform-bar {
+  background: rgba(17, 27, 33, 0.25);
+}
+
+.message-bubble-container.other .audio-waveform-bar.played {
+  background: #00a884;
+}
+
+/* Fallback: barra de progreso simple si no hay waveform */
+.audio-progress-bar-simple {
+  height: 4px;
+  background: rgba(17, 27, 33, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+  cursor: pointer;
+  flex: 1;
+}
+
+.message-bubble-container.own .audio-progress-bar-simple {
+  background: rgba(59, 119, 95, 0.3);
 }
 
 .progress-fill-modern {
   height: 100%;
-  background: rgba(255, 255, 255, 0.9);
+  background: #3b775f;
   border-radius: 2px;
   transition: width 0.1s linear;
 }
 
-/* Fill en mensajes de otros */
 .message-bubble-container.other .progress-fill-modern {
-  background: var(--color-primary, #5b6b8f);
+  background: #00a884;
 }
 
-/* Tiempo del audio - SIN "/" en el medio */
+/* Tiempo del audio inline */
 .audio-time-modern {
   display: flex;
-  gap: 0.25rem;
-  font-size: 10px;
-  color: currentColor;
-  opacity: 0.75;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: rgba(17, 27, 33, 0.6);
+  margin-top: 0;
 }
 
-/* En mensajes propios (texto blanco sobre azul) */
 .message-bubble-container.own .audio-time-modern {
-  color: white;
+  color: rgba(17, 27, 33, 0.6);
+}
+
+/* Dark mode audio */
+.dark .audio-play-btn-modern {
+  color: rgba(233, 237, 239, 0.7);
+}
+
+.dark .message-bubble-container.own .audio-play-btn-modern {
+  color: rgba(233, 237, 239, 0.8);
+}
+
+.dark .audio-waveform-bar {
+  background: rgba(233, 237, 239, 0.3);
+}
+
+.dark .audio-waveform-bar.played {
+  background: #00a884;
+}
+
+.dark .audio-progress-bar-simple {
+  background: rgba(233, 237, 239, 0.2);
+}
+
+.dark .progress-fill-modern {
+  background: #00a884;
+}
+
+.dark .audio-time-modern {
+  color: rgba(233, 237, 239, 0.6);
 }
 
 /* ============================================

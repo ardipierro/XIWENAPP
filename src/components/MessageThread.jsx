@@ -2071,46 +2071,47 @@ const MessageBubble = forwardRef(({
               </div>
             ) : isAudio(message.attachment.type) ? (
               <div className="attachment-audio-modern">
-                {/* Botón play/pause */}
+                {/* Botón play/pause compacto */}
                 <button
                   className={`audio-play-btn-modern ${isPlayingAudio ? 'playing' : ''}`}
                   onClick={toggleAudioPlayback}
                   title={isPlayingAudio ? 'Pausar' : 'Reproducir'}
                 >
-                  {isPlayingAudio ? <Pause size={18} /> : <Play size={18} />}
+                  {isPlayingAudio ? <Pause size={20} /> : <Play size={20} />}
                 </button>
 
-                {/* Barra de progreso y tiempos */}
+                {/* Waveform + tiempo compacto */}
                 <div className="audio-progress-container">
-                  <div
-                    className="audio-progress-modern"
-                    onClick={handleAudioSeek}
-                  >
-                    <div
-                      className="progress-fill-modern"
-                      style={{ width: `${audioProgress}%` }}
-                    />
+                  {/* Waveform visual */}
+                  <div className="audio-progress-modern" onClick={handleAudioSeek}>
+                    {/* Barras del waveform simulado */}
+                    {[...Array(27)].map((_, i) => {
+                      const heights = [8, 12, 18, 14, 20, 16, 22, 14, 18, 10, 24, 16, 20, 12, 18, 22, 14, 26, 16, 12, 20, 18, 14, 22, 10, 16, 12];
+                      const played = (i / 27) * 100 <= audioProgress;
+                      return (
+                        <div
+                          key={i}
+                          className={`audio-waveform-bar ${played ? 'played' : ''}`}
+                          style={{ height: `${heights[i]}px` }}
+                        />
+                      );
+                    })}
                   </div>
 
-                  {/* Tiempo sin "/" */}
+                  {/* Tiempo + hora inline */}
                   <div className="audio-time-modern">
-                    <span className="current-time">{formatAudioTime(audioCurrentTime)}</span>
-                    <span className="total-time">{formatAudioTime(audioDuration || message.attachment.duration)}</span>
-                  </div>
-                </div>
-
-                {/* Hora y estado EN LA MISMA LÍNEA a la derecha */}
-                <div className="audio-message-footer">
-                  <span className="message-time">
-                    {formatTime(message.createdAt)}
-                  </span>
-                  {isOwn && !message.deleted && (
-                    <span className="message-status">
-                      {message.status === 'sent' && <Check size={14} className="status-icon sent" />}
-                      {message.status === 'delivered' && <CheckCheck size={14} className="status-icon delivered" />}
-                      {message.status === 'read' && <CheckCheck size={14} className="status-icon read" />}
+                    <span>{formatAudioTime(audioCurrentTime || audioDuration || message.attachment.duration)}</span>
+                    <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                      {formatTime(message.createdAt)}
+                      {isOwn && !message.deleted && (
+                        <span className="message-status">
+                          {message.status === 'sent' && <Check size={13} className="status-icon sent" />}
+                          {message.status === 'delivered' && <CheckCheck size={13} className="status-icon delivered" />}
+                          {message.status === 'read' && <CheckCheck size={13} className="status-icon read" />}
+                        </span>
+                      )}
                     </span>
-                  )}
+                  </div>
                 </div>
 
                 <audio
@@ -2144,26 +2145,23 @@ const MessageBubble = forwardRef(({
           </div>
         )}
 
-        {/* Text Content - Separado del footer */}
-        {message.content && (
-          <div className="message-content">
-            {highlightText(message.content, searchTerm)}
-          </div>
-        )}
-
-        {/* Footer - Siempre separado del contenido */}
-        <div className="message-footer">
-          <span className="message-time">
-            {formatTime(message.createdAt)}
-            {message.edited && <span className="edited-indicator"> (editado)</span>}
-          </span>
-          {isOwn && !message.deleted && (
-            <span className="message-status">
-              {message.status === 'sent' && <Check size={14} className="status-icon sent" />}
-              {message.status === 'delivered' && <CheckCheck size={14} className="status-icon delivered" />}
-              {message.status === 'read' && <CheckCheck size={14} className="status-icon read" />}
+        {/* Text Content + Inline Footer (WhatsApp style) */}
+        <div className="message-content">
+          {message.content && highlightText(message.content, searchTerm)}
+          {/* Footer INLINE - flota a la derecha del texto */}
+          <span className="message-footer">
+            <span className="message-time">
+              {formatTime(message.createdAt)}
+              {message.edited && <span className="edited-indicator"> ·</span>}
             </span>
-          )}
+            {isOwn && !message.deleted && (
+              <span className="message-status">
+                {message.status === 'sent' && <Check size={13} className="status-icon sent" />}
+                {message.status === 'delivered' && <CheckCheck size={13} className="status-icon delivered" />}
+                {message.status === 'read' && <CheckCheck size={13} className="status-icon read" />}
+              </span>
+            )}
+          </span>
         </div>
 
         {/* Reactions Display */}
