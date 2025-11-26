@@ -79,35 +79,47 @@ function GameContainer({ onBack }) {
       const questionText = allLines[i];
       i++;
 
-      // Recolectar opciones (hasta 4, o hasta encontrar :: o nueva pregunta)
+      // Recolectar opciones (hasta 4, o hasta encontrar línea que empiece con :: sola)
       const options = [];
+      const optionExplanations = []; // Justificación por opción (inline)
       const correctIndices = [];
 
       while (i < allLines.length && options.length < 4) {
         const line = allLines[i];
 
-        // Si empieza con :: es justificación, salir del loop de opciones
-        if (line.startsWith('::')) {
+        // Si la línea empieza con :: y NO tiene nada antes (es justificación general), salir
+        if (line.startsWith('::') && !line.match(/^[*]?[A-Da-d]?[\.\)\s]?/)) {
           break;
         }
 
         // Detectar si es una opción (puede empezar con * para correcta)
         const isCorrect = line.startsWith('*') || line.includes('(correcta)');
-        let optionText = line.replace(/^\*/, '').replace(/\(correcta\)/g, '').trim();
+        let fullOptionText = line.replace(/^\*/, '').replace(/\(correcta\)/g, '').trim();
 
         // Quitar letra inicial si ya viene (A., B., etc.)
-        optionText = removeLeadingLetter(optionText);
+        fullOptionText = removeLeadingLetter(fullOptionText);
+
+        // Separar opción de justificación inline (buscar ::)
+        let optionText = fullOptionText;
+        let inlineExplanation = null;
+
+        const explIndex = fullOptionText.indexOf('::');
+        if (explIndex !== -1) {
+          optionText = fullOptionText.substring(0, explIndex).trim();
+          inlineExplanation = fullOptionText.substring(explIndex + 2).trim();
+        }
 
         if (optionText) {
           if (isCorrect) {
             correctIndices.push(options.length);
           }
           options.push(optionText);
+          optionExplanations.push(inlineExplanation);
         }
         i++;
       }
 
-      // Buscar justificación (línea que empieza con ::)
+      // Buscar justificación general (línea que empieza con :: sola)
       let explanation = null;
       if (i < allLines.length && allLines[i].startsWith('::')) {
         explanation = allLines[i].substring(2).trim();
@@ -119,9 +131,9 @@ function GameContainer({ onBack }) {
         parsedQuestions.push({
           question: questionText,
           options: options,
-          // Si hay múltiples correctas, guardar array; si es una sola, guardar el índice
+          optionExplanations: optionExplanations, // Justificación por cada opción
           correct: correctIndices.length === 1 ? correctIndices[0] : correctIndices,
-          explanation: explanation,
+          explanation: explanation, // Justificación general
           category: category
         });
       }

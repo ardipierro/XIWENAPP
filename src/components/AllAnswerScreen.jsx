@@ -337,26 +337,45 @@ function AllAnswerScreen({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
                 {currentQuestion.options.map((option, index) => {
                   const isCorrectOption = correctAnswers.includes(index)
+                  const optionExplanation = currentQuestion.optionExplanations?.[index]
+
                   return (
                     <div
                       key={index}
                       className={`p-3 rounded-lg border-2 ${
                         phase === 'revealed' && isCorrectOption
                           ? 'bg-green-100 dark:bg-green-900 border-green-500'
+                          : phase === 'revealed' && !isCorrectOption
+                          ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700'
                           : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'
                       }`}
                     >
-                      <span className="font-bold text-lg">{String.fromCharCode(65 + index)}.</span>{' '}
-                      <span className="text-gray-800 dark:text-gray-200">{option}</span>
+                      <div>
+                        <span className="font-bold text-lg">{String.fromCharCode(65 + index)}.</span>{' '}
+                        <span className="text-gray-800 dark:text-gray-200">{option}</span>
+                        {phase === 'revealed' && isCorrectOption && (
+                          <span className="ml-2 text-green-600 dark:text-green-400 font-bold">✓</span>
+                        )}
+                      </div>
+                      {/* Justificación inline de esta opción */}
+                      {phase === 'revealed' && optionExplanation && (
+                        <p className={`mt-2 text-sm italic ${
+                          isCorrectOption
+                            ? 'text-green-700 dark:text-green-300'
+                            : 'text-red-700 dark:text-red-300'
+                        }`}>
+                          → {optionExplanation}
+                        </p>
+                      )}
                     </div>
                   )
                 })}
               </div>
 
-              {/* Justificación (solo después de revelar) */}
+              {/* Justificación general (solo después de revelar) */}
               {phase === 'revealed' && currentQuestion.explanation && (
                 <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-300 dark:border-blue-700 rounded-lg">
-                  <h4 className="font-bold text-blue-800 dark:text-blue-300 mb-2">Explicación:</h4>
+                  <h4 className="font-bold text-blue-800 dark:text-blue-300 mb-2">Explicación general:</h4>
                   <p className="text-blue-700 dark:text-blue-200">{currentQuestion.explanation}</p>
                 </div>
               )}
