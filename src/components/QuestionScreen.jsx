@@ -21,7 +21,8 @@ function QuestionScreen({
   gameMode,
   repeatMode,
   setScreen,
-  saveGameToHistory
+  saveGameToHistory,
+  fontScale = 100 // Porcentaje de escala de fuente (100 = normal)
 }) {
   const [timeLeft, setTimeLeft] = useState(timePerQuestion)
   const [selectedAnswer, setSelectedAnswer] = useState(null)
@@ -168,39 +169,40 @@ function QuestionScreen({
         })
       }
     }
-    
-    setTimeout(() => {
-      moveToNext(correct)
-    }, 2000)
+
+    // Ya no avanza automáticamente - espera al botón "Siguiente"
   }
 
   const handleTimeout = () => {
     setShowFeedback(true)
     setIsCorrect(false)
     playIncorrectSound()
-    
+
     const responseTime = questionStartTime ? (Date.now() - questionStartTime) / 1000 : 0
-    
+
     setQuestionsAnswered({
       ...questionsAnswered,
       [currentStudent]: questionsAnswered[currentStudent] + 1
     })
-    
+
     setResponseTimes({
       ...responseTimes,
       [currentStudent]: responseTimes[currentStudent] + responseTime
     })
-    
+
     if (gameMode === 'penalty') {
       setScores({
         ...scores,
         [currentStudent]: Math.max(0, scores[currentStudent] - 1)
       })
     }
-    
-    setTimeout(() => {
-      moveToNext(false)
-    }, 2000)
+
+    // Ya no avanza automáticamente - espera al botón "Siguiente"
+  }
+
+  // Handler para el botón "Siguiente pregunta"
+  const handleNextQuestion = () => {
+    moveToNext(isCorrect)
   }
 
   const moveToNext = (wasCorrect) => {
@@ -279,25 +281,48 @@ function QuestionScreen({
     }
   }, [timeLeft, showFeedback, isPaused, unlimitedTime])
 
+  // Calcular factor de escala
+  const scale = fontScale / 100
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8" style={{ fontSize: `${scale}rem` }}>
       <div className="max-w-4xl mx-auto relative">
-        {/* Tanteador */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-2xl font-semibold text-gray-900 dark:text-white">Tanteador</h3>
+        {/* Header: Número de pregunta + Timer + Controles + Botón Siguiente */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 mb-4">
+          <div className="flex flex-wrap justify-between items-center gap-3">
+            {/* Número de pregunta */}
+            <div style={{ fontSize: `${1.25 * scale}rem` }} className="font-semibold text-gray-900 dark:text-white">
+              Pregunta {currentQuestionIndex + 1} de {parsedQuestions.length}
+              <span className="ml-2 text-gray-500 dark:text-gray-400 font-normal">
+                ({parsedQuestions.length - currentQuestionIndex - 1} restantes)
+              </span>
+            </div>
+
+            {/* Botón Siguiente (aparece cuando termina cada pregunta) */}
+            {showFeedback && (
+              <button
+                onClick={handleNextQuestion}
+                style={{ fontSize: `${1.1 * scale}rem` }}
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition-colors"
+              >
+                Siguiente →
+              </button>
+            )}
+
+            {/* Timer y controles */}
             <div className="flex items-center gap-3">
               {!unlimitedTime && (
-                <div className={`text-2xl font-bold ${timeLeft <= 10 ? 'text-red-500' : 'text-gray-700 dark:text-gray-300'}`}>
+                <div style={{ fontSize: `${1.5 * scale}rem` }} className={`font-bold ${timeLeft <= 10 ? 'text-red-500' : 'text-gray-700 dark:text-gray-300'}`}>
                   {String(timeLeft).padStart(2, '0')} seg.
-                  {isPaused && <span className="text-orange-500 text-base ml-2">(Pausado)</span>}
+                  {isPaused && <span className="text-orange-500 ml-2" style={{ fontSize: `${0.9 * scale}rem` }}>(Pausado)</span>}
                 </div>
               )}
               {!unlimitedTime && (
                 <button
                   onClick={togglePause}
                   disabled={showFeedback}
-                  className={`px-4 py-2 rounded-lg font-semibold text-base ${
+                  style={{ fontSize: `${scale}rem` }}
+                  className={`px-4 py-2 rounded-lg font-semibold ${
                     showFeedback ? 'bg-gray-300 cursor-not-allowed' :
                     isPaused ? 'bg-green-500 hover:bg-green-600 text-white' :
                     'bg-gray-500 hover:bg-gray-600 text-white'
@@ -308,32 +333,41 @@ function QuestionScreen({
               )}
               <button
                 onClick={endGame}
-                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold text-base"
+                style={{ fontSize: `${scale}rem` }}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold"
               >
                 Terminar
               </button>
             </div>
           </div>
-          <div className="overflow-x-auto pb-2 pt-3 px-1">
+        </div>
+
+        {/* Espacio vacío entre header y estudiantes */}
+        <div className="h-4"></div>
+
+        {/* Estudiantes y puntajes (sin título) */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-4">
+          <div className="overflow-x-auto pb-2 px-1">
             <div className="flex gap-3">
             {validStudents.map(student => (
               <div
                 key={student}
-                className={`p-3 rounded-lg relative min-w-[200px] w-[200px] flex-shrink-0 ${
+                style={{ minWidth: `${200 * scale}px`, width: `${200 * scale}px` }}
+                className={`p-3 rounded-lg relative flex-shrink-0 ${
                   student === currentStudent
                     ? 'bg-gray-200 dark:bg-gray-700 border-4 border-gray-500 dark:border-gray-400'
                     : 'bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600'
                 }`}
               >
                 {student === currentStudent && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gray-600 dark:bg-gray-500 text-white text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap z-10">
+                  <div style={{ fontSize: `${0.75 * scale}rem` }} className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gray-600 dark:bg-gray-500 text-white font-bold px-2 py-1 rounded-full whitespace-nowrap z-10">
                     TU TURNO
                   </div>
                 )}
-                <div className={`font-semibold text-2xl truncate text-gray-900 dark:text-white ${student === currentStudent ? 'mt-2' : ''}`}>
+                <div style={{ fontSize: `${1.5 * scale}rem` }} className={`font-semibold truncate text-gray-900 dark:text-white ${student === currentStudent ? 'mt-2' : ''}`}>
                   {student}
                 </div>
-                <div className={`text-3xl font-bold ${student === currentStudent ? 'text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'}`}>
+                <div style={{ fontSize: `${1.875 * scale}rem` }} className={`font-bold ${student === currentStudent ? 'text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'}`}>
                   {scores[student]} puntos
                 </div>
               </div>
@@ -342,17 +376,20 @@ function QuestionScreen({
           </div>
         </div>
 
+        {/* Espacio vacío entre estudiantes y pregunta (sin separador visible) */}
+        <div className="h-4"></div>
+
         {/* Pregunta */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
-          <div className="mb-8">
+          <div className="mb-6">
             {!hasStarted && isPaused && !showFeedback && !unlimitedTime ? (
               <div className="bg-gray-100 dark:bg-gray-700 border-2 border-gray-400 dark:border-gray-600 rounded-lg p-8 text-center">
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Juego en Pausa</h3>
-                <p className="text-gray-700 dark:text-gray-300">Presiona "Iniciar" cuando estén listos</p>
+                <h3 style={{ fontSize: `${1.5 * scale}rem` }} className="font-bold text-gray-900 dark:text-white mb-2">Juego en Pausa</h3>
+                <p style={{ fontSize: `${scale}rem` }} className="text-gray-700 dark:text-gray-300">Presiona "Iniciar" cuando estén listos</p>
               </div>
             ) : (
               <>
-                <h2 className="text-4xl font-semibold mb-6 text-gray-900 dark:text-white">{currentQuestion.question}</h2>
+                <h2 style={{ fontSize: `${2.25 * scale}rem` }} className="font-semibold mb-6 text-gray-900 dark:text-white">{currentQuestion.question}</h2>
                 <div className="space-y-3">
                   {currentQuestion.options.map((option, index) => {
                     let bgColor = 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white'
@@ -362,19 +399,23 @@ function QuestionScreen({
                         bgColor = 'bg-green-200 dark:bg-green-700 text-gray-900 dark:text-white'
                       } else if (!isCorrect && index === selectedAnswer) {
                         bgColor = 'bg-red-200 dark:bg-red-700 text-gray-900 dark:text-white'
+                      } else if (!isCorrect && index === currentQuestion.correct) {
+                        // Mostrar la respuesta correcta también cuando se equivoca
+                        bgColor = 'bg-green-100 dark:bg-green-800 text-gray-900 dark:text-white border-2 border-green-500'
                       }
                     }
 
                     if (isPaused && !showFeedback && !unlimitedTime) {
                       bgColor = 'bg-gray-200 dark:bg-gray-800 cursor-not-allowed text-gray-900 dark:text-white'
                     }
-                    
+
                     return (
                       <button
                         key={index}
                         onClick={() => handleAnswer(index)}
                         disabled={showFeedback || (isPaused && !unlimitedTime)}
-                        className={`w-full p-5 rounded-lg text-left ${bgColor} transition-colors font-medium text-3xl`}
+                        style={{ fontSize: `${1.875 * scale}rem`, padding: `${1.25 * scale}rem` }}
+                        className={`w-full rounded-lg text-left ${bgColor} transition-colors font-medium`}
                       >
                         {String.fromCharCode(65 + index)}. {option}
                       </button>
@@ -386,24 +427,17 @@ function QuestionScreen({
           </div>
 
           {showFeedback && (
-            <div className={`text-center text-2xl font-bold mb-6 ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
+            <div style={{ fontSize: `${1.5 * scale}rem` }} className={`text-center font-bold mb-4 ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
               {isCorrect ? (
-                <>¡Correcto! ✓ <span className="text-lg">(+1 punto)</span></>
+                <>¡Correcto! ✓ <span style={{ fontSize: `${scale}rem` }}>(+1 punto)</span></>
               ) : (
                 <>
                   {(selectedAnswer === null && !unlimitedTime) ? '¡Tiempo agotado! ✗' : '¡Incorrecto! ✗'}
-                  {gameMode === 'penalty' && <span className="text-lg block mt-1">(-1 punto)</span>}
+                  {gameMode === 'penalty' && <span style={{ fontSize: `${scale}rem` }} className="block mt-1">(-1 punto)</span>}
                 </>
               )}
             </div>
           )}
-
-          <div className="text-center text-xl text-gray-600 dark:text-gray-400">
-            Pregunta {currentQuestionIndex + 1} de {parsedQuestions.length}
-            <span className="ml-2 text-gray-700 dark:text-gray-300 font-semibold">
-              ({parsedQuestions.length - currentQuestionIndex - 1} restantes)
-            </span>
-          </div>
         </div>
       </div>
     </div>
