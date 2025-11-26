@@ -162,8 +162,8 @@ function SetupScreen({
   }
 
   return (
-    <div className="h-screen bg-gray-50 dark:bg-gray-900 overflow-y-auto p-4 md:p-8">
-      <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 md:p-8">
+    <div className="h-screen overflow-y-auto p-4 md:p-8" style={{ background: 'var(--color-bg-secondary)' }}>
+      <div className="max-w-4xl mx-auto rounded-2xl border p-4 md:p-8" style={{ background: 'var(--color-bg-primary)', borderColor: 'var(--color-border)' }}>
         <div className="flex items-center justify-between mb-8">
           {onBack && (
             <BaseButton
@@ -173,7 +173,7 @@ function SetupScreen({
               ← Volver
             </BaseButton>
           )}
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex-1 text-center">
+          <h1 className="text-2xl font-bold flex-1 text-center" style={{ color: 'var(--color-text-primary)' }}>
             Ejercicio de Preguntas por Turnos
           </h1>
           {onBack && <div className="w-24"></div>}
@@ -182,9 +182,9 @@ function SetupScreen({
         {/* ============================================ */}
         {/* SECCIÓN: SELECCIÓN DE ALUMNOS (NUEVO) */}
         {/* ============================================ */}
-        <div className="mb-8 p-6 bg-gray-100 dark:bg-gray-700 rounded-xl border-2 border-gray-300 dark:border-gray-600">
+        <div className="mb-8 p-6 rounded-xl border-2" style={{ background: 'var(--color-bg-tertiary)', borderColor: 'var(--color-border)' }}>
           <div className="mb-4">
-            <h2 className="text-xl md:text-2xl font-semibold flex items-center text-gray-800 dark:text-gray-200">
+            <h2 className="text-xl md:text-2xl font-semibold flex items-center" style={{ color: 'var(--color-text-primary)' }}>
               <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
               </svg>
@@ -192,7 +192,7 @@ function SetupScreen({
             </h2>
           </div>
 
-          <div className="bg-white dark:bg-gray-900 p-4 rounded-lg mb-4">
+          <div className="p-4 rounded-lg mb-4" style={{ background: 'var(--color-bg-primary)' }}>
             <BaseSelect
               value=""
               onChange={(e) => handleStudentSelect(e.target.value)}
@@ -218,15 +218,15 @@ function SetupScreen({
           </div>
 
           {/* Lista de alumnos seleccionados */}
-          <div className="bg-white dark:bg-gray-900 p-4 rounded-lg">
-            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+          <div className="p-4 rounded-lg" style={{ background: 'var(--color-bg-primary)' }}>
+            <h3 className="text-sm font-medium mb-3" style={{ color: 'var(--color-text-secondary)' }}>
               Alumnos en esta partida ({students.length}):
             </h3>
             {students.length > 0 ? (
               <div className="space-y-2">
                 {students.map((student, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <span className="font-medium text-gray-800 dark:text-gray-200">{student}</span>
+                  <div key={index} className="flex items-center justify-between p-3 rounded-lg" style={{ background: 'var(--color-bg-tertiary)' }}>
+                    <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{student}</span>
                     <BaseButton
                       variant="danger"
                       size="sm"
@@ -241,7 +241,7 @@ function SetupScreen({
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 dark:text-gray-400 text-center py-4">
+              <p className="text-center py-4" style={{ color: 'var(--color-text-muted)' }}>
                 No hay alumnos seleccionados para esta partida
               </p>
             )}
@@ -251,9 +251,9 @@ function SetupScreen({
         {/* ============================================ */}
         {/* SECCIÓN: PREGUNTAS POR TEMA */}
         {/* ============================================ */}
-        <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-700 rounded-xl">
+        <div className="mb-8 p-6 rounded-xl" style={{ background: 'var(--color-bg-tertiary)' }}>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl md:text-2xl font-semibold flex items-center text-gray-800 dark:text-gray-200">
+            <h2 className="text-xl md:text-2xl font-semibold flex items-center" style={{ color: 'var(--color-text-primary)' }}>
               <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
               </svg>
@@ -288,8 +288,8 @@ function SetupScreen({
           )}
 
           {Object.entries(questionsByCategory).map(([categoryName, categoryQuestions]) => (
-            <details key={categoryName} className="mb-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
-              <summary className="cursor-pointer p-4 font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2">
+            <details key={categoryName} className="mb-4 rounded-lg border" style={{ background: 'var(--color-bg-primary)', borderColor: 'var(--color-border)' }}>
+              <summary className="cursor-pointer p-4 font-semibold rounded-lg flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
                 <BookOpen size={18} strokeWidth={2} className="inline-icon" /> {categoryName} ({parseQuestions(categoryQuestions).length} preguntas)
               </summary>
               <div className="p-4 border-t border-gray-200 dark:border-gray-600">
@@ -310,8 +310,8 @@ function SetupScreen({
             </details>
           ))}
 
-          <details className="mb-4 bg-gray-100 dark:bg-gray-700 rounded-lg border-2 border-gray-300 dark:border-gray-600">
-            <summary className="cursor-pointer p-4 font-semibold text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg flex items-center gap-2">
+          <details className="mb-4 rounded-lg border-2" style={{ background: 'var(--color-bg-secondary)', borderColor: 'var(--color-border)' }}>
+            <summary className="cursor-pointer p-4 font-semibold rounded-lg flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
               <Plus size={18} strokeWidth={2} className="inline-icon" /> Agregar nuevo tema
             </summary>
             <div className="p-4 border-t border-gray-300 dark:border-gray-600">
@@ -353,8 +353,8 @@ function SetupScreen({
         {/* ============================================ */}
         {/* SECCIÓN: CONFIGURACIÓN */}
         {/* ============================================ */}
-        <div className="mb-8 p-6 bg-gray-50 dark:bg-gray-700 rounded-xl">
-          <h2 className="text-xl md:text-2xl font-semibold mb-4 flex items-center gap-2 text-gray-800 dark:text-gray-200">
+        <div className="mb-8 p-6 rounded-xl" style={{ background: 'var(--color-bg-tertiary)' }}>
+          <h2 className="text-xl md:text-2xl font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
             <Settings size={24} strokeWidth={2} className="inline-icon" /> Configuración
           </h2>
 
@@ -419,7 +419,7 @@ function SetupScreen({
                 onChange={(e) => setUnlimitedTime(e.target.checked)}
                 className="mr-3 w-5 h-5 text-gray-600 dark:text-gray-400 rounded focus:ring-2 focus:ring-gray-500"
               />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+              <span className="text-sm font-medium flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
                 <Clock size={18} strokeWidth={2} className="inline-icon" /> Tiempo ilimitado por pregunta
               </span>
             </label>
@@ -427,7 +427,7 @@ function SetupScreen({
 
           {!unlimitedTime && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
                 Tiempo por pregunta: {timePerQuestion} segundos
               </label>
               <input

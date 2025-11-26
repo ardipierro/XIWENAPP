@@ -253,12 +253,12 @@ function AllAnswerScreen({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8" style={{ background: 'var(--color-bg-secondary)' }}>
       <div className="max-w-5xl mx-auto">
         {/* Header con tiempo y controles */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 md:p-6 mb-6">
+        <div className="rounded-2xl border p-4 md:p-6 mb-6" style={{ background: 'var(--color-bg-primary)', borderColor: 'var(--color-border)' }}>
           <div className="flex justify-between items-center flex-wrap gap-3">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+            <h3 className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
               Pregunta {currentQuestionIndex + 1} de {parsedQuestions.length}
               {isMultipleAnswer && (
                 <span className="ml-2 text-sm bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-2 py-1 rounded">
@@ -268,7 +268,7 @@ function AllAnswerScreen({
             </h3>
             <div className="flex items-center gap-3">
               {!unlimitedTime && phase !== 'waiting' && (
-                <div className={`text-2xl font-bold ${timeLeft <= 10 ? 'text-red-500' : 'text-gray-700 dark:text-gray-300'}`}>
+                <div className="text-2xl font-bold" style={{ color: timeLeft <= 10 ? '#ef4444' : 'var(--color-text-primary)' }}>
                   {String(timeLeft).padStart(2, '0')} seg.
                   {isPaused && <span className="text-orange-500 text-base ml-2">(Pausado)</span>}
                 </div>
@@ -320,11 +320,11 @@ function AllAnswerScreen({
 
         {/* Pantalla de espera (solo primera vez) */}
         {phase === 'waiting' && (
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8 mb-6 text-center">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+          <div className="rounded-2xl border p-8 mb-6 text-center" style={{ background: 'var(--color-bg-primary)', borderColor: 'var(--color-border)' }}>
+            <h2 className="text-3xl font-bold mb-4" style={{ color: 'var(--color-text-primary)' }}>
               ¿Listos?
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-400 mb-6">
+            <p className="text-xl mb-6" style={{ color: 'var(--color-text-secondary)' }}>
               Presiona "Iniciar" cuando todos estén preparados
             </p>
             <button
@@ -339,8 +339,8 @@ function AllAnswerScreen({
         {/* Pregunta (solo visible cuando no está en espera) */}
         {phase !== 'waiting' && (
           <>
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 md:p-8 mb-6">
-              <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white mb-6">
+            <div className="rounded-2xl border p-6 md:p-8 mb-6" style={{ background: 'var(--color-bg-primary)', borderColor: 'var(--color-border)' }}>
+              <h2 className="text-2xl md:text-3xl font-semibold mb-6" style={{ color: 'var(--color-text-primary)' }}>
                 {currentQuestion.question}
               </h2>
 
@@ -363,7 +363,7 @@ function AllAnswerScreen({
                     >
                       <div>
                         <span className="font-bold text-xl">{String.fromCharCode(65 + index)}.</span>{' '}
-                        <span className="text-xl text-gray-800 dark:text-gray-200">{option}</span>
+                        <span className="text-xl" style={{ color: phase === 'revealed' && (isCorrectOption || (currentQuestion.correctAnswers && currentQuestion.correctAnswers.includes(index))) ? 'inherit' : 'var(--color-text-primary)' }}>{option}</span>
                         {phase === 'revealed' && isCorrectOption && (
                           <span className="ml-2 text-green-600 dark:text-green-400 font-bold text-xl">✓</span>
                         )}
@@ -393,8 +393,8 @@ function AllAnswerScreen({
             </div>
 
             {/* Panel de respuestas por alumno */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <div className="rounded-2xl border p-6 mb-6" style={{ background: 'var(--color-bg-primary)', borderColor: 'var(--color-border)' }}>
+              <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>
                 {phase === 'answering'
                   ? isPaused
                     ? 'Juego pausado'
@@ -423,7 +423,7 @@ function AllAnswerScreen({
                     >
                       <div className="flex items-center justify-between flex-wrap gap-3">
                         {/* Nombre del alumno */}
-                        <span className="font-semibold text-lg text-gray-900 dark:text-white min-w-[100px]">
+                        <span className="font-semibold text-lg min-w-[100px]" style={{ color: 'var(--color-text-primary)' }}>
                           {student}
                         </span>
 
