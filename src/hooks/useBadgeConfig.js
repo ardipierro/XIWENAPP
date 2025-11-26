@@ -24,6 +24,18 @@ import {
   saveGlobalBadgeConfig,
   DEFAULT_GLOBAL_BADGE_CONFIG,
   applyColorPalette,
+  // 🆕 Sistema de Presets
+  getBadgePresetConfig,
+  saveBadgePresetConfig,
+  resetBadgePresetConfig,
+  BADGE_DISPLAY_PRESETS,
+  DEFAULT_BADGE_PRESET_CONFIG,
+  getPresetForBadge,
+  createCustomPreset,
+  deleteCustomPreset,
+  setCategoryPreset,
+  setBadgePresetOverride,
+  removeBadgePresetOverride,
 } from '../config/badgeSystem';
 import logger from '../utils/logger';
 
@@ -39,6 +51,7 @@ function useBadgeConfig() {
   const [config, setConfig] = useState(getBadgeConfig());
   const [iconConfig, setIconConfig] = useState(getIconLibraryConfig());
   const [globalConfig, setGlobalConfig] = useState(getGlobalBadgeConfig());
+  const [presetConfig, setPresetConfig] = useState(getBadgePresetConfig());
   const [hasChanges, setHasChanges] = useState(false);
 
   // Cargar configuración al montar
@@ -71,12 +84,19 @@ function useBadgeConfig() {
       applyBadgeColors(updated);
     };
 
+    const handlePresetConfigChange = () => {
+      const updated = getBadgePresetConfig();
+      setPresetConfig(updated);
+    };
+
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('xiwen_badge_config_changed', handleStorageChange);
+    window.addEventListener('badgePresetConfigChange', handlePresetConfigChange);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('xiwen_badge_config_changed', handleStorageChange);
+      window.removeEventListener('badgePresetConfigChange', handlePresetConfigChange);
     };
   }, []);
 
@@ -201,36 +221,41 @@ function useBadgeConfig() {
   }, []);
 
   /**
-   * Guardar configuración actual (badges + iconos + global)
+   * Guardar configuración actual (badges + iconos + global + presets)
    */
   const save = useCallback(() => {
     try {
       saveBadgeConfig(config);
       saveIconLibraryConfig(iconConfig);
       saveGlobalBadgeConfig(globalConfig);
+      saveBadgePresetConfig(presetConfig);
       setHasChanges(false);
       window.dispatchEvent(new Event('xiwen_badge_config_changed'));
-      logger.info('Badge configuration saved', 'useBadgeConfig');
+      window.dispatchEvent(new Event('badgePresetConfigChange'));
+      logger.info('Badge configuration saved (including presets)', 'useBadgeConfig');
       return true;
     } catch (err) {
       logger.error('Error saving badge config:', err, 'useBadgeConfig');
       return false;
     }
-  }, [config, iconConfig, globalConfig]);
+  }, [config, iconConfig, globalConfig, presetConfig]);
 
   /**
-   * Restaurar configuración por defecto
+   * Restaurar configuración por defecto (incluyendo presets)
    */
   const reset = useCallback(() => {
     resetBadgeConfig();
     resetIconLibraryConfig();
+    resetBadgePresetConfig();
     localStorage.removeItem('xiwen_global_badge_config');
     setConfig(DEFAULT_BADGE_CONFIG);
     setIconConfig(DEFAULT_ICON_LIBRARY_CONFIG);
     setGlobalConfig(DEFAULT_GLOBAL_BADGE_CONFIG);
+    setPresetConfig(DEFAULT_BADGE_PRESET_CONFIG);
     setHasChanges(false);
     window.dispatchEvent(new Event('xiwen_badge_config_changed'));
-    logger.info('Badge configuration reset to defaults', 'useBadgeConfig');
+    window.dispatchEvent(new Event('badgePresetConfigChange'));
+    logger.info('Badge configuration reset to defaults (including presets)', 'useBadgeConfig');
   }, []);
 
   /**
@@ -359,17 +384,104 @@ function useBadgeConfig() {
   );
 
   /**
-   * Descartar cambios no guardados
+   * Descartar cambios no guardados (incluyendo presets)
    */
   const discard = useCallback(() => {
     const saved = getBadgeConfig();
     const savedIconConfig = getIconLibraryConfig();
     const savedGlobalConfig = getGlobalBadgeConfig();
+    const savedPresetConfig = getBadgePresetConfig();
     setConfig(saved);
     setIconConfig(savedIconConfig);
     setGlobalConfig(savedGlobalConfig);
+    setPresetConfig(savedPresetConfig);
     setHasChanges(false);
-    logger.info('Badge configuration changes discarded', 'useBadgeConfig');
+    logger.info('Badge configuration changes discarded (including presets)', 'useBadgeConfig');
+  }, []);
+
+  /**
+   * 🆕 Actualizar preset de una categoría
+   */
+  const updateCategoryPreset = useCallback((category, presetName) => {
+    setPresetConfig((prev) => ({
+      ...prev,
+      categories: {
+        ...prev.categories,
+        [category]: presetName,
+      },
+    }));
+    setHasChanges(true);
+    logger.info(`Category ${category} preset set to: ${presetName}`, 'useBadgeConfig');
+  }, []);
+
+  /**
+   * 🆕 Actualizar override de preset individual
+   */
+  const updateBadgePreset = useCallback((badgeKey, presetName) => {
+    setPresetConfig((prev) => ({
+      ...prev,
+      overrides: {
+        ...prev.overrides,
+        [badgeKey]: presetName,
+      },
+    }));
+    setHasChanges(true);
+    logger.info(`Badge ${badgeKey} preset override set to: ${presetName}`, 'useBadgeConfig');
+  }, []);
+
+  /**
+   * 🆕 Eliminar override de preset individual
+   */
+  const removeBadgePreset = useCallback((badgeKey) => {
+    setPresetConfig((prev) => {
+      const { [badgeKey]: removed, ...remaining } = prev.overrides || {};
+      return {
+        ...prev,
+        overrides: remaining,
+      };
+    });
+    setHasChanges(true);
+    logger.info(`Badge ${badgeKey} preset override removed`, 'useBadgeConfig');
+  }, []);
+
+  /**
+   * 🆕 Crear preset personalizado
+   */
+  const addCustomPreset = useCallback((name, presetData) => {
+    setPresetConfig((prev) => ({
+      ...prev,
+      customPresets: {
+        ...prev.customPresets,
+        [name]: {
+          name: presetData.name || name,
+          description: presetData.description || '',
+          icon: presetData.icon || '🎨',
+          showIcon: presetData.showIcon !== false,
+          showText: presetData.showText !== false,
+          showBackground: presetData.showBackground !== false,
+          enabled: presetData.enabled !== false,
+          fontWeight: presetData.fontWeight || 'medium',
+          custom: true,
+        },
+      },
+    }));
+    setHasChanges(true);
+    logger.info(`Custom preset "${name}" created`, 'useBadgeConfig');
+  }, []);
+
+  /**
+   * 🆕 Eliminar preset personalizado
+   */
+  const removeCustomPreset = useCallback((name) => {
+    setPresetConfig((prev) => {
+      const { [name]: removed, ...remaining } = prev.customPresets || {};
+      return {
+        ...prev,
+        customPresets: remaining,
+      };
+    });
+    setHasChanges(true);
+    logger.info(`Custom preset "${name}" removed`, 'useBadgeConfig');
   }, []);
 
   return {
@@ -377,15 +489,18 @@ function useBadgeConfig() {
     config,
     iconConfig,
     globalConfig,
+    presetConfig,
     hasChanges,
     categories: BADGE_CATEGORIES,
     defaults: DEFAULT_BADGE_CONFIG,
+    displayPresets: BADGE_DISPLAY_PRESETS,
 
     // Funciones de lectura
     getBadge,
     getBadgesByCategory,
+    getPresetForBadge,
 
-    // Funciones de escritura
+    // Funciones de escritura (badges)
     save,
     reset,
     discard,
@@ -393,11 +508,20 @@ function useBadgeConfig() {
     updateProperty,
     addBadge,
     removeBadge,
+
+    // Funciones de escritura (iconos y estilos globales)
     updateIconLibrary,
     updateMonochromePalette,
     updateMonochromeColor,
     updateGlobalConfig,
     updateAllBadgeStyles,
+
+    // 🆕 Funciones de escritura (presets)
+    updateCategoryPreset,
+    updateBadgePreset,
+    removeBadgePreset,
+    addCustomPreset,
+    removeCustomPreset,
   };
 }
 

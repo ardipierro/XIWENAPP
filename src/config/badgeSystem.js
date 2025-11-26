@@ -1103,6 +1103,290 @@ export const COLOR_PALETTES = {
   },
 };
 
+// ============================================
+// SISTEMA DE PRESETS DE VISUALIZACIÓN
+// ============================================
+
+/**
+ * Presets de visualización para badges
+ * Define configuraciones reutilizables para controlar cómo se muestran los badges
+ */
+export const BADGE_DISPLAY_PRESETS = {
+  full: {
+    name: 'Completo',
+    description: 'Icono + Texto + Fondo con color',
+    icon: '🎯',
+    showIcon: true,
+    showText: true,
+    showBackground: true,
+    enabled: true,
+  },
+
+  iconOnly: {
+    name: 'Solo Icono',
+    description: 'Solo icono con fondo, sin texto',
+    icon: '🔵',
+    showIcon: true,
+    showText: false,
+    showBackground: true,
+    enabled: true,
+  },
+
+  textOnly: {
+    name: 'Solo Texto',
+    description: 'Solo texto con fondo de color, sin icono',
+    icon: '📝',
+    showIcon: false,
+    showText: true,
+    showBackground: true,
+    enabled: true,
+  },
+
+  minimal: {
+    name: 'Minimalista',
+    description: 'Solo texto plano sin color, sin negrita',
+    icon: '—',
+    showIcon: false,
+    showText: true,
+    showBackground: false,
+    fontWeight: 'normal',
+    enabled: true,
+  },
+
+  iconMinimal: {
+    name: 'Icono Discreto',
+    description: 'Solo icono sin fondo de color',
+    icon: '◯',
+    showIcon: true,
+    showText: false,
+    showBackground: false,
+    enabled: true,
+  },
+
+  textMinimal: {
+    name: 'Texto Discreto',
+    description: 'Icono + Texto sin fondo (solo color del texto)',
+    icon: '◐',
+    showIcon: true,
+    showText: true,
+    showBackground: false,
+    fontWeight: 'normal',
+    enabled: true,
+  },
+
+  hidden: {
+    name: 'Oculto',
+    description: 'No se muestra en ningún lugar de la app',
+    icon: '👁️‍🗨️',
+    enabled: false,
+    showIcon: false,
+    showText: false,
+    showBackground: false,
+  },
+};
+
+/**
+ * Storage key para la configuración de presets
+ */
+export const BADGE_PRESET_CONFIG_KEY = 'xiwen_badge_preset_config';
+
+/**
+ * Configuración por defecto de presets por categoría y overrides
+ */
+export const DEFAULT_BADGE_PRESET_CONFIG = {
+  // Preset por defecto global (si no se especifica nada)
+  defaultPreset: 'full',
+
+  // Presets por categoría
+  categories: {
+    contentType: 'full',         // Tipos de contenido: completo
+    exerciseType: 'iconOnly',    // Tipos de ejercicio: solo icono
+    difficulty: 'full',          // Dificultad: completo
+    cefr: 'full',               // Niveles CEFR: completo
+    status: 'textOnly',         // Estados: solo texto
+    theme: 'full',              // Temas: completo
+    feature: 'iconOnly',        // Características: solo icono
+    role: 'full',               // Roles: completo
+    homework_status: 'minimal', // Corrección: minimalista
+    credits: 'full',            // Créditos: completo
+    gamification: 'iconOnly',   // Gamificación: solo icono
+    session_status: 'textOnly', // Estados de sesión: solo texto
+    user_status: 'iconOnly',    // Estados de usuario: solo icono
+    video_provider: 'iconOnly', // Proveedores: solo icono
+    schedule_type: 'textOnly',  // Tipos de programación: solo texto
+    enrollment_status: 'textOnly', // Estados de inscripción: solo texto
+  },
+
+  // Overrides individuales por badge específico (opcional)
+  overrides: {
+    // Ejemplos:
+    // 'HOMEWORK_PENDING': 'minimal',
+    // 'HOMEWORK_APPROVED': 'iconOnly',
+    // 'STATUS_DRAFT': 'minimal',
+  },
+
+  // Presets personalizados creados por el admin
+  customPresets: {},
+};
+
+/**
+ * Obtiene la configuración de presets actual
+ */
+export function getBadgePresetConfig() {
+  try {
+    const saved = localStorage.getItem(BADGE_PRESET_CONFIG_KEY);
+    if (saved && saved !== 'undefined' && saved !== 'null') {
+      const parsed = JSON.parse(saved);
+      return { ...DEFAULT_BADGE_PRESET_CONFIG, ...parsed };
+    }
+    return { ...DEFAULT_BADGE_PRESET_CONFIG };
+  } catch (err) {
+    console.error('Error loading badge preset config:', err);
+    return { ...DEFAULT_BADGE_PRESET_CONFIG };
+  }
+}
+
+/**
+ * Guarda la configuración de presets
+ */
+export function saveBadgePresetConfig(config) {
+  try {
+    const current = getBadgePresetConfig();
+    const merged = { ...current, ...config };
+    localStorage.setItem(BADGE_PRESET_CONFIG_KEY, JSON.stringify(merged));
+    window.dispatchEvent(new CustomEvent('badgePresetConfigChange', { detail: merged }));
+    return true;
+  } catch (err) {
+    console.error('Error saving badge preset config:', err);
+    return false;
+  }
+}
+
+/**
+ * Obtiene el preset aplicable a un badge específico
+ * @param {string} badgeKey - Clave del badge (ej: 'HOMEWORK_PENDING')
+ * @param {string} category - Categoría del badge (ej: 'homework_status')
+ * @returns {Object} - Configuración del preset a aplicar
+ */
+export function getPresetForBadge(badgeKey, category) {
+  const config = getBadgePresetConfig();
+
+  // 1. Revisar si hay un override individual para este badge
+  if (config.overrides && config.overrides[badgeKey]) {
+    const presetName = config.overrides[badgeKey];
+    const preset = BADGE_DISPLAY_PRESETS[presetName] || config.customPresets[presetName];
+    if (preset) return preset;
+  }
+
+  // 2. Usar el preset de la categoría
+  if (category && config.categories && config.categories[category]) {
+    const presetName = config.categories[category];
+    const preset = BADGE_DISPLAY_PRESETS[presetName] || config.customPresets[presetName];
+    if (preset) return preset;
+  }
+
+  // 3. Usar el preset por defecto global
+  const defaultPresetName = config.defaultPreset || 'full';
+  return BADGE_DISPLAY_PRESETS[defaultPresetName] || BADGE_DISPLAY_PRESETS.full;
+}
+
+/**
+ * Crea un preset personalizado
+ */
+export function createCustomPreset(name, config) {
+  const presetConfig = getBadgePresetConfig();
+  const updated = {
+    ...presetConfig,
+    customPresets: {
+      ...presetConfig.customPresets,
+      [name]: {
+        name: config.name || name,
+        description: config.description || '',
+        icon: config.icon || '🎨',
+        showIcon: config.showIcon !== false,
+        showText: config.showText !== false,
+        showBackground: config.showBackground !== false,
+        enabled: config.enabled !== false,
+        fontWeight: config.fontWeight || 'medium',
+        custom: true,
+      },
+    },
+  };
+  return saveBadgePresetConfig(updated);
+}
+
+/**
+ * Elimina un preset personalizado
+ */
+export function deleteCustomPreset(name) {
+  const presetConfig = getBadgePresetConfig();
+  if (!presetConfig.customPresets || !presetConfig.customPresets[name]) {
+    return false;
+  }
+
+  const { [name]: removed, ...remaining } = presetConfig.customPresets;
+  const updated = {
+    ...presetConfig,
+    customPresets: remaining,
+  };
+  return saveBadgePresetConfig(updated);
+}
+
+/**
+ * Asigna un preset a una categoría
+ */
+export function setCategoryPreset(category, presetName) {
+  const presetConfig = getBadgePresetConfig();
+  const updated = {
+    ...presetConfig,
+    categories: {
+      ...presetConfig.categories,
+      [category]: presetName,
+    },
+  };
+  return saveBadgePresetConfig(updated);
+}
+
+/**
+ * Asigna un preset override a un badge individual
+ */
+export function setBadgePresetOverride(badgeKey, presetName) {
+  const presetConfig = getBadgePresetConfig();
+  const updated = {
+    ...presetConfig,
+    overrides: {
+      ...presetConfig.overrides,
+      [badgeKey]: presetName,
+    },
+  };
+  return saveBadgePresetConfig(updated);
+}
+
+/**
+ * Elimina un override individual
+ */
+export function removeBadgePresetOverride(badgeKey) {
+  const presetConfig = getBadgePresetConfig();
+  if (!presetConfig.overrides || !presetConfig.overrides[badgeKey]) {
+    return false;
+  }
+
+  const { [badgeKey]: removed, ...remaining } = presetConfig.overrides;
+  const updated = {
+    ...presetConfig,
+    overrides: remaining,
+  };
+  return saveBadgePresetConfig(updated);
+}
+
+/**
+ * Resetea toda la configuración de presets
+ */
+export function resetBadgePresetConfig() {
+  localStorage.removeItem(BADGE_PRESET_CONFIG_KEY);
+  window.dispatchEvent(new CustomEvent('badgePresetConfigChange', { detail: DEFAULT_BADGE_PRESET_CONFIG }));
+}
+
 /**
  * Configuración por defecto de librería de iconos
  */
