@@ -287,18 +287,17 @@ function QuestionCard({
         borderColor: 'var(--color-border)'
       }}
     >
-      {/* Question Header */}
+      {/* Question Header - SIN título redundante */}
       <div className="flex items-start justify-between gap-4 mb-4">
         <div className="flex-1">
-          <span className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-            Pregunta {questionIndex + 1}
-            {isMultipleAnswer && (
-              <BaseBadge variant="info" size="sm" className="ml-2">
+          {isMultipleAnswer && (
+            <div className="mb-2">
+              <BaseBadge variant="info" size="sm">
                 Selecciona todas las correctas
               </BaseBadge>
-            )}
-          </span>
-          <p className="mt-1 text-lg font-medium" style={{ color: 'var(--color-text-primary)' }}>
+            </div>
+          )}
+          <p className="text-xl font-semibold" style={{ color: 'var(--color-text-primary)' }}>
             {question.question}
           </p>
         </div>
@@ -557,21 +556,27 @@ function MultipleChoiceExercise({
 
   return (
     <div className="space-y-4">
-      {/* Progress indicator */}
-      <div className="flex items-center justify-between text-sm mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-        <span>Pregunta {currentQuestionIndex + 1} de {questions.length}</span>
-        <div className="flex gap-2 pr-1">
+      {/* Progress indicator - CLICKEABLE */}
+      <div className="flex items-center justify-between text-base mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+        <span className="font-medium">Pregunta {currentQuestionIndex + 1} de {questions.length}</span>
+        <div className="flex gap-2">
           {questions.map((_, idx) => (
-            <div
+            <button
               key={idx}
-              className="w-3 h-3 rounded-full"
+              onClick={() => setCurrentQuestionIndex(idx)}
+              className="w-6 h-6 rounded-full transition-all hover:scale-110 active:scale-95"
               style={{
                 backgroundColor: idx < currentQuestionIndex
                   ? (answers[idx]?.isCorrect ? config.correctColor : config.incorrectColor)
                   : idx === currentQuestionIndex
                   ? config.selectedColor
-                  : 'var(--color-border)'
+                  : 'var(--color-border)',
+                cursor: 'pointer',
+                border: idx === currentQuestionIndex ? '2px solid white' : 'none',
+                boxShadow: idx === currentQuestionIndex ? '0 0 0 2px var(--color-primary)' : 'none'
               }}
+              aria-label={`Ir a pregunta ${idx + 1}`}
+              title={`Pregunta ${idx + 1}${answers[idx] ? (answers[idx].isCorrect ? ' - Correcta' : ' - Incorrecta') : ''}`}
             />
           ))}
         </div>
@@ -586,15 +591,16 @@ function MultipleChoiceExercise({
         showResults={false}
       />
 
-      {/* Navigation */}
-      {answers[currentQuestionIndex] && !isExamMode && (
-        <div className="flex justify-end">
+      {/* Navigation - SIEMPRE visible si hay respuesta */}
+      {!isExamMode && answers[currentQuestionIndex] && (
+        <div className="flex justify-end mt-4">
           <BaseButton
             variant="primary"
             onClick={handleNext}
             icon={ChevronRight}
+            size="lg"
           >
-            {currentQuestionIndex < questions.length - 1 ? 'Siguiente' : 'Finalizar'}
+            {currentQuestionIndex < questions.length - 1 ? 'Siguiente Pregunta' : 'Finalizar Ejercicio'}
           </BaseButton>
         </div>
       )}
