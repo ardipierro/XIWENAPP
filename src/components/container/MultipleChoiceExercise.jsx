@@ -31,12 +31,12 @@ const DEFAULT_CONFIG = {
   showExplanation: true,
   showCorrectAnswer: true,
   gameSettings: {
-    feedbackMode: 'instant',
+    feedbackMode: 'onSubmit',
     allowRetry: true,
     maxRetries: 2,
     hints: { enabled: false, delaySeconds: 20, type: 'eliminate' },
     timer: { enabled: false, secondsPerQuestion: 30, onTimeUp: 'showAnswer' },
-    sound: { enabled: false, selectSound: true, feedbackSounds: true, completionSound: true }
+    sound: { enabled: true, selectSound: false, feedbackSounds: true, completionSound: false }
   }
 };
 
