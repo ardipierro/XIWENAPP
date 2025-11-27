@@ -136,24 +136,24 @@ function QuestionScreen({
 
   const handleAnswer = (index) => {
     if (showFeedback || (isPaused && !unlimitedTime)) return
-    
+
     setSelectedAnswer(index)
     const correct = index === currentQuestion.correct
     setIsCorrect(correct)
     setShowFeedback(true)
-    
+
     const responseTime = questionStartTime ? (Date.now() - questionStartTime) / 1000 : 0
-    
+
     setQuestionsAnswered({
       ...questionsAnswered,
       [currentStudent]: questionsAnswered[currentStudent] + 1
     })
-    
+
     setResponseTimes({
       ...responseTimes,
       [currentStudent]: responseTimes[currentStudent] + responseTime
     })
-    
+
     if (correct) {
       playCorrectSound()
       setScores({
@@ -170,7 +170,10 @@ function QuestionScreen({
       }
     }
 
-    // Ya no avanza automáticamente - espera al botón "Siguiente"
+    // Avanza automáticamente al siguiente jugador después de 1.5 segundos
+    setTimeout(() => {
+      moveToNext(correct)
+    }, 1500)
   }
 
   const handleTimeout = () => {
@@ -197,7 +200,10 @@ function QuestionScreen({
       })
     }
 
-    // Ya no avanza automáticamente - espera al botón "Siguiente"
+    // Avanza automáticamente al siguiente jugador después de 1.5 segundos
+    setTimeout(() => {
+      moveToNext(false)
+    }, 1500)
   }
 
   // Handler para el botón "Siguiente pregunta"
@@ -285,35 +291,27 @@ function QuestionScreen({
   const scale = fontScale / 100
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8" style={{ fontSize: `${scale}rem` }}>
-      <div className="max-w-4xl mx-auto relative">
-        {/* Header: Número de pregunta + Timer + Controles + Botón Siguiente */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 mb-4">
-          <div className="flex flex-wrap justify-between items-center gap-3">
+    <div className="p-4 md:p-6" style={{ background: 'var(--color-bg-primary)', fontSize: `${scale}rem` }}>
+      <div className="max-w-5xl mx-auto">
+        {/* Contenedor único con todo el contenido */}
+        <div className="rounded-2xl border p-6" style={{ background: 'var(--color-bg-primary)', borderColor: 'var(--color-border)' }}>
+          {/* Header: Número de pregunta + Timer + Controles */}
+          <div className="flex flex-wrap justify-between items-center gap-3 mb-6 pb-4 border-b" style={{ borderColor: 'var(--color-border)' }}>
             {/* Número de pregunta */}
-            <div style={{ fontSize: `${1.25 * scale}rem` }} className="font-semibold text-gray-900 dark:text-white">
+            <div style={{ fontSize: `${1.25 * scale}rem`, color: 'var(--color-text-primary)' }} className="font-semibold">
               Pregunta {currentQuestionIndex + 1} de {parsedQuestions.length}
-              <span className="ml-2 text-gray-500 dark:text-gray-400 font-normal">
+              <span className="ml-2 font-normal" style={{ color: 'var(--color-text-secondary)' }}>
                 ({parsedQuestions.length - currentQuestionIndex - 1} restantes)
               </span>
             </div>
 
-            {/* Botón Siguiente (aparece cuando termina cada pregunta) */}
-            {showFeedback && (
-              <button
-                onClick={handleNextQuestion}
-                style={{ fontSize: `${1.1 * scale}rem` }}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition-colors"
-              >
-                Siguiente →
-              </button>
-            )}
-
             {/* Timer y controles */}
             <div className="flex items-center gap-3">
               {!unlimitedTime && (
-                <div style={{ fontSize: `${1.5 * scale}rem` }} className={`font-bold ${timeLeft <= 10 ? 'text-red-500' : 'text-gray-700 dark:text-gray-300'}`}>
-                  {String(timeLeft).padStart(2, '0')} seg.
+                <div style={{ fontSize: `${1.5 * scale}rem` }} className={`font-bold ${timeLeft <= 10 ? 'text-red-500' : ''}`}>
+                  <span style={{ color: timeLeft <= 10 ? undefined : 'var(--color-text-primary)' }}>
+                    {String(timeLeft).padStart(2, '0')} seg.
+                  </span>
                   {isPaused && <span className="text-orange-500 ml-2" style={{ fontSize: `${0.9 * scale}rem` }}>(Pausado)</span>}
                 </div>
               )}
@@ -340,103 +338,151 @@ function QuestionScreen({
               </button>
             </div>
           </div>
-        </div>
 
-        {/* Espacio vacío entre header y estudiantes */}
-        <div className="h-4"></div>
+          {/* Estudiantes y puntajes */}
+          <div className="mb-6" style={{ position: 'relative' }}>
+            <div className="overflow-x-auto pb-2 px-1">
+              <div className="flex gap-3">
+              {validStudents.map(student => {
+                const isActive = student === currentStudent
+                return (
+                  <div
+                    key={student}
+                    style={{
+                      minWidth: `${200 * scale}px`,
+                      width: `${200 * scale}px`,
+                      background: isActive ? 'var(--color-primary, #4f46e5)' : 'var(--color-bg-secondary)',
+                      borderColor: isActive ? 'var(--color-primary, #4f46e5)' : 'var(--color-border)',
+                      opacity: isActive ? 1 : 0.5
+                    }}
+                    className={`p-4 rounded-lg flex-shrink-0 border-2 transition-all relative`}
+                  >
+                    {/* Popup de feedback */}
+                    {showFeedback && isActive && (
+                      <div
+                        style={{
+                          position: 'fixed',
+                          top: '120px',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          fontSize: `${1.2 * scale}rem`,
+                          zIndex: 9999,
+                          minWidth: '200px',
+                          animation: 'fadeInBounce 0.3s ease-out'
+                        }}
+                        className={`px-4 py-3 rounded-lg font-bold text-center shadow-lg ${
+                          isCorrect ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+                        }`}
+                      >
+                        {isCorrect ? (
+                          <>
+                            ✓ ¡Correcto!
+                            <div style={{ fontSize: `${0.85 * scale}rem` }} className="font-normal mt-1">
+                              +1 punto
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            ✗ {(selectedAnswer === null && !unlimitedTime) ? '¡Tiempo agotado!' : '¡Incorrecto!'}
+                            <div style={{ fontSize: `${0.85 * scale}rem` }} className="font-normal mt-1">
+                              {gameMode === 'penalty' ? '-1 punto' : '0 puntos'}
+                            </div>
+                          </>
+                        )}
+                        {/* Flecha hacia abajo */}
+                        <div
+                          style={{
+                            position: 'absolute',
+                            top: '100%',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            width: 0,
+                            height: 0,
+                            borderLeft: '8px solid transparent',
+                            borderRight: '8px solid transparent',
+                            borderTop: `8px solid ${isCorrect ? '#22c55e' : '#ef4444'}`
+                          }}
+                        />
+                      </div>
+                    )}
 
-        {/* Estudiantes y puntajes (sin título) */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6 mb-4">
-          <div className="overflow-x-auto pb-2 px-1">
-            <div className="flex gap-3">
-            {validStudents.map(student => (
-              <div
-                key={student}
-                style={{ minWidth: `${200 * scale}px`, width: `${200 * scale}px` }}
-                className={`p-3 rounded-lg relative flex-shrink-0 ${
-                  student === currentStudent
-                    ? 'bg-gray-200 dark:bg-gray-700 border-4 border-gray-500 dark:border-gray-400'
-                    : 'bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600'
-                }`}
-              >
-                {student === currentStudent && (
-                  <div style={{ fontSize: `${0.75 * scale}rem` }} className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gray-600 dark:bg-gray-500 text-white font-bold px-2 py-1 rounded-full whitespace-nowrap z-10">
-                    TU TURNO
+                    <div style={{ fontSize: `${1.5 * scale}rem`, color: isActive ? '#fff' : 'var(--color-text-primary)' }} className="font-semibold truncate">
+                      {student}
+                    </div>
+                    <div style={{ fontSize: `${1.875 * scale}rem`, color: isActive ? '#fff' : 'var(--color-text-secondary)' }} className="font-bold">
+                      {scores[student]} puntos
+                    </div>
                   </div>
-                )}
-                <div style={{ fontSize: `${1.5 * scale}rem` }} className={`font-semibold truncate text-gray-900 dark:text-white ${student === currentStudent ? 'mt-2' : ''}`}>
-                  {student}
-                </div>
-                <div style={{ fontSize: `${1.875 * scale}rem` }} className={`font-bold ${student === currentStudent ? 'text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'}`}>
-                  {scores[student]} puntos
-                </div>
+                )
+              })}
               </div>
-            ))}
             </div>
           </div>
-        </div>
 
-        {/* Espacio vacío entre estudiantes y pregunta (sin separador visible) */}
-        <div className="h-4"></div>
-
-        {/* Pregunta */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-8">
-          <div className="mb-6">
-            {!hasStarted && isPaused && !showFeedback && !unlimitedTime ? (
-              <div className="bg-gray-100 dark:bg-gray-700 border-2 border-gray-400 dark:border-gray-600 rounded-lg p-8 text-center">
-                <p style={{ fontSize: `${1.25 * scale}rem` }} className="text-gray-700 dark:text-gray-300">Presiona "Iniciar" cuando estén listos</p>
-              </div>
-            ) : (
-              <>
-                <h2 style={{ fontSize: `${2.25 * scale}rem` }} className="font-semibold mb-6 text-gray-900 dark:text-white">{currentQuestion.question}</h2>
-                <div className="space-y-3">
-                  {currentQuestion.options.map((option, index) => {
-                    let bgColor = 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-white'
-
-                    if (showFeedback) {
-                      if (isCorrect && index === currentQuestion.correct) {
-                        bgColor = 'bg-green-200 dark:bg-green-700 text-gray-900 dark:text-white'
-                      } else if (!isCorrect && index === selectedAnswer) {
-                        bgColor = 'bg-red-200 dark:bg-red-700 text-gray-900 dark:text-white'
-                      } else if (!isCorrect && index === currentQuestion.correct) {
-                        // Mostrar la respuesta correcta también cuando se equivoca
-                        bgColor = 'bg-green-100 dark:bg-green-800 text-gray-900 dark:text-white border-2 border-green-500'
-                      }
-                    }
-
-                    if (isPaused && !showFeedback && !unlimitedTime) {
-                      bgColor = 'bg-gray-200 dark:bg-gray-800 cursor-not-allowed text-gray-900 dark:text-white'
-                    }
-
-                    return (
-                      <button
-                        key={index}
-                        onClick={() => handleAnswer(index)}
-                        disabled={showFeedback || (isPaused && !unlimitedTime)}
-                        style={{ fontSize: `${1.875 * scale}rem`, padding: `${1.25 * scale}rem` }}
-                        className={`w-full rounded-lg text-left ${bgColor} transition-colors font-medium`}
-                      >
-                        {String.fromCharCode(65 + index)}. {option}
-                      </button>
-                    )
-                  })}
+          {/* Pregunta */}
+          <div className="pt-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
+            <div className="mb-6">
+              {!hasStarted && isPaused && !showFeedback && !unlimitedTime ? (
+                <div className="rounded-lg p-8 text-center border-2" style={{ background: 'var(--color-bg-secondary)', borderColor: 'var(--color-border)' }}>
+                  <p style={{ fontSize: `${1.25 * scale}rem`, color: 'var(--color-text-secondary)' }}>Presiona "Iniciar" cuando estén listos</p>
                 </div>
-              </>
-            )}
-          </div>
-
-          {showFeedback && (
-            <div style={{ fontSize: `${1.5 * scale}rem` }} className={`text-center font-bold mb-4 ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
-              {isCorrect ? (
-                <>¡Correcto! ✓ <span style={{ fontSize: `${scale}rem` }}>(+1 punto)</span></>
               ) : (
                 <>
-                  {(selectedAnswer === null && !unlimitedTime) ? '¡Tiempo agotado! ✗' : '¡Incorrecto! ✗'}
-                  {gameMode === 'penalty' && <span style={{ fontSize: `${scale}rem` }} className="block mt-1">(-1 punto)</span>}
+                  <h2 style={{ fontSize: `${2.25 * scale}rem`, color: 'var(--color-text-primary)' }} className="font-semibold mb-6">{currentQuestion.question}</h2>
+                  <div className="space-y-3">
+                    {currentQuestion.options.map((option, index) => {
+                      let bgColor = ''
+                      let textColor = 'var(--color-text-primary)'
+                      let borderStyle = ''
+
+                      if (showFeedback) {
+                        if (isCorrect && index === currentQuestion.correct) {
+                          bgColor = 'bg-green-200 dark:bg-green-700'
+                          textColor = '#000'
+                        } else if (!isCorrect && index === selectedAnswer) {
+                          bgColor = 'bg-red-200 dark:bg-red-700'
+                          textColor = '#000'
+                        } else if (!isCorrect && index === currentQuestion.correct) {
+                          bgColor = 'bg-green-100 dark:bg-green-800'
+                          textColor = '#000'
+                          borderStyle = 'border-2 border-green-500'
+                        } else {
+                          bgColor = ''
+                          textColor = 'var(--color-text-secondary)'
+                        }
+                      } else if (isPaused && !unlimitedTime) {
+                        bgColor = 'cursor-not-allowed'
+                        textColor = 'var(--color-text-secondary)'
+                      } else {
+                        bgColor = 'hover:opacity-90'
+                      }
+
+                      const baseStyle = showFeedback || (isPaused && !unlimitedTime)
+                        ? {}
+                        : { background: 'var(--color-bg-secondary)', borderColor: 'var(--color-border)' }
+
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => handleAnswer(index)}
+                          disabled={showFeedback || (isPaused && !unlimitedTime)}
+                          style={{
+                            fontSize: `${1.875 * scale}rem`,
+                            padding: `${1.25 * scale}rem`,
+                            color: textColor,
+                            ...baseStyle
+                          }}
+                          className={`w-full rounded-lg text-left border ${bgColor} ${borderStyle} transition-all font-medium`}
+                        >
+                          {String.fromCharCode(65 + index)}. {option}
+                        </button>
+                      )
+                    })}
+                  </div>
                 </>
               )}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>

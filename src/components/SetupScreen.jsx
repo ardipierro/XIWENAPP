@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Target, BookOpen, Trash2, Plus, Check, AlertTriangle, Settings, Clock, ZoomIn } from 'lucide-react'
+import { Target, BookOpen, Trash2, Plus, Check, AlertTriangle, Settings, Clock, ZoomIn, Play, History } from 'lucide-react'
 import HistoryModal from './HistoryModal'
+import BaseModal from './common/BaseModal'
 import { loadStudents } from '../firebase/firestore'
 import logger from '../utils/logger'
 import { BaseButton, BaseInput, BaseSelect, BaseTextarea } from './common'
@@ -99,12 +100,12 @@ function SetupScreen({
         alert('Ya existe una categoría con ese nombre')
         return
       }
-      
+
       setQuestionsByCategory({
         ...questionsByCategory,
         [newCategoryName]: newCategoryQuestions
       })
-      
+
       setNewCategoryName('')
       setNewCategoryQuestions('')
       setSelectedCategory(newCategoryName)
@@ -123,7 +124,7 @@ function SetupScreen({
       const newCategories = { ...questionsByCategory }
       delete newCategories[categoryName]
       setQuestionsByCategory(newCategories)
-      
+
       if (selectedCategory === categoryName) {
         setSelectedCategory('all')
       }
@@ -164,42 +165,56 @@ function SetupScreen({
   }
 
   return (
-    <div className="h-screen overflow-y-auto p-4 md:p-8" style={{ background: 'var(--color-bg-secondary)' }}>
-      <div className="max-w-4xl mx-auto rounded-2xl border p-4 md:p-8" style={{ background: 'var(--color-bg-primary)', borderColor: 'var(--color-border)' }}>
-        <div className="flex items-center justify-between mb-8">
-          {onBack && (
+    <>
+      <BaseModal
+        isOpen={true}
+        onClose={onBack}
+        title="Configuración del Juego"
+        icon={Settings}
+        size="xl"
+        showCloseButton={true}
+        closeOnOverlayClick={false}
+        noPadding={true}
+        footer={
+          <div className="w-full flex gap-3">
             <BaseButton
+              onClick={() => setShowHistory(!showHistory)}
               variant="secondary"
-              onClick={onBack}
+              size="lg"
+              icon={History}
             >
-              ← Volver
+              {gameHistory.length > 0 ? `Historial (${gameHistory.length})` : 'Historial'}
             </BaseButton>
-          )}
-          <h1 className="text-2xl font-bold flex-1 text-center" style={{ color: 'var(--color-text-primary)' }}>
-            Ejercicio de Preguntas por Turnos
-          </h1>
-          {onBack && <div className="w-24"></div>}
-        </div>
-
-        {/* ============================================ */}
-        {/* SECCIÓN: SELECCIÓN DE ALUMNOS (NUEVO) */}
-        {/* ============================================ */}
-        <div className="mb-8 p-6 rounded-xl border-2" style={{ background: 'var(--color-bg-tertiary)', borderColor: 'var(--color-border)' }}>
-          <div className="mb-4">
-            <h2 className="text-xl md:text-2xl font-semibold flex items-center" style={{ color: 'var(--color-text-primary)' }}>
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <BaseButton
+              onClick={startGame}
+              variant="success"
+              size="lg"
+              icon={Play}
+              className="flex-1"
+            >
+              Iniciar Juego
+            </BaseButton>
+          </div>
+        }
+      >
+        {/* Contenido scrollable */}
+        <div className="px-6 space-y-6">
+          {/* ============================================ */}
+          {/* SECCIÓN: SELECCIÓN DE ALUMNOS */}
+          {/* ============================================ */}
+          <div className="p-4 rounded-lg border" style={{ background: 'var(--color-bg-tertiary)', borderColor: 'var(--color-border)' }}>
+            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
               </svg>
-              Alumnos Participantes
-            </h2>
-          </div>
+              Alumnos ({students.length})
+            </h3>
 
-          <div className="p-4 rounded-lg mb-4" style={{ background: 'var(--color-bg-primary)' }}>
             <BaseSelect
               value=""
               onChange={(e) => handleStudentSelect(e.target.value)}
               options={[
-                { value: '', label: '-- Selecciona un alumno para agregar --' },
+                { value: '', label: '-- Selecciona un alumno --' },
                 ...availableStudents
                   .filter(student => !students.some(s => s.trim().toLowerCase() === student.name.toLowerCase()))
                   .map(student => ({
@@ -207,307 +222,249 @@ function SetupScreen({
                     label: `${student.name}${student.grade ? ` (${student.grade}${student.section || ''})` : ''}`
                   }))
               ]}
-              label="Agregar alumno (selecciona para agregar automáticamente)"
               disabled={loadingStudents}
               error={errorStudents}
             />
 
             {availableStudents.length === 0 && (
-              <p className="mt-3 text-sm text-orange-600 bg-orange-50 p-3 rounded-lg flex items-center gap-2">
-                <AlertTriangle size={18} strokeWidth={2} className="inline-icon flex-shrink-0" /> No hay alumnos creados. Ve al Panel del Profesor → Gestionar Alumnos para crear el primero.
+              <p className="mt-2 text-xs text-orange-600 bg-orange-50 dark:bg-orange-900/20 p-2 rounded flex items-center gap-2">
+                <AlertTriangle size={14} /> No hay alumnos. Ve a Gestionar Alumnos.
               </p>
             )}
-          </div>
 
-          {/* Lista de alumnos seleccionados */}
-          <div className="p-4 rounded-lg" style={{ background: 'var(--color-bg-primary)' }}>
-            <h3 className="text-sm font-medium mb-3" style={{ color: 'var(--color-text-secondary)' }}>
-              Alumnos en esta partida ({students.length}):
-            </h3>
-            {students.length > 0 ? (
-              <div className="space-y-2">
+            {/* Lista compacta de alumnos seleccionados */}
+            {students.length > 0 && (
+              <div className="mt-3 space-y-1">
                 {students.map((student, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 rounded-lg" style={{ background: 'var(--color-bg-tertiary)' }}>
+                  <div key={index} className="flex items-center justify-between p-2 rounded-lg text-sm" style={{ background: 'var(--color-bg-primary)' }}>
                     <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>{student}</span>
-                    <BaseButton
-                      variant="danger"
-                      size="sm"
-                      icon={Trash2}
+                    <button
                       onClick={() => removeStudent(index)}
                       disabled={students.length <= 1}
-                      title={students.length <= 1 ? "Debe haber al menos 1 alumno" : "Quitar alumno"}
+                      className="text-red-500 hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed p-1 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                      title={students.length <= 1 ? "Debe haber al menos 1 alumno" : "Quitar"}
                     >
-                      Quitar
-                    </BaseButton>
+                      <Trash2 size={16} />
+                    </button>
                   </div>
                 ))}
               </div>
-            ) : (
-              <p className="text-center py-4" style={{ color: 'var(--color-text-muted)' }}>
-                No hay alumnos seleccionados para esta partida
-              </p>
             )}
           </div>
-        </div>
 
-        {/* ============================================ */}
-        {/* SECCIÓN: PREGUNTAS POR TEMA */}
-        {/* ============================================ */}
-        <div className="mb-8 p-6 rounded-xl" style={{ background: 'var(--color-bg-tertiary)' }}>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl md:text-2xl font-semibold flex items-center" style={{ color: 'var(--color-text-primary)' }}>
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              Preguntas por Tema
-            </h2>
-            <label className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 dark:bg-gray-600 dark:hover:bg-gray-500 cursor-pointer transition-colors text-sm md:text-base">
-              Importar archivos .txt
-              <input
-                type="file"
-                accept=".txt"
-                onChange={importFile}
-                className="hidden"
-              />
-            </label>
-          </div>
-
-          {Object.keys(questionsByCategory).length > 0 && (
-            <div className="mb-6">
-              <BaseSelect
-                value={selectedCategory}
-                onChange={(e) => handleCategoryChange(e.target.value)}
-                options={[
-                  { value: 'all', label: `Mezclar TODAS (${Object.keys(questionsByCategory).length} temas)` },
-                  ...Object.keys(questionsByCategory).map(category => ({
-                    value: category,
-                    label: `${category} (${parseQuestions(questionsByCategory[category]).length} preguntas)`
-                  }))
-                ]}
-                label="Selecciona qué preguntas usar"
-              />
+          {/* ============================================ */}
+          {/* SECCIÓN: PREGUNTAS POR TEMA */}
+          {/* ============================================ */}
+          <div className="p-4 rounded-lg border" style={{ background: 'var(--color-bg-tertiary)', borderColor: 'var(--color-border)' }}>
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-lg font-semibold flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+                <BookOpen size={20} />
+                Preguntas
+              </h3>
+              <label className="px-3 py-1 bg-gray-600 text-white rounded text-xs cursor-pointer hover:bg-gray-700">
+                Importar .txt
+                <input
+                  type="file"
+                  accept=".txt"
+                  onChange={importFile}
+                  className="hidden"
+                />
+              </label>
             </div>
-          )}
 
-          {Object.entries(questionsByCategory).map(([categoryName, categoryQuestions]) => (
-            <details key={categoryName} className="mb-4 rounded-lg border" style={{ background: 'var(--color-bg-primary)', borderColor: 'var(--color-border)' }}>
-              <summary className="cursor-pointer p-4 font-semibold rounded-lg flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
-                <BookOpen size={18} strokeWidth={2} className="inline-icon" /> {categoryName} ({parseQuestions(categoryQuestions).length} preguntas)
+            {Object.keys(questionsByCategory).length > 0 && (
+              <div className="mb-3">
+                <BaseSelect
+                  value={selectedCategory}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
+                  options={[
+                    { value: 'all', label: `Mezclar TODAS (${Object.keys(questionsByCategory).length} temas)` },
+                    ...Object.keys(questionsByCategory).map(category => ({
+                      value: category,
+                      label: `${category} (${parseQuestions(questionsByCategory[category]).length})`
+                    }))
+                  ]}
+                />
+              </div>
+            )}
+
+            {Object.entries(questionsByCategory).map(([categoryName, categoryQuestions]) => (
+              <details key={categoryName} className="mb-2 rounded-lg border text-sm overflow-hidden" style={{ background: 'var(--color-bg-primary)', borderColor: 'var(--color-border)' }}>
+                <summary className="cursor-pointer p-3 font-medium flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" style={{ color: 'var(--color-text-primary)' }}>
+                  <BookOpen size={16} /> {categoryName} ({parseQuestions(categoryQuestions).length})
+                </summary>
+                <div className="p-3 border-t" style={{ borderColor: 'var(--color-border)' }}>
+                  <BaseTextarea
+                    value={categoryQuestions}
+                    onChange={(e) => updateCategory(categoryName, e.target.value)}
+                    rows={6}
+                    className="font-mono text-xs mb-2"
+                  />
+                  <BaseButton
+                    variant="danger"
+                    size="sm"
+                    icon={Trash2}
+                    onClick={() => deleteCategory(categoryName)}
+                  >
+                    Eliminar
+                  </BaseButton>
+                </div>
+              </details>
+            ))}
+
+            <details className="mb-2 rounded-lg border-2 border-dashed text-sm overflow-hidden" style={{ borderColor: 'var(--color-border)' }}>
+              <summary className="cursor-pointer p-3 font-medium flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" style={{ color: 'var(--color-text-primary)' }}>
+                <Plus size={16} /> Agregar tema
               </summary>
-              <div className="p-4 border-t border-gray-200 dark:border-gray-600">
+              <div className="p-3 border-t" style={{ borderColor: 'var(--color-border)', background: 'var(--color-bg-primary)' }}>
+                <BaseInput
+                  type="text"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  placeholder="Nombre del tema"
+                  className="mb-2"
+                />
                 <BaseTextarea
-                  value={categoryQuestions}
-                  onChange={(e) => updateCategory(categoryName, e.target.value)}
-                  rows={10}
-                  className="font-mono text-sm mb-3"
+                  value={newCategoryQuestions}
+                  onChange={(e) => setNewCategoryQuestions(e.target.value)}
+                  placeholder="Preguntas..."
+                  rows={6}
+                  className="font-mono text-xs mb-2"
                 />
                 <BaseButton
-                  variant="danger"
-                  icon={Trash2}
-                  onClick={() => deleteCategory(categoryName)}
+                  variant="success"
+                  size="sm"
+                  icon={Check}
+                  onClick={addNewCategory}
                 >
-                  Eliminar tema
+                  Guardar
                 </BaseButton>
               </div>
             </details>
-          ))}
 
-          <details className="mb-4 rounded-lg border-2" style={{ background: 'var(--color-bg-secondary)', borderColor: 'var(--color-border)' }}>
-            <summary className="cursor-pointer p-4 font-semibold rounded-lg flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
-              <Plus size={18} strokeWidth={2} className="inline-icon" /> Agregar nuevo tema
-            </summary>
-            <div className="p-4 border-t border-gray-300 dark:border-gray-600">
-              <BaseInput
-                type="text"
-                value={newCategoryName}
-                onChange={(e) => setNewCategoryName(e.target.value)}
-                placeholder="Nombre del tema (ej: Matemáticas)"
-                label="Nombre del tema"
-              />
-              <BaseTextarea
-                value={newCategoryQuestions}
-                onChange={(e) => setNewCategoryQuestions(e.target.value)}
-                placeholder="Pega aquí las preguntas del nuevo tema..."
-                rows={10}
-                className="font-mono text-sm mb-3"
-                label="Preguntas"
-              />
-              <BaseButton
-                variant="success"
-                icon={Check}
-                onClick={addNewCategory}
-              >
-                Guardar tema
-              </BaseButton>
-            </div>
-          </details>
-
-          <BaseTextarea
-            value={questions}
-            onChange={(e) => setQuestions(e.target.value)}
-            placeholder="Ingresa tus preguntas aquí..."
-            rows={12}
-            className="font-mono text-sm"
-            label="O escribe/pega tus preguntas manualmente"
-          />
-        </div>
-
-        {/* ============================================ */}
-        {/* SECCIÓN: CONFIGURACIÓN */}
-        {/* ============================================ */}
-        <div className="mb-8 p-6 rounded-xl" style={{ background: 'var(--color-bg-tertiary)' }}>
-          <h2 className="text-xl md:text-2xl font-semibold mb-4 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
-            <Settings size={24} strokeWidth={2} className="inline-icon" /> Configuración
-          </h2>
-
-          <div className="mb-4">
-            <BaseSelect
-              value={turnMode}
-              onChange={(e) => setTurnMode(e.target.value)}
-              options={[
-                { value: 'turns', label: 'Por Turnos (cada alumno responde una pregunta)' },
-                { value: 'all', label: 'Todos Responden (todos responden la misma pregunta)' }
-              ]}
-              label="Modo de participación"
+            <BaseTextarea
+              value={questions}
+              onChange={(e) => setQuestions(e.target.value)}
+              placeholder="O escribe/pega tus preguntas aquí..."
+              rows={8}
+              className="font-mono text-sm"
             />
           </div>
 
-          {turnMode === 'all' && (
-            <div className="mb-4">
+          {/* ============================================ */}
+          {/* SECCIÓN: CONFIGURACIÓN */}
+          {/* ============================================ */}
+          <div className="p-4 rounded-lg border" style={{ background: 'var(--color-bg-tertiary)', borderColor: 'var(--color-border)' }}>
+            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
+              <Settings size={20} />
+              Configuración
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Selectores */}
               <BaseSelect
-                value={optionsLayout}
-                onChange={(e) => setOptionsLayout(e.target.value)}
+                value={turnMode}
+                onChange={(e) => setTurnMode(e.target.value)}
                 options={[
-                  { value: '2cols', label: '2 columnas (respuestas cortas)' },
-                  { value: '1col', label: '1 columna (respuestas largas)' }
+                  { value: 'turns', label: 'Por Turnos' },
+                  { value: 'all', label: 'Todos Responden' }
                 ]}
-                label="Layout de opciones"
+                label="Modo"
               />
-            </div>
-          )}
 
-          <div className="mb-4">
-            <BaseSelect
-              value={gameMode}
-              onChange={(e) => setGameMode(e.target.value)}
-              options={[
-                { value: 'classic', label: 'Clásico (solo puntos positivos)' },
-                { value: 'penalty', label: 'Con Penalización (-1 por error)' }
-              ]}
-              label="Modo de puntuación"
-            />
-          </div>
-
-          {turnMode === 'turns' && (
-            <div className="mb-4">
               <BaseSelect
-                value={repeatMode}
-                onChange={(e) => setRepeatMode(e.target.value)}
+                value={gameMode}
+                onChange={(e) => setGameMode(e.target.value)}
                 options={[
-                  { value: 'shuffle', label: 'Reinserción aleatoria (pregunta incorrecta vuelve al mazo)' },
-                  { value: 'repeat', label: 'Repetir hasta correcta (no avanza hasta responder bien)' },
-                  { value: 'none', label: 'Sin repetición (una sola vez cada pregunta)' }
+                  { value: 'classic', label: 'Clásico (+1)' },
+                  { value: 'penalty', label: 'Con Penalización (-1)' }
                 ]}
-                label="Repetición de preguntas"
+                label="Puntuación"
               />
-            </div>
-          )}
 
-          <div className="mb-4">
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={unlimitedTime}
-                onChange={(e) => setUnlimitedTime(e.target.checked)}
-                className="mr-3 w-5 h-5 text-gray-600 dark:text-gray-400 rounded focus:ring-2 focus:ring-gray-500"
-              />
-              <span className="text-sm font-medium flex items-center gap-2" style={{ color: 'var(--color-text-primary)' }}>
-                <Clock size={18} strokeWidth={2} className="inline-icon" /> Tiempo ilimitado por pregunta
-              </span>
-            </label>
-          </div>
+              {turnMode === 'all' && (
+                <BaseSelect
+                  value={optionsLayout}
+                  onChange={(e) => setOptionsLayout(e.target.value)}
+                  options={[
+                    { value: '2cols', label: '2 columnas' },
+                    { value: '1col', label: '1 columna' }
+                  ]}
+                  label="Layout opciones"
+                />
+              )}
 
-          {!unlimitedTime && (
-            <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
-                Tiempo por pregunta: {timePerQuestion} segundos
-              </label>
-              <input
-                type="range"
-                min="1"
-                max="30"
-                value={timePerQuestion}
-                onChange={(e) => setTimePerQuestion(parseInt(e.target.value))}
-                className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
-              />
-            </div>
-          )}
+              {turnMode === 'turns' && (
+                <BaseSelect
+                  value={repeatMode}
+                  onChange={(e) => setRepeatMode(e.target.value)}
+                  options={[
+                    { value: 'shuffle', label: 'Reinserción aleatoria' },
+                    { value: 'repeat', label: 'Repetir hasta correcta' },
+                    { value: 'none', label: 'Sin repetición' }
+                  ]}
+                  label="Repetición"
+                />
+              )}
 
-          {/* Control de tamaño de fuente */}
-          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-600">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-              <ZoomIn size={18} strokeWidth={2} className="inline-icon" />
-              Tamaño de fuente: {fontScale}%
-              <span className="text-gray-500 font-normal ml-2">(para pantalla completa)</span>
-            </label>
-            <input
-              type="range"
-              min="80"
-              max="200"
-              step="10"
-              value={fontScale}
-              onChange={(e) => setFontScale && setFontScale(parseInt(e.target.value))}
-              className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer"
-            />
-            <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-              <span>80%</span>
-              <span>100% (normal)</span>
-              <span>150%</span>
-              <span>200%</span>
-            </div>
-            <div className="mt-3 flex gap-2">
-              {[80, 100, 120, 150, 200].map(size => (
-                <button
-                  key={size}
-                  type="button"
-                  onClick={() => setFontScale && setFontScale(size)}
-                  className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                    fontScale === size
-                      ? 'bg-gray-700 text-white dark:bg-gray-300 dark:text-gray-900'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'
-                  }`}
-                >
-                  {size}%
-                </button>
-              ))}
+              {/* Tiempo por pregunta */}
+              <div>
+                <label className="flex items-center gap-2 cursor-pointer mb-2">
+                  <input
+                    type="checkbox"
+                    checked={unlimitedTime}
+                    onChange={(e) => setUnlimitedTime(e.target.checked)}
+                    className="w-4 h-4 rounded"
+                  />
+                  <span className="text-sm font-medium flex items-center gap-1" style={{ color: 'var(--color-text-primary)' }}>
+                    <Clock size={16} /> Tiempo ilimitado
+                  </span>
+                </label>
+                {!unlimitedTime && (
+                  <div>
+                    <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+                      {timePerQuestion} segundos
+                    </label>
+                    <input
+                      type="range"
+                      min="5"
+                      max="60"
+                      value={timePerQuestion}
+                      onChange={(e) => setTimePerQuestion(parseInt(e.target.value))}
+                      className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer slider-thumb"
+                      style={{
+                        backgroundImage: `linear-gradient(to right, var(--color-primary, #4f46e5) 0%, var(--color-primary, #4f46e5) ${((timePerQuestion - 5) / 55) * 100}%, transparent ${((timePerQuestion - 5) / 55) * 100}%)`
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Tamaño de fuente */}
+              <div>
+                <label className="block text-sm font-medium mb-2 flex items-center gap-1" style={{ color: 'var(--color-text-primary)' }}>
+                  <ZoomIn size={16} /> Tamaño fuente
+                </label>
+                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--color-text-secondary)' }}>
+                  {fontScale}%
+                </label>
+                <input
+                  type="range"
+                  min="80"
+                  max="200"
+                  step="10"
+                  value={fontScale}
+                  onChange={(e) => setFontScale && setFontScale(parseInt(e.target.value))}
+                  className="w-full h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer slider-thumb"
+                  style={{
+                    backgroundImage: `linear-gradient(to right, var(--color-primary, #4f46e5) 0%, var(--color-primary, #4f46e5) ${((fontScale - 80) / 120) * 100}%, transparent ${((fontScale - 80) / 120) * 100}%)`
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
-
-        {/* ============================================ */}
-        {/* BOTONES DE ACCIÓN */}
-        {/* ============================================ */}
-        <BaseButton
-          onClick={startGame}
-          variant="success"
-          size="xl"
-          fullWidth
-          className="mb-3"
-        >
-          Iniciar Juego
-        </BaseButton>
-
-        {gameHistory.length > 0 && (
-          <BaseButton
-            onClick={() => setShowHistory(!showHistory)}
-            variant="secondary"
-            size="lg"
-            fullWidth
-          >
-            {showHistory ? 'Ocultar Historial' : `Ver Historial (${gameHistory.length} partidas)`}
-          </BaseButton>
-        )}
-      </div>
+      </BaseModal>
 
       {/* MODALES */}
       {showHistory && (
@@ -518,7 +475,7 @@ function SetupScreen({
           questionsByCategory={questionsByCategory}
         />
       )}
-    </div>
+    </>
   )
 }
 

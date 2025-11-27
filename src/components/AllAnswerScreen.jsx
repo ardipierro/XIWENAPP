@@ -117,6 +117,75 @@ function AllAnswerScreen({
     }
   }
 
+  // Sonido para seleccionar respuesta
+  const playClickSound = () => {
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+      oscillator.frequency.value = 600
+      oscillator.type = 'sine'
+      gainNode.gain.setValueAtTime(0.15, audioContext.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.08)
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.08)
+    } catch (e) {
+      logger.debug('Audio not supported')
+    }
+  }
+
+  // Sonido para pausar/reanudar
+  const playPauseSound = () => {
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+      oscillator.frequency.value = 500
+      oscillator.type = 'square'
+      gainNode.gain.setValueAtTime(0.2, audioContext.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15)
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.15)
+    } catch (e) {
+      logger.debug('Audio not supported')
+    }
+  }
+
+  // Sonido para siguiente pregunta
+  const playNextSound = () => {
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)()
+      const oscillator = audioContext.createOscillator()
+      const gainNode = audioContext.createGain()
+      oscillator.connect(gainNode)
+      gainNode.connect(audioContext.destination)
+      oscillator.frequency.value = 700
+      oscillator.type = 'sine'
+      gainNode.gain.setValueAtTime(0.2, audioContext.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2)
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.2)
+
+      // Segundo tono
+      const oscillator2 = audioContext.createOscillator()
+      const gainNode2 = audioContext.createGain()
+      oscillator2.connect(gainNode2)
+      gainNode2.connect(audioContext.destination)
+      oscillator2.frequency.value = 900
+      oscillator2.type = 'sine'
+      gainNode2.gain.setValueAtTime(0.2, audioContext.currentTime + 0.1)
+      gainNode2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.25)
+      oscillator2.start(audioContext.currentTime + 0.1)
+      oscillator2.stop(audioContext.currentTime + 0.25)
+    } catch (e) {
+      logger.debug('Audio not supported')
+    }
+  }
+
   // Iniciar el juego
   const handleStart = () => {
     setGameStarted(true)
@@ -126,6 +195,7 @@ function AllAnswerScreen({
 
   // Pausar/reanudar
   const togglePause = () => {
+    playPauseSound()
     if (isPaused) {
       // Reanudar - ajustar el tiempo de inicio
       if (pausedTime > 0 && questionStartTime) {
@@ -143,6 +213,7 @@ function AllAnswerScreen({
   const handleAnswer = (student, answerIndex) => {
     if (phase !== 'answering' || isPaused) return
 
+    playClickSound()
     setStudentAnswers(prev => {
       const currentAnswers = prev[student] || []
 
@@ -244,6 +315,7 @@ function AllAnswerScreen({
 
   // Siguiente pregunta
   const handleNextQuestion = () => {
+    playNextSound()
     if (currentQuestionIndex + 1 >= parsedQuestions.length) {
       // Fin del juego
       saveGameToHistory(scores, questionsAnswered, responseTimes)
@@ -266,7 +338,7 @@ function AllAnswerScreen({
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-6" style={{ background: 'var(--color-bg-secondary)' }}>
+    <div className="p-4 md:p-6" style={{ background: 'var(--color-bg-primary)' }}>
       <div className="max-w-5xl mx-auto">
         {/* Pantalla de espera (solo primera vez) */}
         {phase === 'waiting' && (
@@ -328,6 +400,19 @@ function AllAnswerScreen({
                     className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-semibold"
                   >
                     Revelar
+                  </button>
+                )}
+
+                {/* Botón Siguiente (aparece cuando termina cada pregunta) */}
+                {phase === 'revealed' && (
+                  <button
+                    onClick={handleNextQuestion}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold"
+                  >
+                    {currentQuestionIndex + 1 >= parsedQuestions.length
+                      ? 'Ver Resultados →'
+                      : 'Siguiente →'
+                    }
                   </button>
                 )}
 
@@ -397,16 +482,7 @@ function AllAnswerScreen({
 
             {/* Panel de respuestas por alumno */}
             <div>
-              <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>
-                {phase === 'answering'
-                  ? isPaused
-                    ? 'Juego pausado'
-                    : 'Respuestas de los alumnos (pueden marcar varias)'
-                  : 'Resultados'
-                }
-              </h3>
-
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {rotatedStudents.map((student) => {
                   const answers = studentAnswers[student] || []
                   const hasAnswered = answers.length > 0
@@ -418,7 +494,7 @@ function AllAnswerScreen({
                   return (
                     <div
                       key={student}
-                      className={`p-4 rounded-lg border-2 ${
+                      className={`p-3 rounded-lg border-2 ${
                         isCorrect
                           ? 'bg-green-50 dark:bg-green-900/30 border-green-500'
                           : isIncorrect
@@ -445,7 +521,7 @@ function AllAnswerScreen({
                                 key={optIndex}
                                 onClick={() => handleAnswer(student, optIndex)}
                                 disabled={phase === 'revealed' || isPaused}
-                                className={`w-14 h-14 rounded-lg font-bold text-xl transition-all ${
+                                className={`w-12 h-12 rounded-lg font-bold text-lg transition-all ${
                                   showAsCorrect && isSelected
                                     ? 'bg-green-500 text-white ring-4 ring-green-300'
                                     : showAsCorrect
@@ -496,21 +572,6 @@ function AllAnswerScreen({
                 })}
               </div>
             </div>
-
-            {/* Botón siguiente pregunta */}
-            {phase === 'revealed' && (
-              <div className="flex gap-4 justify-center mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                <button
-                  onClick={handleNextQuestion}
-                  className="px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold text-xl"
-                >
-                  {currentQuestionIndex + 1 >= parsedQuestions.length
-                    ? 'Ver Resultados Finales'
-                    : 'Siguiente Pregunta'
-                  }
-                </button>
-              </div>
-            )}
           </div>
         )}
       </div>
