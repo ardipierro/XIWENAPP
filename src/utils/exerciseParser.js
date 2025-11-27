@@ -69,7 +69,8 @@ export function parseChainedExercises(text) {
   if (!text || typeof text !== 'string') return [];
 
   const sections = [];
-  const markerPattern = /^(#\w+)/gm;
+  // Permitir espacios opcionales antes del marcador #
+  const markerPattern = /^\s*(#\w+)/gm;
   const markers = Object.keys(CHAIN_MARKERS);
 
   // Encontrar todas las posiciones de marcadores
