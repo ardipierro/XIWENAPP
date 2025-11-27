@@ -344,7 +344,7 @@ function parseOpenQuestionsSection(content) {
 /**
  * Parsea ejercicio de opción múltiple
  */
-function parseMCQSection(content) {
+export function parseMCQSection(content) {
   const lines = content.split('\n').filter(l => l.trim());
 
   if (lines.length < 3) return { question: '', options: [], correctAnswer: null, explanation: '' };
