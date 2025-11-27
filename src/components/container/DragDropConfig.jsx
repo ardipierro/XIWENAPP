@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Save, Eye, EyeOff, Volume2, Shuffle } from 'lucide-react';
+import { Save, Eye, EyeOff, Volume2, Shuffle, Move } from 'lucide-react';
 import { BaseButton, BaseInput, BaseAlert } from '../common';
 import DragDropBlanksExercise from './DragDropBlanksExercise';
 import logger from '../../utils/logger';
@@ -92,12 +92,53 @@ function DragDropConfig({ onSave }) {
         </BaseAlert>
       )}
 
-      {/* Info */}
-      <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-        <p className="text-sm text-blue-700 dark:text-blue-300">
-          <strong>Drag & Drop:</strong> Las palabras entre asteriscos (*palabra*) se retiran del texto
-          y aparecen como elementos arrastrables. El estudiante debe colocarlas en su posición correcta.
+      {/* Guía de formato */}
+      <div className="p-6 rounded-lg border-2 border-purple-200 dark:border-purple-800" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+        <div className="flex items-center gap-2 mb-3">
+          <Move className="w-5 h-5 text-purple-500" />
+          <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            Cómo Escribir el Texto
+          </h3>
+        </div>
+        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          Para ejercicios de <strong>Drag & Drop</strong>, escribe el texto y coloca <strong>asteriscos (*)</strong> alrededor de las palabras que deben ser arrastradas. Las palabras marcadas se retirarán del texto y aparecerán como elementos arrastrables.
         </p>
+
+        <div className="space-y-3">
+          <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/10">
+            <p className="text-xs font-semibold mb-2 text-purple-700 dark:text-purple-300">
+              ✏️ Ejemplo de texto:
+            </p>
+            <pre className="text-sm font-mono p-3 rounded bg-white dark:bg-gray-800 overflow-x-auto" style={{ color: 'var(--color-text-primary)' }}>
+{`El *perro* ladra y el *gato* maúlla.
+Los *pájaros* cantan en el *árbol*.`}
+            </pre>
+          </div>
+
+          <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/10">
+            <p className="text-xs font-semibold mb-2 text-green-700 dark:text-green-300">
+              ✅ Resultado:
+            </p>
+            <p className="text-sm mb-2" style={{ color: 'var(--color-text-primary)' }}>
+              El texto aparecerá con espacios vacíos:
+            </p>
+            <p className="text-sm italic bg-white dark:bg-gray-800 p-2 rounded" style={{ color: 'var(--color-text-secondary)' }}>
+              "El _____ ladra y el _____ maúlla. Los _____ cantan en el _____."
+            </p>
+            <p className="text-xs mt-2" style={{ color: 'var(--color-text-secondary)' }}>
+              Y las palabras <strong className="text-purple-600">perro</strong>, <strong className="text-purple-600">gato</strong>, <strong className="text-purple-600">pájaros</strong> y <strong className="text-purple-600">árbol</strong> estarán disponibles para arrastrar.
+            </p>
+          </div>
+
+          <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/10">
+            <p className="text-xs font-semibold mb-1 text-yellow-700 dark:text-yellow-300">
+              💡 Tip:
+            </p>
+            <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+              Las palabras se mezclan automáticamente si tienes habilitada la opción "Mezclar palabras".
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Configuración de colores */}

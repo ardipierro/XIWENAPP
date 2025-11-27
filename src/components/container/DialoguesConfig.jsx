@@ -612,29 +612,58 @@ function DialoguesConfig({ onSave }) {
         </div>
       </section>
 
-      {/* Preview del formato */}
-      <section className="p-4 rounded-lg border-2 border-dashed" style={{ borderColor: 'var(--color-border)' }}>
-        <div className="flex items-center gap-2 mb-4">
-          <Zap size={18} className="text-cyan-500" />
-          <h4 className="font-medium" style={{ color: 'var(--color-text-primary)' }}>Formato de Contenido</h4>
+      {/* Guía de formato */}
+      <section className="p-6 rounded-lg border-2 border-cyan-200 dark:border-cyan-800" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+        <div className="flex items-center gap-2 mb-3">
+          <MessageCircle className="w-5 h-5 text-cyan-500" />
+          <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            Cómo Escribir el Texto
+          </h3>
         </div>
+        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          Para <strong>Diálogos</strong>, usa el marcador <strong>#DIALOGO</strong> y escribe cada línea con el formato <strong>Personaje: texto</strong>. Las palabras entre <strong>*asteriscos*</strong> se convierten en espacios en blanco que el alumno debe completar.
+        </p>
 
-        <div className="p-4 rounded-lg font-mono text-sm" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
-          <pre style={{ color: 'var(--color-text-primary)' }}>
+        <div className="space-y-3">
+          <div className="p-4 rounded-lg bg-cyan-50 dark:bg-cyan-900/10">
+            <p className="text-xs font-semibold mb-2 text-cyan-700 dark:text-cyan-300">
+              ✏️ Ejemplo de texto:
+            </p>
+            <pre className="text-sm font-mono p-3 rounded bg-white dark:bg-gray-800 overflow-x-auto" style={{ color: 'var(--color-text-primary)' }}>
 {`#DIALOGO
-Mozo: Buenas noches. ¿Tienen reserva?
+Mozo: Buenas noches. ¿Tienen *reserva*?
 Sofía: Sí, a nombre de *Sofía Torres*.
 Mozo: Perfecto, síganme por *favor*.
+Carlos: Gracias, muy *amable*.`}
+            </pre>
+          </div>
 
----
-Las palabras entre *asteriscos* se
-convierten en blancos para completar.`}
-          </pre>
-        </div>
+          <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/10">
+            <p className="text-xs font-semibold mb-2 text-blue-700 dark:text-blue-300">
+              ✅ Resultado:
+            </p>
+            <p className="text-sm mb-2" style={{ color: 'var(--color-text-primary)' }}>
+              Se mostrará un diálogo estilo chat con:
+            </p>
+            <ul className="text-xs space-y-1 ml-4 list-disc" style={{ color: 'var(--color-text-secondary)' }}>
+              <li><strong>Burbujas de chat</strong> alternadas por personaje</li>
+              <li><strong>Espacios en blanco</strong> donde estaban las palabras con *asteriscos*</li>
+              <li><strong>Audio</strong> opcional para cada línea (si está habilitado TTS)</li>
+              <li><strong>Traducciones</strong> opcionales (si están habilitadas)</li>
+            </ul>
+          </div>
 
-        <div className="mt-3 flex gap-2">
-          <BaseBadge variant="info" size="sm">Personaje: texto</BaseBadge>
-          <BaseBadge variant="warning" size="sm">*palabra* = blank</BaseBadge>
+          <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/10">
+            <p className="text-xs font-semibold mb-1 text-yellow-700 dark:text-yellow-300">
+              💡 Tips:
+            </p>
+            <ul className="text-xs space-y-1 ml-4 list-disc" style={{ color: 'var(--color-text-secondary)' }}>
+              <li>Cada línea debe empezar con <code className="px-1 bg-white dark:bg-gray-800 rounded">Personaje:</code></li>
+              <li>Los personajes deben estar configurados en la sección "Personajes y Voces"</li>
+              <li>Usa *asteriscos* solo si quieres modo de ejercicio con espacios en blanco</li>
+              <li>Para diálogos solo de lectura, no uses asteriscos</li>
+            </ul>
+          </div>
         </div>
       </section>
     </div>
