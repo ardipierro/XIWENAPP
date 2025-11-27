@@ -268,16 +268,9 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
       }
     } else if (type === EXERCISE_TYPES.MULTIPLE_CHOICE) {
       const savedConfig = localStorage.getItem('xiwen_multipleChoiceConfig');
-      const parsedConfig = savedConfig ? JSON.parse(savedConfig) : {};
-
-      // Override de configuración para modo viewer
-      setConfig({
-        ...parsedConfig,
-        gameSettings: {
-          ...parsedConfig.gameSettings,
-          feedbackMode: 'onSubmit' // SIEMPRE usar botón verificar, NO instantáneo
-        }
-      });
+      if (savedConfig) {
+        setConfig(JSON.parse(savedConfig));
+      }
     }
 
     logger.info(`Exercise type detected: ${type}`, 'ExerciseViewerModal');
@@ -660,7 +653,7 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
       size={isExpanded ? 'fullscreen' : 'xl'}
       noPadding={true}
       footer={renderFooter()}
-      className="min-h-[700px]"
+      className="min-h-[735px]"
       headerActions={
         <>
           {/* Botón Expandir */}

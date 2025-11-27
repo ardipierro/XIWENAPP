@@ -266,7 +266,8 @@ function QuestionCard({
     }
 
     // After checking
-    if (isCorrect) {
+    // Mostrar correcta solo si está configurado O si fue seleccionada
+    if (isCorrect && (config.showCorrectAnswer || isSelected)) {
       return {
         borderColor: config.correctColor,
         backgroundColor: `${config.correctColor}15`
@@ -280,7 +281,8 @@ function QuestionCard({
       };
     }
 
-    return { opacity: 0.6 };
+    // Si showCorrectAnswer está desactivado, no mostrar estado
+    return config.showCorrectAnswer ? { opacity: 0.6 } : {};
   };
 
   const canRetry = config.gameSettings?.allowRetry &&
@@ -354,14 +356,14 @@ function QuestionCard({
                   className="w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0"
                   style={{
                     borderColor: isChecked || showResults
-                      ? (isCorrect ? config.correctColor : (isSelected ? config.incorrectColor : 'var(--color-border)'))
+                      ? ((isCorrect && (config.showCorrectAnswer || isSelected)) ? config.correctColor : (isSelected ? config.incorrectColor : 'var(--color-border)'))
                       : (isSelected ? config.selectedColor : 'var(--color-border)'),
-                    backgroundColor: (isChecked || showResults) && isCorrect
+                    backgroundColor: (isChecked || showResults) && isCorrect && (config.showCorrectAnswer || isSelected)
                       ? config.correctColor
                       : (isChecked && isSelected && !isCorrect ? config.incorrectColor : 'transparent')
                   }}
                 >
-                  {(isChecked || showResults) && isCorrect && (
+                  {(isChecked || showResults) && isCorrect && (config.showCorrectAnswer || isSelected) && (
                     <Check size={14} className="text-white" />
                   )}
                   {isChecked && isSelected && !isCorrect && (
