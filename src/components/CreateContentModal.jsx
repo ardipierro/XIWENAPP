@@ -1028,6 +1028,12 @@ El gato [corre] por el jardín.
             <Eye size={20} />
             Vista Previa
           </h3>
+          {/* Debug info */}
+          <div className="mb-4 p-2 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono overflow-auto max-h-32">
+            <p>Body length: {formData.body?.length || 0}</p>
+            <p>Parsed sections: {parsedSections.length}</p>
+            <p>Types: {parsedSections.map(s => s.type).join(', ')}</p>
+          </div>
           <ChainedExerciseViewer
             text={formData.body}
             defaultMode="scroll"
