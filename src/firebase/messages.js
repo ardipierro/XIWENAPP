@@ -18,7 +18,8 @@ import {
   onSnapshot,
   serverTimestamp,
   writeBatch,
-  arrayUnion
+  arrayUnion,
+  deleteField
 } from 'firebase/firestore';
 import { db } from './config';
 import logger from '../utils/logger';
@@ -495,6 +496,45 @@ export async function archiveConversation(conversationId, userId) {
 }
 
 /**
+ * Unarchive a conversation for a user
+ * @param {string} conversationId - Conversation ID
+ * @param {string} userId - User ID
+ * @returns {Promise<void>}
+ */
+export async function unarchiveConversation(conversationId, userId) {
+  try {
+    const conversationRef = doc(db, 'conversations', conversationId);
+    await updateDoc(conversationRef, {
+      [`archived.${userId}`]: deleteField()
+    });
+    logger.info('Conversation unarchived', 'Messages');
+  } catch (error) {
+    logger.error('Error unarchiving conversation', error, 'Messages');
+    throw error;
+  }
+}
+
+/**
+ * Delete a conversation for a user (soft delete)
+ * @param {string} conversationId - Conversation ID
+ * @param {string} userId - User ID
+ * @returns {Promise<void>}
+ */
+export async function deleteConversation(conversationId, userId) {
+  try {
+    const conversationRef = doc(db, 'conversations', conversationId);
+    await updateDoc(conversationRef, {
+      [`deleted.${userId}`]: true,
+      [`deletedAt.${userId}`]: serverTimestamp()
+    });
+    logger.info('Conversation deleted for user', 'Messages');
+  } catch (error) {
+    logger.error('Error deleting conversation', error, 'Messages');
+    throw error;
+  }
+}
+
+/**
  * Subscribe to a single conversation (for typing indicators)
  * @param {string} conversationId - Conversation ID
  * @param {Function} callback - Callback with conversation data
@@ -854,6 +894,8 @@ export default {
   subscribeToConversations,
   subscribeToConversation,
   archiveConversation,
+  unarchiveConversation,
+  deleteConversation,
   searchUsers,
   setTyping,
   clearTyping,

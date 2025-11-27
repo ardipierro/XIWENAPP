@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:student1": "vite --port 5174 --host",
+    "dev:student2": "vite --port 5176 --host",
+    "dev:student3": "vite --port 5177 --host",
     "build": "vite build && node scripts/inject-preload.cjs",
     "build:clean": "vite build",
     "preview": "vite preview",

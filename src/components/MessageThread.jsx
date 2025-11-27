@@ -53,13 +53,17 @@ const safeAsync = async (fn, options = {}) => {
 };
 
 /**
- * Voice Preview Player - dentro del input
+ * Voice Preview Player - dentro del input (estilo WhatsApp moderno)
  */
 function VoicePreviewPlayer({ audioUrl, duration }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
   const audioRef = useRef(null);
+  const waveformRef = useRef(null);
+
+  // Waveform heights (mismo patrón que en burbujas)
+  const waveformHeights = [6, 10, 14, 11, 16, 13, 18, 11, 14, 8, 20, 13, 16, 10, 14, 18, 11, 22, 13, 10, 16, 14, 11, 18, 8, 13, 10];
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -110,7 +114,7 @@ function VoicePreviewPlayer({ audioUrl, duration }) {
     setIsPlaying(!isPlaying);
   };
 
-  const handleProgressClick = (e) => {
+  const handleWaveformClick = (e) => {
     const audio = audioRef.current;
     if (!audio || !audioDuration || !isFinite(audioDuration)) return;
     const rect = e.currentTarget.getBoundingClientRect();
@@ -133,30 +137,40 @@ function VoicePreviewPlayer({ audioUrl, duration }) {
     : 0;
 
   return (
-    <div className="voice-preview-player">
+    <div className="voice-preview-modern">
       <audio ref={audioRef} src={audioUrl} preload="metadata" />
+
+      {/* Play/Pause button */}
       <button
         type="button"
         onClick={togglePlayPause}
-        className="preview-play-btn"
+        className="preview-play-modern"
         title={isPlaying ? 'Pausar' : 'Reproducir'}
       >
-        {isPlaying ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
+        {isPlaying ? <Pause size={18} /> : <Play size={18} className="ml-0.5" />}
       </button>
-      <div className="preview-progress-container">
+
+      {/* Waveform + time */}
+      <div className="preview-waveform-container">
         <div
-          className="preview-progress-bar"
-          onClick={handleProgressClick}
+          ref={waveformRef}
+          className="preview-waveform"
+          onClick={handleWaveformClick}
         >
-          <div
-            className="preview-progress-fill"
-            style={{ width: `${progress}%`, transition: 'width 0.05s linear' }}
-          />
+          {waveformHeights.map((height, i) => {
+            const played = (i / waveformHeights.length) * 100 <= progress;
+            return (
+              <div
+                key={i}
+                className={`preview-waveform-bar ${played ? 'played' : ''}`}
+                style={{ height: `${height}px` }}
+              />
+            );
+          })}
         </div>
-        <div className="preview-time">
-          <span>{formatTime(currentTime)}</span>
-          <span>{formatTime(audioDuration)}</span>
-        </div>
+        <span className="preview-time-modern">
+          {formatTime(currentTime)} / {formatTime(audioDuration)}
+        </span>
       </div>
     </div>
   );
@@ -1516,12 +1530,17 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false}) 
             {/* Textarea / Timer / Player */}
             <div className="textarea-wrapper">
               {isRecordingVoice ? (
-                /* Grabando: mostrar timer GRANDE Y NEGRITA */
+                /* Grabando: timer moderno con waveform animado */
                 <div className="voice-recording-timer">
                   <span className="recording-indicator"></span>
                   <span className="timer-text">
                     {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}
                   </span>
+                  <div className="recording-waveform">
+                    {[...Array(15)].map((_, i) => (
+                      <div key={i} className="recording-waveform-bar" />
+                    ))}
+                  </div>
                 </div>
               ) : voiceBlob ? (
                 /* Preview del audio listo para enviar */
@@ -1619,7 +1638,7 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false}) 
                   onClick={stopRecording}
                   title="Detener grabación"
                 >
-                  <Square size={22} />
+                  <Square size={18} />
                 </button>
                 <button
                   type="button"
@@ -1627,31 +1646,31 @@ function MessageThread({ conversation, currentUser, onClose, isMobile = false}) 
                   onClick={cancelRecording}
                   title="Cancelar"
                 >
-                  <X size={22} />
+                  <X size={18} />
                 </button>
               </>
             ) : voiceBlob ? (
-              /* Audio listo: Send + Cancel */
+              /* Audio listo: Send + Delete */
               <>
                 <button
                   type="submit"
-                  className="send-button"
+                  className="voice-send-button"
                   disabled={sending || uploading}
                   title="Enviar audio"
                 >
                   {uploading ? (
                     <div className="spinner-small"></div>
                   ) : (
-                    <Send size={22} />
+                    <Send size={18} />
                   )}
                 </button>
                 <button
                   type="button"
-                  className="voice-cancel-button"
+                  className="voice-delete-button"
                   onClick={cancelRecording}
-                  title="Cancelar"
+                  title="Eliminar"
                 >
-                  <X size={22} />
+                  <Trash2 size={18} />
                 </button>
               </>
             ) : newMessage.trim() || selectedFile || editingMessage ? (
@@ -2071,46 +2090,47 @@ const MessageBubble = forwardRef(({
               </div>
             ) : isAudio(message.attachment.type) ? (
               <div className="attachment-audio-modern">
-                {/* Botón play/pause */}
+                {/* Botón play/pause compacto */}
                 <button
                   className={`audio-play-btn-modern ${isPlayingAudio ? 'playing' : ''}`}
                   onClick={toggleAudioPlayback}
                   title={isPlayingAudio ? 'Pausar' : 'Reproducir'}
                 >
-                  {isPlayingAudio ? <Pause size={18} /> : <Play size={18} />}
+                  {isPlayingAudio ? <Pause size={20} /> : <Play size={20} />}
                 </button>
 
-                {/* Barra de progreso y tiempos */}
+                {/* Waveform + tiempo compacto */}
                 <div className="audio-progress-container">
-                  <div
-                    className="audio-progress-modern"
-                    onClick={handleAudioSeek}
-                  >
-                    <div
-                      className="progress-fill-modern"
-                      style={{ width: `${audioProgress}%` }}
-                    />
+                  {/* Waveform visual */}
+                  <div className="audio-progress-modern" onClick={handleAudioSeek}>
+                    {/* Barras del waveform simulado */}
+                    {[...Array(27)].map((_, i) => {
+                      const heights = [8, 12, 18, 14, 20, 16, 22, 14, 18, 10, 24, 16, 20, 12, 18, 22, 14, 26, 16, 12, 20, 18, 14, 22, 10, 16, 12];
+                      const played = (i / 27) * 100 <= audioProgress;
+                      return (
+                        <div
+                          key={i}
+                          className={`audio-waveform-bar ${played ? 'played' : ''}`}
+                          style={{ height: `${heights[i]}px` }}
+                        />
+                      );
+                    })}
                   </div>
 
-                  {/* Tiempo sin "/" */}
+                  {/* Tiempo + hora inline */}
                   <div className="audio-time-modern">
-                    <span className="current-time">{formatAudioTime(audioCurrentTime)}</span>
-                    <span className="total-time">{formatAudioTime(audioDuration || message.attachment.duration)}</span>
-                  </div>
-                </div>
-
-                {/* Hora y estado EN LA MISMA LÍNEA a la derecha */}
-                <div className="audio-message-footer">
-                  <span className="message-time">
-                    {formatTime(message.createdAt)}
-                  </span>
-                  {isOwn && !message.deleted && (
-                    <span className="message-status">
-                      {message.status === 'sent' && <Check size={14} className="status-icon sent" />}
-                      {message.status === 'delivered' && <CheckCheck size={14} className="status-icon delivered" />}
-                      {message.status === 'read' && <CheckCheck size={14} className="status-icon read" />}
+                    <span>{formatAudioTime(audioCurrentTime || audioDuration || message.attachment.duration)}</span>
+                    <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                      {formatTime(message.createdAt)}
+                      {isOwn && !message.deleted && (
+                        <span className="message-status">
+                          {message.status === 'sent' && <Check size={13} className="status-icon sent" />}
+                          {message.status === 'delivered' && <CheckCheck size={13} className="status-icon delivered" />}
+                          {message.status === 'read' && <CheckCheck size={13} className="status-icon read" />}
+                        </span>
+                      )}
                     </span>
-                  )}
+                  </div>
                 </div>
 
                 <audio
@@ -2144,26 +2164,23 @@ const MessageBubble = forwardRef(({
           </div>
         )}
 
-        {/* Text Content - Separado del footer */}
-        {message.content && (
-          <div className="message-content">
-            {highlightText(message.content, searchTerm)}
-          </div>
-        )}
-
-        {/* Footer - Siempre separado del contenido */}
-        <div className="message-footer">
-          <span className="message-time">
-            {formatTime(message.createdAt)}
-            {message.edited && <span className="edited-indicator"> (editado)</span>}
-          </span>
-          {isOwn && !message.deleted && (
-            <span className="message-status">
-              {message.status === 'sent' && <Check size={14} className="status-icon sent" />}
-              {message.status === 'delivered' && <CheckCheck size={14} className="status-icon delivered" />}
-              {message.status === 'read' && <CheckCheck size={14} className="status-icon read" />}
+        {/* Text Content + Inline Footer (WhatsApp style) */}
+        <div className="message-content">
+          {message.content && highlightText(message.content, searchTerm)}
+          {/* Footer INLINE - flota a la derecha del texto */}
+          <span className="message-footer">
+            <span className="message-time">
+              {formatTime(message.createdAt)}
+              {message.edited && <span className="edited-indicator"> ·</span>}
             </span>
-          )}
+            {isOwn && !message.deleted && (
+              <span className="message-status">
+                {message.status === 'sent' && <Check size={13} className="status-icon sent" />}
+                {message.status === 'delivered' && <CheckCheck size={13} className="status-icon delivered" />}
+                {message.status === 'read' && <CheckCheck size={13} className="status-icon read" />}
+              </span>
+            )}
+          </span>
         </div>
 
         {/* Reactions Display */}

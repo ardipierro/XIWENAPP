@@ -197,6 +197,10 @@ export default defineConfig({
 
   // Optimizaciones de servidor dev
   server: {
+    // Permitir acceso desde la red local (para testing con múltiples dispositivos)
+    host: true, // Escucha en todas las interfaces de red (0.0.0.0)
+    strictPort: false, // Si el puerto está ocupado, usa el siguiente disponible
+
     // Preload de módulos críticos
     warmup: {
       clientFiles: [
