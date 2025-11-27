@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { Box, CheckSquare, Move, Edit3, HelpCircle, MessageSquare, Table2, MessageCircle, ListChecks, ArrowRightLeft, CheckCircle, FileText, Link2 } from 'lucide-react';
+import { Box, CheckSquare, Move, Edit3, HelpCircle, MessageSquare, Table2, MessageCircle, ListChecks, ArrowRightLeft, CheckCircle, FileText, Link2, Layout } from 'lucide-react';
 import { BaseBadge } from './common';
 import WordHighlightConfig from './container/WordHighlightConfig';
 import DragDropConfig from './container/DragDropConfig';
@@ -17,6 +17,7 @@ import MatchingConfig from './container/MatchingConfig';
 import TrueFalseConfig from './container/TrueFalseConfig';
 import RichTextConfig from './container/RichTextConfig';
 import ChainedExerciseConfig from './container/ChainedExerciseConfig';
+import DisplaySettingsConfig from './container/DisplaySettingsConfig';
 import logger from '../utils/logger';
 
 /**
@@ -109,6 +110,14 @@ const CONTAINER_TABS = [
     icon: Link2,
     description: 'Combina múltiples tipos de ejercicios en secuencia. Usa marcadores (#marcar, #arrastrar, etc.) para crear ejercicios encadenados.',
     component: ChainedExerciseConfig,
+    available: true
+  },
+  {
+    id: 'display-settings',
+    label: 'Visualización',
+    icon: Layout,
+    description: 'Configura el aspecto visual de los ejercicios: tamaño de fuente, ancho del contenido, alineación y modo de pantalla completa. Estos ajustes se aplican a todos los tipos de ejercicios.',
+    component: DisplaySettingsConfig,
     available: true
   }
 ];

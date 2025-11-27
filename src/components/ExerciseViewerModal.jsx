@@ -9,8 +9,11 @@ import { X, Loader2, Edit2, Maximize2, Minimize2, RotateCcw, Type } from 'lucide
 import { BaseModal, BaseButton } from './common';
 import WordHighlightExercise from './container/WordHighlightExercise';
 import ChainedExerciseViewer from './ChainedExerciseViewer';
-import { getDisplayClasses, getDisplayStyles, mergeDisplaySettings } from '../constants/displaySettings';
+import QuickDisplayFAB from './QuickDisplayFAB';
+import { getDisplayClasses, getDisplayStyles, mergeDisplaySettings, DEFAULT_DISPLAY_SETTINGS } from '../constants/displaySettings';
 import logger from '../utils/logger';
+
+const DISPLAY_SETTINGS_KEY = 'xiwen_display_settings';
 import { parseExerciseFile, parseChainedExercises, parseQuestions, CHAIN_MARKERS } from '../utils/exerciseParser.js';
 
 // Lazy load de componentes de ejercicios adicionales
@@ -172,6 +175,38 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
   const [isExpanded, setIsExpanded] = useState(false);
   const [exerciseActions, setExerciseActions] = useState(null);
   const [fontScale, setFontScale] = useState(100); // 80-200%
+
+  // Display settings propios (cuando no viene desde un contenedor)
+  const [liveDisplaySettings, setLiveDisplaySettings] = useState(null);
+  const [localFullscreen, setLocalFullscreen] = useState(false);
+
+  // Cargar display settings del localStorage cuando no vienen del contenedor
+  useEffect(() => {
+    if (isOpen && !displaySettings) {
+      try {
+        const savedSettings = localStorage.getItem(DISPLAY_SETTINGS_KEY);
+        if (savedSettings) {
+          setLiveDisplaySettings(JSON.parse(savedSettings));
+        }
+      } catch (error) {
+        logger.error('Error loading display settings:', error);
+      }
+    }
+    // Reset fullscreen al cerrar
+    if (!isOpen) {
+      setLocalFullscreen(false);
+    }
+  }, [isOpen, displaySettings]);
+
+  // Handler para cambios desde el FAB
+  const handleDisplaySettingsChange = useCallback((newSettings) => {
+    setLiveDisplaySettings(newSettings);
+  }, []);
+
+  // Toggle fullscreen local
+  const handleToggleFullscreen = useCallback(() => {
+    setLocalFullscreen(prev => !prev);
+  }, []);
 
   useEffect(() => {
     if (!exercise) return;
@@ -532,7 +567,10 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
   if (!exercise) return null;
 
   // Obtener clases y estilos de displaySettings
-  const mergedDisplaySettings = mergeDisplaySettings(displaySettings, exerciseType || 'exercise');
+  // Usar displaySettings del contenedor, o liveDisplaySettings si viene directamente
+  const effectiveDisplaySettings = displaySettings || liveDisplaySettings;
+  const mergedDisplaySettings = mergeDisplaySettings(effectiveDisplaySettings, exerciseType || 'exercise');
+  const effectiveFullscreen = isFullscreen || localFullscreen;
   const displayClasses = getDisplayClasses(mergedDisplaySettings);
   const displayStyles = getDisplayStyles(mergedDisplaySettings);
 
@@ -653,6 +691,7 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
   };
 
   return (
+    <>
     <BaseModal
       isOpen={isOpen}
       onClose={handleClose}
@@ -760,6 +799,17 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
         </div>
       )}
     </BaseModal>
+
+      {/* FAB de ajustes rápidos - siempre visible cuando el modal está abierto */}
+      {isOpen && (
+        <QuickDisplayFAB
+          initialSettings={effectiveDisplaySettings}
+          onSettingsChange={handleDisplaySettingsChange}
+          isFullscreen={effectiveFullscreen}
+          onToggleFullscreen={!displaySettings ? handleToggleFullscreen : undefined}
+        />
+      )}
+    </>
   );
 }
 
