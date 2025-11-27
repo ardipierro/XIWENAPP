@@ -10,7 +10,7 @@ import { BaseModal, BaseButton } from './common';
 import WordHighlightExercise from './container/WordHighlightExercise';
 import ChainedExerciseViewer from './ChainedExerciseViewer';
 import logger from '../utils/logger';
-import { parseExerciseFile, parseChainedExercises, parseMCQSection, CHAIN_MARKERS } from '../utils/exerciseParser.js';
+import { parseExerciseFile, parseChainedExercises, parseQuestions, CHAIN_MARKERS } from '../utils/exerciseParser.js';
 
 // Lazy load de componentes de ejercicios adicionales
 const DragDropBlanksExercise = lazy(() => import('./container/DragDropBlanksExercise'));
@@ -447,17 +447,16 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
       }
 
       case EXERCISE_TYPES.MULTIPLE_CHOICE: {
-        // Parsear el texto para convertirlo al formato esperado por MultipleChoiceExercise
+        // Usar el parser que YA FUNCIONA en el juego por turnos
         try {
-          console.log('%c🎯 PARSEANDO MULTIPLE CHOICE', 'background: orange; color: white; font-size: 14px; padding: 3px;');
+          console.log('%c🎯 PARSEANDO MULTIPLE CHOICE (usando parseQuestions)', 'background: orange; color: white; font-size: 14px; padding: 3px;');
           console.log('📝 cleanContent:', cleanContent);
 
-          const mcqData = parseMCQSection(cleanContent);
-          console.log('📦 Parsed MCQ data:', mcqData);
+          // parseQuestions devuelve array de preguntas en formato correcto
+          const questions = parseQuestions(cleanContent, 'General');
+          console.log('📦 Parsed questions:', questions);
 
-          // Transformar formato: parseMCQSection devuelve un solo ejercicio
-          // pero MultipleChoiceExercise espera array de questions
-          if (!mcqData || !mcqData.options || mcqData.options.length === 0) {
+          if (!questions || questions.length === 0) {
             return (
               <div className="text-center py-12">
                 <p style={{ color: 'var(--color-text-secondary)' }}>
@@ -472,25 +471,10 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
             );
           }
 
-          // Transformar al formato esperado por MultipleChoiceExercise:
-          // options: array de objetos {text, correct, explanation} -> array de strings
-          // correctIndices: array de números
-          const formattedQuestion = {
-            question: mcqData.question,
-            options: mcqData.options.map(opt => opt.text || opt),
-            correct: mcqData.correctIndices.length === 1
-              ? mcqData.correctIndices[0]
-              : mcqData.correctIndices,
-            optionExplanations: mcqData.options.map(opt => opt.explanation || null),
-            explanation: mcqData.explanation
-          };
-
-          console.log('✅ Formatted question:', formattedQuestion);
-
           return (
             <Suspense fallback={<ExerciseLoader />}>
               <MultipleChoiceExercise
-                questions={[formattedQuestion]}
+                questions={questions}
                 config={config || {}}
                 onComplete={handleComplete}
               />
