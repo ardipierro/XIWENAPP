@@ -10,13 +10,14 @@ import { BaseModal, BaseButton } from './common';
 import WordHighlightExercise from './container/WordHighlightExercise';
 import ChainedExerciseViewer from './ChainedExerciseViewer';
 import logger from '../utils/logger';
-import { parseExerciseFile, parseChainedExercises, CHAIN_MARKERS } from '../utils/exerciseParser.js';
+import { parseExerciseFile, parseChainedExercises, parseMCQSection, CHAIN_MARKERS } from '../utils/exerciseParser.js';
 
 // Lazy load de componentes de ejercicios adicionales
 const DragDropBlanksExercise = lazy(() => import('./container/DragDropBlanksExercise'));
 const FillInBlanksExercise = lazy(() => import('./container/FillInBlanksExercise'));
 const DialoguesExercise = lazy(() => import('./container/DialoguesExercise'));
 const OpenQuestionsExercise = lazy(() => import('./container/OpenQuestionsExercise'));
+const MultipleChoiceExercise = lazy(() => import('./container/MultipleChoiceExercise'));
 
 /**
  * Spinner de carga para lazy components
@@ -39,6 +40,7 @@ const EXERCISE_TYPES = {
   FILLBLANKS: 'fill-blanks',
   DIALOGUES: 'dialogues',
   OPEN_QUESTIONS: 'open-questions',
+  MULTIPLE_CHOICE: 'multiple-choice',
   CHAINED: 'chained-exercises' // Múltiples ejercicios encadenados
 };
 
@@ -110,16 +112,45 @@ function detectExerciseType(content) {
   }
 
   // Detectar diálogos por formato (Personaje: texto)
-  const dialoguePattern = /^[A-Za-zÀ-ÿ\s]+:\s*.+$/m;
-  if (dialoguePattern.test(content) && content.split('\n').filter(l => dialoguePattern.test(l.trim())).length >= 2) {
+  // IMPORTANTE: No confundir con :: de explicaciones de opción múltiple
+  const dialoguePattern = /^[A-Za-zÀ-ÿ\s]+:\s+[^:].*$/m; // Un solo : seguido de espacio y NO otro :
+  const dialogueLines = content.split('\n').filter(l => {
+    const trimmed = l.trim();
+    // Excluir líneas que tienen :: (explicaciones)
+    if (trimmed.includes('::')) return false;
+    return dialoguePattern.test(trimmed);
+  });
+
+  if (dialogueLines.length >= 2) {
     return {
       type: EXERCISE_TYPES.DIALOGUES,
       cleanContent: content
     };
   }
 
-  // Fallback: detectar por contenido (si tiene asteriscos, default a highlight)
+  // Detectar OPCIÓN MÚLTIPLE por formato:
+  // - Líneas que empiezan con * (sin cerrar con *)
+  // - Al menos 2 opciones (líneas no vacías)
+  // - Puede tener :: para explicaciones
+  const optionLines = content.split('\n').filter(l => {
+    const trimmed = l.trim();
+    // Línea que empieza con * pero NO es *palabra* (highlight)
+    return trimmed.startsWith('*') && !trimmed.match(/^\*[^*]+\*$/);
+  });
+
+  // Si hay al menos 2 opciones con formato *opción, es opción múltiple
+  if (optionLines.length >= 2) {
+    console.log('✅ Detected as MULTIPLE CHOICE (by * prefix)');
+    return {
+      type: 'multiple-choice',
+      cleanContent: content
+    };
+  }
+
+  // Fallback: detectar por contenido (si tiene *palabra*, default a highlight)
+  // SOLO si el patrón es *palabra* (asteriscos que abren Y cierran)
   if (/\*([^*]+)\*/g.test(content)) {
+    console.log('✅ Detected as WORD HIGHLIGHT (by *word* pattern)');
     return {
       type: EXERCISE_TYPES.HIGHLIGHT,
       cleanContent: content
@@ -232,6 +263,11 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
       }
     } else if (type === EXERCISE_TYPES.OPEN_QUESTIONS) {
       const savedConfig = localStorage.getItem('xiwen_open_questions_config');
+      if (savedConfig) {
+        setConfig(JSON.parse(savedConfig));
+      }
+    } else if (type === EXERCISE_TYPES.MULTIPLE_CHOICE) {
+      const savedConfig = localStorage.getItem('xiwen_multipleChoiceConfig');
       if (savedConfig) {
         setConfig(JSON.parse(savedConfig));
       }
@@ -403,6 +439,56 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
               <div className="mt-4 p-4 rounded-lg text-left max-w-md mx-auto" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
                 <pre className="text-xs whitespace-pre-wrap" style={{ color: 'var(--color-text-tertiary)' }}>
                   {typeof cleanContent === 'string' ? cleanContent : JSON.stringify(cleanContent, null, 2)}
+                </pre>
+              </div>
+            </div>
+          );
+        }
+      }
+
+      case EXERCISE_TYPES.MULTIPLE_CHOICE: {
+        // Parsear el texto para convertirlo al formato esperado por MultipleChoiceExercise
+        try {
+          console.log('%c🎯 PARSEANDO MULTIPLE CHOICE', 'background: orange; color: white; font-size: 14px; padding: 3px;');
+          console.log('📝 cleanContent:', cleanContent);
+
+          const mcqData = parseMCQSection(cleanContent);
+          console.log('📦 Parsed MCQ data:', mcqData);
+
+          if (!mcqData || !mcqData.questions || mcqData.questions.length === 0) {
+            return (
+              <div className="text-center py-12">
+                <p style={{ color: 'var(--color-text-secondary)' }}>
+                  No se pudieron parsear las preguntas de opción múltiple.
+                </p>
+                <div className="mt-4 p-4 rounded-lg text-left max-w-md mx-auto" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+                  <pre className="text-xs whitespace-pre-wrap" style={{ color: 'var(--color-text-tertiary)' }}>
+                    {cleanContent?.substring(0, 300)}...
+                  </pre>
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <Suspense fallback={<ExerciseLoader />}>
+              <MultipleChoiceExercise
+                questions={mcqData.questions}
+                config={config || {}}
+                onComplete={handleComplete}
+              />
+            </Suspense>
+          );
+        } catch (error) {
+          logger.error('Error parsing multiple choice:', error);
+          return (
+            <div className="text-center py-12">
+              <p style={{ color: 'var(--color-text-secondary)' }}>
+                Error al parsear el ejercicio: {error.message}
+              </p>
+              <div className="mt-4 p-4 rounded-lg text-left max-w-md mx-auto" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+                <pre className="text-xs whitespace-pre-wrap" style={{ color: 'var(--color-text-tertiary)' }}>
+                  {cleanContent}
                 </pre>
               </div>
             </div>
