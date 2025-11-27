@@ -128,7 +128,10 @@ export default function ChainedExerciseViewer({
 
   // Parsear ejercicios
   const sections = useMemo(() => {
-    return parseChainedExercises(text);
+    console.log('ChainedExerciseViewer - Parsing text:', text?.substring(0, 100));
+    const result = parseChainedExercises(text);
+    console.log('ChainedExerciseViewer - Sections found:', result.length, result.map(s => s.type));
+    return result;
   }, [text]);
 
   // Navegación en modo galería
