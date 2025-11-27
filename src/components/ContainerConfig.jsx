@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { Box, CheckSquare, Move, Edit3, HelpCircle, MessageSquare, Table2, MessageCircle } from 'lucide-react';
+import { Box, CheckSquare, Move, Edit3, HelpCircle, MessageSquare, Table2, MessageCircle, Link2 } from 'lucide-react';
 import { BaseBadge } from './common';
 import WordHighlightConfig from './container/WordHighlightConfig';
 import DragDropConfig from './container/DragDropConfig';
@@ -12,6 +12,7 @@ import FillBlanksConfig from './container/FillBlanksConfig';
 import OpenQuestionsConfig from './container/OpenQuestionsConfig';
 import InfoTableConfig from './container/InfoTableConfig';
 import DialoguesConfig from './container/DialoguesConfig';
+import ChainedExerciseConfig from './container/ChainedExerciseConfig';
 import logger from '../utils/logger';
 
 /**
@@ -73,6 +74,14 @@ const CONTAINER_TABS = [
     description: 'Ejercicios de selección múltiple',
     component: null,
     available: false
+  },
+  {
+    id: 'chained-exercises',
+    label: 'Encadenar Ejercicios',
+    icon: Link2,
+    description: 'Combina múltiples tipos de ejercicios en secuencia. Usa marcadores (#marcar, #arrastrar, etc.) para crear ejercicios encadenados.',
+    component: ChainedExerciseConfig,
+    available: true
   }
 ];
 
