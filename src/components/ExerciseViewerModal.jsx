@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
-import { X, Loader2, Edit2, Maximize2, Minimize2, RotateCcw } from 'lucide-react';
+import { X, Loader2, Edit2, Maximize2, Minimize2, RotateCcw, Type } from 'lucide-react';
 import { BaseModal, BaseButton } from './common';
 import WordHighlightExercise from './container/WordHighlightExercise';
 import ChainedExerciseViewer from './ChainedExerciseViewer';
@@ -170,6 +170,7 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
   const [result, setResult] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [exerciseActions, setExerciseActions] = useState(null);
+  const [fontScale, setFontScale] = useState(100); // 80-200%
 
   useEffect(() => {
     if (!exercise) return;
@@ -656,6 +657,27 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
       className="min-h-[735px]"
       headerActions={
         <>
+          {/* Control de tamaño de fuente */}
+          <div className="flex items-center gap-2">
+            <Type size={18} style={{ color: 'var(--color-text-secondary)' }} />
+            <input
+              type="range"
+              min="80"
+              max="200"
+              step="10"
+              value={fontScale}
+              onChange={(e) => setFontScale(parseInt(e.target.value))}
+              className="w-24 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer"
+              style={{
+                backgroundImage: `linear-gradient(to right, var(--color-primary) 0%, var(--color-primary) ${((fontScale - 80) / 120) * 100}%, transparent ${((fontScale - 80) / 120) * 100}%)`
+              }}
+              title={`Tamaño de fuente: ${fontScale}%`}
+            />
+            <span className="text-xs font-medium min-w-[3ch]" style={{ color: 'var(--color-text-secondary)' }}>
+              {fontScale}%
+            </span>
+          </div>
+
           {/* Botón Expandir */}
           <button
             className="flex items-center justify-center w-9 h-9 rounded-lg active:scale-95 transition-all"
@@ -706,8 +728,8 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
         </>
       }
     >
-      {/* Ejercicio interactivo con padding */}
-      <div className="px-6 py-4">
+      {/* Ejercicio interactivo con padding y escala de fuente */}
+      <div className="px-6 py-4" style={{ fontSize: `${fontScale / 100}rem` }}>
         {renderExercise()}
       </div>
 
