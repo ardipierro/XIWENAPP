@@ -19,7 +19,8 @@ export const CONTENT_TYPES = {
   VIDEO: 'video',
   LINK: 'link',
   EXERCISE: 'exercise',
-  LIVE_GAME: 'live-game'
+  LIVE_GAME: 'live-game',
+  CONTAINER: 'container'  // Carpeta/colección de otros contenidos
 };
 
 export const EXERCISE_TYPES = {
@@ -119,6 +120,44 @@ class UnifiedContentRepository extends BaseRepository {
       return this.getByTeacherAndType(teacherId, CONTENT_TYPES.EXERCISE);
     }
     return this.getByType(CONTENT_TYPES.EXERCISE);
+  }
+
+  /**
+   * Obtener solo contenedores
+   */
+  async getContainers(teacherId = null) {
+    if (teacherId) {
+      return this.getByTeacherAndType(teacherId, CONTENT_TYPES.CONTAINER);
+    }
+    return this.getByType(CONTENT_TYPES.CONTAINER);
+  }
+
+  /**
+   * Obtener los contenidos de un contenedor
+   * @param {string} containerId - ID del contenedor
+   * @returns {Array} Lista de contenidos ordenados según el contenedor
+   */
+  async getContainerContents(containerId) {
+    try {
+      const container = await this.getById(containerId);
+      if (!container || container.type !== CONTENT_TYPES.CONTAINER) {
+        logger.warn(`Container not found or invalid type: ${containerId}`, 'UnifiedContentRepository');
+        return [];
+      }
+
+      const childIds = container.metadata?.childContentIds || [];
+      if (childIds.length === 0) return [];
+
+      // Cargar todos los contenidos hijos
+      const childPromises = childIds.map(id => this.getById(id));
+      const children = await Promise.all(childPromises);
+
+      // Filtrar nulls y mantener el orden del array original
+      return children.filter(child => child !== null);
+    } catch (error) {
+      logger.error(`Error getting container contents:`, error, 'UnifiedContentRepository');
+      throw error;
+    }
   }
 
   /**
@@ -269,6 +308,8 @@ export const getByType = (type) => contentRepo.getByType(type);
 export const getByTeacherAndType = (teacherId, type) => contentRepo.getByTeacherAndType(teacherId, type);
 export const getCourses = (teacherId = null) => contentRepo.getCourses(teacherId);
 export const getExercises = (teacherId = null) => contentRepo.getExercises(teacherId);
+export const getContainers = (teacherId = null) => contentRepo.getContainers(teacherId);
+export const getContainerContents = (containerId) => contentRepo.getContainerContents(containerId);
 
 // Queries avanzadas
 export const getByDifficulty = (difficulty) => contentRepo.getByDifficulty(difficulty);

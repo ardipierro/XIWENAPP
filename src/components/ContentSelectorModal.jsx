@@ -38,7 +38,8 @@ const CONTENT_TYPE_CONFIG = {
   [CONTENT_TYPES.VIDEO]: { icon: Video, label: 'Video', color: 'red' },
   [CONTENT_TYPES.LINK]: { icon: LinkIcon, label: 'Link', color: 'zinc' },
   [CONTENT_TYPES.EXERCISE]: { icon: PenTool, label: 'Ejercicio', color: 'amber' },
-  [CONTENT_TYPES.LIVE_GAME]: { icon: Gamepad2, label: 'Juego', color: 'zinc' }
+  [CONTENT_TYPES.LIVE_GAME]: { icon: Gamepad2, label: 'Juego', color: 'zinc' },
+  [CONTENT_TYPES.CONTAINER]: { icon: BookOpen, label: 'Contenedor', color: 'indigo' }
 };
 
 const FILTER_OPTIONS = [
@@ -47,7 +48,8 @@ const FILTER_OPTIONS = [
   { value: CONTENT_TYPES.READING, label: '📖 Lecturas' },
   { value: CONTENT_TYPES.VIDEO, label: '🎥 Videos' },
   { value: CONTENT_TYPES.EXERCISE, label: '✏️ Ejercicios' },
-  { value: CONTENT_TYPES.LINK, label: '🔗 Links' }
+  { value: CONTENT_TYPES.LINK, label: '🔗 Links' },
+  { value: CONTENT_TYPES.CONTAINER, label: '📦 Contenedores' }
 ];
 
 function ContentSelectorModal({ isOpen, onClose, onSelect, teacherId }) {

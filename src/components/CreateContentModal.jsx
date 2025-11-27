@@ -28,7 +28,8 @@ const TYPE_OPTIONS = [
   { value: CONTENT_TYPES.LINK, label: '🔗 Link' },
   { value: CONTENT_TYPES.EXERCISE, label: '✏️ Ejercicio' },
   { value: CONTENT_TYPES.LIVE_GAME, label: '🎮 Juego en Vivo' },
-  { value: CONTENT_TYPES.COURSE, label: '📚 Curso' }
+  { value: CONTENT_TYPES.COURSE, label: '📚 Curso' },
+  { value: CONTENT_TYPES.CONTAINER, label: '📦 Contenedor' }
 ];
 
 const DIFFICULTY_OPTIONS = [
@@ -80,7 +81,8 @@ function CreateContentModal({ isOpen, onClose, onSave, onDelete, initialData = n
       level: '',
       childContentIds: [], // Para cursos/contenedores
       contentOrder: [], // Orden personalizado de contenidos
-      styles: null // Estilos visuales personalizados
+      styles: null, // Estilos visuales personalizados
+      color: '#6366f1' // Color del contenedor (default: índigo)
     }
   });
 
@@ -139,7 +141,8 @@ function CreateContentModal({ isOpen, onClose, onSave, onDelete, initialData = n
           level: initialData.metadata?.level || '',
           childContentIds: initialData.metadata?.childContentIds || [],
           contentOrder: initialData.metadata?.contentOrder || [],
-          styles: initialData.metadata?.styles || null
+          styles: initialData.metadata?.styles || null,
+          color: initialData.metadata?.color || '#6366f1'
         }
       });
     }
@@ -280,7 +283,7 @@ function CreateContentModal({ isOpen, onClose, onSave, onDelete, initialData = n
             : [],
           language: formData.metadata.language,
           level: formData.metadata.level || null,
-          // FASE 4-7: Guardar childContentIds, contentOrder y styles
+          // FASE 4-7: Guardar childContentIds, contentOrder, styles y color
           ...(formData.metadata.childContentIds && formData.metadata.childContentIds.length > 0 && {
             childContentIds: formData.metadata.childContentIds
           }),
@@ -289,6 +292,10 @@ function CreateContentModal({ isOpen, onClose, onSave, onDelete, initialData = n
           }),
           ...(formData.metadata.styles && {
             styles: formData.metadata.styles
+          }),
+          // Color del contenedor
+          ...(formData.type === CONTENT_TYPES.CONTAINER && formData.metadata.color && {
+            color: formData.metadata.color
           })
         },
         createdBy: userId,
@@ -349,7 +356,8 @@ function CreateContentModal({ isOpen, onClose, onSave, onDelete, initialData = n
         level: '',
         childContentIds: [],
         contentOrder: [],
-        styles: null
+        styles: null,
+        color: '#6366f1'
       }
     });
     setError(null);
@@ -686,14 +694,50 @@ function CreateContentModal({ isOpen, onClose, onSave, onDelete, initialData = n
               />
             </div>
 
-            {/* FASE 4: Asignar Contenidos (solo para cursos) */}
-            {formData.type === CONTENT_TYPES.COURSE && (
+            {/* Asignar Contenidos (para cursos y contenedores) */}
+            {(formData.type === CONTENT_TYPES.COURSE || formData.type === CONTENT_TYPES.CONTAINER) && (
               <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6">
+                {/* Color del contenedor (solo para contenedores) */}
+                {formData.type === CONTENT_TYPES.CONTAINER && (
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                      Color del Contenedor
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { value: '#6366f1', label: 'Índigo' },
+                        { value: '#8b5cf6', label: 'Violeta' },
+                        { value: '#ec4899', label: 'Rosa' },
+                        { value: '#ef4444', label: 'Rojo' },
+                        { value: '#f97316', label: 'Naranja' },
+                        { value: '#eab308', label: 'Amarillo' },
+                        { value: '#22c55e', label: 'Verde' },
+                        { value: '#14b8a6', label: 'Teal' },
+                        { value: '#06b6d4', label: 'Cyan' },
+                        { value: '#3b82f6', label: 'Azul' },
+                      ].map(color => (
+                        <button
+                          key={color.value}
+                          type="button"
+                          onClick={() => handleMetadataChange('color', color.value)}
+                          className={`w-8 h-8 rounded-lg transition-all ${
+                            formData.metadata.color === color.value
+                              ? 'ring-2 ring-offset-2 ring-zinc-900 dark:ring-white scale-110'
+                              : 'hover:scale-105'
+                          }`}
+                          style={{ backgroundColor: color.value }}
+                          title={color.label}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <Layers size={20} className="text-indigo-600 dark:text-indigo-400" />
                     <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">
-                      Contenidos del Curso
+                      {formData.type === CONTENT_TYPES.COURSE ? 'Contenidos del Curso' : 'Contenidos del Contenedor'}
                     </h3>
                   </div>
                   {formData.metadata.childContentIds.length > 0 && (
@@ -707,33 +751,44 @@ function CreateContentModal({ isOpen, onClose, onSave, onDelete, initialData = n
                 <div className="space-y-2 max-h-64 overflow-y-auto border border-zinc-200 dark:border-zinc-700 rounded-lg p-3">
                   {allContents && allContents.length > 0 ? (
                     allContents
-                      .filter(c => c.type !== CONTENT_TYPES.COURSE) // No permitir cursos dentro de cursos
-                      .map(content => (
-                        <label
-                          key={content.id}
-                          className="flex items-start gap-3 p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={formData.metadata.childContentIds.includes(content.id)}
-                            onChange={(e) => {
-                              const newIds = e.target.checked
-                                ? [...formData.metadata.childContentIds, content.id]
-                                : formData.metadata.childContentIds.filter(id => id !== content.id);
-                              handleMetadataChange('childContentIds', newIds);
-                            }}
-                            className="mt-1 w-4 h-4 rounded border-zinc-300 dark:border-zinc-600"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm text-zinc-900 dark:text-white truncate">
-                              {content.title}
-                            </p>
-                            <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                              {CONTENT_TYPE_CONFIG[content.type]?.label || content.type}
-                            </p>
-                          </div>
-                        </label>
-                      ))
+                      .filter(c => c.type !== CONTENT_TYPES.COURSE && c.id !== initialData?.id) // No permitir cursos ni self-reference
+                      .map(content => {
+                        const typeLabels = {
+                          lesson: '📝 Lección',
+                          reading: '📖 Lectura',
+                          video: '🎥 Video',
+                          link: '🔗 Link',
+                          exercise: '✏️ Ejercicio',
+                          'live-game': '🎮 Juego',
+                          container: '📦 Contenedor'
+                        };
+                        return (
+                          <label
+                            key={content.id}
+                            className="flex items-start gap-3 p-2 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={formData.metadata.childContentIds.includes(content.id)}
+                              onChange={(e) => {
+                                const newIds = e.target.checked
+                                  ? [...formData.metadata.childContentIds, content.id]
+                                  : formData.metadata.childContentIds.filter(id => id !== content.id);
+                                handleMetadataChange('childContentIds', newIds);
+                              }}
+                              className="mt-1 w-4 h-4 rounded border-zinc-300 dark:border-zinc-600"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm text-zinc-900 dark:text-white truncate">
+                                {content.title}
+                              </p>
+                              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                                {typeLabels[content.type] || content.type}
+                              </p>
+                            </div>
+                          </label>
+                        );
+                      })
                   ) : (
                     <p className="text-sm text-center py-4 text-zinc-500 dark:text-zinc-400">
                       No hay contenidos disponibles
