@@ -142,7 +142,7 @@ function detectExerciseType(content) {
   if (optionLines.length >= 2) {
     console.log('✅ Detected as MULTIPLE CHOICE (by * prefix)');
     return {
-      type: 'multiple-choice',
+      type: EXERCISE_TYPES.MULTIPLE_CHOICE,
       cleanContent: content
     };
   }
