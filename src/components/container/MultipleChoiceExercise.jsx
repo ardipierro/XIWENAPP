@@ -15,6 +15,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Check, X, Lightbulb, ChevronRight, RotateCcw, Clock } from 'lucide-react';
 import { BaseButton, BaseBadge } from '../common';
 import PropTypes from 'prop-types';
+import { playCorrectSound, playIncorrectSound } from '../../utils/gameSounds';
 
 // Default configuration
 const DEFAULT_CONFIG = {
@@ -220,8 +221,18 @@ function QuestionCard({
     setAttempts(prev => prev + 1);
 
     const result = calculateResult();
+
+    // Reproducir sonido según resultado
+    if (config.gameSettings?.sound?.enabled && config.gameSettings?.sound?.feedbackSounds) {
+      if (result.isCorrect) {
+        playCorrectSound();
+      } else {
+        playIncorrectSound();
+      }
+    }
+
     onAnswer?.(result);
-  }, [selectedOptions, calculateResult, onAnswer]);
+  }, [selectedOptions, calculateResult, onAnswer, config.gameSettings?.sound]);
 
   const handleRetry = () => {
     if (!config.gameSettings?.allowRetry) return;
@@ -566,8 +577,8 @@ function MultipleChoiceExercise({
               onClick={() => setCurrentQuestionIndex(idx)}
               className="w-6 h-6 rounded-full transition-all hover:scale-110 active:scale-95"
               style={{
-                backgroundColor: idx < currentQuestionIndex
-                  ? (answers[idx]?.isCorrect ? config.correctColor : config.incorrectColor)
+                backgroundColor: answers[idx]
+                  ? (answers[idx].isCorrect ? config.correctColor : config.incorrectColor)
                   : idx === currentQuestionIndex
                   ? config.selectedColor
                   : 'var(--color-border)',
