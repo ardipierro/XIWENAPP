@@ -455,7 +455,9 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
           const mcqData = parseMCQSection(cleanContent);
           console.log('📦 Parsed MCQ data:', mcqData);
 
-          if (!mcqData || !mcqData.questions || mcqData.questions.length === 0) {
+          // Transformar formato: parseMCQSection devuelve un solo ejercicio
+          // pero MultipleChoiceExercise espera array de questions
+          if (!mcqData || !mcqData.options || mcqData.options.length === 0) {
             return (
               <div className="text-center py-12">
                 <p style={{ color: 'var(--color-text-secondary)' }}>
@@ -470,10 +472,25 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
             );
           }
 
+          // Transformar al formato esperado por MultipleChoiceExercise:
+          // options: array de objetos {text, correct, explanation} -> array de strings
+          // correctIndices: array de números
+          const formattedQuestion = {
+            question: mcqData.question,
+            options: mcqData.options.map(opt => opt.text || opt),
+            correct: mcqData.correctIndices.length === 1
+              ? mcqData.correctIndices[0]
+              : mcqData.correctIndices,
+            optionExplanations: mcqData.options.map(opt => opt.explanation || null),
+            explanation: mcqData.explanation
+          };
+
+          console.log('✅ Formatted question:', formattedQuestion);
+
           return (
             <Suspense fallback={<ExerciseLoader />}>
               <MultipleChoiceExercise
-                questions={mcqData.questions}
+                questions={[formattedQuestion]}
                 config={config || {}}
                 onComplete={handleComplete}
               />

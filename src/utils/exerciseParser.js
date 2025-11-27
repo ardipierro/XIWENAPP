@@ -349,14 +349,20 @@ export function parseMCQSection(content) {
 
   if (lines.length < 3) return { question: '', options: [], correctAnswer: null, explanation: '' };
 
-  const question = lines[0];
+  // Ignorar primera línea si es el marcador #opcion_multiple
+  let startIndex = 0;
+  if (lines[0].toLowerCase().startsWith('#opcion') || lines[0].toLowerCase().startsWith('#multiple')) {
+    startIndex = 1;
+  }
+
+  const question = lines[startIndex];
   const options = [];
   const optionExplanations = [];
   const correctIndices = [];
   let explanation = null;
 
   // Procesar líneas de opciones
-  for (let i = 1; i < lines.length && options.length < 6; i++) {
+  for (let i = startIndex + 1; i < lines.length && options.length < 6; i++) {
     const line = lines[i];
 
     // Explicación general (empieza con :: sola)
