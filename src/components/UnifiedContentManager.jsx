@@ -102,6 +102,12 @@ const CONTENT_TYPE_CONFIG = {
     label: 'Juego en Vivo',
     color: 'zinc', // Gris (reemplaza pink)
     description: 'Sesión interactiva sincrónica'
+  },
+  [CONTENT_TYPES.CONTAINER]: {
+    icon: BookOpen,
+    label: 'Contenedor',
+    color: 'indigo',
+    description: 'Carpeta/colección de contenidos'
   }
 };
 
@@ -113,7 +119,8 @@ const FILTER_OPTIONS = [
   { value: CONTENT_TYPES.VIDEO, label: '🎥 Videos' },
   { value: CONTENT_TYPES.LINK, label: '🔗 Links' },
   { value: CONTENT_TYPES.EXERCISE, label: '✏️ Ejercicios' },
-  { value: CONTENT_TYPES.LIVE_GAME, label: '🎮 Juegos' }
+  { value: CONTENT_TYPES.LIVE_GAME, label: '🎮 Juegos' },
+  { value: CONTENT_TYPES.CONTAINER, label: '📦 Contenedores' }
 ];
 
 const DIFFICULTY_OPTIONS = [
@@ -641,7 +648,8 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
       [CONTENT_TYPES.COURSE]: 'info',
       [CONTENT_TYPES.LESSON]: 'success',
       [CONTENT_TYPES.EXERCISE]: 'warning',
-      [CONTENT_TYPES.LIVE_GAME]: 'danger'
+      [CONTENT_TYPES.LIVE_GAME]: 'danger',
+      [CONTENT_TYPES.CONTAINER]: 'info'
     };
     return variants[type] || 'default';
   };
@@ -683,7 +691,8 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
       [CONTENT_TYPES.COURSE]: 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white',
       [CONTENT_TYPES.READING]: 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white',
       [CONTENT_TYPES.LINK]: 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white',
-      [CONTENT_TYPES.LIVE_GAME]: 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white'
+      [CONTENT_TYPES.LIVE_GAME]: 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white',
+      [CONTENT_TYPES.CONTAINER]: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400'
     };
     return colorMap[type] || 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white';
   };

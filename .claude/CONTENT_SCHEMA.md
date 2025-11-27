@@ -7,6 +7,7 @@ Un solo sistema para gestionar TODOS los tipos de contenido educativo:
 - Ejercicios (múltiple choice, fill-blank, matching, etc.)
 - Juegos en Vivo (live games)
 - Cursos (contenedores de otros contenidos)
+- Contenedores (carpetas/colecciones de contenidos)
 
 ## 📊 Esquema de Datos
 
@@ -20,7 +21,7 @@ interface UnifiedContent {
   description?: string;
 
   // Tipo principal
-  type: 'lesson' | 'reading' | 'video' | 'link' | 'exercise' | 'live-game' | 'course';
+  type: 'lesson' | 'reading' | 'video' | 'link' | 'exercise' | 'live-game' | 'course' | 'container';
 
   // Subtipo (para ejercicios)
   contentType?: 'multiple-choice' | 'fill-blank' | 'matching' | 'ordering' | 'true-false' | 'short-answer' | 'essay' | 'listening';
@@ -29,7 +30,7 @@ interface UnifiedContent {
   body?: string; // HTML para lessons/readings
   url?: string; // Para videos/links
   questions?: Question[]; // Para exercises
-  childContentIds?: string[]; // Para courses (contenidos incluidos)
+  childContentIds?: string[]; // Para courses y containers (contenidos incluidos)
 
   // Metadata
   metadata: {
@@ -39,6 +40,7 @@ interface UnifiedContent {
     tags?: string[];
     language?: string; // 'en', 'es', 'zh', etc.
     level?: string; // 'A1', 'A2', 'B1', etc. para idiomas
+    color?: string; // Color hex para containers (ej: '#6366f1')
   };
 
   // Relaciones
@@ -198,7 +200,8 @@ const CONTENT_TYPE_ICONS = {
   video: Video,
   link: Link,
   exercise: PenTool,
-  'live-game': Gamepad2
+  'live-game': Gamepad2,
+  container: FolderOpen
 };
 
 const CONTENT_TYPE_COLORS = {
@@ -208,7 +211,8 @@ const CONTENT_TYPE_COLORS = {
   video: 'red',
   link: 'cyan',
   exercise: 'amber',
-  'live-game': 'pink'
+  'live-game': 'pink',
+  container: 'indigo'  // Color personalizable por el usuario
 };
 ```
 

@@ -72,6 +72,7 @@ import {
 } from './diary';
 import SortableDiaryEntry from './diary/SortableDiaryEntry';
 import WordHighlightExercise from './container/WordHighlightExercise';
+import ContainerCard from './container/ContainerCard';
 import SelectionDetector from './translation/SelectionDetector';
 
 // ============================================
@@ -85,6 +86,7 @@ const CONTENT_ICONS = {
   exercise: PenTool,
   link: LinkIcon,
   course: BookOpen,
+  container: BookOpen,
   'text-block': FileText
 };
 
@@ -806,6 +808,16 @@ function ClassDailyLog({ logId, user, onBack }) {
             onComplete={handleExerciseComplete}
             readOnly={log?.status === 'ended'}
             logId={logId}
+          />
+        );
+
+      case 'container':
+        // Contenedor de contenidos - usa el componente ContainerCard
+        return (
+          <ContainerCard
+            container={content}
+            compact={false}
+            className="w-full"
           />
         );
 
