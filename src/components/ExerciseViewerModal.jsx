@@ -711,8 +711,8 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
         {renderExercise()}
       </div>
 
-      {/* Resultado final */}
-      {result && (
+      {/* Resultado final - SOLO para ejercicios que no manejan su propia pantalla de resultados */}
+      {result && exerciseType !== EXERCISE_TYPES.MULTIPLE_CHOICE && (
         <div
           className="mx-6 mb-6 mt-6 p-6 rounded-lg text-center"
           style={{ backgroundColor: 'var(--color-bg-secondary)' }}

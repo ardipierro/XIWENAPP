@@ -15,7 +15,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Check, X, Lightbulb, ChevronRight, RotateCcw, Clock } from 'lucide-react';
 import { BaseButton, BaseBadge } from '../common';
 import PropTypes from 'prop-types';
-import { playCorrectSound, playIncorrectSound } from '../../utils/gameSounds';
+import { playCorrectSound, playIncorrectSound, playCompletionSound } from '../../utils/gameSounds';
 
 // Default configuration
 const DEFAULT_CONFIG = {
@@ -376,9 +376,8 @@ function QuestionCard({
                   )}
                 </div>
 
-                {/* Option text */}
+                {/* Option text - SIN letra escrita, solo ícono */}
                 <span style={{ color: 'var(--color-text-primary)' }}>
-                  {config.showOptionLetters && !isChecked && !showResults && `${getOptionLetter(displayIndex)}) `}
                   {option.text}
                 </span>
               </div>
@@ -510,6 +509,11 @@ function MultipleChoiceExercise({
     const correctCount = answers.filter(a => a?.isCorrect).length;
     const partialCount = answers.filter(a => a?.isPartial).length;
 
+    // Sonido de finalización
+    if (config.gameSettings?.sound?.enabled) {
+      playCompletionSound();
+    }
+
     onComplete?.({
       totalPoints,
       correctCount,
@@ -520,41 +524,92 @@ function MultipleChoiceExercise({
     });
   };
 
-  // Results screen for exam mode
-  if (isCompleted && isExamMode) {
+  // Results screen - SIEMPRE mostrar al completar
+  if (isCompleted) {
     const totalPoints = answers.reduce((sum, a) => sum + (a?.points || 0), 0);
     const correctCount = answers.filter(a => a?.isCorrect).length;
+    const partialCount = answers.filter(a => a?.isPartial).length;
+    const incorrectCount = questions.length - correctCount - partialCount;
 
     return (
       <div className="space-y-4">
+        {/* Results summary */}
         <div
           className="p-6 rounded-lg text-center"
           style={{ backgroundColor: 'var(--color-bg-secondary)' }}
         >
           <h3 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
-            Resultados del Examen
+            ¡Ejercicio Completado!
           </h3>
-          <p className="text-4xl font-bold mb-4" style={{ color: config.correctColor }}>
-            {correctCount} / {questions.length}
+          <div className="flex justify-center gap-8 my-6">
+            <div>
+              <p className="text-5xl font-bold" style={{ color: config.correctColor }}>
+                {correctCount}
+              </p>
+              <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+                Correctas
+              </p>
+            </div>
+            {partialCount > 0 && (
+              <div>
+                <p className="text-5xl font-bold" style={{ color: config.partialColor }}>
+                  {partialCount}
+                </p>
+                <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+                  Parciales
+                </p>
+              </div>
+            )}
+            <div>
+              <p className="text-5xl font-bold" style={{ color: config.incorrectColor }}>
+                {incorrectCount}
+              </p>
+              <p className="text-sm mt-1" style={{ color: 'var(--color-text-secondary)' }}>
+                Incorrectas
+              </p>
+            </div>
+          </div>
+          <p className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            Puntuación total: <span style={{ color: config.correctColor }}>{totalPoints} puntos</span>
           </p>
-          <p style={{ color: 'var(--color-text-secondary)' }}>
-            Puntuación total: {totalPoints} puntos
+          <p className="text-sm mt-2" style={{ color: 'var(--color-text-secondary)' }}>
+            {Math.round((correctCount / questions.length) * 100)}% de aciertos
           </p>
         </div>
 
-        {/* Show all questions with results */}
-        <div className="space-y-4">
-          {questions.map((q, idx) => (
-            <QuestionCard
-              key={idx}
-              question={q}
-              questionIndex={idx}
-              config={config}
-              showResults={true}
-              onAnswer={() => {}}
-            />
-          ))}
+        {/* Navigation to review questions */}
+        <div className="flex items-center justify-between text-base mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          <span className="font-medium">Revisar respuestas - Pregunta {currentQuestionIndex + 1} de {questions.length}</span>
+          <div className="flex gap-2">
+            {questions.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentQuestionIndex(idx)}
+                className="w-6 h-6 rounded-full transition-all hover:scale-110 active:scale-95"
+                style={{
+                  backgroundColor: answers[idx]
+                    ? (answers[idx].isCorrect ? config.correctColor : config.incorrectColor)
+                    : 'var(--color-border)',
+                  cursor: 'pointer',
+                  border: idx === currentQuestionIndex ? '2px solid white' : 'none',
+                  boxShadow: idx === currentQuestionIndex ? '0 0 0 2px var(--color-primary)' : 'none'
+                }}
+                aria-label={`Ver pregunta ${idx + 1}`}
+                title={`Pregunta ${idx + 1}${answers[idx] ? (answers[idx].isCorrect ? ' - Correcta' : ' - Incorrecta') : ''}`}
+              />
+            ))}
+          </div>
         </div>
+
+        {/* Show current question with results */}
+        <QuestionCard
+          key={currentQuestionIndex}
+          question={questions[currentQuestionIndex]}
+          questionIndex={currentQuestionIndex}
+          config={config}
+          showResults={true}
+          onAnswer={() => {}}
+        />
       </div>
     );
   }
