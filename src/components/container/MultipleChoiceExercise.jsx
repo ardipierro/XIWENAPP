@@ -425,11 +425,11 @@ function QuestionCard({
         {isChecked && (
           <div className="ml-auto">
             {selectedOptions.size > 0 && Array.from(selectedOptions).every(idx => correctAnswers.includes(idx)) && selectedOptions.size === correctAnswers.length ? (
-              <BaseBadge variant="success">Correcto +{config.correctPoints}pts</BaseBadge>
+              <BaseBadge variant="success" size="lg" className="text-base px-4 py-2">Correcto +{config.correctPoints}pts</BaseBadge>
             ) : selectedOptions.size > 0 && Array.from(selectedOptions).some(idx => correctAnswers.includes(idx)) && !Array.from(selectedOptions).some(idx => !correctAnswers.includes(idx)) ? (
-              <BaseBadge variant="warning">Parcial +{config.partialPoints}pts</BaseBadge>
+              <BaseBadge variant="warning" size="lg" className="text-base px-4 py-2">Parcial +{config.partialPoints}pts</BaseBadge>
             ) : (
-              <BaseBadge variant="danger">Incorrecto {config.incorrectPoints}pts</BaseBadge>
+              <BaseBadge variant="danger" size="lg" className="text-base px-4 py-2">Incorrecto {config.incorrectPoints}pts</BaseBadge>
             )}
           </div>
         )}
@@ -558,13 +558,13 @@ function MultipleChoiceExercise({
   return (
     <div className="space-y-4">
       {/* Progress indicator */}
-      <div className="flex items-center justify-between text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+      <div className="flex items-center justify-between text-sm mb-2" style={{ color: 'var(--color-text-secondary)' }}>
         <span>Pregunta {currentQuestionIndex + 1} de {questions.length}</span>
-        <div className="flex gap-1">
+        <div className="flex gap-2 pr-1">
           {questions.map((_, idx) => (
             <div
               key={idx}
-              className="w-2 h-2 rounded-full"
+              className="w-3 h-3 rounded-full"
               style={{
                 backgroundColor: idx < currentQuestionIndex
                   ? (answers[idx]?.isCorrect ? config.correctColor : config.incorrectColor)
