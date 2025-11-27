@@ -46,6 +46,7 @@ export const CHAIN_MARKERS = {
   '#verdadero_falso': EXERCISE_TYPES.TRUE_FALSE,
   '#tabla': EXERCISE_TYPES.TABLE,
   '#tabla_info': EXERCISE_TYPES.INFO_TABLE,
+  '#dialogo': 'dialogue',  // Tipo diálogo
   '#texto': EXERCISE_TYPES.TEXT
 };
 
