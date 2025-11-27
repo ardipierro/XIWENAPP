@@ -99,8 +99,8 @@ function ChainedExerciseConfig({ onSave }) {
             </p>
             <pre className="text-xs font-mono p-2 rounded bg-white dark:bg-gray-800 overflow-x-auto" style={{ color: 'var(--color-text-primary)' }}>
 {`#marcar
-INSTRUCCION: Selecciona los verbos
-Yo *como* manzanas y *bebo* agua.`}
+Yo *como* manzanas y *bebo* agua.
+Mi hermano *corre* en el parque.`}
             </pre>
           </div>
 
@@ -111,9 +111,8 @@ Yo *como* manzanas y *bebo* agua.`}
             </p>
             <pre className="text-xs font-mono p-2 rounded bg-white dark:bg-gray-800 overflow-x-auto" style={{ color: 'var(--color-text-primary)' }}>
 {`#arrastrar
-INSTRUCCION: Ordena la oración
-PALABRAS: Yo|me|levanto|temprano
-ORDEN: Yo|me|levanto|temprano`}
+El *perro* ladra y el *gato* maúlla.
+Los *pájaros* cantan en el *árbol*.`}
             </pre>
           </div>
 
@@ -124,8 +123,8 @@ ORDEN: Yo|me|levanto|temprano`}
             </p>
             <pre className="text-xs font-mono p-2 rounded bg-white dark:bg-gray-800 overflow-x-auto" style={{ color: 'var(--color-text-primary)' }}>
 {`#completar
-Me ___ María y ___ de España.
-RESPUESTA: llamo, soy`}
+Mi nombre es *María* y vivo en *Buenos Aires*.
+Me gusta *leer* libros en mi tiempo libre.`}
             </pre>
           </div>
 
@@ -150,8 +149,10 @@ RESPUESTA: llamo, soy`}
             <pre className="text-xs font-mono p-2 rounded bg-white dark:bg-gray-800 overflow-x-auto" style={{ color: 'var(--color-text-primary)' }}>
 {`#opcion_multiple
 ¿Cómo se dice "hello" en español?
-[hola]* [adiós] [gracias] [por favor]
-EXPLICACION: "Hola" es el saludo más común.`}
+*hola::Se usa para saludar
+adiós::Se usa para despedirse
+gracias
+por favor`}
             </pre>
           </div>
 
@@ -162,10 +163,10 @@ EXPLICACION: "Hola" es el saludo más común.`}
             </p>
             <pre className="text-xs font-mono p-2 rounded bg-white dark:bg-gray-800 overflow-x-auto" style={{ color: 'var(--color-text-primary)' }}>
 {`#emparejar
-TITULO: Empareja los saludos
 Hola -> Hello
 Adiós -> Goodbye
-Gracias -> Thank you`}
+Gracias -> Thank you
+Por favor -> Please`}
             </pre>
           </div>
 
@@ -176,8 +177,9 @@ Gracias -> Thank you`}
             </p>
             <pre className="text-xs font-mono p-2 rounded bg-white dark:bg-gray-800 overflow-x-auto" style={{ color: 'var(--color-text-primary)' }}>
 {`#verdadero_falso
-Madrid es la capital de España. [V]
-Barcelona es la capital de Francia. [F]`}
+*Madrid es la capital de España.::Madrid es la capital desde 1561
+Barcelona es la capital de Francia.
+*El español se habla en México.`}
             </pre>
           </div>
 
@@ -191,6 +193,7 @@ Barcelona es la capital de Francia. [F]`}
 TÍTULO: Verbos Regulares
 mucho | muy
 Hace mucho calor | El tiempo está muy bueno
+Hace mucho frío | El tiempo está muy malo
 NOTA: muy + adjetivo / mucho + nombre`}
             </pre>
           </div>
@@ -205,6 +208,21 @@ NOTA: muy + adjetivo / mucho + nombre`}
 Mozo: Buenas noches. ¿Tienen *reserva*?
 Sofía: Sí, a nombre de *Sofía Torres*.
 Mozo: Perfecto, síganme por *favor*.`}
+            </pre>
+          </div>
+
+          {/* Texto Enriquecido */}
+          <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-900/10 border border-gray-200 dark:border-gray-700">
+            <p className="text-xs font-semibold mb-2 text-gray-700 dark:text-gray-300">
+              ✏️ #texto - Texto Enriquecido
+            </p>
+            <pre className="text-xs font-mono p-2 rounded bg-white dark:bg-gray-800 overflow-x-auto" style={{ color: 'var(--color-text-primary)' }}>
+{`#texto
+La tortuga y la liebre
+
+Había una vez una tortuga y una liebre que decidieron
+competir en una carrera. La liebre, confiada en su
+velocidad, se burló de la tortuga.`}
             </pre>
           </div>
 
@@ -225,10 +243,11 @@ Mozo: Perfecto, síganme por *favor*.`}
             </p>
             <ul className="text-xs space-y-1 ml-4 list-disc" style={{ color: 'var(--color-text-secondary)' }}>
               <li><strong>Los formatos son idénticos</strong> a las otras pestañas</li>
+              <li>Usa <code className="px-1 py-0.5 bg-white dark:bg-gray-800 rounded">*palabra*</code> para marcar objetivos en todos los ejercicios</li>
+              <li>Usa <code className="px-1 py-0.5 bg-white dark:bg-gray-800 rounded">::explicación</code> para agregar feedback opcional (múltiple choice, verdadero/falso, etc.)</li>
               <li>Puedes combinar tantos ejercicios como quieras</li>
               <li>Separa cada ejercicio con su marcador (#marcar, #arrastrar, etc.)</li>
               <li>El orden de los marcadores define el orden de aparición</li>
-              <li>Usa líneas en blanco entre ejercicios para mejor legibilidad</li>
             </ul>
           </div>
         </div>
