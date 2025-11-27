@@ -54,6 +54,7 @@ import { ContentRenderer } from './content';
 import CreateContentModal from './CreateContentModal';
 import ExerciseCreatorModal from './ExerciseCreatorModal';
 import ExerciseViewerModal from './ExerciseViewerModal';
+import ContainerViewer from './container/ContainerViewer';
 import { useCardConfig } from '../contexts/CardConfigContext';
 
 // ============================================
@@ -160,6 +161,8 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
   const [viewingContent, setViewingContent] = useState(null);
   const [showExerciseViewer, setShowExerciseViewer] = useState(false);
   const [viewingExercise, setViewingExercise] = useState(null);
+  const [showContainerViewer, setShowContainerViewer] = useState(false);
+  const [viewingContainer, setViewingContainer] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [newlyCreatedId, setNewlyCreatedId] = useState(null);
 
@@ -384,7 +387,12 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
       bodyIsOpenQuestions
     });
 
-    if (isInteractive || hasInteractiveContent || bodyIsOpenQuestions) {
+    // Detectar si es un contenedor - usar ContainerViewer dedicado
+    if (content.type === CONTENT_TYPES.CONTAINER) {
+      console.log('%c📦 ABRIENDO CONTAINER VIEWER', 'background: indigo; color: white; font-size: 16px; padding: 5px;');
+      setViewingContainer(content);
+      setShowContainerViewer(true);
+    } else if (isInteractive || hasInteractiveContent || bodyIsOpenQuestions) {
       console.log('%c✅ ABRIENDO MODAL INTERACTIVO', 'background: green; color: white; font-size: 16px; padding: 5px;');
       setViewingExercise(content);
       setShowExerciseViewer(true);
@@ -620,6 +628,16 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
         }}
         exercise={viewingExercise}
         onEdit={handleEdit}
+      />
+
+      {/* Container Viewer - Para ver contenedores con sus contenidos */}
+      <ContainerViewer
+        container={viewingContainer}
+        isOpen={showContainerViewer}
+        onClose={() => {
+          setShowContainerViewer(false);
+          setViewingContainer(null);
+        }}
       />
     </div>
   );
