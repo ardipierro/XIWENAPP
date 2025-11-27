@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Save, FileText, Sparkles, Edit3, Layers, ArrowUpDown, Palette, FileCheck, Eye, Archive, Send, Trash2 } from 'lucide-react';
+import { Save, FileText, Sparkles, Edit3, Layers, ArrowUpDown, Palette, FileCheck, Eye, Archive, Send, Trash2, Layout } from 'lucide-react';
 import {
   BaseModal,
   BaseButton,
@@ -19,6 +19,8 @@ import { getAllContent } from '../firebase/content';
 import ExerciseGeneratorContent from './ExerciseGeneratorContent';
 import ContentOrderEditor from './ContentOrderEditor';
 import ContentStyleEditor from './ContentStyleEditor';
+import DisplaySettingsPanel from './DisplaySettingsPanel';
+import { DEFAULT_DISPLAY_SETTINGS } from '../constants/displaySettings';
 import logger from '../utils/logger';
 
 const TYPE_OPTIONS = [
@@ -82,7 +84,8 @@ function CreateContentModal({ isOpen, onClose, onSave, onDelete, initialData = n
       childContentIds: [], // Para cursos/contenedores
       contentOrder: [], // Orden personalizado de contenidos
       styles: null, // Estilos visuales personalizados
-      color: '#6366f1' // Color del contenedor (default: índigo)
+      color: '#6366f1', // Color del contenedor (default: índigo)
+      displaySettings: null // Opciones de visualización (layout, ancho, fuente, etc.)
     }
   });
 
@@ -94,6 +97,7 @@ function CreateContentModal({ isOpen, onClose, onSave, onDelete, initialData = n
   // Estados para FASE 4-7
   const [showOrderEditor, setShowOrderEditor] = useState(false);
   const [showStyleEditor, setShowStyleEditor] = useState(false);
+  const [showDisplayEditor, setShowDisplayEditor] = useState(false); // NUEVO: Panel de visualización
   const [childContents, setChildContents] = useState([]);
   const [loadingChildren, setLoadingChildren] = useState(false);
   const [allContents, setAllContents] = useState([]);
@@ -142,7 +146,8 @@ function CreateContentModal({ isOpen, onClose, onSave, onDelete, initialData = n
           childContentIds: initialData.metadata?.childContentIds || [],
           contentOrder: initialData.metadata?.contentOrder || [],
           styles: initialData.metadata?.styles || null,
-          color: initialData.metadata?.color || '#6366f1'
+          color: initialData.metadata?.color || '#6366f1',
+          displaySettings: initialData.metadata?.displaySettings || null
         }
       });
     }
@@ -296,6 +301,10 @@ function CreateContentModal({ isOpen, onClose, onSave, onDelete, initialData = n
           // Color del contenedor
           ...(formData.type === CONTENT_TYPES.CONTAINER && formData.metadata.color && {
             color: formData.metadata.color
+          }),
+          // Opciones de visualización (para contenedores)
+          ...(formData.metadata.displaySettings && {
+            displaySettings: formData.metadata.displaySettings
           })
         },
         createdBy: userId,
@@ -357,13 +366,15 @@ function CreateContentModal({ isOpen, onClose, onSave, onDelete, initialData = n
         childContentIds: [],
         contentOrder: [],
         styles: null,
-        color: '#6366f1'
+        color: '#6366f1',
+        displaySettings: null
       }
     });
     setError(null);
     setActiveTab('manual');
     setShowOrderEditor(false);
     setShowStyleEditor(false);
+    setShowDisplayEditor(false);
     onClose();
   };
 
@@ -404,6 +415,19 @@ function CreateContentModal({ isOpen, onClose, onSave, onDelete, initialData = n
     });
     setShowStyleEditor(false);
     logger.info('Estilos guardados', 'CreateContentModal');
+  };
+
+  // Handler para DisplaySettingsPanel
+  const handleDisplaySettingsSaved = (displaySettings) => {
+    setFormData({
+      ...formData,
+      metadata: {
+        ...formData.metadata,
+        displaySettings
+      }
+    });
+    setShowDisplayEditor(false);
+    logger.info('Opciones de visualización guardadas', 'CreateContentModal');
   };
 
   return (
@@ -814,7 +838,7 @@ function CreateContentModal({ isOpen, onClose, onSave, onDelete, initialData = n
             )}
 
             {/* FASE 7: Botón para abrir editor de estilos */}
-            <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6">
+            <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6 space-y-3">
               <BaseButton
                 variant="secondary"
                 icon={Palette}
@@ -828,6 +852,26 @@ function CreateContentModal({ isOpen, onClose, onSave, onDelete, initialData = n
                 <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400 text-center">
                   ✓ Estilos personalizados aplicados
                 </p>
+              )}
+
+              {/* Opciones de Visualización (solo para contenedores) */}
+              {formData.type === CONTENT_TYPES.CONTAINER && (
+                <>
+                  <BaseButton
+                    variant="secondary"
+                    icon={Layout}
+                    onClick={() => setShowDisplayEditor(true)}
+                    type="button"
+                    className="w-full"
+                  >
+                    {formData.metadata.displaySettings ? 'Editar Opciones de Visualización' : 'Configurar Visualización'}
+                  </BaseButton>
+                  {formData.metadata.displaySettings && (
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">
+                      ✓ Visualización personalizada configurada
+                    </p>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -874,6 +918,22 @@ function CreateContentModal({ isOpen, onClose, onSave, onDelete, initialData = n
         initialStyles={formData.metadata.styles}
         onSave={handleStylesSaved}
         onCancel={() => setShowStyleEditor(false)}
+      />
+    </BaseModal>
+
+    {/* Modal de opciones de visualización (para contenedores) */}
+    <BaseModal
+      isOpen={showDisplayEditor}
+      onClose={() => setShowDisplayEditor(false)}
+      title="Opciones de Visualización"
+      icon={Layout}
+      size="2xl"
+    >
+      <DisplaySettingsPanel
+        initialSettings={formData.metadata.displaySettings}
+        onSave={handleDisplaySettingsSaved}
+        onCancel={() => setShowDisplayEditor(false)}
+        contentType={formData.type}
       />
     </BaseModal>
     </>

@@ -8,6 +8,7 @@ import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
 import { X, Loader2, Edit2, Maximize2, Minimize2, RotateCcw } from 'lucide-react';
 import { BaseModal, BaseButton } from './common';
 import WordHighlightExercise from './container/WordHighlightExercise';
+import { getDisplayClasses, getDisplayStyles, mergeDisplaySettings } from '../constants/displaySettings';
 import logger from '../utils/logger';
 import { parseExerciseFile } from '../utils/exerciseParser.js';
 
@@ -116,7 +117,7 @@ function detectExerciseType(content) {
 /**
  * Modal para visualizar ejercicios interactivos
  */
-function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
+function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySettings = null, isFullscreen = false }) {
   const [exerciseType, setExerciseType] = useState(null);
   const [cleanContent, setCleanContent] = useState('');
   const [config, setConfig] = useState(null);
@@ -407,6 +408,11 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
 
   if (!exercise) return null;
 
+  // Obtener clases y estilos de displaySettings
+  const mergedDisplaySettings = mergeDisplaySettings(displaySettings, exerciseType || 'exercise');
+  const displayClasses = getDisplayClasses(mergedDisplaySettings);
+  const displayStyles = getDisplayStyles(mergedDisplaySettings);
+
   /**
    * Renderizar footer con botones de acción
    */
@@ -583,8 +589,10 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
         </>
       }
     >
-      {/* Ejercicio interactivo - sin contenedor extra */}
-      {renderExercise()}
+      {/* Ejercicio interactivo con displaySettings aplicados */}
+      <div className={`${displayClasses.content} ${displayClasses.text}`} style={displayStyles}>
+        {renderExercise()}
+      </div>
 
       {/* Resultado final */}
       {result && (

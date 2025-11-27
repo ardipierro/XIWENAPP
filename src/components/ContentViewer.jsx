@@ -9,10 +9,12 @@
  */
 
 import { useState, useRef } from 'react';
-import { BookMarked, FileText, Video, Link as LinkIcon, PenTool, BookOpen, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { BookMarked, FileText, Video, Link as LinkIcon, PenTool, BookOpen, CheckCircle, XCircle, AlertCircle, X } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import { ExpandableModal, VideoPlayer } from './common';
 import { ContentRenderer } from './content';
 import SelectionDetector from './translation/SelectionDetector';
+import { getDisplayClasses, getDisplayStyles, mergeDisplaySettings } from '../constants/displaySettings';
 import logger from '../utils/logger';
 
 /**
@@ -23,12 +25,19 @@ import logger from '../utils/logger';
  * @param {boolean} props.isOpen - Si el modal está abierto
  * @param {Function} props.onClose - Callback para cerrar
  * @param {Array} [props.courses] - Cursos asociados al contenido
+ * @param {Object} [props.displaySettings] - Configuración de visualización (desde contenedor)
+ * @param {boolean} [props.isFullscreen] - Si está en modo pantalla completa
  */
-function ContentViewer({ content, isOpen, onClose, courses = [] }) {
+function ContentViewer({ content, isOpen, onClose, courses = [], displaySettings = null, isFullscreen = false }) {
   const [renderError, setRenderError] = useState(null);
   const contentContainerRef = useRef(null);
 
   if (!content) return null;
+
+  // Obtener clases y estilos de displaySettings
+  const mergedDisplaySettings = mergeDisplaySettings(displaySettings, content.type);
+  const displayClasses = getDisplayClasses(mergedDisplaySettings);
+  const displayStyles = getDisplayStyles(mergedDisplaySettings);
 
   /**
    * Detecta el tipo real del contenido para el icono
@@ -142,6 +151,45 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
 
   const customStyles = getCustomStyles();
 
+  // Combinar estilos personalizados con displayStyles
+  const combinedStyles = {
+    ...customStyles,
+    ...displayStyles
+  };
+
+  // Renderizado en modo fullscreen
+  if (isFullscreen) {
+    return createPortal(
+      <div className="fixed inset-0 z-50 bg-white dark:bg-zinc-900 overflow-auto">
+        {/* Header en fullscreen */}
+        <div className="sticky top-0 z-10 px-4 py-3 bg-white/95 dark:bg-zinc-900/95 backdrop-blur border-b border-zinc-200 dark:border-zinc-700 flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-white truncate">
+            {content.title || 'Sin título'}
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+          >
+            <X size={20} className="text-zinc-600 dark:text-zinc-400" />
+          </button>
+        </div>
+
+        {/* Contenido en fullscreen */}
+        <div className={displayClasses.container}>
+          <div className={displayClasses.content}>
+            <SelectionDetector enabled={isOpen} containerRef={contentContainerRef}>
+              <div ref={contentContainerRef} className={displayClasses.text} style={combinedStyles}>
+                <ContentRenderer content={content} />
+              </div>
+            </SelectionDetector>
+          </div>
+        </div>
+      </div>,
+      document.body
+    );
+  }
+
+  // Renderizado normal (modal)
   return (
     <ExpandableModal
       isOpen={isOpen}
@@ -165,18 +213,14 @@ function ContentViewer({ content, isOpen, onClose, courses = [] }) {
         </div>
       )}
 
-      {/* Contenido renderizado con estilos personalizados */}
-      <SelectionDetector enabled={isOpen} containerRef={contentContainerRef}>
-        <div ref={contentContainerRef}>
-          {customStyles ? (
-            <div style={customStyles} className="p-4 rounded-lg transition-all">
-              <ContentRenderer content={content} />
-            </div>
-          ) : (
+      {/* Contenido renderizado con estilos personalizados y displaySettings */}
+      <div className={displayClasses.content}>
+        <SelectionDetector enabled={isOpen} containerRef={contentContainerRef}>
+          <div ref={contentContainerRef} className={displayClasses.text} style={combinedStyles}>
             <ContentRenderer content={content} />
-          )}
-        </div>
-      </SelectionDetector>
+          </div>
+        </SelectionDetector>
+      </div>
     </ExpandableModal>
   );
 }

@@ -31,6 +31,8 @@ import { getContainerContents, CONTENT_TYPES } from '../../firebase/content';
 import { ExpandableModal } from '../common';
 import ContentViewer from '../ContentViewer';
 import ExerciseViewerModal from '../ExerciseViewerModal';
+import QuickDisplayFAB from '../QuickDisplayFAB';
+import { mergeDisplaySettings, getDisplayClasses } from '../../constants/displaySettings';
 import logger from '../../utils/logger';
 
 /**
@@ -98,6 +100,19 @@ function ContainerViewer({ container, isOpen, onClose }) {
   const [error, setError] = useState(null);
   const [selectedContent, setSelectedContent] = useState(null);
   const [viewerType, setViewerType] = useState(null); // 'content' | 'exercise'
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Display settings: combina los guardados en el contenedor con los ajustes temporales
+  const [liveDisplaySettings, setLiveDisplaySettings] = useState(null);
+
+  // Inicializar display settings del contenedor
+  useEffect(() => {
+    if (isOpen && container) {
+      const savedSettings = container.metadata?.displaySettings || null;
+      setLiveDisplaySettings(savedSettings);
+      setIsFullscreen(false);
+    }
+  }, [isOpen, container]);
 
   // Cargar contenidos del contenedor
   useEffect(() => {
@@ -141,6 +156,24 @@ function ContainerViewer({ container, isOpen, onClose }) {
     setSelectedContent(null);
     setViewerType(null);
   }, []);
+
+  // Handler para cambios de display settings desde el FAB
+  const handleDisplaySettingsChange = useCallback((newSettings) => {
+    setLiveDisplaySettings(newSettings);
+    logger.debug('Display settings actualizados desde FAB', 'ContainerViewer');
+  }, []);
+
+  // Toggle fullscreen
+  const handleToggleFullscreen = useCallback(() => {
+    setIsFullscreen(prev => !prev);
+    logger.debug(`Fullscreen toggled: ${!isFullscreen}`, 'ContainerViewer');
+  }, [isFullscreen]);
+
+  // Obtener los settings combinados (guardados + live)
+  const currentDisplaySettings = mergeDisplaySettings(
+    liveDisplaySettings,
+    selectedContent?.type || container?.type
+  );
 
   if (!container) return null;
 
@@ -296,6 +329,8 @@ function ContainerViewer({ container, isOpen, onClose }) {
           content={selectedContent}
           isOpen={true}
           onClose={handleCloseContentViewer}
+          displaySettings={currentDisplaySettings}
+          isFullscreen={isFullscreen}
         />
       )}
 
@@ -305,6 +340,18 @@ function ContainerViewer({ container, isOpen, onClose }) {
           exercise={selectedContent}
           isOpen={true}
           onClose={handleCloseContentViewer}
+          displaySettings={currentDisplaySettings}
+          isFullscreen={isFullscreen}
+        />
+      )}
+
+      {/* FAB de ajustes rápidos - solo visible cuando hay contenido abierto */}
+      {selectedContent && (
+        <QuickDisplayFAB
+          initialSettings={container.metadata?.displaySettings}
+          onSettingsChange={handleDisplaySettingsChange}
+          isFullscreen={isFullscreen}
+          onToggleFullscreen={handleToggleFullscreen}
         />
       )}
     </>
