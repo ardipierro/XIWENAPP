@@ -452,8 +452,16 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
           console.log('%c🎯 PARSEANDO MULTIPLE CHOICE (usando parseQuestions)', 'background: orange; color: white; font-size: 14px; padding: 3px;');
           console.log('📝 cleanContent:', cleanContent);
 
+          // Limpiar contenido: quitar marcador #opcion_multiple si existe
+          let textToProcess = cleanContent;
+          const lines = cleanContent.split('\n');
+          if (lines[0] && (lines[0].toLowerCase().trim().startsWith('#opcion') || lines[0].toLowerCase().trim().startsWith('#multiple'))) {
+            textToProcess = lines.slice(1).join('\n').trim();
+          }
+          console.log('📝 textToProcess (sin marcador):', textToProcess);
+
           // parseQuestions devuelve array de preguntas en formato correcto
-          const questions = parseQuestions(cleanContent, 'General');
+          const questions = parseQuestions(textToProcess, 'General');
           console.log('📦 Parsed questions:', questions);
 
           if (!questions || questions.length === 0) {
