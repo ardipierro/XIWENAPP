@@ -8,8 +8,9 @@ import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
 import { X, Loader2, Edit2, Maximize2, Minimize2, RotateCcw } from 'lucide-react';
 import { BaseModal, BaseButton } from './common';
 import WordHighlightExercise from './container/WordHighlightExercise';
+import ChainedExerciseViewer from './ChainedExerciseViewer';
 import logger from '../utils/logger';
-import { parseExerciseFile } from '../utils/exerciseParser.js';
+import { parseExerciseFile, parseChainedExercises, CHAIN_MARKERS } from '../utils/exerciseParser.js';
 
 // Lazy load de componentes de ejercicios adicionales
 const DragDropBlanksExercise = lazy(() => import('./container/DragDropBlanksExercise'));
@@ -37,15 +38,30 @@ const EXERCISE_TYPES = {
   DRAGDROP: 'drag-drop',
   FILLBLANKS: 'fill-blanks',
   DIALOGUES: 'dialogues',
-  OPEN_QUESTIONS: 'open-questions'
+  OPEN_QUESTIONS: 'open-questions',
+  CHAINED: 'chained-exercises' // Múltiples ejercicios encadenados
 };
 
 /**
  * Detectar tipo de ejercicio basado en prefijo o contenido
  * Prefijos soportados: #marcar, #arrastrar, #completar, #dialogo
+ * NUEVO: Detecta ejercicios encadenados (múltiples marcadores)
  */
 function detectExerciseType(content) {
   if (!content) return { type: null, cleanContent: content };
+
+  // PRIMERO: Detectar si hay múltiples marcadores (ejercicios encadenados)
+  const chainedSections = parseChainedExercises(content);
+  console.log('🔗 Chained sections detected:', chainedSections.length, chainedSections.map(s => s.type));
+
+  // Si hay 2 o más secciones con marcadores válidos, es un ejercicio encadenado
+  if (chainedSections.length >= 2) {
+    console.log('✅ Detected as CHAINED exercise');
+    return {
+      type: EXERCISE_TYPES.CHAINED,
+      cleanContent: content // Mantener contenido completo para ChainedExerciseViewer
+    };
+  }
 
   const lines = content.trim().split('\n');
   const firstLine = lines[0].toLowerCase().trim();
@@ -393,6 +409,17 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
           );
         }
       }
+
+      case EXERCISE_TYPES.CHAINED:
+        return (
+          <ChainedExerciseViewer
+            text={cleanContent}
+            defaultMode="scroll"
+            showModeToggle={true}
+            showProgress={true}
+            maxHeight="calc(80vh - 200px)"
+          />
+        );
 
       default:
         return (
