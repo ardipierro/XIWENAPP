@@ -542,49 +542,86 @@ function parseByType(text, type, category) {
 }
 
 /**
- * Parse Multiple Choice (existing format)
+ * Helper: Remove leading letter (A., B), a), etc.) from option text
+ */
+function removeLeadingLetter(text) {
+  return text.replace(/^[A-Da-d][\.\)\s]+\s*/, '').trim();
+}
+
+/**
+ * Parse Multiple Choice (enhanced format)
+ * Supports:
+ * - Multiple correct answers (multiple * markers)
+ * - 2-4 options (flexible)
+ * - Inline explanations per option (:: syntax)
+ * - General explanation (:: on its own line)
+ *
  * Format:
  * Question text?
- * Option 1
- * *Option 2 (correct)
- * Option 3
+ * *Option 1 :: explanation for this option
+ * Option 2
+ * *Option 3 (another correct)
  * Option 4
+ * :: General explanation for the question
  */
 function parseMultipleChoice(text, category) {
   const lines = text.split('\n').map(l => l.trim()).filter(l => l);
 
-  if (lines.length < 5) return null;
+  if (lines.length < 3) return null; // Minimum: 1 question + 2 options
 
   const question = lines[0];
-  const options = lines.slice(1, 5);
+  const options = [];
+  const optionExplanations = [];
+  const correctIndices = [];
+  let explanation = null;
 
-  // Find correct answer (marked with *)
-  const correctAnswerText = options.find(opt =>
-    opt.startsWith('*') || opt.includes('(correcta)')
-  );
+  // Process option lines
+  for (let i = 1; i < lines.length && options.length < 6; i++) {
+    const line = lines[i];
 
-  if (!correctAnswerText) return null;
+    // Check if this is a general explanation line (starts with :: alone)
+    if (line.startsWith('::') && !line.match(/^[*]?[A-Da-d]?[\.\)\s]?/)) {
+      explanation = line.substring(2).trim();
+      continue;
+    }
 
-  // Clean options
-  const cleanOptions = options.map(opt =>
-    opt.replace(/^\*/, '').replace(/\(correcta\)/g, '').trim()
-  );
+    // Detect if option is correct
+    const isCorrect = line.startsWith('*') || line.includes('(correcta)');
+    let fullOptionText = line.replace(/^\*/, '').replace(/\(correcta\)/g, '').trim();
 
-  const correctAnswerCleaned = correctAnswerText
-    .replace(/^\*/, '')
-    .replace(/\(correcta\)/g, '')
-    .trim();
+    // Remove leading letter if present (A., B), etc.)
+    fullOptionText = removeLeadingLetter(fullOptionText);
 
-  const correctIndex = cleanOptions.findIndex(opt => opt === correctAnswerCleaned);
+    // Separate option text from inline explanation (:: syntax)
+    let optionText = fullOptionText;
+    let inlineExplanation = null;
 
-  if (correctIndex === -1) return null;
+    const explIndex = fullOptionText.indexOf('::');
+    if (explIndex !== -1) {
+      optionText = fullOptionText.substring(0, explIndex).trim();
+      inlineExplanation = fullOptionText.substring(explIndex + 2).trim();
+    }
+
+    if (optionText) {
+      if (isCorrect) {
+        correctIndices.push(options.length);
+      }
+      options.push(optionText);
+      optionExplanations.push(inlineExplanation);
+    }
+  }
+
+  // Validate: at least 2 options and at least 1 correct answer
+  if (options.length < 2 || correctIndices.length === 0) return null;
 
   return {
     type: EXERCISE_TYPES.MULTIPLE_CHOICE,
     category,
     question,
-    options: cleanOptions,
-    correct: correctIndex
+    options,
+    optionExplanations,
+    correct: correctIndices.length === 1 ? correctIndices[0] : correctIndices,
+    explanation
   };
 }
 
@@ -969,8 +1006,25 @@ function parseInfoTable(text, category) {
 }
 
 /**
- * Legacy parser for backward compatibility
- * Parses old-style multiple choice questions
+ * Enhanced parser for multiple choice questions
+ * Supports:
+ * - Multiple correct answers (multiple * markers)
+ * - 2-6 options (flexible, not fixed to 4)
+ * - Inline explanations per option (:: syntax)
+ * - General explanation (:: on its own line)
+ *
+ * Format:
+ * Question text?
+ * *Option 1 :: why this is correct
+ * Option 2
+ * *Option 3
+ * Option 4
+ * :: General explanation
+ *
+ * Next question?
+ * Option A
+ * *Option B
+ * Option C
  */
 export function parseQuestions(text, category) {
   const parsedQuestions = [];
@@ -979,42 +1033,71 @@ export function parseQuestions(text, category) {
     .map(line => line.trim())
     .filter(line => line.length > 0);
 
-  for (let i = 0; i < allLines.length; i += 5) {
-    if (i + 4 < allLines.length) {
-      const questionText = allLines[i];
-      const options = [
-        allLines[i + 1],
-        allLines[i + 2],
-        allLines[i + 3],
-        allLines[i + 4]
-      ];
+  let i = 0;
+  while (i < allLines.length) {
+    const questionText = allLines[i];
+    i++;
 
-      const correctAnswerText = options.find((opt) =>
-        opt.startsWith('*') || opt.includes('(correcta)')
-      );
+    // Collect options (up to 6, or until we hit a line that looks like a new question)
+    const options = [];
+    const optionExplanations = [];
+    const correctIndices = [];
+    let explanation = null;
 
-      if (correctAnswerText) {
-        const cleanOptions = options.map((opt) =>
-          opt.replace(/^\*/, '').replace(/\(correcta\)/g, '').trim()
-        );
+    while (i < allLines.length && options.length < 6) {
+      const line = allLines[i];
 
-        const correctAnswerCleaned = correctAnswerText
-          .replace(/^\*/, '')
-          .replace(/\(correcta\)/g, '')
-          .trim();
-
-        const correctIndex = cleanOptions.findIndex(opt => opt === correctAnswerCleaned);
-
-        if (correctIndex !== -1) {
-          parsedQuestions.push({
-            type: EXERCISE_TYPES.MULTIPLE_CHOICE,
-            question: questionText,
-            options: cleanOptions,
-            correct: correctIndex,
-            category: category
-          });
-        }
+      // Check if this is a general explanation line (starts with :: alone)
+      if (line.startsWith('::') && !line.match(/^[*]?[A-Da-d]?[\.\)\s]/)) {
+        explanation = line.substring(2).trim();
+        i++;
+        continue;
       }
+
+      // Check if this looks like a new question (ends with ? and isn't an option)
+      // A new question typically doesn't start with *, A), B), etc.
+      if (options.length >= 2 && line.endsWith('?') && !line.startsWith('*') && !line.match(/^[A-Da-d][\.\)]/)) {
+        break; // This is the next question
+      }
+
+      // Detect if option is correct
+      const isCorrect = line.startsWith('*') || line.includes('(correcta)');
+      let fullOptionText = line.replace(/^\*/, '').replace(/\(correcta\)/g, '').trim();
+
+      // Remove leading letter if present (A., B), etc.)
+      fullOptionText = removeLeadingLetter(fullOptionText);
+
+      // Separate option text from inline explanation (:: syntax)
+      let optionText = fullOptionText;
+      let inlineExplanation = null;
+
+      const explIndex = fullOptionText.indexOf('::');
+      if (explIndex !== -1) {
+        optionText = fullOptionText.substring(0, explIndex).trim();
+        inlineExplanation = fullOptionText.substring(explIndex + 2).trim();
+      }
+
+      if (optionText) {
+        if (isCorrect) {
+          correctIndices.push(options.length);
+        }
+        options.push(optionText);
+        optionExplanations.push(inlineExplanation);
+      }
+      i++;
+    }
+
+    // Validate: at least 2 options and at least 1 correct answer
+    if (options.length >= 2 && correctIndices.length > 0) {
+      parsedQuestions.push({
+        type: EXERCISE_TYPES.MULTIPLE_CHOICE,
+        question: questionText,
+        options,
+        optionExplanations,
+        correct: correctIndices.length === 1 ? correctIndices[0] : correctIndices,
+        explanation,
+        category
+      });
     }
   }
 
