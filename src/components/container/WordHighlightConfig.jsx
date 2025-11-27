@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Save, Eye, EyeOff, Gamepad2, Timer, Lightbulb, Sparkles, Volume2 } from 'lucide-react';
+import { Save, Eye, EyeOff, Gamepad2, Timer, Lightbulb, Sparkles, Volume2, CheckSquare } from 'lucide-react';
 import { BaseButton, BaseInput, BaseAlert } from '../common';
 import WordHighlightExercise from './WordHighlightExercise';
 import logger from '../../utils/logger';
