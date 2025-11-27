@@ -4,7 +4,7 @@
  */
 
 import { useState } from 'react';
-import { Box, CheckSquare, Move, Edit3, HelpCircle, MessageSquare, Table2, MessageCircle } from 'lucide-react';
+import { Box, CheckSquare, Move, Edit3, HelpCircle, MessageSquare, Table2, MessageCircle, ListChecks, ArrowRightLeft, CheckCircle, FileText, Link2 } from 'lucide-react';
 import { BaseBadge } from './common';
 import WordHighlightConfig from './container/WordHighlightConfig';
 import DragDropConfig from './container/DragDropConfig';
@@ -12,6 +12,11 @@ import FillBlanksConfig from './container/FillBlanksConfig';
 import OpenQuestionsConfig from './container/OpenQuestionsConfig';
 import InfoTableConfig from './container/InfoTableConfig';
 import DialoguesConfig from './container/DialoguesConfig';
+import MultipleChoiceConfig from './container/MultipleChoiceConfig';
+import MatchingConfig from './container/MatchingConfig';
+import TrueFalseConfig from './container/TrueFalseConfig';
+import RichTextConfig from './container/RichTextConfig';
+import ChainedExerciseConfig from './container/ChainedExerciseConfig';
 import logger from '../utils/logger';
 
 /**
@@ -68,11 +73,43 @@ const CONTAINER_TABS = [
   },
   {
     id: 'multiple-choice',
-    label: 'Multiple Choice',
-    icon: HelpCircle,
-    description: 'Ejercicios de selección múltiple',
-    component: null,
-    available: false
+    label: 'Opción Múltiple',
+    icon: ListChecks,
+    description: 'Preguntas con opciones de respuesta. Soporta una o múltiples respuestas correctas. Usa *opción para marcar correctas y :: para explicaciones.',
+    component: MultipleChoiceConfig,
+    available: true
+  },
+  {
+    id: 'matching',
+    label: 'Emparejar',
+    icon: ArrowRightLeft,
+    description: 'Ejercicios de emparejar elementos. Escribe pares separados por -> (ej: Hola -> Hello). Ideal para vocabulario y traducciones.',
+    component: MatchingConfig,
+    available: true
+  },
+  {
+    id: 'true-false',
+    label: 'Verdadero/Falso',
+    icon: CheckCircle,
+    description: 'Afirmaciones verdaderas o falsas. Marca las verdaderas con * al inicio. Usa ::explicación para feedback opcional.',
+    component: TrueFalseConfig,
+    available: true
+  },
+  {
+    id: 'rich-text',
+    label: 'Texto Enriquecido',
+    icon: FileText,
+    description: 'Contenido de lectura con texto formateado e imágenes. Ideal para páginas de libros con selector de palabras, diccionario y pronunciación.',
+    component: RichTextConfig,
+    available: true
+  },
+  {
+    id: 'chained-exercises',
+    label: 'Encadenar Ejercicios',
+    icon: Link2,
+    description: 'Combina múltiples tipos de ejercicios en secuencia. Usa marcadores (#marcar, #arrastrar, etc.) para crear ejercicios encadenados.',
+    component: ChainedExerciseConfig,
+    available: true
   }
 ];
 

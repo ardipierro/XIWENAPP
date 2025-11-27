@@ -115,18 +115,61 @@ function OpenQuestionsConfig({ onSave }) {
         </BaseAlert>
       )}
 
-      {/* Info */}
-      <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800">
-        <p className="text-sm text-purple-700 dark:text-purple-300">
-          <strong>Respuesta Libre:</strong> Ejercicios donde el estudiante escribe oraciones completas.
-          Ideal para ejercicios de transformación, contrarios, traducciones, etc.
+      {/* Guía de formato */}
+      <div className="p-6 rounded-lg border-2 border-orange-200 dark:border-orange-800" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+        <div className="flex items-center gap-2 mb-3">
+          <MessageSquare className="w-5 h-5 text-orange-500" />
+          <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            Cómo Escribir el Texto
+          </h3>
+        </div>
+        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          Para ejercicios de <strong>Respuesta Libre</strong>, escribe preguntas <strong>numeradas</strong> o usa el formato con <strong>P:</strong> (pregunta) y <strong>R:</strong> (respuesta). El alumno escribirá oraciones completas. Ideal para transformaciones, contrarios, traducciones, etc.
         </p>
-        <div className="mt-2 text-xs text-purple-600 dark:text-purple-400">
-          <strong>Formatos detectados:</strong>
-          <ul className="list-disc ml-4 mt-1">
-            <li><code>#RESPUESTA_LIBRE</code> con P: y R:</li>
-            <li>Líneas numeradas (1. 2. 3.)</li>
-          </ul>
+
+        <div className="space-y-3">
+          <div className="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/10">
+            <p className="text-xs font-semibold mb-2 text-orange-700 dark:text-orange-300">
+              ✏️ Formato 1: Líneas numeradas
+            </p>
+            <pre className="text-sm font-mono p-3 rounded bg-white dark:bg-gray-800 overflow-x-auto" style={{ color: 'var(--color-text-primary)' }}>
+{`1. ¿Cómo te llamas?
+2. ¿De dónde eres?
+3. ¿Qué idiomas hablas?`}
+            </pre>
+          </div>
+
+          <div className="p-4 rounded-lg bg-pink-50 dark:bg-pink-900/10">
+            <p className="text-xs font-semibold mb-2 text-pink-700 dark:text-pink-300">
+              ✏️ Formato 2: Con marcador #RESPUESTA_LIBRE
+            </p>
+            <pre className="text-sm font-mono p-3 rounded bg-white dark:bg-gray-800 overflow-x-auto" style={{ color: 'var(--color-text-primary)' }}>
+{`#RESPUESTA_LIBRE
+P: Acá llueve mucho. (mucho ≠ poco)
+R: Acá llueve poco.
+
+P: El tiempo es muy agradable.
+R: El tiempo es muy desagradable.`}
+            </pre>
+          </div>
+
+          <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/10">
+            <p className="text-xs font-semibold mb-2 text-blue-700 dark:text-blue-300">
+              ✅ Resultado:
+            </p>
+            <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+              El alumno verá cada pregunta con un <strong>campo de texto amplio</strong> (textarea) donde podrá escribir su respuesta completa. Si incluiste respuestas (R:), se validarán automáticamente.
+            </p>
+          </div>
+
+          <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/10">
+            <p className="text-xs font-semibold mb-1 text-yellow-700 dark:text-yellow-300">
+              💡 Tip:
+            </p>
+            <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+              En la validación puedes configurar si ignoras acentos, puntuación o mayúsculas. También puedes aceptar respuestas parcialmente correctas.
+            </p>
+          </div>
         </div>
       </div>
 

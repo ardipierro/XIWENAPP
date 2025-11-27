@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Save, Eye, EyeOff, Volume2, Lightbulb, Type } from 'lucide-react';
+import { Save, Eye, EyeOff, Volume2, Lightbulb, Type, Edit3 } from 'lucide-react';
 import { BaseButton, BaseInput, BaseAlert } from '../common';
 import FillInBlanksExercise from './FillInBlanksExercise';
 import logger from '../../utils/logger';
@@ -97,12 +97,53 @@ function FillBlanksConfig({ onSave }) {
         </BaseAlert>
       )}
 
-      {/* Info */}
-      <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
-        <p className="text-sm text-green-700 dark:text-green-300">
-          <strong>Llenar Palabras:</strong> Las palabras entre asteriscos (*palabra*) se convierten en
-          campos de texto donde el estudiante debe escribir la palabra correcta.
+      {/* Guía de formato */}
+      <div className="p-6 rounded-lg border-2 border-green-200 dark:border-green-800" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+        <div className="flex items-center gap-2 mb-3">
+          <Edit3 className="w-5 h-5 text-green-500" />
+          <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            Cómo Escribir el Texto
+          </h3>
+        </div>
+        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          Para ejercicios de <strong>Llenar Palabras</strong>, escribe el texto y coloca <strong>asteriscos (*)</strong> alrededor de las palabras que deben ser completadas. Las palabras marcadas se convertirán en campos de texto donde el estudiante deberá escribir la respuesta correcta.
         </p>
+
+        <div className="space-y-3">
+          <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/10">
+            <p className="text-xs font-semibold mb-2 text-green-700 dark:text-green-300">
+              ✏️ Ejemplo de texto:
+            </p>
+            <pre className="text-sm font-mono p-3 rounded bg-white dark:bg-gray-800 overflow-x-auto" style={{ color: 'var(--color-text-primary)' }}>
+{`Mi nombre es *María* y vivo en *Buenos Aires*.
+Me gusta *leer* libros en mi tiempo libre.`}
+            </pre>
+          </div>
+
+          <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/10">
+            <p className="text-xs font-semibold mb-2 text-blue-700 dark:text-blue-300">
+              ✅ Resultado:
+            </p>
+            <p className="text-sm mb-2" style={{ color: 'var(--color-text-primary)' }}>
+              El alumno verá campos de texto para completar:
+            </p>
+            <p className="text-sm bg-white dark:bg-gray-800 p-2 rounded" style={{ color: 'var(--color-text-secondary)' }}>
+              "Mi nombre es <span className="inline-block w-20 h-6 mx-1 bg-gray-200 dark:bg-gray-700 rounded"></span> y vivo en <span className="inline-block w-32 h-6 mx-1 bg-gray-200 dark:bg-gray-700 rounded"></span>."
+            </p>
+            <p className="text-xs mt-2" style={{ color: 'var(--color-text-secondary)' }}>
+              El alumno debe escribir: <strong className="text-green-600">María</strong>, <strong className="text-green-600">Buenos Aires</strong> y <strong className="text-green-600">leer</strong>
+            </p>
+          </div>
+
+          <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/10">
+            <p className="text-xs font-semibold mb-1 text-yellow-700 dark:text-yellow-300">
+              💡 Tip:
+            </p>
+            <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+              Puedes configurar si la verificación es sensible a mayúsculas/minúsculas en las opciones de comportamiento. Las pistas mostrarán la primera letra de la palabra si están habilitadas.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Configuración de colores */}

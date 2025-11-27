@@ -23,8 +23,512 @@ export const EXERCISE_TYPES = {
   DRAG_DROP: 'drag_drop',
   TABLE: 'table',
   OPEN_QUESTIONS: 'open_questions',
-  INFO_TABLE: 'info_table'
+  INFO_TABLE: 'info_table',
+  // Nuevos tipos para ejercicios encadenados
+  MARK_WORDS: 'mark_words',
+  TEXT: 'text'
 };
+
+/**
+ * Marcadores en español para ejercicios encadenados
+ * Mapea #marcador -> tipo de ejercicio
+ */
+export const CHAIN_MARKERS = {
+  '#marcar': EXERCISE_TYPES.MARK_WORDS,
+  '#seleccionar': EXERCISE_TYPES.HIGHLIGHT,
+  '#arrastrar': EXERCISE_TYPES.DRAG_DROP,
+  '#ordenar': EXERCISE_TYPES.ORDER,
+  '#respuesta_libre': EXERCISE_TYPES.OPEN_QUESTIONS,
+  '#pregunta_abierta': EXERCISE_TYPES.OPEN_QUESTIONS,
+  '#opcion_multiple': EXERCISE_TYPES.MULTIPLE_CHOICE,
+  '#completar': EXERCISE_TYPES.FILL_BLANK,
+  '#emparejar': EXERCISE_TYPES.MATCHING,
+  '#verdadero_falso': EXERCISE_TYPES.TRUE_FALSE,
+  '#tabla': EXERCISE_TYPES.TABLE,
+  '#tabla_info': EXERCISE_TYPES.INFO_TABLE,
+  '#dialogo': 'dialogue',  // Tipo diálogo
+  '#texto': EXERCISE_TYPES.TEXT
+};
+
+/**
+ * Parsea texto con múltiples ejercicios encadenados usando marcadores #tipo
+ *
+ * @param {string} text - Texto completo con ejercicios encadenados
+ * @returns {Array} Array de secciones parseadas con tipo y contenido
+ *
+ * Ejemplo de entrada:
+ * ```
+ * #marcar
+ * El gato [corre] por el jardín.
+ *
+ * #respuesta_libre
+ * 1. ¿Cómo te llamas?
+ * 2. ¿De dónde eres?
+ * ```
+ */
+export function parseChainedExercises(text) {
+  if (!text || typeof text !== 'string') return [];
+
+  const sections = [];
+  const markerPattern = /^(#\w+)/gm;
+  const markers = Object.keys(CHAIN_MARKERS);
+
+  // Encontrar todas las posiciones de marcadores
+  const markerPositions = [];
+  let match;
+
+  while ((match = markerPattern.exec(text)) !== null) {
+    const marker = match[1].toLowerCase();
+    if (markers.includes(marker)) {
+      markerPositions.push({
+        marker,
+        type: CHAIN_MARKERS[marker],
+        index: match.index,
+        endIndex: match.index + match[0].length
+      });
+    }
+  }
+
+  // Si no hay marcadores, devolver todo como texto plano
+  if (markerPositions.length === 0) {
+    const trimmed = text.trim();
+    if (trimmed) {
+      return [{
+        id: 'section-0',
+        type: EXERCISE_TYPES.TEXT,
+        marker: '#texto',
+        rawContent: trimmed,
+        parsed: { content: trimmed }
+      }];
+    }
+    return [];
+  }
+
+  // Extraer contenido entre marcadores
+  for (let i = 0; i < markerPositions.length; i++) {
+    const current = markerPositions[i];
+    const next = markerPositions[i + 1];
+
+    // Contenido desde después del marcador hasta el próximo marcador (o fin del texto)
+    const contentStart = current.endIndex;
+    const contentEnd = next ? next.index : text.length;
+    const rawContent = text.substring(contentStart, contentEnd).trim();
+
+    if (rawContent) {
+      const parsed = parseChainedSection(rawContent, current.type);
+      sections.push({
+        id: `section-${i}`,
+        type: current.type,
+        marker: current.marker,
+        rawContent,
+        parsed
+      });
+    }
+  }
+
+  return sections;
+}
+
+/**
+ * Parsea una sección individual según su tipo
+ */
+function parseChainedSection(content, type) {
+  switch (type) {
+    case EXERCISE_TYPES.MARK_WORDS:
+      return parseMarkWords(content);
+    case EXERCISE_TYPES.HIGHLIGHT:
+      return parseHighlightSection(content);
+    case EXERCISE_TYPES.DRAG_DROP:
+    case EXERCISE_TYPES.ORDER:
+      return parseDragDropSection(content);
+    case EXERCISE_TYPES.OPEN_QUESTIONS:
+      return parseOpenQuestionsSection(content);
+    case EXERCISE_TYPES.MULTIPLE_CHOICE:
+      return parseMCQSection(content);
+    case EXERCISE_TYPES.FILL_BLANK:
+      return parseFillBlankSection(content);
+    case EXERCISE_TYPES.MATCHING:
+      return parseMatchingSection(content);
+    case EXERCISE_TYPES.TRUE_FALSE:
+      return parseTrueFalseSection(content);
+    case EXERCISE_TYPES.TABLE:
+    case EXERCISE_TYPES.INFO_TABLE:
+      return parseTableSection(content);
+    case EXERCISE_TYPES.TEXT:
+    default:
+      return { content };
+  }
+}
+
+/**
+ * Parsea ejercicio de marcar palabras
+ * Soporta dos formatos:
+ * - Simple: Texto con *palabras* entre asteriscos
+ * - Avanzado: Texto con [palabras] entre corchetes
+ */
+function parseMarkWords(content) {
+  const lines = content.split('\n').filter(l => l.trim());
+  let instruction = '';
+  let text = '';
+  const wordsToMark = [];
+
+  for (const line of lines) {
+    if (line.toUpperCase().startsWith('INSTRUCCION:') || line.toUpperCase().startsWith('INSTRUCTION:')) {
+      instruction = line.split(':').slice(1).join(':').trim();
+    } else {
+      text += (text ? '\n' : '') + line;
+    }
+  }
+
+  // Detectar formato usado (prioridad a asteriscos)
+  const hasAsterisks = text.includes('*');
+  const hasBrackets = text.includes('[');
+
+  let cleanText = text;
+
+  if (hasAsterisks) {
+    // Formato simple: *palabra*
+    const asteriskPattern = /\*([^*]+)\*/g;
+    let match;
+    while ((match = asteriskPattern.exec(text)) !== null) {
+      wordsToMark.push(match[1].trim());
+    }
+    // Limpiar asteriscos
+    cleanText = text.replace(/\*([^*]+)\*/g, '$1');
+  } else if (hasBrackets) {
+    // Formato avanzado: [palabra]
+    const bracketPattern = /\[([^\]]+)\]/g;
+    let match;
+    while ((match = bracketPattern.exec(text)) !== null) {
+      wordsToMark.push(match[1].trim());
+    }
+    // Limpiar corchetes
+    cleanText = text.replace(/\[([^\]]+)\]/g, '$1');
+  }
+
+  return {
+    instruction: instruction || 'Selecciona las palabras indicadas',
+    text: cleanText,
+    wordsToMark,
+    originalText: text
+  };
+}
+
+/**
+ * Parsea ejercicio de seleccionar/highlight
+ */
+function parseHighlightSection(content) {
+  const lines = content.split('\n').filter(l => l.trim());
+  let instruction = '';
+  let text = '';
+  let targetWords = [];
+
+  for (const line of lines) {
+    if (line.toUpperCase().startsWith('INSTRUCCION:')) {
+      instruction = line.split(':').slice(1).join(':').trim();
+    } else if (line.toUpperCase().startsWith('PALABRAS:') || line.toUpperCase().startsWith('WORDS:')) {
+      targetWords = line.split(':').slice(1).join(':').split(/[,|]/).map(w => w.trim());
+    } else if (line.toUpperCase().startsWith('TEXTO:') || line.toUpperCase().startsWith('TEXT:')) {
+      text = line.split(':').slice(1).join(':').trim();
+    } else if (!text) {
+      text = line;
+    }
+  }
+
+  return {
+    instruction: instruction || 'Selecciona las palabras correctas',
+    text,
+    targetWords
+  };
+}
+
+/**
+ * Parsea ejercicio de arrastrar/ordenar
+ * Soporta tres formatos:
+ * - Simple con asteriscos: El *perro* ladra y el *gato* maúlla
+ * - Avanzado con PALABRAS: Yo|me|levanto|temprano
+ * - Lista separada por |
+ */
+function parseDragDropSection(content) {
+  const lines = content.split('\n').filter(l => l.trim());
+  let instruction = '';
+  let words = [];
+  let correctOrder = [];
+  let text = '';
+
+  // Detectar formato PALABRAS:/ORDEN: (avanzado)
+  for (const line of lines) {
+    if (line.toUpperCase().startsWith('INSTRUCCION:')) {
+      instruction = line.split(':').slice(1).join(':').trim();
+    } else if (line.toUpperCase().startsWith('PALABRAS:') || line.toUpperCase().startsWith('WORDS:')) {
+      words = line.split(':').slice(1).join(':').split('|').map(w => w.trim());
+    } else if (line.toUpperCase().startsWith('ORDEN:') || line.toUpperCase().startsWith('ORDER:')) {
+      correctOrder = line.split(':').slice(1).join(':').split('|').map(w => w.trim());
+    } else if (!instruction) {
+      text += (text ? '\n' : '') + line;
+    }
+  }
+
+  // Si no hay formato avanzado, detectar formato simple
+  if (words.length === 0 && text) {
+    // Formato simple: *palabra* en el texto
+    if (text.includes('*')) {
+      const asteriskPattern = /\*([^*]+)\*/g;
+      let match;
+      const extractedWords = [];
+      while ((match = asteriskPattern.exec(text)) !== null) {
+        extractedWords.push(match[1].trim());
+      }
+
+      if (extractedWords.length > 0) {
+        words = extractedWords;
+        correctOrder = [...extractedWords];
+      }
+    } else if (text.includes('|')) {
+      // Formato lista con pipes
+      words = text.split('|').map(w => w.trim());
+      correctOrder = [...words];
+    }
+  }
+
+  return {
+    instruction: instruction || 'Ordena las palabras correctamente',
+    words,
+    correctOrder: correctOrder.length > 0 ? correctOrder : words,
+    shuffledWords: [...words].sort(() => Math.random() - 0.5)
+  };
+}
+
+/**
+ * Parsea ejercicio de respuesta libre/preguntas abiertas
+ */
+function parseOpenQuestionsSection(content) {
+  const lines = content.split('\n').filter(l => l.trim());
+  const questions = [];
+  let currentQuestion = null;
+
+  for (const line of lines) {
+    // Formato numerado: 1. Pregunta
+    if (/^\d+[\.\)]\s+/.test(line)) {
+      if (currentQuestion) questions.push(currentQuestion);
+      currentQuestion = {
+        question: line.replace(/^\d+[\.\)]\s+/, '').trim(),
+        answer: null
+      };
+    }
+    // Formato P: Pregunta
+    else if (line.toUpperCase().startsWith('P:') || line.toUpperCase().startsWith('PREGUNTA:')) {
+      if (currentQuestion) questions.push(currentQuestion);
+      currentQuestion = {
+        question: line.split(':').slice(1).join(':').trim(),
+        answer: null
+      };
+    }
+    // Respuesta esperada
+    else if (line.toUpperCase().startsWith('R:') || line.toUpperCase().startsWith('RESPUESTA:')) {
+      if (currentQuestion) {
+        currentQuestion.answer = line.split(':').slice(1).join(':').trim();
+      }
+    }
+    // Línea con guión como respuesta
+    else if (line.startsWith('-') && currentQuestion && !currentQuestion.answer) {
+      currentQuestion.answer = line.replace(/^-\s*/, '').trim();
+    }
+  }
+
+  if (currentQuestion) questions.push(currentQuestion);
+
+  return { questions };
+}
+
+/**
+ * Parsea ejercicio de opción múltiple
+ */
+export function parseMCQSection(content) {
+  const lines = content.split('\n').filter(l => l.trim());
+
+  if (lines.length < 3) return { question: '', options: [], correctAnswer: null, explanation: '' };
+
+  // Ignorar primera línea si es el marcador #opcion_multiple
+  let startIndex = 0;
+  if (lines[0].toLowerCase().startsWith('#opcion') || lines[0].toLowerCase().startsWith('#multiple')) {
+    startIndex = 1;
+  }
+
+  const question = lines[startIndex];
+  const options = [];
+  const optionExplanations = [];
+  const correctIndices = [];
+  let explanation = null;
+
+  // Procesar líneas de opciones
+  for (let i = startIndex + 1; i < lines.length && options.length < 6; i++) {
+    const line = lines[i];
+
+    // Explicación general (empieza con :: sola)
+    if (line.startsWith('::') && !line.match(/^[*]?[A-Da-d]?[\.\)\s]?/)) {
+      explanation = line.substring(2).trim();
+      continue;
+    }
+
+    // Formato avanzado: [opción]* (backward compatibility)
+    if (line.includes('[') && line.includes(']')) {
+      const optionPattern = /\[([^\]]+)\](\*)?/g;
+      let match;
+      while ((match = optionPattern.exec(line)) !== null) {
+        const optionText = match[1].trim();
+        const isCorrect = match[2] === '*';
+        options.push({ text: optionText, correct: isCorrect });
+        if (isCorrect) correctIndices.push(options.length - 1);
+      }
+      continue;
+    }
+
+    // Formato simple: *opción::explicación
+    const isCorrect = line.startsWith('*');
+    let fullOptionText = line.replace(/^\*/, '').trim();
+
+    // Separar texto de explicación inline
+    let optionText = fullOptionText;
+    let inlineExplanation = null;
+
+    const explIndex = fullOptionText.indexOf('::');
+    if (explIndex !== -1) {
+      optionText = fullOptionText.substring(0, explIndex).trim();
+      inlineExplanation = fullOptionText.substring(explIndex + 2).trim();
+    }
+
+    if (optionText && !line.toUpperCase().startsWith('EXPLICACION:')) {
+      if (isCorrect) {
+        correctIndices.push(options.length);
+      }
+      options.push({ text: optionText, correct: isCorrect, explanation: inlineExplanation });
+      optionExplanations.push(inlineExplanation);
+    }
+  }
+
+  // Determinar respuesta correcta
+  const correctAnswer = correctIndices.length === 1
+    ? options[correctIndices[0]]?.text
+    : correctIndices.map(i => options[i]?.text);
+
+  return {
+    question,
+    options,
+    correctAnswer,
+    explanation,
+    optionExplanations,
+    correctIndices
+  };
+}
+
+/**
+ * Parsea ejercicio de completar espacios
+ */
+function parseFillBlankSection(content) {
+  const lines = content.split('\n').filter(l => l.trim());
+  let sentence = '';
+  let answers = [];
+  let explanation = '';
+
+  for (const line of lines) {
+    if (line.toUpperCase().startsWith('RESPUESTA:') || line.toUpperCase().startsWith('ANSWER:')) {
+      answers = line.split(':').slice(1).join(':').split(/[,|]/).map(a => a.trim());
+    } else if (line.toUpperCase().startsWith('EXPLICACION:')) {
+      explanation = line.split(':').slice(1).join(':').trim();
+    } else if (line.includes('___') || line.includes('____')) {
+      sentence = line;
+    } else if (!sentence) {
+      sentence = line;
+    }
+  }
+
+  return { sentence, answers, explanation };
+}
+
+/**
+ * Parsea ejercicio de emparejar
+ */
+function parseMatchingSection(content) {
+  const lines = content.split('\n').filter(l => l.trim());
+  const pairs = [];
+  let title = '';
+
+  for (const line of lines) {
+    if (line.toUpperCase().startsWith('TITULO:')) {
+      title = line.split(':').slice(1).join(':').trim();
+    } else if (line.includes('->') || line.includes('=')) {
+      const separator = line.includes('->') ? '->' : '=';
+      const parts = line.split(separator);
+      if (parts.length === 2) {
+        pairs.push({
+          left: parts[0].trim(),
+          right: parts[1].trim()
+        });
+      }
+    }
+  }
+
+  return { title: title || 'Empareja los elementos', pairs };
+}
+
+/**
+ * Parsea ejercicio verdadero/falso
+ */
+function parseTrueFalseSection(content) {
+  const lines = content.split('\n').filter(l => l.trim());
+  let statement = '';
+  let correct = null;
+  let explanation = '';
+
+  for (const line of lines) {
+    const upperLine = line.toUpperCase();
+    if (upperLine.startsWith('RESPUESTA:') || upperLine.startsWith('ANSWER:')) {
+      const answer = line.split(':').slice(1).join(':').trim().toUpperCase();
+      correct = ['TRUE', 'VERDADERO', 'V', 'SI', 'YES'].includes(answer);
+    } else if (upperLine.startsWith('EXPLICACION:')) {
+      explanation = line.split(':').slice(1).join(':').trim();
+    } else if (upperLine === 'TRUE' || upperLine === 'FALSE' ||
+               upperLine === 'VERDADERO' || upperLine === 'FALSO' ||
+               upperLine === 'V' || upperLine === 'F') {
+      correct = ['TRUE', 'VERDADERO', 'V'].includes(upperLine);
+    } else if (!statement) {
+      statement = line;
+    }
+  }
+
+  return { statement, correct, explanation };
+}
+
+/**
+ * Parsea tabla informativa
+ */
+function parseTableSection(content) {
+  const lines = content.split('\n').filter(l => l.trim());
+  let title = '';
+  let columns = [];
+  const rows = [];
+  const notes = [];
+
+  for (const line of lines) {
+    if (line.toUpperCase().startsWith('TITULO:')) {
+      title = line.split(':').slice(1).join(':').trim();
+    } else if (line.toUpperCase().startsWith('COLUMNAS:') || line.toUpperCase().startsWith('COLUMNS:')) {
+      columns = line.split(':').slice(1).join(':').split('|').map(c => c.trim());
+    } else if (line.toUpperCase().startsWith('NOTA:')) {
+      notes.push(line.split(':').slice(1).join(':').trim());
+    } else if (line.includes('|')) {
+      const cells = line.split('|').map(c => c.trim());
+      if (columns.length === 0) {
+        columns = cells;
+      } else {
+        rows.push(cells);
+      }
+    }
+  }
+
+  return { title, columns, rows, notes };
+}
 
 /**
  * Main parser function that detects and routes to specific parsers
@@ -126,49 +630,86 @@ function parseByType(text, type, category) {
 }
 
 /**
- * Parse Multiple Choice (existing format)
+ * Helper: Remove leading letter (A., B), a), etc.) from option text
+ */
+function removeLeadingLetter(text) {
+  return text.replace(/^[A-Da-d][\.\)\s]+\s*/, '').trim();
+}
+
+/**
+ * Parse Multiple Choice (enhanced format)
+ * Supports:
+ * - Multiple correct answers (multiple * markers)
+ * - 2-4 options (flexible)
+ * - Inline explanations per option (:: syntax)
+ * - General explanation (:: on its own line)
+ *
  * Format:
  * Question text?
- * Option 1
- * *Option 2 (correct)
- * Option 3
+ * *Option 1 :: explanation for this option
+ * Option 2
+ * *Option 3 (another correct)
  * Option 4
+ * :: General explanation for the question
  */
 function parseMultipleChoice(text, category) {
   const lines = text.split('\n').map(l => l.trim()).filter(l => l);
 
-  if (lines.length < 5) return null;
+  if (lines.length < 3) return null; // Minimum: 1 question + 2 options
 
   const question = lines[0];
-  const options = lines.slice(1, 5);
+  const options = [];
+  const optionExplanations = [];
+  const correctIndices = [];
+  let explanation = null;
 
-  // Find correct answer (marked with *)
-  const correctAnswerText = options.find(opt =>
-    opt.startsWith('*') || opt.includes('(correcta)')
-  );
+  // Process option lines
+  for (let i = 1; i < lines.length && options.length < 6; i++) {
+    const line = lines[i];
 
-  if (!correctAnswerText) return null;
+    // Check if this is a general explanation line (starts with :: alone)
+    if (line.startsWith('::') && !line.match(/^[*]?[A-Da-d]?[\.\)\s]?/)) {
+      explanation = line.substring(2).trim();
+      continue;
+    }
 
-  // Clean options
-  const cleanOptions = options.map(opt =>
-    opt.replace(/^\*/, '').replace(/\(correcta\)/g, '').trim()
-  );
+    // Detect if option is correct
+    const isCorrect = line.startsWith('*') || line.includes('(correcta)');
+    let fullOptionText = line.replace(/^\*/, '').replace(/\(correcta\)/g, '').trim();
 
-  const correctAnswerCleaned = correctAnswerText
-    .replace(/^\*/, '')
-    .replace(/\(correcta\)/g, '')
-    .trim();
+    // Remove leading letter if present (A., B), etc.)
+    fullOptionText = removeLeadingLetter(fullOptionText);
 
-  const correctIndex = cleanOptions.findIndex(opt => opt === correctAnswerCleaned);
+    // Separate option text from inline explanation (:: syntax)
+    let optionText = fullOptionText;
+    let inlineExplanation = null;
 
-  if (correctIndex === -1) return null;
+    const explIndex = fullOptionText.indexOf('::');
+    if (explIndex !== -1) {
+      optionText = fullOptionText.substring(0, explIndex).trim();
+      inlineExplanation = fullOptionText.substring(explIndex + 2).trim();
+    }
+
+    if (optionText) {
+      if (isCorrect) {
+        correctIndices.push(options.length);
+      }
+      options.push(optionText);
+      optionExplanations.push(inlineExplanation);
+    }
+  }
+
+  // Validate: at least 2 options and at least 1 correct answer
+  if (options.length < 2 || correctIndices.length === 0) return null;
 
   return {
     type: EXERCISE_TYPES.MULTIPLE_CHOICE,
     category,
     question,
-    options: cleanOptions,
-    correct: correctIndex
+    options,
+    optionExplanations,
+    correct: correctIndices.length === 1 ? correctIndices[0] : correctIndices,
+    explanation
   };
 }
 
@@ -553,8 +1094,25 @@ function parseInfoTable(text, category) {
 }
 
 /**
- * Legacy parser for backward compatibility
- * Parses old-style multiple choice questions
+ * Enhanced parser for multiple choice questions
+ * Supports:
+ * - Multiple correct answers (multiple * markers)
+ * - 2-6 options (flexible, not fixed to 4)
+ * - Inline explanations per option (:: syntax)
+ * - General explanation (:: on its own line)
+ *
+ * Format:
+ * Question text?
+ * *Option 1 :: why this is correct
+ * Option 2
+ * *Option 3
+ * Option 4
+ * :: General explanation
+ *
+ * Next question?
+ * Option A
+ * *Option B
+ * Option C
  */
 export function parseQuestions(text, category) {
   const parsedQuestions = [];
@@ -563,42 +1121,71 @@ export function parseQuestions(text, category) {
     .map(line => line.trim())
     .filter(line => line.length > 0);
 
-  for (let i = 0; i < allLines.length; i += 5) {
-    if (i + 4 < allLines.length) {
-      const questionText = allLines[i];
-      const options = [
-        allLines[i + 1],
-        allLines[i + 2],
-        allLines[i + 3],
-        allLines[i + 4]
-      ];
+  let i = 0;
+  while (i < allLines.length) {
+    const questionText = allLines[i];
+    i++;
 
-      const correctAnswerText = options.find((opt) =>
-        opt.startsWith('*') || opt.includes('(correcta)')
-      );
+    // Collect options (up to 6, or until we hit a line that looks like a new question)
+    const options = [];
+    const optionExplanations = [];
+    const correctIndices = [];
+    let explanation = null;
 
-      if (correctAnswerText) {
-        const cleanOptions = options.map((opt) =>
-          opt.replace(/^\*/, '').replace(/\(correcta\)/g, '').trim()
-        );
+    while (i < allLines.length && options.length < 6) {
+      const line = allLines[i];
 
-        const correctAnswerCleaned = correctAnswerText
-          .replace(/^\*/, '')
-          .replace(/\(correcta\)/g, '')
-          .trim();
-
-        const correctIndex = cleanOptions.findIndex(opt => opt === correctAnswerCleaned);
-
-        if (correctIndex !== -1) {
-          parsedQuestions.push({
-            type: EXERCISE_TYPES.MULTIPLE_CHOICE,
-            question: questionText,
-            options: cleanOptions,
-            correct: correctIndex,
-            category: category
-          });
-        }
+      // Check if this is a general explanation line (starts with :: alone)
+      if (line.startsWith('::') && !line.match(/^[*]?[A-Da-d]?[\.\)\s]/)) {
+        explanation = line.substring(2).trim();
+        i++;
+        continue;
       }
+
+      // Check if this looks like a new question (ends with ? and isn't an option)
+      // A new question typically doesn't start with *, A), B), etc.
+      if (options.length >= 2 && line.endsWith('?') && !line.startsWith('*') && !line.match(/^[A-Da-d][\.\)]/)) {
+        break; // This is the next question
+      }
+
+      // Detect if option is correct
+      const isCorrect = line.startsWith('*') || line.includes('(correcta)');
+      let fullOptionText = line.replace(/^\*/, '').replace(/\(correcta\)/g, '').trim();
+
+      // Remove leading letter if present (A., B), etc.)
+      fullOptionText = removeLeadingLetter(fullOptionText);
+
+      // Separate option text from inline explanation (:: syntax)
+      let optionText = fullOptionText;
+      let inlineExplanation = null;
+
+      const explIndex = fullOptionText.indexOf('::');
+      if (explIndex !== -1) {
+        optionText = fullOptionText.substring(0, explIndex).trim();
+        inlineExplanation = fullOptionText.substring(explIndex + 2).trim();
+      }
+
+      if (optionText) {
+        if (isCorrect) {
+          correctIndices.push(options.length);
+        }
+        options.push(optionText);
+        optionExplanations.push(inlineExplanation);
+      }
+      i++;
+    }
+
+    // Validate: at least 2 options and at least 1 correct answer
+    if (options.length >= 2 && correctIndices.length > 0) {
+      parsedQuestions.push({
+        type: EXERCISE_TYPES.MULTIPLE_CHOICE,
+        question: questionText,
+        options,
+        optionExplanations,
+        correct: correctIndices.length === 1 ? correctIndices[0] : correctIndices,
+        explanation,
+        category
+      });
     }
   }
 

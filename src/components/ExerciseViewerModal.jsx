@@ -5,18 +5,20 @@
  */
 
 import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
-import { X, Loader2, Edit2, Maximize2, Minimize2, RotateCcw } from 'lucide-react';
+import { X, Loader2, Edit2, Maximize2, Minimize2, RotateCcw, Type } from 'lucide-react';
 import { BaseModal, BaseButton } from './common';
 import WordHighlightExercise from './container/WordHighlightExercise';
+import ChainedExerciseViewer from './ChainedExerciseViewer';
 import { getDisplayClasses, getDisplayStyles, mergeDisplaySettings } from '../constants/displaySettings';
 import logger from '../utils/logger';
-import { parseExerciseFile } from '../utils/exerciseParser.js';
+import { parseExerciseFile, parseChainedExercises, parseQuestions, CHAIN_MARKERS } from '../utils/exerciseParser.js';
 
 // Lazy load de componentes de ejercicios adicionales
 const DragDropBlanksExercise = lazy(() => import('./container/DragDropBlanksExercise'));
 const FillInBlanksExercise = lazy(() => import('./container/FillInBlanksExercise'));
 const DialoguesExercise = lazy(() => import('./container/DialoguesExercise'));
 const OpenQuestionsExercise = lazy(() => import('./container/OpenQuestionsExercise'));
+const MultipleChoiceExercise = lazy(() => import('./container/MultipleChoiceExercise'));
 
 /**
  * Spinner de carga para lazy components
@@ -38,15 +40,31 @@ const EXERCISE_TYPES = {
   DRAGDROP: 'drag-drop',
   FILLBLANKS: 'fill-blanks',
   DIALOGUES: 'dialogues',
-  OPEN_QUESTIONS: 'open-questions'
+  OPEN_QUESTIONS: 'open-questions',
+  MULTIPLE_CHOICE: 'multiple-choice',
+  CHAINED: 'chained-exercises' // Múltiples ejercicios encadenados
 };
 
 /**
  * Detectar tipo de ejercicio basado en prefijo o contenido
  * Prefijos soportados: #marcar, #arrastrar, #completar, #dialogo
+ * NUEVO: Detecta ejercicios encadenados (múltiples marcadores)
  */
 function detectExerciseType(content) {
   if (!content) return { type: null, cleanContent: content };
+
+  // PRIMERO: Detectar si hay múltiples marcadores (ejercicios encadenados)
+  const chainedSections = parseChainedExercises(content);
+  console.log('🔗 Chained sections detected:', chainedSections.length, chainedSections.map(s => s.type));
+
+  // Si hay 2 o más secciones con marcadores válidos, es un ejercicio encadenado
+  if (chainedSections.length >= 2) {
+    console.log('✅ Detected as CHAINED exercise');
+    return {
+      type: EXERCISE_TYPES.CHAINED,
+      cleanContent: content // Mantener contenido completo para ChainedExerciseViewer
+    };
+  }
 
   const lines = content.trim().split('\n');
   const firstLine = lines[0].toLowerCase().trim();
@@ -95,16 +113,45 @@ function detectExerciseType(content) {
   }
 
   // Detectar diálogos por formato (Personaje: texto)
-  const dialoguePattern = /^[A-Za-zÀ-ÿ\s]+:\s*.+$/m;
-  if (dialoguePattern.test(content) && content.split('\n').filter(l => dialoguePattern.test(l.trim())).length >= 2) {
+  // IMPORTANTE: No confundir con :: de explicaciones de opción múltiple
+  const dialoguePattern = /^[A-Za-zÀ-ÿ\s]+:\s+[^:].*$/m; // Un solo : seguido de espacio y NO otro :
+  const dialogueLines = content.split('\n').filter(l => {
+    const trimmed = l.trim();
+    // Excluir líneas que tienen :: (explicaciones)
+    if (trimmed.includes('::')) return false;
+    return dialoguePattern.test(trimmed);
+  });
+
+  if (dialogueLines.length >= 2) {
     return {
       type: EXERCISE_TYPES.DIALOGUES,
       cleanContent: content
     };
   }
 
-  // Fallback: detectar por contenido (si tiene asteriscos, default a highlight)
+  // Detectar OPCIÓN MÚLTIPLE por formato:
+  // - Líneas que empiezan con * (sin cerrar con *)
+  // - Al menos 2 opciones (líneas no vacías)
+  // - Puede tener :: para explicaciones
+  const optionLines = content.split('\n').filter(l => {
+    const trimmed = l.trim();
+    // Línea que empieza con * pero NO es *palabra* (highlight)
+    return trimmed.startsWith('*') && !trimmed.match(/^\*[^*]+\*$/);
+  });
+
+  // Si hay al menos 2 opciones con formato *opción, es opción múltiple
+  if (optionLines.length >= 2) {
+    console.log('✅ Detected as MULTIPLE CHOICE (by * prefix)');
+    return {
+      type: EXERCISE_TYPES.MULTIPLE_CHOICE,
+      cleanContent: content
+    };
+  }
+
+  // Fallback: detectar por contenido (si tiene *palabra*, default a highlight)
+  // SOLO si el patrón es *palabra* (asteriscos que abren Y cierran)
   if (/\*([^*]+)\*/g.test(content)) {
+    console.log('✅ Detected as WORD HIGHLIGHT (by *word* pattern)');
     return {
       type: EXERCISE_TYPES.HIGHLIGHT,
       cleanContent: content
@@ -124,6 +171,7 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
   const [result, setResult] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [exerciseActions, setExerciseActions] = useState(null);
+  const [fontScale, setFontScale] = useState(100); // 80-200%
 
   useEffect(() => {
     if (!exercise) return;
@@ -217,6 +265,11 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
       }
     } else if (type === EXERCISE_TYPES.OPEN_QUESTIONS) {
       const savedConfig = localStorage.getItem('xiwen_open_questions_config');
+      if (savedConfig) {
+        setConfig(JSON.parse(savedConfig));
+      }
+    } else if (type === EXERCISE_TYPES.MULTIPLE_CHOICE) {
+      const savedConfig = localStorage.getItem('xiwen_multipleChoiceConfig');
       if (savedConfig) {
         setConfig(JSON.parse(savedConfig));
       }
@@ -395,6 +448,76 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
         }
       }
 
+      case EXERCISE_TYPES.MULTIPLE_CHOICE: {
+        // Usar el parser que YA FUNCIONA en el juego por turnos
+        try {
+          console.log('%c🎯 PARSEANDO MULTIPLE CHOICE (usando parseQuestions)', 'background: orange; color: white; font-size: 14px; padding: 3px;');
+          console.log('📝 cleanContent:', cleanContent);
+
+          // Limpiar contenido: quitar marcador #opcion_multiple si existe
+          let textToProcess = cleanContent;
+          const lines = cleanContent.split('\n');
+          if (lines[0] && (lines[0].toLowerCase().trim().startsWith('#opcion') || lines[0].toLowerCase().trim().startsWith('#multiple'))) {
+            textToProcess = lines.slice(1).join('\n').trim();
+          }
+          console.log('📝 textToProcess (sin marcador):', textToProcess);
+
+          // parseQuestions devuelve array de preguntas en formato correcto
+          const questions = parseQuestions(textToProcess, 'General');
+          console.log('📦 Parsed questions:', questions);
+
+          if (!questions || questions.length === 0) {
+            return (
+              <div className="text-center py-12">
+                <p style={{ color: 'var(--color-text-secondary)' }}>
+                  No se pudieron parsear las preguntas de opción múltiple.
+                </p>
+                <div className="mt-4 p-4 rounded-lg text-left max-w-md mx-auto" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+                  <pre className="text-xs whitespace-pre-wrap" style={{ color: 'var(--color-text-tertiary)' }}>
+                    {cleanContent?.substring(0, 300)}...
+                  </pre>
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <Suspense fallback={<ExerciseLoader />}>
+              <MultipleChoiceExercise
+                questions={questions}
+                config={config || {}}
+                onComplete={handleComplete}
+              />
+            </Suspense>
+          );
+        } catch (error) {
+          logger.error('Error parsing multiple choice:', error);
+          return (
+            <div className="text-center py-12">
+              <p style={{ color: 'var(--color-text-secondary)' }}>
+                Error al parsear el ejercicio: {error.message}
+              </p>
+              <div className="mt-4 p-4 rounded-lg text-left max-w-md mx-auto" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+                <pre className="text-xs whitespace-pre-wrap" style={{ color: 'var(--color-text-tertiary)' }}>
+                  {cleanContent}
+                </pre>
+              </div>
+            </div>
+          );
+        }
+      }
+
+      case EXERCISE_TYPES.CHAINED:
+        return (
+          <ChainedExerciseViewer
+            text={cleanContent}
+            defaultMode="scroll"
+            showModeToggle={true}
+            showProgress={true}
+            maxHeight="calc(80vh - 200px)"
+          />
+        );
+
       default:
         return (
           <div className="text-center py-12">
@@ -537,8 +660,30 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
       size={isExpanded ? 'fullscreen' : 'xl'}
       noPadding={true}
       footer={renderFooter()}
+      className="min-h-[735px]"
       headerActions={
         <>
+          {/* Control de tamaño de fuente */}
+          <div className="flex items-center gap-2">
+            <Type size={18} style={{ color: 'var(--color-text-secondary)' }} />
+            <input
+              type="range"
+              min="80"
+              max="200"
+              step="10"
+              value={fontScale}
+              onChange={(e) => setFontScale(parseInt(e.target.value))}
+              className="w-24 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full appearance-none cursor-pointer"
+              style={{
+                backgroundImage: `linear-gradient(to right, var(--color-primary) 0%, var(--color-primary) ${((fontScale - 80) / 120) * 100}%, transparent ${((fontScale - 80) / 120) * 100}%)`
+              }}
+              title={`Tamaño de fuente: ${fontScale}%`}
+            />
+            <span className="text-xs font-medium min-w-[3ch]" style={{ color: 'var(--color-text-secondary)' }}>
+              {fontScale}%
+            </span>
+          </div>
+
           {/* Botón Expandir */}
           <button
             className="flex items-center justify-center w-9 h-9 rounded-lg active:scale-95 transition-all"
@@ -589,13 +734,16 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
         </>
       }
     >
-      {/* Ejercicio interactivo con displaySettings aplicados */}
-      <div className={`${displayClasses.content} ${displayClasses.text}`} style={displayStyles}>
+{/* Ejercicio interactivo con displaySettings y escala de fuente */}
+      <div
+        className={`px-6 py-4 ${displayClasses.content} ${displayClasses.text}`}
+        style={{ ...displayStyles, fontSize: `${fontScale / 100}rem` }}
+      >
         {renderExercise()}
       </div>
 
-      {/* Resultado final */}
-      {result && (
+      {/* Resultado final - SOLO para ejercicios que no manejan su propia pantalla de resultados */}
+      {result && exerciseType !== EXERCISE_TYPES.MULTIPLE_CHOICE && (
         <div
           className="mx-6 mb-6 mt-6 p-6 rounded-lg text-center"
           style={{ backgroundColor: 'var(--color-bg-secondary)' }}

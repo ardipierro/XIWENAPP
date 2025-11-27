@@ -3,8 +3,8 @@
  * @module components/CreateContentModal
  */
 
-import { useState, useEffect } from 'react';
-import { Save, FileText, Sparkles, Edit3, Layers, ArrowUpDown, Palette, FileCheck, Eye, Archive, Send, Trash2, Layout } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Save, FileText, Sparkles, Edit3, Layers, ArrowUpDown, Palette, FileCheck, Eye, Archive, Send, Trash2, Layout, Link2 } from 'lucide-react';
 import {
   BaseModal,
   BaseButton,
