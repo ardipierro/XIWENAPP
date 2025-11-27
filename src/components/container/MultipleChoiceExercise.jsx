@@ -582,8 +582,9 @@ function MultipleChoiceExercise({
         </div>
       </div>
 
-      {/* Current Question */}
+      {/* Current Question - key fuerza re-mount al cambiar pregunta */}
       <QuestionCard
+        key={currentQuestionIndex}
         question={currentQuestion}
         questionIndex={currentQuestionIndex}
         config={config}

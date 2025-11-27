@@ -660,6 +660,7 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit }) {
       size={isExpanded ? 'fullscreen' : 'xl'}
       noPadding={true}
       footer={renderFooter()}
+      className="min-h-[600px]"
       headerActions={
         <>
           {/* Botón Expandir */}
