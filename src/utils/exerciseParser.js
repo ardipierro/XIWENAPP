@@ -23,8 +23,424 @@ export const EXERCISE_TYPES = {
   DRAG_DROP: 'drag_drop',
   TABLE: 'table',
   OPEN_QUESTIONS: 'open_questions',
-  INFO_TABLE: 'info_table'
+  INFO_TABLE: 'info_table',
+  // Nuevos tipos para ejercicios encadenados
+  MARK_WORDS: 'mark_words',
+  TEXT: 'text'
 };
+
+/**
+ * Marcadores en español para ejercicios encadenados
+ * Mapea #marcador -> tipo de ejercicio
+ */
+export const CHAIN_MARKERS = {
+  '#marcar': EXERCISE_TYPES.MARK_WORDS,
+  '#seleccionar': EXERCISE_TYPES.HIGHLIGHT,
+  '#arrastrar': EXERCISE_TYPES.DRAG_DROP,
+  '#ordenar': EXERCISE_TYPES.ORDER,
+  '#respuesta_libre': EXERCISE_TYPES.OPEN_QUESTIONS,
+  '#pregunta_abierta': EXERCISE_TYPES.OPEN_QUESTIONS,
+  '#opcion_multiple': EXERCISE_TYPES.MULTIPLE_CHOICE,
+  '#completar': EXERCISE_TYPES.FILL_BLANK,
+  '#emparejar': EXERCISE_TYPES.MATCHING,
+  '#verdadero_falso': EXERCISE_TYPES.TRUE_FALSE,
+  '#tabla': EXERCISE_TYPES.TABLE,
+  '#tabla_info': EXERCISE_TYPES.INFO_TABLE,
+  '#texto': EXERCISE_TYPES.TEXT
+};
+
+/**
+ * Parsea texto con múltiples ejercicios encadenados usando marcadores #tipo
+ *
+ * @param {string} text - Texto completo con ejercicios encadenados
+ * @returns {Array} Array de secciones parseadas con tipo y contenido
+ *
+ * Ejemplo de entrada:
+ * ```
+ * #marcar
+ * El gato [corre] por el jardín.
+ *
+ * #respuesta_libre
+ * 1. ¿Cómo te llamas?
+ * 2. ¿De dónde eres?
+ * ```
+ */
+export function parseChainedExercises(text) {
+  if (!text || typeof text !== 'string') return [];
+
+  const sections = [];
+  const markerPattern = /^(#\w+)/gm;
+  const markers = Object.keys(CHAIN_MARKERS);
+
+  // Encontrar todas las posiciones de marcadores
+  const markerPositions = [];
+  let match;
+
+  while ((match = markerPattern.exec(text)) !== null) {
+    const marker = match[1].toLowerCase();
+    if (markers.includes(marker)) {
+      markerPositions.push({
+        marker,
+        type: CHAIN_MARKERS[marker],
+        index: match.index,
+        endIndex: match.index + match[0].length
+      });
+    }
+  }
+
+  // Si no hay marcadores, devolver todo como texto plano
+  if (markerPositions.length === 0) {
+    const trimmed = text.trim();
+    if (trimmed) {
+      return [{
+        id: 'section-0',
+        type: EXERCISE_TYPES.TEXT,
+        marker: '#texto',
+        rawContent: trimmed,
+        parsed: { content: trimmed }
+      }];
+    }
+    return [];
+  }
+
+  // Extraer contenido entre marcadores
+  for (let i = 0; i < markerPositions.length; i++) {
+    const current = markerPositions[i];
+    const next = markerPositions[i + 1];
+
+    // Contenido desde después del marcador hasta el próximo marcador (o fin del texto)
+    const contentStart = current.endIndex;
+    const contentEnd = next ? next.index : text.length;
+    const rawContent = text.substring(contentStart, contentEnd).trim();
+
+    if (rawContent) {
+      const parsed = parseChainedSection(rawContent, current.type);
+      sections.push({
+        id: `section-${i}`,
+        type: current.type,
+        marker: current.marker,
+        rawContent,
+        parsed
+      });
+    }
+  }
+
+  return sections;
+}
+
+/**
+ * Parsea una sección individual según su tipo
+ */
+function parseChainedSection(content, type) {
+  switch (type) {
+    case EXERCISE_TYPES.MARK_WORDS:
+      return parseMarkWords(content);
+    case EXERCISE_TYPES.HIGHLIGHT:
+      return parseHighlightSection(content);
+    case EXERCISE_TYPES.DRAG_DROP:
+    case EXERCISE_TYPES.ORDER:
+      return parseDragDropSection(content);
+    case EXERCISE_TYPES.OPEN_QUESTIONS:
+      return parseOpenQuestionsSection(content);
+    case EXERCISE_TYPES.MULTIPLE_CHOICE:
+      return parseMCQSection(content);
+    case EXERCISE_TYPES.FILL_BLANK:
+      return parseFillBlankSection(content);
+    case EXERCISE_TYPES.MATCHING:
+      return parseMatchingSection(content);
+    case EXERCISE_TYPES.TRUE_FALSE:
+      return parseTrueFalseSection(content);
+    case EXERCISE_TYPES.TABLE:
+    case EXERCISE_TYPES.INFO_TABLE:
+      return parseTableSection(content);
+    case EXERCISE_TYPES.TEXT:
+    default:
+      return { content };
+  }
+}
+
+/**
+ * Parsea ejercicio de marcar palabras
+ * Formato: Texto con [palabras] entre corchetes para marcar
+ */
+function parseMarkWords(content) {
+  const lines = content.split('\n').filter(l => l.trim());
+  let instruction = '';
+  let text = '';
+  const wordsToMark = [];
+
+  for (const line of lines) {
+    if (line.toUpperCase().startsWith('INSTRUCCION:') || line.toUpperCase().startsWith('INSTRUCTION:')) {
+      instruction = line.split(':').slice(1).join(':').trim();
+    } else {
+      text += (text ? '\n' : '') + line;
+    }
+  }
+
+  // Extraer palabras entre [corchetes]
+  const bracketPattern = /\[([^\]]+)\]/g;
+  let match;
+  while ((match = bracketPattern.exec(text)) !== null) {
+    wordsToMark.push(match[1]);
+  }
+
+  // Limpiar texto de corchetes para mostrar
+  const cleanText = text.replace(/\[([^\]]+)\]/g, '$1');
+
+  return {
+    instruction: instruction || 'Selecciona las palabras indicadas',
+    text: cleanText,
+    wordsToMark,
+    originalText: text
+  };
+}
+
+/**
+ * Parsea ejercicio de seleccionar/highlight
+ */
+function parseHighlightSection(content) {
+  const lines = content.split('\n').filter(l => l.trim());
+  let instruction = '';
+  let text = '';
+  let targetWords = [];
+
+  for (const line of lines) {
+    if (line.toUpperCase().startsWith('INSTRUCCION:')) {
+      instruction = line.split(':').slice(1).join(':').trim();
+    } else if (line.toUpperCase().startsWith('PALABRAS:') || line.toUpperCase().startsWith('WORDS:')) {
+      targetWords = line.split(':').slice(1).join(':').split(/[,|]/).map(w => w.trim());
+    } else if (line.toUpperCase().startsWith('TEXTO:') || line.toUpperCase().startsWith('TEXT:')) {
+      text = line.split(':').slice(1).join(':').trim();
+    } else if (!text) {
+      text = line;
+    }
+  }
+
+  return {
+    instruction: instruction || 'Selecciona las palabras correctas',
+    text,
+    targetWords
+  };
+}
+
+/**
+ * Parsea ejercicio de arrastrar/ordenar
+ */
+function parseDragDropSection(content) {
+  const lines = content.split('\n').filter(l => l.trim());
+  let instruction = '';
+  let words = [];
+  let correctOrder = [];
+
+  for (const line of lines) {
+    if (line.toUpperCase().startsWith('INSTRUCCION:')) {
+      instruction = line.split(':').slice(1).join(':').trim();
+    } else if (line.toUpperCase().startsWith('PALABRAS:') || line.toUpperCase().startsWith('WORDS:')) {
+      words = line.split(':').slice(1).join(':').split('|').map(w => w.trim());
+    } else if (line.toUpperCase().startsWith('ORDEN:') || line.toUpperCase().startsWith('ORDER:')) {
+      correctOrder = line.split(':').slice(1).join(':').split('|').map(w => w.trim());
+    }
+  }
+
+  // Si no hay palabras explícitas, intentar parsear formato simple
+  if (words.length === 0) {
+    const firstLine = lines.find(l => !l.includes(':'));
+    if (firstLine) {
+      words = firstLine.split(/[|,]/).map(w => w.trim());
+      correctOrder = [...words];
+    }
+  }
+
+  return {
+    instruction: instruction || 'Ordena las palabras correctamente',
+    words,
+    correctOrder: correctOrder.length > 0 ? correctOrder : words,
+    shuffledWords: [...words].sort(() => Math.random() - 0.5)
+  };
+}
+
+/**
+ * Parsea ejercicio de respuesta libre/preguntas abiertas
+ */
+function parseOpenQuestionsSection(content) {
+  const lines = content.split('\n').filter(l => l.trim());
+  const questions = [];
+  let currentQuestion = null;
+
+  for (const line of lines) {
+    // Formato numerado: 1. Pregunta
+    if (/^\d+[\.\)]\s+/.test(line)) {
+      if (currentQuestion) questions.push(currentQuestion);
+      currentQuestion = {
+        question: line.replace(/^\d+[\.\)]\s+/, '').trim(),
+        answer: null
+      };
+    }
+    // Formato P: Pregunta
+    else if (line.toUpperCase().startsWith('P:') || line.toUpperCase().startsWith('PREGUNTA:')) {
+      if (currentQuestion) questions.push(currentQuestion);
+      currentQuestion = {
+        question: line.split(':').slice(1).join(':').trim(),
+        answer: null
+      };
+    }
+    // Respuesta esperada
+    else if (line.toUpperCase().startsWith('R:') || line.toUpperCase().startsWith('RESPUESTA:')) {
+      if (currentQuestion) {
+        currentQuestion.answer = line.split(':').slice(1).join(':').trim();
+      }
+    }
+    // Línea con guión como respuesta
+    else if (line.startsWith('-') && currentQuestion && !currentQuestion.answer) {
+      currentQuestion.answer = line.replace(/^-\s*/, '').trim();
+    }
+  }
+
+  if (currentQuestion) questions.push(currentQuestion);
+
+  return { questions };
+}
+
+/**
+ * Parsea ejercicio de opción múltiple
+ */
+function parseMCQSection(content) {
+  const lines = content.split('\n').filter(l => l.trim());
+  let question = '';
+  const options = [];
+  let correctAnswer = null;
+  let explanation = '';
+
+  for (const line of lines) {
+    // Opciones entre corchetes: [opcion]* donde * marca la correcta
+    if (line.includes('[') && line.includes(']')) {
+      const optionPattern = /\[([^\]]+)\](\*)?/g;
+      let match;
+      while ((match = optionPattern.exec(line)) !== null) {
+        const optionText = match[1].trim();
+        const isCorrect = match[2] === '*';
+        options.push({ text: optionText, correct: isCorrect });
+        if (isCorrect) correctAnswer = optionText;
+      }
+    }
+    else if (line.toUpperCase().startsWith('EXPLICACION:')) {
+      explanation = line.split(':').slice(1).join(':').trim();
+    }
+    else if (!question && !line.startsWith('[')) {
+      question = line;
+    }
+  }
+
+  return { question, options, correctAnswer, explanation };
+}
+
+/**
+ * Parsea ejercicio de completar espacios
+ */
+function parseFillBlankSection(content) {
+  const lines = content.split('\n').filter(l => l.trim());
+  let sentence = '';
+  let answers = [];
+  let explanation = '';
+
+  for (const line of lines) {
+    if (line.toUpperCase().startsWith('RESPUESTA:') || line.toUpperCase().startsWith('ANSWER:')) {
+      answers = line.split(':').slice(1).join(':').split(/[,|]/).map(a => a.trim());
+    } else if (line.toUpperCase().startsWith('EXPLICACION:')) {
+      explanation = line.split(':').slice(1).join(':').trim();
+    } else if (line.includes('___') || line.includes('____')) {
+      sentence = line;
+    } else if (!sentence) {
+      sentence = line;
+    }
+  }
+
+  return { sentence, answers, explanation };
+}
+
+/**
+ * Parsea ejercicio de emparejar
+ */
+function parseMatchingSection(content) {
+  const lines = content.split('\n').filter(l => l.trim());
+  const pairs = [];
+  let title = '';
+
+  for (const line of lines) {
+    if (line.toUpperCase().startsWith('TITULO:')) {
+      title = line.split(':').slice(1).join(':').trim();
+    } else if (line.includes('->') || line.includes('=')) {
+      const separator = line.includes('->') ? '->' : '=';
+      const parts = line.split(separator);
+      if (parts.length === 2) {
+        pairs.push({
+          left: parts[0].trim(),
+          right: parts[1].trim()
+        });
+      }
+    }
+  }
+
+  return { title: title || 'Empareja los elementos', pairs };
+}
+
+/**
+ * Parsea ejercicio verdadero/falso
+ */
+function parseTrueFalseSection(content) {
+  const lines = content.split('\n').filter(l => l.trim());
+  let statement = '';
+  let correct = null;
+  let explanation = '';
+
+  for (const line of lines) {
+    const upperLine = line.toUpperCase();
+    if (upperLine.startsWith('RESPUESTA:') || upperLine.startsWith('ANSWER:')) {
+      const answer = line.split(':').slice(1).join(':').trim().toUpperCase();
+      correct = ['TRUE', 'VERDADERO', 'V', 'SI', 'YES'].includes(answer);
+    } else if (upperLine.startsWith('EXPLICACION:')) {
+      explanation = line.split(':').slice(1).join(':').trim();
+    } else if (upperLine === 'TRUE' || upperLine === 'FALSE' ||
+               upperLine === 'VERDADERO' || upperLine === 'FALSO' ||
+               upperLine === 'V' || upperLine === 'F') {
+      correct = ['TRUE', 'VERDADERO', 'V'].includes(upperLine);
+    } else if (!statement) {
+      statement = line;
+    }
+  }
+
+  return { statement, correct, explanation };
+}
+
+/**
+ * Parsea tabla informativa
+ */
+function parseTableSection(content) {
+  const lines = content.split('\n').filter(l => l.trim());
+  let title = '';
+  let columns = [];
+  const rows = [];
+  const notes = [];
+
+  for (const line of lines) {
+    if (line.toUpperCase().startsWith('TITULO:')) {
+      title = line.split(':').slice(1).join(':').trim();
+    } else if (line.toUpperCase().startsWith('COLUMNAS:') || line.toUpperCase().startsWith('COLUMNS:')) {
+      columns = line.split(':').slice(1).join(':').split('|').map(c => c.trim());
+    } else if (line.toUpperCase().startsWith('NOTA:')) {
+      notes.push(line.split(':').slice(1).join(':').trim());
+    } else if (line.includes('|')) {
+      const cells = line.split('|').map(c => c.trim());
+      if (columns.length === 0) {
+        columns = cells;
+      } else {
+        rows.push(cells);
+      }
+    }
+  }
+
+  return { title, columns, rows, notes };
+}
 
 /**
  * Main parser function that detects and routes to specific parsers

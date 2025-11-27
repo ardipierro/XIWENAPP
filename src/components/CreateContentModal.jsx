@@ -3,8 +3,8 @@
  * @module components/CreateContentModal
  */
 
-import { useState, useEffect } from 'react';
-import { Save, FileText, Sparkles, Edit3, Layers, ArrowUpDown, Palette, FileCheck, Eye, Archive, Send, Trash2 } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Save, FileText, Sparkles, Edit3, Layers, ArrowUpDown, Palette, FileCheck, Eye, Archive, Send, Trash2, Link2 } from 'lucide-react';
 import {
   BaseModal,
   BaseButton,
@@ -19,6 +19,8 @@ import { getAllContent } from '../firebase/content';
 import ExerciseGeneratorContent from './ExerciseGeneratorContent';
 import ContentOrderEditor from './ContentOrderEditor';
 import ContentStyleEditor from './ContentStyleEditor';
+import ChainedExerciseViewer from './ChainedExerciseViewer';
+import { parseChainedExercises, CHAIN_MARKERS } from '../utils/exerciseParser';
 import logger from '../utils/logger';
 
 const TYPE_OPTIONS = [
@@ -465,10 +467,11 @@ function CreateContentModal({ isOpen, onClose, onSave, onDelete, initialData = n
           </BaseAlert>
         )}
 
-        {/* Tabs: Manual vs IA - Using BaseTabs component */}
+        {/* Tabs: Manual vs IA vs Encadenados - Using BaseTabs component */}
         <BaseTabs
           tabs={[
             { id: 'manual', label: 'Manual', icon: Edit3 },
+            { id: 'chained', label: 'Encadenar', icon: Link2 },
             { id: 'ai', label: 'Generar con IA', icon: Sparkles },
           ]}
           activeTab={activeTab}
@@ -833,6 +836,14 @@ function CreateContentModal({ isOpen, onClose, onSave, onDelete, initialData = n
           </div>
         )}
 
+        {/* Contenido Tab Encadenar Ejercicios */}
+        {activeTab === 'chained' && (
+          <ChainedExerciseTab
+            formData={formData}
+            handleChange={handleChange}
+          />
+        )}
+
         {/* Contenido Tab IA */}
         {activeTab === 'ai' && (
           <div className="min-h-[500px] space-y-4">
@@ -877,6 +888,163 @@ function CreateContentModal({ isOpen, onClose, onSave, onDelete, initialData = n
       />
     </BaseModal>
     </>
+  );
+}
+
+/**
+ * Tab de Ejercicios Encadenados
+ * Permite escribir múltiples ejercicios con marcadores y ver preview
+ */
+function ChainedExerciseTab({ formData, handleChange }) {
+  const [showPreview, setShowPreview] = useState(false);
+
+  // Detectar si el texto tiene marcadores válidos
+  const hasChainedMarkers = useMemo(() => {
+    if (!formData.body) return false;
+    const markers = Object.keys(CHAIN_MARKERS);
+    return markers.some(marker =>
+      formData.body.toLowerCase().includes(marker)
+    );
+  }, [formData.body]);
+
+  // Parsear ejercicios para mostrar contador
+  const parsedSections = useMemo(() => {
+    if (!formData.body) return [];
+    return parseChainedExercises(formData.body);
+  }, [formData.body]);
+
+  // Ejemplo de texto con marcadores
+  const exampleText = `#marcar
+INSTRUCCION: Selecciona los verbos
+El gato [corre] por el jardín mientras el perro [duerme] bajo el árbol.
+
+#arrastrar
+INSTRUCCION: Ordena la oración
+PALABRAS: Yo|me|levanto|temprano|todos|los|días
+ORDEN: Yo|me|levanto|temprano|todos|los|días
+
+#respuesta_libre
+1. ¿Cómo te llamas?
+2. ¿De dónde eres?
+3. ¿Qué idiomas hablas?
+
+#opcion_multiple
+¿Cómo se dice "hello" en español?
+[hola]* [adiós] [gracias] [por favor]
+EXPLICACION: "Hola" es el saludo más común.
+
+#completar
+Me ___ María y ___ de España.
+RESPUESTA: llamo, soy
+
+#emparejar
+TITULO: Empareja los saludos
+Hola -> Hello
+Adiós -> Goodbye
+Gracias -> Thank you
+Por favor -> Please`;
+
+  return (
+    <div className="min-h-[500px] space-y-6">
+      {/* Instrucciones */}
+      <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-xl">
+        <h3 className="font-semibold text-indigo-900 dark:text-indigo-100 mb-2 flex items-center gap-2">
+          <Link2 size={18} />
+          Ejercicios Encadenados
+        </h3>
+        <p className="text-sm text-indigo-700 dark:text-indigo-300 mb-3">
+          Escribe múltiples ejercicios en un solo texto usando marcadores <code className="bg-indigo-100 dark:bg-indigo-800 px-1 rounded">#tipo</code>.
+          Cada marcador inicia un nuevo ejercicio que será renderizado con su formato correspondiente.
+        </p>
+
+        {/* Marcadores disponibles */}
+        <div className="flex flex-wrap gap-2">
+          {Object.keys(CHAIN_MARKERS).map(marker => (
+            <code
+              key={marker}
+              className="px-2 py-0.5 bg-white dark:bg-zinc-800 text-indigo-700 dark:text-indigo-300 rounded text-xs font-mono"
+            >
+              {marker}
+            </code>
+          ))}
+        </div>
+      </div>
+
+      {/* Textarea con el contenido */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+            Contenido con Ejercicios
+          </label>
+          <div className="flex items-center gap-2">
+            {parsedSections.length > 0 && (
+              <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-xs font-medium">
+                {parsedSections.length} ejercicio(s) detectado(s)
+              </span>
+            )}
+            <BaseButton
+              variant="outline"
+              size="sm"
+              onClick={() => handleChange('body', exampleText)}
+            >
+              Cargar ejemplo
+            </BaseButton>
+          </div>
+        </div>
+
+        <BaseTextarea
+          value={formData.body}
+          onChange={(e) => handleChange('body', e.target.value)}
+          placeholder={`Escribe ejercicios usando marcadores...
+
+#marcar
+El gato [corre] por el jardín.
+
+#respuesta_libre
+1. ¿Cómo te llamas?
+2. ¿De dónde eres?`}
+          rows={12}
+          className="font-mono text-sm"
+        />
+      </div>
+
+      {/* Botón de vista previa */}
+      {hasChainedMarkers && (
+        <div className="flex justify-center">
+          <BaseButton
+            variant={showPreview ? 'secondary' : 'primary'}
+            icon={Eye}
+            onClick={() => setShowPreview(!showPreview)}
+          >
+            {showPreview ? 'Ocultar Vista Previa' : 'Ver Vista Previa'}
+          </BaseButton>
+        </div>
+      )}
+
+      {/* Vista previa */}
+      {showPreview && hasChainedMarkers && (
+        <div className="border-t border-zinc-200 dark:border-zinc-700 pt-6">
+          <h3 className="text-lg font-semibold text-zinc-900 dark:text-white mb-4 flex items-center gap-2">
+            <Eye size={20} />
+            Vista Previa
+          </h3>
+          <ChainedExerciseViewer
+            text={formData.body}
+            defaultMode="scroll"
+            showModeToggle={true}
+            maxHeight="500px"
+          />
+        </div>
+      )}
+
+      {/* Tip adicional */}
+      <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+        <p className="text-xs text-amber-800 dark:text-amber-200">
+          💡 <strong>Tip:</strong> Los ejercicios se guardarán en el campo "body" del contenido.
+          Cuando un estudiante abra este contenido, verá los ejercicios formateados con navegación.
+        </p>
+      </div>
+    </div>
   );
 }
 
