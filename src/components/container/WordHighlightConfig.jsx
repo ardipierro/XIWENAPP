@@ -133,6 +133,49 @@ function WordHighlightConfig({ onSave }) {
         </BaseAlert>
       )}
 
+      {/* Guía de formato */}
+      <div className="p-6 rounded-lg border-2 border-blue-200 dark:border-blue-800" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+        <div className="flex items-center gap-2 mb-3">
+          <CheckSquare className="w-5 h-5 text-blue-500" />
+          <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            Cómo Escribir el Texto
+          </h3>
+        </div>
+        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          Para que el ejercicio de <strong>Marcar Palabras</strong> funcione correctamente, escribe el texto y coloca <strong>asteriscos (*)</strong> alrededor de las palabras que deben ser marcadas.
+        </p>
+
+        <div className="space-y-3">
+          <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/10">
+            <p className="text-xs font-semibold mb-2 text-blue-700 dark:text-blue-300">
+              ✏️ Ejemplo de texto:
+            </p>
+            <pre className="text-sm font-mono p-3 rounded bg-white dark:bg-gray-800 overflow-x-auto" style={{ color: 'var(--color-text-primary)' }}>
+{`Yo *como* manzanas y *bebo* agua.
+Mi hermano *corre* en el parque.`}
+            </pre>
+          </div>
+
+          <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/10">
+            <p className="text-xs font-semibold mb-2 text-green-700 dark:text-green-300">
+              ✅ Resultado:
+            </p>
+            <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+              Las palabras <strong className="text-blue-600">como</strong>, <strong className="text-blue-600">bebo</strong> y <strong className="text-blue-600">corre</strong> serán clicables y el alumno deberá marcarlas.
+            </p>
+          </div>
+
+          <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/10">
+            <p className="text-xs font-semibold mb-1 text-yellow-700 dark:text-yellow-300">
+              💡 Tip:
+            </p>
+            <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+              Usa <code className="px-1 py-0.5 bg-white dark:bg-gray-800 rounded">*palabra*</code> para marcar verbos, sustantivos, adjetivos, o cualquier tipo de palabra que quieras que el alumno identifique.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Configuración de colores */}
       <div className="p-6 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
         <h3 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>

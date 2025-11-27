@@ -141,14 +141,60 @@ function InfoTableConfig({ onSave }) {
         </BaseAlert>
       )}
 
-      {/* Info */}
-      <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-        <p className="text-sm text-blue-700 dark:text-blue-300">
-          <strong>Cuadro Informativo:</strong> Tablas para mostrar gramática, conjugaciones, vocabulario
-          comparativo y explicaciones. Soporta modos interactivos.
+      {/* Guía de formato */}
+      <div className="p-6 rounded-lg border-2 border-indigo-200 dark:border-indigo-800" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+        <div className="flex items-center gap-2 mb-3">
+          <Table2 className="w-5 h-5 text-indigo-500" />
+          <h3 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+            Cómo Escribir el Texto
+          </h3>
+        </div>
+        <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+          Para <strong>Cuadros Informativos</strong>, usa el marcador <strong>#TABLA_INFO</strong> y separa las columnas con el carácter <strong>|</strong> (barra vertical). Ideal para mostrar gramática, conjugaciones, vocabulario comparativo, etc.
         </p>
-        <div className="mt-2 text-xs text-blue-600 dark:text-blue-400">
-          <strong>Formato:</strong> <code>#TABLA_INFO</code> con columnas separadas por <code>|</code>
+
+        <div className="space-y-3">
+          <div className="p-4 rounded-lg bg-indigo-50 dark:bg-indigo-900/10">
+            <p className="text-xs font-semibold mb-2 text-indigo-700 dark:text-indigo-300">
+              ✏️ Ejemplo de texto:
+            </p>
+            <pre className="text-sm font-mono p-3 rounded bg-white dark:bg-gray-800 overflow-x-auto" style={{ color: 'var(--color-text-primary)' }}>
+{`#TABLA_INFO
+TÍTULO: Verbos Regulares
+mucho | muy
+Hace mucho calor | El tiempo está muy bueno
+Hace mucho frío | El tiempo está muy malo
+Hay mucho viento | El clima es muy caluroso
+NOTA: muy (副词) + 形容词 / mucho (形容词) + 名词`}
+            </pre>
+          </div>
+
+          <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/10">
+            <p className="text-xs font-semibold mb-2 text-green-700 dark:text-green-300">
+              ✅ Resultado:
+            </p>
+            <p className="text-sm mb-2" style={{ color: 'var(--color-text-primary)' }}>
+              Se mostrará una tabla con:
+            </p>
+            <ul className="text-xs space-y-1 ml-4 list-disc" style={{ color: 'var(--color-text-secondary)' }}>
+              <li><strong>Título</strong>: "Verbos Regulares"</li>
+              <li><strong>Encabezados</strong>: "mucho" y "muy"</li>
+              <li><strong>Filas</strong>: Cada línea con | forma una fila de la tabla</li>
+              <li><strong>Nota</strong>: Aparece al final resaltada</li>
+            </ul>
+          </div>
+
+          <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/10">
+            <p className="text-xs font-semibold mb-1 text-yellow-700 dark:text-yellow-300">
+              💡 Tips:
+            </p>
+            <ul className="text-xs space-y-1 ml-4 list-disc" style={{ color: 'var(--color-text-secondary)' }}>
+              <li>La primera fila con | se convierte en encabezados</li>
+              <li>Usa TÍTULO: para agregar un título a la tabla</li>
+              <li>Usa NOTA: para agregar notas explicativas al final</li>
+              <li>Puedes tener tantas columnas como necesites</li>
+            </ul>
+          </div>
         </div>
       </div>
 
