@@ -6,7 +6,7 @@
 
 import logger from '../utils/logger';
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useViewAs } from '../contexts/ViewAsContext';
 import { TopBarProvider, useTopBar } from '../contexts/TopBarContext';
@@ -149,6 +149,15 @@ function HomeView({ user, onNavigate }) {
       hideForStudents: true // Ocultar para estudiantes
     },
     {
+      title: 'Unirse a Juego',
+      description: 'Ingresa el código para unirte a un juego en vivo',
+      icon: Gamepad2,
+      path: '/join',
+      permission: null, // Disponible para todos
+      showOnlyForStudents: true, // Mostrar solo para estudiantes
+      isExternal: true // Indica que es una ruta externa al dashboard
+    },
+    {
       title: 'ADE1 2026 - Fonética',
       description: 'Libro interactivo con 120+ slides y ejercicios',
       icon: BookOpen,
@@ -163,6 +172,11 @@ function HomeView({ user, onNavigate }) {
     // Ocultar tarjetas marcadas para estudiantes
     // ✅ user es effectiveUser (pasado como prop desde UniversalDashboardInner)
     if (card.hideForStudents && user.role === 'student') {
+      return false;
+    }
+
+    // Mostrar solo para estudiantes
+    if (card.showOnlyForStudents && user.role !== 'student') {
       return false;
     }
 
@@ -295,6 +309,7 @@ function PlaceholderView({ title }) {
  */
 function UniversalDashboardInner() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { getEffectiveUser, isViewingAs } = useViewAs();
   const { initialized, can } = usePermissions();
@@ -362,6 +377,17 @@ function UniversalDashboardInner() {
   }
 
   const handleNavigate = (path) => {
+    // Si la ruta es externa al dashboard (no empieza con /dashboard), usar navigate
+    if (!path.startsWith('/dashboard')) {
+      navigate(path);
+      // En mobile, cerrar menú al navegar
+      if (window.innerWidth < 1024) {
+        setMenuOpen(false);
+      }
+      return;
+    }
+
+    // Ruta interna del dashboard: actualizar currentPath
     setCurrentPath(path);
     // En mobile, cerrar menú al navegar
     if (window.innerWidth < 1024) {
