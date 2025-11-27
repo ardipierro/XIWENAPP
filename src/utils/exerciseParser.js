@@ -161,7 +161,9 @@ function parseChainedSection(content, type) {
 
 /**
  * Parsea ejercicio de marcar palabras
- * Formato: Texto con [palabras] entre corchetes para marcar
+ * Soporta dos formatos:
+ * - Simple: Texto con *palabras* entre asteriscos
+ * - Avanzado: Texto con [palabras] entre corchetes
  */
 function parseMarkWords(content) {
   const lines = content.split('\n').filter(l => l.trim());
@@ -177,15 +179,31 @@ function parseMarkWords(content) {
     }
   }
 
-  // Extraer palabras entre [corchetes]
-  const bracketPattern = /\[([^\]]+)\]/g;
-  let match;
-  while ((match = bracketPattern.exec(text)) !== null) {
-    wordsToMark.push(match[1]);
-  }
+  // Detectar formato usado (prioridad a asteriscos)
+  const hasAsterisks = text.includes('*');
+  const hasBrackets = text.includes('[');
 
-  // Limpiar texto de corchetes para mostrar
-  const cleanText = text.replace(/\[([^\]]+)\]/g, '$1');
+  let cleanText = text;
+
+  if (hasAsterisks) {
+    // Formato simple: *palabra*
+    const asteriskPattern = /\*([^*]+)\*/g;
+    let match;
+    while ((match = asteriskPattern.exec(text)) !== null) {
+      wordsToMark.push(match[1].trim());
+    }
+    // Limpiar asteriscos
+    cleanText = text.replace(/\*([^*]+)\*/g, '$1');
+  } else if (hasBrackets) {
+    // Formato avanzado: [palabra]
+    const bracketPattern = /\[([^\]]+)\]/g;
+    let match;
+    while ((match = bracketPattern.exec(text)) !== null) {
+      wordsToMark.push(match[1].trim());
+    }
+    // Limpiar corchetes
+    cleanText = text.replace(/\[([^\]]+)\]/g, '$1');
+  }
 
   return {
     instruction: instruction || 'Selecciona las palabras indicadas',
@@ -225,13 +243,19 @@ function parseHighlightSection(content) {
 
 /**
  * Parsea ejercicio de arrastrar/ordenar
+ * Soporta tres formatos:
+ * - Simple con asteriscos: El *perro* ladra y el *gato* maúlla
+ * - Avanzado con PALABRAS: Yo|me|levanto|temprano
+ * - Lista separada por |
  */
 function parseDragDropSection(content) {
   const lines = content.split('\n').filter(l => l.trim());
   let instruction = '';
   let words = [];
   let correctOrder = [];
+  let text = '';
 
+  // Detectar formato PALABRAS:/ORDEN: (avanzado)
   for (const line of lines) {
     if (line.toUpperCase().startsWith('INSTRUCCION:')) {
       instruction = line.split(':').slice(1).join(':').trim();
@@ -239,14 +263,29 @@ function parseDragDropSection(content) {
       words = line.split(':').slice(1).join(':').split('|').map(w => w.trim());
     } else if (line.toUpperCase().startsWith('ORDEN:') || line.toUpperCase().startsWith('ORDER:')) {
       correctOrder = line.split(':').slice(1).join(':').split('|').map(w => w.trim());
+    } else if (!instruction) {
+      text += (text ? '\n' : '') + line;
     }
   }
 
-  // Si no hay palabras explícitas, intentar parsear formato simple
-  if (words.length === 0) {
-    const firstLine = lines.find(l => !l.includes(':'));
-    if (firstLine) {
-      words = firstLine.split(/[|,]/).map(w => w.trim());
+  // Si no hay formato avanzado, detectar formato simple
+  if (words.length === 0 && text) {
+    // Formato simple: *palabra* en el texto
+    if (text.includes('*')) {
+      const asteriskPattern = /\*([^*]+)\*/g;
+      let match;
+      const extractedWords = [];
+      while ((match = asteriskPattern.exec(text)) !== null) {
+        extractedWords.push(match[1].trim());
+      }
+
+      if (extractedWords.length > 0) {
+        words = extractedWords;
+        correctOrder = [...extractedWords];
+      }
+    } else if (text.includes('|')) {
+      // Formato lista con pipes
+      words = text.split('|').map(w => w.trim());
       correctOrder = [...words];
     }
   }
@@ -306,13 +345,26 @@ function parseOpenQuestionsSection(content) {
  */
 function parseMCQSection(content) {
   const lines = content.split('\n').filter(l => l.trim());
-  let question = '';
-  const options = [];
-  let correctAnswer = null;
-  let explanation = '';
 
-  for (const line of lines) {
-    // Opciones entre corchetes: [opcion]* donde * marca la correcta
+  if (lines.length < 3) return { question: '', options: [], correctAnswer: null, explanation: '' };
+
+  const question = lines[0];
+  const options = [];
+  const optionExplanations = [];
+  const correctIndices = [];
+  let explanation = null;
+
+  // Procesar líneas de opciones
+  for (let i = 1; i < lines.length && options.length < 6; i++) {
+    const line = lines[i];
+
+    // Explicación general (empieza con :: sola)
+    if (line.startsWith('::') && !line.match(/^[*]?[A-Da-d]?[\.\)\s]?/)) {
+      explanation = line.substring(2).trim();
+      continue;
+    }
+
+    // Formato avanzado: [opción]* (backward compatibility)
     if (line.includes('[') && line.includes(']')) {
       const optionPattern = /\[([^\]]+)\](\*)?/g;
       let match;
@@ -320,18 +372,47 @@ function parseMCQSection(content) {
         const optionText = match[1].trim();
         const isCorrect = match[2] === '*';
         options.push({ text: optionText, correct: isCorrect });
-        if (isCorrect) correctAnswer = optionText;
+        if (isCorrect) correctIndices.push(options.length - 1);
       }
+      continue;
     }
-    else if (line.toUpperCase().startsWith('EXPLICACION:')) {
-      explanation = line.split(':').slice(1).join(':').trim();
+
+    // Formato simple: *opción::explicación
+    const isCorrect = line.startsWith('*');
+    let fullOptionText = line.replace(/^\*/, '').trim();
+
+    // Separar texto de explicación inline
+    let optionText = fullOptionText;
+    let inlineExplanation = null;
+
+    const explIndex = fullOptionText.indexOf('::');
+    if (explIndex !== -1) {
+      optionText = fullOptionText.substring(0, explIndex).trim();
+      inlineExplanation = fullOptionText.substring(explIndex + 2).trim();
     }
-    else if (!question && !line.startsWith('[')) {
-      question = line;
+
+    if (optionText && !line.toUpperCase().startsWith('EXPLICACION:')) {
+      if (isCorrect) {
+        correctIndices.push(options.length);
+      }
+      options.push({ text: optionText, correct: isCorrect, explanation: inlineExplanation });
+      optionExplanations.push(inlineExplanation);
     }
   }
 
-  return { question, options, correctAnswer, explanation };
+  // Determinar respuesta correcta
+  const correctAnswer = correctIndices.length === 1
+    ? options[correctIndices[0]]?.text
+    : correctIndices.map(i => options[i]?.text);
+
+  return {
+    question,
+    options,
+    correctAnswer,
+    explanation,
+    optionExplanations,
+    correctIndices
+  };
 }
 
 /**
