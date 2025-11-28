@@ -86,22 +86,30 @@ export function MultipleChoiceRenderer({
 
   // Normalizar opciones a formato objeto
   const normalizedOptions = useMemo(() => {
-    return options.map((opt, idx) => {
-      if (typeof opt === 'string') {
+    // ✅ Filtrar elementos undefined, null o vacíos preservando índice original
+    return options
+      .map((opt, idx) => {
+        // Retornar null para opciones inválidas (las filtraremos después)
+        if (opt == null || opt === '') {
+          return null;
+        }
+
+        if (typeof opt === 'string') {
+          return {
+            text: opt,
+            value: idx,
+            originalIndex: idx,
+            explanation: optionExplanations?.[idx]
+          };
+        }
         return {
-          text: opt,
-          value: idx,
-          originalIndex: idx,
-          explanation: optionExplanations?.[idx]
+          text: opt.text || opt.label || opt,
+          explanation: opt.explanation || optionExplanations?.[idx],
+          value: opt.value ?? idx,
+          originalIndex: idx
         };
-      }
-      return {
-        text: opt.text || opt.label || opt,
-        explanation: opt.explanation || optionExplanations?.[idx],
-        value: opt.value ?? idx,
-        originalIndex: idx
-      };
-    });
+      })
+      .filter(opt => opt !== null); // Filtrar opciones null al final
   }, [options, optionExplanations]);
 
   // Mezclar opciones si está habilitado

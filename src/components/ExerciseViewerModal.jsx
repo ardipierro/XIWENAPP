@@ -19,6 +19,7 @@ import {
   MultipleChoiceRenderer,
   FillBlankRenderer,
   OpenQuestionsRenderer,
+  ChainedLayout,
   FEEDBACK_MODES
 } from './exercises';
 
@@ -262,7 +263,11 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
     } else if (type === EXERCISE_TYPES.FILLBLANKS) {
       const savedConfig = localStorage.getItem('fillBlanksConfig');
       if (savedConfig) {
-        setConfig(JSON.parse(savedConfig));
+        const parsedConfig = JSON.parse(savedConfig);
+        console.log('⚙️ Loaded Fill Blanks Config from localStorage:', parsedConfig);
+        setConfig(parsedConfig);
+      } else {
+        console.log('⚙️ No Fill Blanks Config found in localStorage');
       }
     } else if (type === EXERCISE_TYPES.DIALOGUES) {
       const savedConfig = localStorage.getItem('xiwen_dialogues_config');
@@ -277,7 +282,11 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
     } else if (type === EXERCISE_TYPES.MULTIPLE_CHOICE) {
       const savedConfig = localStorage.getItem('xiwen_multipleChoiceConfig');
       if (savedConfig) {
-        setConfig(JSON.parse(savedConfig));
+        const parsedConfig = JSON.parse(savedConfig);
+        console.log('⚙️ Loaded Multiple Choice Config from localStorage:', parsedConfig);
+        setConfig(parsedConfig);
+      } else {
+        console.log('⚙️ No Multiple Choice Config found in localStorage');
       }
     }
 
@@ -363,18 +372,72 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
         );
 
       case EXERCISE_TYPES.FILLBLANKS: {
-        // Usar renderer unificado FillBlankRenderer
-        const fillConfig = {
+        // ✅ Usar configuración guardada si existe, sino usar defaults
+        const defaultConfig = {
           feedbackMode: FEEDBACK_MODES.INSTANT,
           soundEnabled: true,
-          showCorrectAnswer: true
+          showCorrectAnswer: true,
+          caseSensitive: false,
+          allowHints: true,
+          hintPenalty: 5
         };
 
+        const fillConfig = config ? { ...defaultConfig, ...config } : defaultConfig;
+        console.log('⚙️ Final Fill Blanks Config being used:', fillConfig);
+
+        // ✅ Aplicar displaySettings centralizados
+        const mergedDisplaySettings = mergeDisplaySettings(displaySettings, 'fill-blanks');
+        const displayClasses = getDisplayClasses(mergedDisplaySettings);
+
+        // Detectar si hay múltiples ejercicios separados por líneas en blanco o marcadores
+        const exercises = cleanContent.split(/\n\s*\n/).filter(text => text.trim());
+
+        if (exercises.length > 1) {
+          console.log('📚 Multiple fill-blank exercises detected:', exercises.length);
+
+          const exercisesData = exercises.map((text, idx) => ({
+            id: `fillblank-${idx}`,
+            text: text.trim()
+          }));
+
+          return (
+            <ChainedLayout
+              exercises={exercisesData}
+              renderExercise={(exerciseData, index) => (
+                <ExerciseProvider
+                  key={`fillblank-${index}`}
+                  config={fillConfig}
+                  onComplete={(result) => {
+                    console.log(`Fill blank ${index + 1} completed:`, result);
+                    if (onExerciseComplete) onExerciseComplete(result);
+                  }}
+                >
+                  <FillBlankRenderer
+                    text={exerciseData.text}
+                    caseSensitive={fillConfig.caseSensitive}
+                    allowHints={fillConfig.allowHints}
+                    hintPenalty={fillConfig.hintPenalty}
+                    className={`${displayClasses.text} ${displayClasses.content}`}
+                  />
+                </ExerciseProvider>
+              )}
+              defaultMode="gallery"
+              showModeToggle={true}
+              showProgress={true}
+              onAllComplete={handleComplete}
+            />
+          );
+        }
+
+        // Un solo ejercicio
         return (
           <ExerciseProvider config={fillConfig} onComplete={handleComplete}>
             <FillBlankRenderer
               text={cleanContent}
-              caseSensitive={false}
+              caseSensitive={fillConfig.caseSensitive}
+              allowHints={fillConfig.allowHints}
+              hintPenalty={fillConfig.hintPenalty}
+              className={`${displayClasses.text} ${displayClasses.content}`}
             />
           </ExerciseProvider>
         );
@@ -393,12 +456,19 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
         );
 
       case EXERCISE_TYPES.OPEN_QUESTIONS: {
-        // Usar renderer unificado OpenQuestionsRenderer
-        const openConfig = {
+        // ✅ Usar configuración guardada si existe, sino usar defaults
+        const defaultConfig = {
           feedbackMode: FEEDBACK_MODES.ON_SUBMIT,
           soundEnabled: true,
-          showCorrectAnswer: true
+          showCorrectAnswer: true,
+          showExpectedAnswer: true,
+          caseSensitive: false,
+          ignoreAccents: true,
+          ignorePunctuation: true
         };
+
+        const openConfig = config ? { ...defaultConfig, ...config } : defaultConfig;
+        console.log('⚙️ Final Open Questions Config being used:', openConfig);
 
         // Si cleanContent ya es un objeto parseado con las preguntas, usarlo directamente
         let questions = [];
@@ -433,24 +503,77 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
           }
         }
 
+        console.log('📋 Open questions parsed:', questions);
+
+        // ✅ Aplicar displaySettings centralizados
+        const mergedDisplaySettings = mergeDisplaySettings(displaySettings, 'open-questions');
+        const displayClasses = getDisplayClasses(mergedDisplaySettings);
+
+        // ✅ Usar ChainedLayout si hay múltiples preguntas
+        if (questions.length > 1) {
+          console.log('📚 Multiple open questions detected:', questions.length);
+
+          const exercisesData = questions.map((q, idx) => ({
+            id: `openq-${idx}`,
+            questions: [q] // Cada renderer recibe una pregunta
+          }));
+
+          return (
+            <ChainedLayout
+              exercises={exercisesData}
+              renderExercise={(exerciseData, index) => (
+                <ExerciseProvider
+                  key={`openq-${index}`}
+                  config={openConfig}
+                  onComplete={(result) => {
+                    console.log(`Open question ${index + 1} completed:`, result);
+                    if (onExerciseComplete) onExerciseComplete(result);
+                  }}
+                >
+                  <OpenQuestionsRenderer
+                    questions={exerciseData.questions}
+                    showExpectedAnswer={openConfig.showExpectedAnswer}
+                    caseSensitive={openConfig.caseSensitive}
+                    ignoreAccents={openConfig.ignoreAccents}
+                    ignorePunctuation={openConfig.ignorePunctuation}
+                    className={`${displayClasses.text} ${displayClasses.content}`}
+                  />
+                </ExerciseProvider>
+              )}
+              defaultMode="gallery"
+              showModeToggle={true}
+              showProgress={true}
+              onAllComplete={handleComplete}
+            />
+          );
+        }
+
+        // Una sola pregunta o todas juntas
         return (
           <ExerciseProvider config={openConfig} onComplete={handleComplete}>
             <OpenQuestionsRenderer
               questions={questions}
-              showExpectedAnswer={true}
+              showExpectedAnswer={openConfig.showExpectedAnswer}
+              caseSensitive={openConfig.caseSensitive}
+              ignoreAccents={openConfig.ignoreAccents}
+              ignorePunctuation={openConfig.ignorePunctuation}
+              className={`${displayClasses.text} ${displayClasses.content}`}
             />
           </ExerciseProvider>
         );
       }
 
       case EXERCISE_TYPES.MULTIPLE_CHOICE: {
-        // Usar renderer unificado MultipleChoiceRenderer
-        const mcConfig = {
+        // ✅ Usar configuración guardada si existe, sino usar defaults
+        const defaultConfig = {
           feedbackMode: FEEDBACK_MODES.INSTANT,
           soundEnabled: true,
           showCorrectAnswer: true,
           showExplanation: true
         };
+
+        const mcConfig = config ? { ...defaultConfig, ...config } : defaultConfig;
+        console.log('⚙️ Final Multiple Choice Config being used:', mcConfig);
 
         try {
           // Limpiar contenido: quitar marcador #opcion_multiple si existe
@@ -463,6 +586,11 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
           // parseQuestions devuelve array de preguntas en formato correcto
           const questions = parseQuestions(textToProcess, 'General');
 
+          console.log('🔍 Parsed questions:', questions);
+          console.log('🔍 First question:', questions?.[0]);
+          console.log('🔍 First question options:', questions?.[0]?.options);
+          console.log('🔍 First question correct answer:', questions?.[0]?.correct);
+
           if (!questions || questions.length === 0) {
             return (
               <div className="text-center py-12">
@@ -473,12 +601,84 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
             );
           }
 
-          // Para múltiples preguntas, renderizar cada una
-          // El renderer espera una sola pregunta, así que renderizamos la primera
-          // TODO: Usar ChainedLayout para múltiples preguntas
+          // ✅ Usar ChainedLayout para múltiples preguntas
+          if (questions.length > 1) {
+            // Transformar preguntas al formato de ejercicios para ChainedLayout
+            const exercisesData = questions.map((q, idx) => {
+              // ✅ El parser devuelve `correct` como campo separado, no en cada opción
+              const correctAnswer = Array.isArray(q.correct) ? q.correct[0] : q.correct;
+
+              return {
+                id: `q${idx}`,
+                question: q.question,
+                options: q.options?.map(opt => {
+                  if (typeof opt === 'string') return opt;
+                  return opt.text || opt.label || opt.option || String(opt);
+                }) || [],
+                correctAnswer: correctAnswer ?? 0,
+                explanation: q.explanation,
+                optionExplanations: q.optionExplanations || []
+              };
+            });
+
+            console.log('📚 Multiple questions detected:', exercisesData.length);
+            console.log('📚 Exercises data:', exercisesData);
+
+            // ✅ Aplicar displaySettings centralizados
+            const mergedDisplaySettings = mergeDisplaySettings(displaySettings, 'multiple-choice');
+            const displayClasses = getDisplayClasses(mergedDisplaySettings);
+
+            return (
+              <ChainedLayout
+                exercises={exercisesData}
+                renderExercise={(exerciseData, index) => (
+                  <ExerciseProvider
+                    key={`mcq-${index}`}
+                    config={mcConfig}
+                    onComplete={(result) => {
+                      console.log(`Question ${index + 1} completed:`, result);
+                      if (onExerciseComplete) onExerciseComplete(result);
+                    }}
+                  >
+                    <MultipleChoiceRenderer
+                      question={exerciseData.question}
+                      options={exerciseData.options}
+                      correctAnswer={exerciseData.correctAnswer}
+                      explanation={exerciseData.explanation}
+                      optionExplanations={exerciseData.optionExplanations}
+                      showLetters={true}
+                      className={`${displayClasses.text} ${displayClasses.content}`}
+                    />
+                  </ExerciseProvider>
+                )}
+                defaultMode="gallery"
+                showModeToggle={true}
+                showProgress={true}
+                onAllComplete={handleComplete}
+              />
+            );
+          }
+
+          // Una sola pregunta
           const firstQuestion = questions[0];
-          const correctIndex = firstQuestion.options?.findIndex(opt => opt.correct) ?? 0;
-          const optionTexts = firstQuestion.options?.map(opt => opt.text) || [];
+
+          // ✅ El parser devuelve `correct` como campo separado, no en cada opción
+          const correctIndex = Array.isArray(firstQuestion.correct)
+            ? firstQuestion.correct[0]
+            : firstQuestion.correct ?? 0;
+
+          const optionTexts = firstQuestion.options?.map(opt => {
+            if (typeof opt === 'string') return opt;
+            return opt.text || opt.label || opt.option || String(opt);
+          }) || [];
+
+          console.log('📋 Single question, option texts:', optionTexts);
+          console.log('✅ Correct index from parser:', firstQuestion.correct);
+          console.log('✅ Resolved correct index:', correctIndex);
+
+          // ✅ Aplicar displaySettings centralizados
+          const mergedDisplaySettings = mergeDisplaySettings(displaySettings, 'multiple-choice');
+          const displayClasses = getDisplayClasses(mergedDisplaySettings);
 
           return (
             <ExerciseProvider config={mcConfig} onComplete={handleComplete}>
@@ -488,6 +688,7 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
                 correctAnswer={correctIndex}
                 explanation={firstQuestion.explanation}
                 showLetters={true}
+                className={`${displayClasses.text} ${displayClasses.content}`}
               />
             </ExerciseProvider>
           );
