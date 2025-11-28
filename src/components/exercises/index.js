@@ -103,6 +103,18 @@ export { ChainedLayout } from './layouts/ChainedLayout';
 export { GameLayout } from './layouts/GameLayout';
 
 // ============================================
+// ADAPTERS (Normalizadores de datos)
+// ============================================
+
+export {
+  fromExerciseBuilder,
+  EXERCISE_BUILDER_TYPES
+} from './adapters/fromExerciseBuilder';
+
+export { fromParsedText } from './adapters/fromParsedText';
+export { fromFirebase } from './adapters/fromFirebase';
+
+// ============================================
 // TIPOS (para TypeScript/JSDoc)
 // ============================================
 

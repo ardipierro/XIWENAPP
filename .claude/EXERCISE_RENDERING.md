@@ -28,11 +28,34 @@ src/components/exercises/
 │   ├── AudioRenderer.jsx
 │   ├── ReadingRenderer.jsx
 │   └── index.js
-└── layouts/
-    ├── ModalLayout.jsx          # Modal expandible
-    ├── ChainedLayout.jsx        # Lista vertical/galería
-    ├── GameLayout.jsx           # Modo juego/proyección
-    └── index.js
+├── layouts/
+│   ├── ModalLayout.jsx          # Modal expandible
+│   ├── ChainedLayout.jsx        # Lista vertical/galería
+│   ├── GameLayout.jsx           # Modo juego/proyección
+│   └── index.js
+└── adapters/                    # Normalizadores de datos
+    ├── index.js
+    ├── fromExerciseBuilder.js   # Datos del Exercise Builder
+    ├── fromParsedText.js        # Texto con marcadores (#marcar, etc)
+    └── fromFirebase.js          # Contenido de Firebase
+```
+
+## Adapters (Normalizadores de Datos)
+
+Los adapters convierten datos de diferentes fuentes al formato estándar:
+
+```jsx
+import { fromExerciseBuilder, fromParsedText, fromFirebase } from '@/components/exercises';
+
+// Desde Exercise Builder
+const normalized = fromExerciseBuilder(exerciseData);
+// → { type, renderer, data, config, metadata }
+
+// Desde texto con marcadores
+const normalized = fromParsedText(parsedExercise);
+
+// Desde Firebase content
+const normalized = fromFirebase(firebaseDocument);
 ```
 
 ## Uso Básico
@@ -222,3 +245,79 @@ Los componentes de referencia para el diseño visual son:
 - **Componentes base**: `src/components/common/`
 
 Seguir las directivas de `.claude/DESIGN_SYSTEM.md`.
+
+---
+
+## Estado de Migración (Actualizado: Nov 2024)
+
+### ✅ Migrados a Renderers Unificados
+
+| Componente | Tipos Migrados | Notas |
+|------------|----------------|-------|
+| `ChainedExerciseViewer.jsx` | MCQ, FillBlank, TrueFalse, Matching, OpenQuestions | Usa `ExerciseProvider` + renderers |
+| `diary/UnifiedExerciseRenderer.jsx` | mcq, blank, match, truefalse | Tipos básicos migrados; tipos avanzados usan wrappers de ExerciseBuilder |
+| `ExerciseViewerModal.jsx` | FILLBLANKS, OPEN_QUESTIONS, MULTIPLE_CHOICE | Modal de corrección usa renderers unificados |
+
+### ⏳ Pendientes de Migración
+
+| Componente | Razón | Prioridad |
+|------------|-------|-----------|
+| `GameContainer/QuestionScreen.jsx` | Complejo (timer, turnos, animaciones). Requiere testing extensivo | Baja |
+| Tipos avanzados (audio-listening, dictation, etc.) | 13+ tipos usan lazy-load de `exercisebuilder/exercises/` | Media |
+
+### 🚫 NO Migrar (Fuera de Alcance)
+
+| Componente | Razón |
+|------------|-------|
+| `ExerciseCreatorModal.jsx` | Es para CREACIÓN de contenido, no renderizado |
+| `WordMarkingExerciseCreator.jsx` | Es para CREACIÓN de ejercicios word-marking |
+| `TextToExerciseParser.jsx` | Es un parser, no un renderer |
+
+### Flujo de Datos
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        FUENTES DE DATOS                              │
+├──────────────────┬──────────────────┬───────────────────────────────┤
+│  ExerciseBuilder │   Texto Parseado │     Firebase Content          │
+│  (JSON guardado) │  (#marcar, etc)  │   (colección 'contents')      │
+└────────┬─────────┴────────┬─────────┴─────────────┬─────────────────┘
+         │                  │                       │
+         ▼                  ▼                       ▼
+┌────────────────────────────────────────────────────────────────────┐
+│                         ADAPTERS                                    │
+├─────────────────────┬─────────────────────┬────────────────────────┤
+│ fromExerciseBuilder │   fromParsedText    │      fromFirebase      │
+│  (20+ tipos)        │ (mcq, blank, etc)   │  (usa fromExerciseBuilder) │
+└────────┬────────────┴─────────┬───────────┴────────────┬───────────┘
+         │                      │                        │
+         └──────────────────────┼────────────────────────┘
+                                ▼
+┌────────────────────────────────────────────────────────────────────┐
+│                    FORMATO NORMALIZADO                              │
+│  { type, renderer, data, config, metadata }                        │
+└────────────────────────────────┬───────────────────────────────────┘
+                                 │
+                                 ▼
+┌────────────────────────────────────────────────────────────────────┐
+│                         RENDERERS                                   │
+├────────────────┬────────────────┬────────────────┬─────────────────┤
+│ MultipleChoice │   FillBlank    │   Matching     │  TrueFalse      │
+│ OpenQuestions  │   Video        │   Audio        │  Reading        │
+└────────────────┴────────────────┴────────────────┴─────────────────┘
+                                 │
+                                 ▼
+┌────────────────────────────────────────────────────────────────────┐
+│                          LAYOUTS                                    │
+├─────────────────────┬─────────────────────┬────────────────────────┤
+│     ModalLayout     │   ChainedLayout     │      GameLayout        │
+│   (modal único)     │ (lista/galería)     │   (turnos/timer)       │
+└─────────────────────┴─────────────────────┴────────────────────────┘
+```
+
+### Próximos Pasos Recomendados
+
+1. **Testing**: Probar los componentes migrados en diferentes escenarios
+2. **GameContainer**: Migrar cuando se requiera refactoring del juego
+3. **Tipos avanzados**: Crear renderers para tipos de audio cuando haya demanda
+4. **Deprecación**: Eventualmente marcar como deprecated los componentes duplicados en `exercisebuilder/exercises/` una vez que los renderers cubran toda la funcionalidad
