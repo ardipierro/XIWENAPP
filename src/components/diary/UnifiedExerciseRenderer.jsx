@@ -1,15 +1,34 @@
+/**
+ * @fileoverview UnifiedExerciseRenderer - Renderiza ejercicios del Exercise Builder
+ * @module components/diary/UnifiedExerciseRenderer
+ *
+ * MIGRACIÓN A ARQUITECTURA UNIFICADA:
+ * - Tipos básicos (mcq, blank, match, truefalse) → Renderers unificados
+ * - Tipos avanzados → Componentes del ExerciseBuilder (wrappers)
+ *
+ * Esto permite una migración gradual sin romper funcionalidad existente.
+ */
+
 import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { AlertCircle, Loader } from 'lucide-react';
 import CategoryBadge from '../common/CategoryBadge';
 
-// Importación dinámica de componentes de ejercicio del Exercise Builder
-const exerciseComponents = {
-  // Ejercicios básicos (Fase 1)
-  'mcq': lazy(() => import('../exercisebuilder/exercises/MultipleChoiceExercise')),
-  'blank': lazy(() => import('../exercisebuilder/exercises/FillInBlankExercise')),
-  'match': lazy(() => import('../exercisebuilder/exercises/MatchingExercise')),
-  'truefalse': lazy(() => import('../exercisebuilder/exercises/TrueFalseExercise')),
+// Renderers unificados para tipos básicos
+import {
+  ExerciseProvider,
+  MultipleChoiceRenderer,
+  FillBlankRenderer,
+  MatchingRenderer,
+  TrueFalseRenderer,
+  fromExerciseBuilder,
+  FEEDBACK_MODES
+} from '../exercises';
 
+// Tipos que usan renderers unificados
+const UNIFIED_TYPES = ['mcq', 'blank', 'match', 'truefalse'];
+
+// Importación dinámica de componentes del ExerciseBuilder para tipos avanzados
+const exerciseComponents = {
   // Ejercicios de audio (Fase 2)
   'audio-listening': lazy(() => import('../exercisebuilder/exercises/AudioListeningExercise')),
   'ai-audio-pronunciation': lazy(() => import('../exercisebuilder/exercises/AIAudioPronunciationExercise')),
@@ -34,12 +53,73 @@ const exerciseComponents = {
   'interactive-reading': lazy(() => import('../exercisebuilder/exercises/InteractiveReadingExercise')),
   'hotspot-image': lazy(() => import('../exercisebuilder/exercises/HotspotImageExercise')),
 
-  // Ejercicios de marcado de palabras (word-marking)
+  // Ejercicios de marcado de palabras
   'word-marking': lazy(() => import('../exercisebuilder/exercises/VerbIdentificationExercise')),
 };
 
 // Componente editable para word-marking (lazy load)
 const EditableWordMarkingExercise = lazy(() => import('../exercisebuilder/exercises/EditableWordMarkingExercise'));
+
+/**
+ * Renderiza ejercicios con los renderers unificados
+ */
+function UnifiedRenderer({ type, data, onAnswer, readOnly }) {
+  const config = {
+    feedbackMode: readOnly ? FEEDBACK_MODES.NONE : FEEDBACK_MODES.INSTANT,
+    soundEnabled: !readOnly,
+    showCorrectAnswer: true,
+    showExplanation: true
+  };
+
+  // Adaptar datos usando el adapter
+  const adapted = fromExerciseBuilder({ ...data, type });
+
+  if (!adapted) {
+    return <div>Error adaptando datos del ejercicio</div>;
+  }
+
+  const handleComplete = (result) => {
+    if (onAnswer) {
+      onAnswer(result.userAnswer, result.isCorrect);
+    }
+  };
+
+  return (
+    <ExerciseProvider config={config} onAnswer={handleComplete}>
+      {type === 'mcq' && (
+        <MultipleChoiceRenderer
+          question={adapted.data.question}
+          options={adapted.data.options}
+          correctAnswer={adapted.data.correctAnswer}
+          explanation={adapted.data.explanation}
+          showLetters={true}
+        />
+      )}
+
+      {type === 'blank' && (
+        <FillBlankRenderer
+          text={adapted.data.text}
+          answers={adapted.data.answers}
+          caseSensitive={adapted.data.caseSensitive}
+        />
+      )}
+
+      {type === 'match' && (
+        <MatchingRenderer
+          pairs={adapted.data.pairs}
+          title={adapted.data.title}
+          shuffleRight={true}
+        />
+      )}
+
+      {type === 'truefalse' && (
+        <TrueFalseRenderer
+          statements={adapted.data.statements}
+        />
+      )}
+    </ExerciseProvider>
+  );
+}
 
 /**
  * UnifiedExerciseRenderer - Renderiza dinámicamente ejercicios del Exercise Builder
@@ -73,8 +153,8 @@ export function UnifiedExerciseRenderer({
 
       setExerciseData(data);
       setError(null);
-    } catch (error) {
-      console.error('Error parsing exercise data:', error);
+    } catch (err) {
+      console.error('Error parsing exercise data:', err);
       setError('Error al cargar el ejercicio. Formato JSON inválido.');
     }
   }, [content]);
@@ -121,10 +201,14 @@ export function UnifiedExerciseRenderer({
   // Detectar si es ejercicio de marcado de palabras (word-marking)
   const isWordMarking = ['word-marking', 'verb-identification'].includes(exerciseType);
 
-  // Obtener componente correcto
-  const ExerciseComponent = exerciseComponents[exerciseType];
+  // Verificar si usa renderer unificado o wrapper
+  const usesUnifiedRenderer = UNIFIED_TYPES.includes(exerciseType);
 
-  if (!ExerciseComponent) {
+  // Obtener componente para tipos que usan wrapper
+  const ExerciseComponent = !usesUnifiedRenderer ? exerciseComponents[exerciseType] : null;
+
+  // Si no es tipo unificado y no hay componente, mostrar error
+  if (!usesUnifiedRenderer && !ExerciseComponent) {
     return (
       <div className="p-6 bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-200
                       dark:border-amber-800 rounded-lg">
@@ -139,7 +223,6 @@ export function UnifiedExerciseRenderer({
               en el visualizador del Diario de Clases.
             </p>
 
-            {/* Mostrar metadata disponible (usando sistema universal de badges) */}
             {content.metadata && (
               <div className="flex flex-wrap gap-2 mb-3">
                 {content.metadata.difficulty && (
@@ -151,7 +234,6 @@ export function UnifiedExerciseRenderer({
               </div>
             )}
 
-            {/* Preview de los datos */}
             <details className="mt-3">
               <summary className="text-sm cursor-pointer text-amber-600 dark:text-amber-400
                                 font-semibold">
@@ -222,47 +304,57 @@ export function UnifiedExerciseRenderer({
 
       {/* Componente de ejercicio */}
       <div className="p-6">
-        <Suspense
-          fallback={
-            <div className="flex items-center justify-center py-12">
-              <Loader className="animate-spin text-gray-600 mr-3" size={24} />
-              <span className="text-gray-600 dark:text-gray-400">
-                Cargando componente de ejercicio...
-              </span>
-            </div>
-          }
-        >
-          {/* Si es word-marking Y es profesor, usar versión editable */}
-          {isWordMarking && isTeacher && !readOnly ? (
-            <EditableWordMarkingExercise
-              initialExercise={exerciseData}
-              onSave={async (updatedExercise) => {
-                // Actualizar ejercicio en Firebase
-                if (onSaveExercise) {
-                  await onSaveExercise(content.id, updatedExercise);
-                }
-                // Actualizar estado local
-                setExerciseData(updatedExercise);
-              }}
-              isTeacher={isTeacher}
-              readOnly={readOnly}
-              onAnswer={handleAnswer}
-              showFeedback={!readOnly}
-              userAnswer={userAnswer}
-              isCorrect={isCorrect}
-            />
-          ) : (
-            /* Sino, usar componente normal */
-            <ExerciseComponent
-              {...exerciseData}
-              onAnswer={handleAnswer}
-              readOnly={readOnly}
-              showFeedback={!readOnly}
-              userAnswer={userAnswer}
-              isCorrect={isCorrect}
-            />
-          )}
-        </Suspense>
+        {/* Tipos básicos: usar renderers unificados */}
+        {usesUnifiedRenderer && (
+          <UnifiedRenderer
+            type={exerciseType}
+            data={exerciseData}
+            onAnswer={handleAnswer}
+            readOnly={readOnly}
+          />
+        )}
+
+        {/* Tipos avanzados: usar wrappers del ExerciseBuilder */}
+        {!usesUnifiedRenderer && (
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center py-12">
+                <Loader className="animate-spin text-gray-600 mr-3" size={24} />
+                <span className="text-gray-600 dark:text-gray-400">
+                  Cargando componente de ejercicio...
+                </span>
+              </div>
+            }
+          >
+            {/* Si es word-marking Y es profesor, usar versión editable */}
+            {isWordMarking && isTeacher && !readOnly ? (
+              <EditableWordMarkingExercise
+                initialExercise={exerciseData}
+                onSave={async (updatedExercise) => {
+                  if (onSaveExercise) {
+                    await onSaveExercise(content.id, updatedExercise);
+                  }
+                  setExerciseData(updatedExercise);
+                }}
+                isTeacher={isTeacher}
+                readOnly={readOnly}
+                onAnswer={handleAnswer}
+                showFeedback={!readOnly}
+                userAnswer={userAnswer}
+                isCorrect={isCorrect}
+              />
+            ) : (
+              <ExerciseComponent
+                {...exerciseData}
+                onAnswer={handleAnswer}
+                readOnly={readOnly}
+                showFeedback={!readOnly}
+                userAnswer={userAnswer}
+                isCorrect={isCorrect}
+              />
+            )}
+          </Suspense>
+        )}
       </div>
 
       {/* Modo solo lectura indicator */}
