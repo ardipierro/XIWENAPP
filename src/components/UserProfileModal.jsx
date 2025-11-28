@@ -338,8 +338,9 @@ function UserProfileModal({
       )
     });
 
-    // Tab de Clases - Estudiantes y Profesores (NO para admins puros ni guardians)
-    if (isStudent || isTeacher) {
+    // Tab de Clases - Solo Profesores (NO para estudiantes ni guardians)
+    // ✅ DESHABILITADO PARA ESTUDIANTES - Solo mostrar pestaña "Información"
+    if (isTeacher) {
       tabs.push({
         id: 'classes',
         label: 'Clases',
@@ -364,7 +365,9 @@ function UserProfileModal({
       });
     }
 
-    // Tab de Contenidos - Solo Estudiantes
+    // Tab de Contenidos - DESHABILITADO PARA ESTUDIANTES
+    // ✅ Solo mostrar pestaña "Información" para alumnos
+    /*
     if (isStudent) {
       tabs.push({
         id: 'content',
@@ -373,8 +376,11 @@ function UserProfileModal({
         component: <ContentTab user={normalizedUser} />
       });
     }
+    */
 
-    // Tab de Tareas - Solo Estudiantes
+    // Tab de Tareas - DESHABILITADO PARA ESTUDIANTES
+    // ✅ Solo mostrar pestaña "Información" para alumnos
+    /*
     if (isStudent) {
       tabs.push({
         id: 'tasks',
@@ -383,6 +389,7 @@ function UserProfileModal({
         component: <TasksTab user={normalizedUser} />
       });
     }
+    */
 
     // Tab de Estudiantes - Solo Profesores Y Admins
     // IMPORTANTE: Validar que NO sea estudiante aunque tenga rol 'admin' corrupto
@@ -462,7 +469,7 @@ function UserProfileModal({
       size="xl"
       showCloseButton={false}
       noPadding={true}
-      className="!overflow-hidden !h-[90vh] !max-h-[90vh]"
+      className="!overflow-hidden !h-[90vh] !max-h-[90vh] md:!max-w-[820px]"
     >
       <div className="flex flex-col h-full overflow-hidden">
         {/* Banner Section - Con avatar y nombre superpuestos */}

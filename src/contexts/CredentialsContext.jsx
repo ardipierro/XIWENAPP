@@ -19,6 +19,7 @@ import { createContext, useContext, useState, useEffect, useCallback, useMemo } 
 import credentialsService from '../services/CredentialsService';
 import { AI_PROVIDERS } from '../constants/providers';
 import logger from '../utils/logger';
+import { useAuth } from './AuthContext';
 
 // Create context
 const CredentialsContext = createContext(null);
@@ -27,6 +28,7 @@ const CredentialsContext = createContext(null);
  * Credentials Provider Component
  */
 export function CredentialsProvider({ children }) {
+  const { user } = useAuth();
   const [credentials, setCredentials] = useState({});
   const [customCredentials, setCustomCredentials] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,6 +37,18 @@ export function CredentialsProvider({ children }) {
 
   // Initialize service and subscribe to changes
   useEffect(() => {
+    // ✅ Solo cargar credenciales si el usuario es teacher o admin
+    // Los estudiantes no necesitan (ni deben tener acceso a) credenciales de IA
+    const shouldLoadCredentials = user?.role && ['teacher', 'admin', 'trial_teacher'].includes(user.role);
+
+    if (!shouldLoadCredentials) {
+      // Para estudiantes, marcar como inicializado sin cargar credenciales
+      setLoading(false);
+      setInitialized(true);
+      logger.debug('Credentials not loaded for student role', 'CredentialsContext');
+      return;
+    }
+
     let unsubscribe = null;
 
     const init = async () => {
@@ -81,7 +95,7 @@ export function CredentialsProvider({ children }) {
         unsubscribe();
       }
     };
-  }, []);
+  }, [user?.role]); // Re-ejecutar cuando cambie el rol del usuario
 
   /**
    * Get API key for a provider

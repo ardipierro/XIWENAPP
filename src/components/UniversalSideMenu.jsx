@@ -20,18 +20,20 @@ import {
   // DollarSign, // Ya no se usa - Sección de pagos eliminada
 } from 'lucide-react';
 import { usePermissions } from '../hooks/usePermissions';
+import { useAuth } from '../contexts/AuthContext';
 
 /**
  * Definición de items del menú con permisos requeridos
  */
 const MENU_ITEMS = [
-  // COMÚN PARA TODOS
+  // COMÚN PARA TODOS (excepto estudiantes)
   {
     id: 'calendar',
     label: 'Calendario',
     icon: Calendar,
     path: '/dashboard/calendar',
-    permission: null, // Todos pueden ver el calendario
+    permission: null,
+    hideForStudents: true, // ✅ Ocultar solo para estudiantes
   },
   {
     id: 'messages',
@@ -39,6 +41,7 @@ const MENU_ITEMS = [
     icon: MessageSquare,
     path: '/dashboard/messages',
     permission: 'send-messages',
+    hideForStudents: true, // ✅ Ocultar solo para estudiantes
   },
 
   // DIVIDER
@@ -173,6 +176,7 @@ const MENU_ITEMS = [
  */
 export function UniversalSideMenu({ isOpen, currentPath, onNavigate }) {
   const { can, canAny } = usePermissions();
+  const { user } = useAuth();
 
   /**
    * Filtra items basado en permisos
@@ -185,6 +189,12 @@ export function UniversalSideMenu({ isOpen, currentPath, onNavigate }) {
         return canAny(item.showIf);
       }
       return true;
+    }
+
+    // ✅ Verificar hideForStudents (ocultar solo para estudiantes)
+    if (item.hideForStudents) {
+      const isStudent = ['student', 'listener', 'trial'].includes(user?.role);
+      if (isStudent) return false;
     }
 
     // Items normales

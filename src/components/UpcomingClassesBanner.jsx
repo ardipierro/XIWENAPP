@@ -9,7 +9,6 @@ import { useState, useEffect } from 'react';
 import { Clock, Video, ChevronRight, BookOpen } from 'lucide-react';
 import { getStudentInstances } from '../firebase/classInstances';
 import { BaseLoading, BaseBadge } from './common';
-import { UniversalCard } from './cards';
 
 /**
  * Banner de próximas clases
@@ -106,11 +105,9 @@ function UpcomingClassesBanner({ student }) {
 
   if (loading) {
     return (
-      <UniversalCard variant="default" size="md">
-        <div className="flex items-center justify-center py-8">
-          <BaseLoading variant="spinner" size="md" text="Cargando próximas clases..." />
-        </div>
-      </UniversalCard>
+      <div className="flex items-center justify-center py-8">
+        <BaseLoading variant="spinner" size="md" text="Cargando próximas clases..." />
+      </div>
     );
   }
 
@@ -120,94 +117,87 @@ function UpcomingClassesBanner({ student }) {
   }
 
   return (
-    <UniversalCard
-      variant="elevated"
-      size="md"
-    >
-      <div className="space-y-4">
-        {/* Header */}
-        <div className="flex items-center gap-2">
-          <Video size={24} className="text-gray-600 dark:text-gray-400" />
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-            Próximas Clases
-          </h2>
-        </div>
+    <>
+      {/* Título simple (como "Progreso") */}
+      <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+        Próximas Clases
+      </h2>
 
-        {/* Lista de clases */}
-        <div className="space-y-3">
-          {upcomingClasses.map((classItem, index) => (
-            <div
-              key={classItem.id}
-              className="flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/20 dark:to-gray-700/20 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
-            >
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                {/* Nombre de la clase */}
-                <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-                  {classItem.name || classItem.scheduleName || 'Clase sin nombre'}
-                </h3>
+      {/* Grid de tarjetas (como las de Progreso) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {upcomingClasses.map((classItem) => {
+          const isLive = classItem.status === 'live';
 
-                {/* Fecha y hora */}
-                <div className="flex items-center gap-2 mt-1">
-                  <Clock size={14} className="text-gray-500 dark:text-gray-400 flex-shrink-0" />
-                  <span className="text-sm text-gray-600 dark:text-gray-300">
-                    {classItem.status === 'live' ? (
-                      <span className="text-red-600 dark:text-red-400 font-semibold">
-                        ¡En vivo ahora!
-                      </span>
-                    ) : (
-                      formatDate(classItem.scheduledStart)
-                    )}
+          // Si está en vivo, hacer la tarjeta clickeable
+          const CardWrapper = isLive ? 'button' : 'div';
+          const cardProps = isLive ? {
+            onClick: () => {
+              // Navegar a la clase en vivo
+              window.location.href = `/class/${classItem.id}`;
+            },
+            className: `w-full text-left p-4 rounded-lg border-2 transition-all cursor-pointer
+                       bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20
+                       border-green-500 dark:border-green-400 hover:shadow-lg hover:scale-[1.02]`
+          } : {
+            className: `p-4 rounded-lg border border-gray-200 dark:border-gray-700
+                       bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800/20 dark:to-gray-700/20`
+          };
+
+          return (
+            <CardWrapper key={classItem.id} {...cardProps}>
+              {/* Badge EN VIVO */}
+              {isLive && (
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="flex items-center gap-1.5 px-2.5 py-1 bg-red-500 text-white text-xs font-bold rounded-full">
+                    <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                    EN VIVO
                   </span>
                 </div>
+              )}
 
-                {/* Curso (si existe) */}
-                {classItem.courseName && (
-                  <div className="flex items-center gap-2 mt-1">
-                    <BookOpen size={14} className="text-gray-500 dark:text-gray-400 flex-shrink-0" />
-                    <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                      {classItem.courseName}
-                    </span>
-                  </div>
-                )}
+              {/* Nombre de la clase */}
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                {classItem.name || classItem.scheduleName || 'Clase sin nombre'}
+              </h3>
 
-                {/* Recurrente badge */}
-                {classItem.scheduleType === 'recurring' && (
-                  <div className="mt-2">
-                    <BaseBadge variant="info" size="sm">
-                      Clase Recurrente
-                    </BaseBadge>
-                  </div>
-                )}
+              {/* Fecha y hora */}
+              <div className="flex items-center gap-2 mb-1">
+                <Clock size={14} className={isLive ? 'text-green-600 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'} />
+                <span className={`text-sm ${isLive ? 'text-green-700 dark:text-green-300 font-semibold' : 'text-gray-600 dark:text-gray-300'}`}>
+                  {isLive ? '¡Únete ahora!' : formatDate(classItem.scheduledStart)}
+                </span>
               </div>
 
-              {/* Arrow indicator */}
-              <div className="flex-shrink-0">
-                <ChevronRight
-                  size={20}
-                  className={`${
-                    classItem.status === 'live'
-                      ? 'text-red-500 dark:text-red-400'
-                      : 'text-gray-500 dark:text-gray-400'
-                  }`}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
+              {/* Curso (si existe) */}
+              {classItem.courseName && (
+                <div className="flex items-center gap-2 mt-1">
+                  <BookOpen size={14} className="text-gray-500 dark:text-gray-400 flex-shrink-0" />
+                  <span className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {classItem.courseName}
+                  </span>
+                </div>
+              )}
 
-        {/* Footer - Link to all classes */}
-        <div className="pt-3 border-t border-gray-200 dark:border-gray-700">
-          <a
-            href="/dashboard/my-classes"
-            className="flex items-center justify-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
-          >
-            Ver todas mis clases
-            <ChevronRight size={16} />
-          </a>
-        </div>
+              {/* Recurrente badge */}
+              {classItem.scheduleType === 'recurring' && (
+                <div className="mt-2">
+                  <BaseBadge variant="info" size="sm">
+                    Clase Recurrente
+                  </BaseBadge>
+                </div>
+              )}
+
+              {/* Flecha solo si está en vivo */}
+              {isLive && (
+                <div className="flex justify-end mt-2">
+                  <ChevronRight size={20} className="text-green-600 dark:text-green-400" />
+                </div>
+              )}
+            </CardWrapper>
+          );
+        })}
       </div>
-    </UniversalCard>
+    </>
   );
 }
 

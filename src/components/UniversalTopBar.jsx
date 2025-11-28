@@ -184,8 +184,8 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
           )}
         </button>
 
-        {/* Messages */}
-        {can('send-messages') && (
+        {/* Messages - ✅ Solo visible para Admin y Teachers */}
+        {can('send-messages') && !['student', 'listener', 'trial'].includes(user?.role) && (
           <button
             className="universal-topbar__icon-btn universal-topbar__notifications"
             onClick={() => navigate('/dashboard/messages')}
@@ -232,6 +232,8 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
                 <User size={16} />
                 <span>Mi Perfil</span>
               </button>
+              {/* Configuración - ✅ DESACTIVADO TEMPORALMENTE */}
+              {/*
               <button
                 className="universal-topbar__dropdown-item"
                 onClick={() => setShowUserMenu(false)}
@@ -239,6 +241,7 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
                 <Settings size={16} />
                 <span>Configuración</span>
               </button>
+              */}
               <div className="universal-topbar__dropdown-divider" />
               <button
                 className="universal-topbar__dropdown-item universal-topbar__dropdown-item--danger"

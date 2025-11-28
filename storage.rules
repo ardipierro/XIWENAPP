@@ -36,10 +36,10 @@ service firebase.storage {
     }
 
     // Carpeta de avatares de usuarios
-    match /avatars/{userId}/{fileName} {
+    // Nota: Los avatares se guardan como avatars/{userId}_{timestamp}.ext
+    match /avatars/{fileName} {
       allow read: if true;
       allow write: if isAuthenticated()
-                   && request.auth.uid == userId
                    && isImage()
                    && isValidSize();
     }

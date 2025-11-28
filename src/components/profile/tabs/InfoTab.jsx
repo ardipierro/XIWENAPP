@@ -298,7 +298,9 @@ function InfoTab({ user, userRole, isAdmin, isOwnProfile, onUpdate, onEditingCha
               <option value="trial">Prueba</option>
             </select>
           ) : (
-            <CategoryBadge type="role" value={formData.role} size="md" />
+            <div className="inline-block">
+              <CategoryBadge type="role" value={formData.role} size="md" />
+            </div>
           )}
         </div>
 
