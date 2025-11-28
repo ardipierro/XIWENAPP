@@ -3,24 +3,28 @@
  * @module components/exercises/renderers/FillBlankRenderer
  *
  * UNIFICA:
- * - container/FillInBlanksExercise.jsx
+ * - container/FillInBlanksExercise.jsx (diseño de referencia)
  * - exercisebuilder/exercises/FillInBlankExercise.jsx
  * - ChainedExerciseViewer.jsx → FillBlankContent
  *
- * Soporta:
- * - Espacios en blanco marcados con ___ o [blank]
- * - Múltiples espacios por texto
- * - Validación case-insensitive opcional
- * - Alternativas de respuesta (resp1|resp2)
+ * Usa los mismos estilos que container/FillInBlanksExercise.jsx
+ * y los componentes base del sistema de diseño.
  */
 
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { Check, X } from 'lucide-react';
+import { CheckCircle, XCircle, Lightbulb } from 'lucide-react';
+import { BaseBadge } from '../../common';
 import { useExercise, FEEDBACK_MODES } from '../core/ExerciseContext';
+
+// Colores por defecto (mismo que container/FillInBlanksExercise.jsx)
+const DEFAULT_COLORS = {
+  correctColor: '#10b981',
+  incorrectColor: '#ef4444'
+};
 
 /**
  * Parsear texto y extraer blanks
- * Soporta formatos: ___, ___palabra___, [blank], [blank:palabra]
+ * Soporta formatos: *palabra* o ___palabra___ o [blank:palabra]
  */
 function parseTextWithBlanks(text) {
   if (!text) return { segments: [], blanks: [] };
@@ -28,8 +32,8 @@ function parseTextWithBlanks(text) {
   const segments = [];
   const blanks = [];
 
-  // Regex para detectar blanks: ___ o ___palabra___ o [blank] o [blank:palabra]
-  const blankRegex = /(?:_{3,}([^_]*)?_{3,}|\[blank(?::([^\]]+))?\])/gi;
+  // Regex para detectar blanks: *palabra* o ___palabra___ o [blank:palabra]
+  const blankRegex = /(?:\*([^*]+)\*|_{3,}([^_]*)_{3,}|\[blank(?::([^\]]+))?\])/gi;
 
   let lastIndex = 0;
   let match;
@@ -44,19 +48,21 @@ function parseTextWithBlanks(text) {
       });
     }
 
-    // El blank
-    const answer = match[1] || match[2] || '';
+    // El blank - match[1] para *palabra*, match[2] para ___palabra___, match[3] para [blank:palabra]
+    const answer = match[1] || match[2] || match[3] || '';
     const answers = answer.split('|').map(a => a.trim()).filter(Boolean);
 
     segments.push({
       type: 'blank',
       index: blankIndex,
+      correctWord: answers[0] || '',
       answers: answers.length > 0 ? answers : null,
       width: answers.length > 0 ? Math.max(...answers.map(a => a.length)) : 10
     });
 
     blanks.push({
       index: blankIndex,
+      word: answers[0] || '',
       answers
     });
 
@@ -78,15 +84,21 @@ function parseTextWithBlanks(text) {
 /**
  * Verificar si una respuesta es correcta
  */
-function checkBlankAnswer(userAnswer, correctAnswers, caseSensitive = false) {
+function checkBlankAnswer(userAnswer, correctAnswers, caseSensitive = false, trimSpaces = true) {
   if (!userAnswer || !correctAnswers || correctAnswers.length === 0) {
     return false;
   }
 
-  const normalizedUser = caseSensitive ? userAnswer.trim() : userAnswer.trim().toLowerCase();
+  let normalizedUser = trimSpaces ? userAnswer.trim() : userAnswer;
+  if (!caseSensitive) {
+    normalizedUser = normalizedUser.toLowerCase();
+  }
 
   return correctAnswers.some(correct => {
-    const normalizedCorrect = caseSensitive ? correct.trim() : correct.trim().toLowerCase();
+    let normalizedCorrect = trimSpaces ? correct.trim() : correct;
+    if (!caseSensitive) {
+      normalizedCorrect = normalizedCorrect.toLowerCase();
+    }
     return normalizedUser === normalizedCorrect;
   });
 }
@@ -94,13 +106,16 @@ function checkBlankAnswer(userAnswer, correctAnswers, caseSensitive = false) {
 /**
  * FillBlankRenderer - Renderiza ejercicios de completar espacios
  *
+ * Sigue el diseño exacto de container/FillInBlanksExercise.jsx
+ *
  * @param {Object} props
- * @param {string} props.text - Texto con blanks marcados (___palabra___)
+ * @param {string} props.text - Texto con blanks marcados (*palabra*)
  * @param {string} [props.instruction] - Instrucción del ejercicio
  * @param {Array} [props.answers] - Respuestas correctas (override del texto)
  * @param {boolean} [props.caseSensitive] - Validación sensible a mayúsculas
- * @param {boolean} [props.showHints] - Mostrar primera letra como pista
- * @param {string} [props.inputStyle] - 'underline' | 'box' | 'inline'
+ * @param {boolean} [props.allowHints] - Permitir pistas
+ * @param {number} [props.hintPenalty] - Puntos que se pierden por pista
+ * @param {Object} [props.colors] - Colores personalizados
  * @param {string} [props.className] - Clases adicionales
  */
 export function FillBlankRenderer({
@@ -108,18 +123,21 @@ export function FillBlankRenderer({
   instruction,
   answers: overrideAnswers,
   caseSensitive = false,
-  showHints = false,
-  inputStyle = 'underline',
+  allowHints = true,
+  hintPenalty = 5,
+  colors = {},
   className = ''
 }) {
   const {
     userAnswer,
     setAnswer,
-    isCorrect,
     showingFeedback,
     config,
     checkAnswer
   } = useExercise();
+
+  // Merge colors with defaults
+  const colorConfig = { ...DEFAULT_COLORS, ...colors };
 
   // Parsear texto
   const { segments, blanks } = useMemo(() => parseTextWithBlanks(text), [text]);
@@ -131,6 +149,9 @@ export function FillBlankRenderer({
       return acc;
     }, {})
   );
+
+  // Estado de hints usados
+  const [hints, setHints] = useState({});
 
   // Estado de validación por input
   const [validationResults, setValidationResults] = useState({});
@@ -151,24 +172,7 @@ export function FillBlankRenderer({
     }));
   }, []);
 
-  // Handler de blur para validación en modo onSubmit
-  const handleBlur = useCallback((blankIndex) => {
-    // No validar automáticamente en modo onSubmit o exam
-    if (config.feedbackMode !== FEEDBACK_MODES.INSTANT) return;
-
-    const blank = blanks.find(b => b.index === blankIndex);
-    if (!blank?.answers) return;
-
-    const value = inputValues[blankIndex];
-    const isValid = checkBlankAnswer(value, blank.answers, caseSensitive);
-
-    setValidationResults(prev => ({
-      ...prev,
-      [blankIndex]: isValid
-    }));
-  }, [blanks, inputValues, caseSensitive, config.feedbackMode]);
-
-  // Handler de enter para pasar al siguiente input
+  // Handler de Enter para avanzar al siguiente campo
   const handleKeyDown = useCallback((e, blankIndex) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -179,7 +183,18 @@ export function FillBlankRenderer({
     }
   }, [blanks]);
 
-  // Verificar todas las respuestas
+  // Mostrar pista para un blank
+  const handleShowHint = useCallback((blankIndex, correctWord) => {
+    if (showingFeedback || hints[blankIndex]) return;
+
+    // Mostrar primera letra
+    setHints(prev => ({
+      ...prev,
+      [blankIndex]: correctWord[0] + '...'
+    }));
+  }, [showingFeedback, hints]);
+
+  // Verificar todas las respuestas cuando showingFeedback cambie
   useEffect(() => {
     if (showingFeedback) {
       const results = {};
@@ -196,88 +211,113 @@ export function FillBlankRenderer({
     }
   }, [showingFeedback, blanks, inputValues, caseSensitive]);
 
-  // Estilos de input
-  const getInputClasses = (blankIndex) => {
-    const baseClasses = `
-      px-2 py-1 mx-1 text-center font-medium
-      transition-all duration-200
-      focus:outline-none focus:ring-2
-    `;
+  // Obtener estilo de un input (mismo que container/FillInBlanksExercise.jsx)
+  const getInputStyle = (blankIndex, correctWord) => {
+    const answer = inputValues[blankIndex];
+    const isCorrect = showingFeedback ? validationResults[blankIndex] : false;
 
-    const styleClasses = {
-      underline: 'border-b-2 bg-transparent',
-      box: 'border-2 rounded-lg bg-white dark:bg-gray-800',
-      inline: 'border-none bg-gray-100 dark:bg-gray-700 rounded'
-    };
-
-    // Estado de validación
     if (showingFeedback) {
-      if (validationResults[blankIndex]) {
-        return `${baseClasses} ${styleClasses[inputStyle]} border-green-500 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 focus:ring-green-200`;
-      }
-      return `${baseClasses} ${styleClasses[inputStyle]} border-red-500 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 focus:ring-red-200`;
+      return {
+        backgroundColor: isCorrect ? `${colorConfig.correctColor}20` : `${colorConfig.incorrectColor}20`,
+        borderColor: isCorrect ? colorConfig.correctColor : colorConfig.incorrectColor,
+        color: isCorrect ? colorConfig.correctColor : colorConfig.incorrectColor
+      };
     }
 
-    // En modo instant con validación
-    if (validationResults[blankIndex] !== undefined) {
-      if (validationResults[blankIndex]) {
-        return `${baseClasses} ${styleClasses[inputStyle]} border-green-500 focus:ring-green-200`;
-      }
-    }
-
-    // Estado normal
-    return `${baseClasses} ${styleClasses[inputStyle]} border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-200 dark:focus:ring-blue-800`;
+    return {
+      backgroundColor: 'var(--color-bg-primary)',
+      borderColor: 'var(--color-border)',
+      color: 'var(--color-text-primary)'
+    };
   };
 
+  // Calcular progreso
+  const filledCount = Object.values(inputValues).filter(a => a && a.trim()).length;
+  const correctCount = showingFeedback ? Object.values(validationResults).filter(v => v).length : 0;
+  const hintCount = Object.keys(hints).length;
+
   return (
-    <div className={`fill-blank-renderer ${className}`}>
+    <div className={`fill-blank-renderer w-full ${className}`}>
+      {/* Header */}
+      <div className="flex items-center justify-end mb-4">
+        <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+          {filledCount} / {blanks.length} completados
+        </div>
+      </div>
+
       {/* Instrucción */}
       {instruction && (
-        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          {instruction}
-        </p>
+        <div
+          className="mb-4 p-3 rounded-lg"
+          style={{
+            backgroundColor: 'var(--color-bg-secondary)',
+            border: '1px solid var(--color-border)'
+          }}
+        >
+          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+            {instruction}
+          </p>
+        </div>
       )}
 
-      {/* Texto con blanks */}
-      <div className="text-lg leading-relaxed text-gray-900 dark:text-white p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+      {/* Texto con inputs */}
+      <div
+        className="text-lg leading-relaxed p-4 rounded-lg"
+        style={{
+          backgroundColor: 'var(--color-bg-secondary)',
+          color: 'var(--color-text-primary)',
+          lineHeight: '2.8',
+          whiteSpace: 'pre-line'
+        }}
+      >
         {segments.map((segment, idx) => {
           if (segment.type === 'text') {
-            return (
-              <span key={idx} className="whitespace-pre-wrap">
-                {segment.content}
-              </span>
-            );
+            return <span key={idx}>{segment.content}</span>;
           }
 
-          // Blank input
           const blank = blanks.find(b => b.index === segment.index);
-          const inputWidth = Math.max(segment.width, 8) * 0.6;
+          const hasHint = hints[segment.index];
+          const inputWidth = Math.max(80, (segment.correctWord?.length || 8) * 12);
+          const isCorrect = showingFeedback && validationResults[segment.index];
+          const userValue = inputValues[segment.index] || '';
 
           return (
-            <span key={idx} className="inline-flex items-center relative">
+            <span key={idx} className="inline-flex items-center mx-1">
               <input
                 ref={el => inputRefs.current[segment.index] = el}
                 type="text"
-                value={inputValues[segment.index] || ''}
+                value={userValue}
                 onChange={(e) => handleInputChange(segment.index, e.target.value)}
-                onBlur={() => handleBlur(segment.index)}
                 onKeyDown={(e) => handleKeyDown(e, segment.index)}
                 disabled={showingFeedback}
-                placeholder={showHints && blank?.answers?.[0] ? blank.answers[0][0] + '...' : ''}
-                className={getInputClasses(segment.index)}
-                style={{ width: `${inputWidth}rem`, minWidth: '3rem' }}
-                autoComplete="off"
-                spellCheck="false"
+                placeholder={hasHint || '___'}
+                style={{
+                  width: inputWidth,
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  border: '2px solid',
+                  textAlign: 'center',
+                  fontWeight: '500',
+                  ...getInputStyle(segment.index, segment.correctWord)
+                }}
+                className="focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
 
-              {/* Icono de feedback */}
-              {showingFeedback && (
-                <span className="absolute -right-6 top-1/2 -translate-y-1/2">
-                  {validationResults[segment.index] ? (
-                    <Check size={18} className="text-green-500" />
-                  ) : (
-                    <X size={18} className="text-red-500" />
-                  )}
+              {/* Botón de pista */}
+              {allowHints && !showingFeedback && !hasHint && segment.correctWord && (
+                <button
+                  onClick={() => handleShowHint(segment.index, segment.correctWord)}
+                  className="ml-1 p-1 rounded hover:bg-amber-100 dark:hover:bg-amber-900/30 text-amber-500"
+                  title={`Ver pista (-${hintPenalty} pts)`}
+                >
+                  <Lightbulb className="w-4 h-4" />
+                </button>
+              )}
+
+              {/* Mostrar respuesta correcta si falló */}
+              {showingFeedback && !isCorrect && segment.correctWord && config.showCorrectAnswer !== false && (
+                <span className="ml-1 text-xs font-medium" style={{ color: colorConfig.correctColor }}>
+                  ({segment.correctWord})
                 </span>
               )}
             </span>
@@ -285,47 +325,69 @@ export function FillBlankRenderer({
         })}
       </div>
 
-      {/* Mostrar respuestas correctas si falló */}
-      {showingFeedback && !isCorrect && config.showCorrectAnswer && (
-        <div className="mt-4 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-          <p className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-2">
-            Respuestas correctas:
+      {/* Instrucciones de uso */}
+      {!showingFeedback && (
+        <div
+          className="mt-4 p-3 rounded-lg"
+          style={{
+            backgroundColor: 'var(--color-bg-secondary)',
+            border: '1px solid var(--color-border)'
+          }}
+        >
+          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+            Presiona <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs">Enter</kbd> para avanzar al siguiente campo.
+            {allowHints && (
+              <> Usa el icono <Lightbulb className="w-3 h-3 inline text-amber-500" /> para ver pistas (-{hintPenalty} pts).</>
+            )}
           </p>
-          <ul className="space-y-1">
-            {blanks.map((blank, idx) => {
-              if (!validationResults[blank.index] && blank.answers) {
-                return (
-                  <li key={idx} className="text-sm text-amber-700 dark:text-amber-300">
-                    Espacio {idx + 1}: <strong>{blank.answers.join(' o ')}</strong>
-                    {inputValues[blank.index] && (
-                      <span className="text-red-600 dark:text-red-400 ml-2">
-                        (Tu respuesta: "{inputValues[blank.index]}")
-                      </span>
-                    )}
-                  </li>
-                );
-              }
-              return null;
-            })}
-          </ul>
         </div>
       )}
 
-      {/* Contador de progreso */}
-      <div className="mt-4 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-        <span>
-          {Object.values(inputValues).filter(v => v.trim()).length} / {blanks.length} espacios completados
-        </span>
-        {showingFeedback && (
-          <span className={`font-medium ${
-            Object.values(validationResults).every(v => v)
-              ? 'text-green-600 dark:text-green-400'
-              : 'text-orange-600 dark:text-orange-400'
-          }`}>
-            {Object.values(validationResults).filter(v => v).length} / {blanks.length} correctos
-          </span>
-        )}
-      </div>
+      {/* Resultados cuando showingFeedback */}
+      {showingFeedback && (
+        <div className="mt-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1">
+              <CheckCircle size={16} style={{ color: colorConfig.correctColor }} />
+              <span className="text-sm font-medium" style={{ color: colorConfig.correctColor }}>
+                {correctCount} correctas
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <XCircle size={16} style={{ color: colorConfig.incorrectColor }} />
+              <span className="text-sm font-medium" style={{ color: colorConfig.incorrectColor }}>
+                {blanks.length - correctCount} incorrectas
+              </span>
+            </div>
+          </div>
+
+          {hintCount > 0 && (
+            <div className="flex items-center gap-1 text-amber-500">
+              <Lightbulb className="w-4 h-4" />
+              <span className="text-sm">
+                {hintCount} pista{hintCount !== 1 ? 's' : ''} usada{hintCount !== 1 ? 's' : ''} (-{hintCount * hintPenalty} pts)
+              </span>
+            </div>
+          )}
+
+          {/* Result Badge */}
+          <div>
+            {correctCount === blanks.length ? (
+              <BaseBadge variant="success" size="lg" className="text-base px-4 py-2">
+                ¡Perfecto! +{(config.correctPoints || 10) * blanks.length - (hintCount * hintPenalty)}pts
+              </BaseBadge>
+            ) : correctCount > 0 ? (
+              <BaseBadge variant="warning" size="lg" className="text-base px-4 py-2">
+                {Math.round((correctCount / blanks.length) * 100)}% correcto
+              </BaseBadge>
+            ) : (
+              <BaseBadge variant="danger" size="lg" className="text-base px-4 py-2">
+                Intenta de nuevo
+              </BaseBadge>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -105,11 +105,12 @@ export function ModalLayout({
 
       {/* Modal */}
       <div
-        className={`relative bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl overflow-hidden flex flex-col ${
+        className={`relative rounded-2xl shadow-2xl overflow-hidden flex flex-col ${
           isExpanded
             ? 'w-full h-full rounded-none'
             : `w-full ${sizeClasses[size]} max-h-[90vh]`
         }`}
+        style={{ backgroundColor: 'var(--color-bg-primary)' }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

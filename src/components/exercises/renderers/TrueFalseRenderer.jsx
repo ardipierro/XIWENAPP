@@ -14,7 +14,15 @@
 
 import { useState, useCallback } from 'react';
 import { Check, X, HelpCircle } from 'lucide-react';
+import { BaseBadge } from '../../common';
 import { useExercise, FEEDBACK_MODES } from '../core/ExerciseContext';
+
+// Colores por defecto (mismo que otros renderers)
+const DEFAULT_COLORS = {
+  correctColor: '#10b981',
+  incorrectColor: '#ef4444',
+  selectedColor: '#3b82f6'
+};
 
 /**
  * TrueFalseRenderer - Renderiza ejercicios de Verdadero/Falso
@@ -33,8 +41,11 @@ export function TrueFalseRenderer({
   trueLabel = 'Verdadero',
   falseLabel = 'Falso',
   mode = 'buttons',
+  colors = {},
   className = ''
 }) {
+  // Merge colors with defaults
+  const colorConfig = { ...DEFAULT_COLORS, ...colors };
   const {
     userAnswer,
     setAnswer,
@@ -250,18 +261,28 @@ export function TrueFalseRenderer({
       </div>
 
       {/* Progreso */}
-      <div className="mt-6 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-        <span>
+      <div className="mt-6 flex items-center justify-between">
+        <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
           {Object.values(answers).filter(a => a !== null).length} / {statements.length} respondidas
         </span>
         {showingFeedback && (
-          <span className={`font-medium ${
-            Object.entries(answers).every(([idx, a]) => a === statements[idx].correct)
-              ? 'text-green-600 dark:text-green-400'
-              : 'text-orange-600 dark:text-orange-400'
-          }`}>
-            {Object.entries(answers).filter(([idx, a]) => a === statements[idx].correct).length} / {statements.length} correctas
-          </span>
+          (() => {
+            const correctCount = Object.entries(answers).filter(([idx, a]) => a === statements[parseInt(idx)].correct).length;
+            const allCorrect = correctCount === statements.length;
+            return allCorrect ? (
+              <BaseBadge variant="success" size="lg" className="text-base px-4 py-2">
+                ¡Perfecto! Todas correctas
+              </BaseBadge>
+            ) : correctCount > 0 ? (
+              <BaseBadge variant="warning" size="lg" className="text-base px-4 py-2">
+                {correctCount} / {statements.length} correctas
+              </BaseBadge>
+            ) : (
+              <BaseBadge variant="danger" size="lg" className="text-base px-4 py-2">
+                Ninguna correcta
+              </BaseBadge>
+            );
+          })()
         )}
       </div>
     </div>

@@ -3,17 +3,26 @@
  * @module components/exercises/renderers/MultipleChoiceRenderer
  *
  * UNIFICA los 3 componentes anteriores:
- * - container/MultipleChoiceExercise.jsx
+ * - container/MultipleChoiceExercise.jsx (diseño de referencia)
  * - exercisebuilder/exercises/MultipleChoiceExercise.jsx
  * - ChainedExerciseViewer.jsx → MCQContent
  *
- * Solo se encarga del RENDERIZADO de opciones.
- * El estado y lógica viene del ExerciseContext.
+ * Usa los mismos estilos que container/MultipleChoiceExercise.jsx
+ * y los componentes base del sistema de diseño.
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { Check, X, Circle } from 'lucide-react';
+import { Check, X, Lightbulb } from 'lucide-react';
+import { BaseButton, BaseBadge } from '../../common';
 import { useExercise, FEEDBACK_MODES } from '../core/ExerciseContext';
+
+// Colores por defecto (mismo que container/MultipleChoiceExercise.jsx)
+const DEFAULT_COLORS = {
+  correctColor: '#10b981',
+  incorrectColor: '#ef4444',
+  selectedColor: '#3b82f6',
+  partialColor: '#f59e0b'
+};
 
 /**
  * Shuffle array using Fisher-Yates algorithm
@@ -37,15 +46,18 @@ function getOptionLetter(index) {
 /**
  * MultipleChoiceRenderer - Renderiza opciones de selección múltiple
  *
+ * Sigue el diseño exacto de container/MultipleChoiceExercise.jsx
+ *
  * @param {Object} props
  * @param {string} props.question - Pregunta a mostrar
  * @param {Array} props.options - Opciones: string[] o {text, explanation?, value?}[]
  * @param {number|number[]} props.correctAnswer - Índice(s) de respuesta(s) correcta(s)
  * @param {string} [props.explanation] - Explicación general
+ * @param {Object} [props.optionExplanations] - Explicaciones por opción
  * @param {boolean} [props.multiSelect] - Permitir múltiples selecciones
  * @param {boolean} [props.shuffleOptions] - Mezclar opciones
  * @param {boolean} [props.showLetters] - Mostrar letras (A, B, C, D)
- * @param {string} [props.layout] - 'list' | 'grid' | 'compact'
+ * @param {Object} [props.colors] - Colores personalizados
  * @param {string} [props.className] - Clases adicionales
  */
 export function MultipleChoiceRenderer({
@@ -53,43 +65,49 @@ export function MultipleChoiceRenderer({
   options = [],
   correctAnswer,
   explanation,
+  optionExplanations,
   multiSelect = false,
   shuffleOptions = false,
   showLetters = true,
-  layout = 'list',
+  colors = {},
   className = ''
 }) {
   const {
     userAnswer,
     setAnswer,
-    isCorrect,
     showingFeedback,
     eliminatedOptions,
     config,
     checkAnswer
   } = useExercise();
 
+  // Merge colors with defaults
+  const colorConfig = { ...DEFAULT_COLORS, ...colors };
+
   // Normalizar opciones a formato objeto
   const normalizedOptions = useMemo(() => {
     return options.map((opt, idx) => {
       if (typeof opt === 'string') {
-        return { text: opt, value: idx, originalIndex: idx };
+        return {
+          text: opt,
+          value: idx,
+          originalIndex: idx,
+          explanation: optionExplanations?.[idx]
+        };
       }
       return {
         text: opt.text || opt.label || opt,
-        explanation: opt.explanation,
+        explanation: opt.explanation || optionExplanations?.[idx],
         value: opt.value ?? idx,
         originalIndex: idx
       };
     });
-  }, [options]);
+  }, [options, optionExplanations]);
 
   // Mezclar opciones si está habilitado
   const displayOptions = useMemo(() => {
     if (!shuffleOptions) return normalizedOptions;
-
-    const shuffled = shuffleArray(normalizedOptions);
-    return shuffled;
+    return shuffleArray(normalizedOptions);
   }, [normalizedOptions, shuffleOptions]);
 
   // Determinar respuestas correctas (normalizar a array)
@@ -152,173 +170,211 @@ export function MultipleChoiceRenderer({
     return eliminatedOptions.has(originalIndex);
   };
 
-  // Obtener clases de estilo para una opción
-  const getOptionClasses = (option) => {
-    const baseClasses = `
-      relative flex items-center gap-3 p-4 rounded-xl border-2
-      transition-all duration-200 cursor-pointer
-      focus:outline-none focus:ring-2 focus:ring-offset-2
-    `;
+  // Obtener estilos para una opción (mismo que container/MultipleChoiceExercise.jsx)
+  const getOptionStyle = (option) => {
+    const selected = isSelected(option.value);
+    const correct = isOptionCorrect(option.originalIndex);
+    const eliminated = isEliminated(option.originalIndex);
 
-    // Eliminada por hint
-    if (isEliminated(option.originalIndex)) {
-      return `${baseClasses} opacity-40 cursor-not-allowed bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700`;
+    if (eliminated) {
+      return {
+        opacity: 0.3,
+        textDecoration: 'line-through',
+        cursor: 'not-allowed'
+      };
     }
 
-    // Mostrando feedback
-    if (showingFeedback) {
-      const selected = isSelected(option.value);
-      const correct = isOptionCorrect(option.originalIndex);
-
-      if (correct) {
-        return `${baseClasses} bg-green-50 dark:bg-green-900/30 border-green-500 dark:border-green-600`;
+    if (!showingFeedback) {
+      if (selected) {
+        return {
+          borderColor: colorConfig.selectedColor,
+          backgroundColor: `${colorConfig.selectedColor}15`
+        };
       }
-      if (selected && !correct) {
-        return `${baseClasses} bg-red-50 dark:bg-red-900/30 border-red-500 dark:border-red-600`;
-      }
-      return `${baseClasses} opacity-50 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700`;
+      return {};
     }
 
-    // Estado normal
-    if (isSelected(option.value)) {
-      return `${baseClasses} bg-blue-50 dark:bg-blue-900/20 border-blue-500 dark:border-blue-600 ring-2 ring-blue-200 dark:ring-blue-800`;
+    // After checking - mostrar correcta solo si está configurado O si fue seleccionada
+    if (correct && (config.showCorrectAnswer !== false || selected)) {
+      return {
+        borderColor: colorConfig.correctColor,
+        backgroundColor: `${colorConfig.correctColor}15`
+      };
     }
 
-    return `${baseClasses} bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50/50 dark:hover:bg-blue-900/10`;
+    if (selected && !correct) {
+      return {
+        borderColor: colorConfig.incorrectColor,
+        backgroundColor: `${colorConfig.incorrectColor}15`
+      };
+    }
+
+    return config.showCorrectAnswer !== false ? { opacity: 0.6 } : {};
   };
 
-  // Obtener icono para una opción
-  const getOptionIcon = (option) => {
+  // Obtener borde para el indicador circular
+  const getIndicatorStyle = (option) => {
     const selected = isSelected(option.value);
     const correct = isOptionCorrect(option.originalIndex);
 
     if (showingFeedback) {
-      if (correct) {
-        return (
-          <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
-            <Check size={16} className="text-white" strokeWidth={3} />
-          </div>
-        );
+      if (correct && (config.showCorrectAnswer !== false || selected)) {
+        return {
+          borderColor: colorConfig.correctColor,
+          backgroundColor: correct ? colorConfig.correctColor : 'transparent'
+        };
       }
       if (selected && !correct) {
-        return (
-          <div className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center">
-            <X size={16} className="text-white" strokeWidth={3} />
-          </div>
-        );
+        return {
+          borderColor: colorConfig.incorrectColor,
+          backgroundColor: colorConfig.incorrectColor
+        };
       }
+      return { borderColor: 'var(--color-border)' };
     }
 
-    // Radio/Checkbox según multiSelect
-    if (multiSelect) {
-      return (
-        <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-colors ${
-          selected
-            ? 'bg-blue-500 border-blue-500'
-            : 'border-gray-300 dark:border-gray-600'
-        }`}>
-          {selected && <Check size={14} className="text-white" strokeWidth={3} />}
-        </div>
-      );
+    if (selected) {
+      return { borderColor: colorConfig.selectedColor };
     }
 
-    return (
-      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
-        selected
-          ? 'border-blue-500'
-          : 'border-gray-300 dark:border-gray-600'
-      }`}>
-        {selected && <Circle size={12} className="text-blue-500 fill-current" />}
-      </div>
-    );
-  };
-
-  // Layout classes
-  const getLayoutClasses = () => {
-    switch (layout) {
-      case 'grid':
-        return 'grid grid-cols-1 sm:grid-cols-2 gap-3';
-      case 'compact':
-        return 'space-y-2';
-      default:
-        return 'space-y-3';
-    }
+    return { borderColor: 'var(--color-border)' };
   };
 
   return (
-    <div className={`multiple-choice-renderer ${className}`}>
+    <div
+      className={`multiple-choice-renderer ${className}`}
+      style={{ backgroundColor: 'var(--color-bg-primary)' }}
+    >
       {/* Pregunta */}
       {question && (
-        <div className="mb-6">
-          <p className="text-lg font-medium text-gray-900 dark:text-white leading-relaxed">
+        <div className="mb-4">
+          {multiSelect && (
+            <div className="mb-2">
+              <BaseBadge variant="info" size="sm">
+                Selecciona todas las correctas
+              </BaseBadge>
+            </div>
+          )}
+          <p
+            className="text-xl font-semibold"
+            style={{ color: 'var(--color-text-primary)' }}
+          >
             {question}
           </p>
-          {multiSelect && (
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-              Selecciona todas las respuestas correctas
-            </p>
-          )}
         </div>
       )}
 
       {/* Opciones */}
-      <div className={getLayoutClasses()}>
-        {displayOptions.map((option, displayIndex) => (
-          <button
-            key={option.value}
-            onClick={() => handleSelect(option.value)}
-            disabled={showingFeedback || isEliminated(option.originalIndex)}
-            className={getOptionClasses(option)}
-            aria-pressed={isSelected(option.value)}
-            aria-disabled={isEliminated(option.originalIndex)}
-          >
-            {/* Letra de opción */}
-            {showLetters && (
-              <span className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${
-                showingFeedback && isOptionCorrect(option.originalIndex)
-                  ? 'bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-200'
-                  : showingFeedback && isSelected(option.value) && !isOptionCorrect(option.originalIndex)
-                  ? 'bg-red-100 dark:bg-red-800 text-red-700 dark:text-red-200'
-                  : isSelected(option.value)
-                  ? 'bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-200'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-              }`}>
-                {getOptionLetter(displayIndex)}
-              </span>
-            )}
+      <div className="space-y-2 mb-4">
+        {displayOptions.map((option, displayIndex) => {
+          const optionStyle = getOptionStyle(option);
+          const indicatorStyle = getIndicatorStyle(option);
+          const selected = isSelected(option.value);
+          const correct = isOptionCorrect(option.originalIndex);
+          const eliminated = isEliminated(option.originalIndex);
 
-            {/* Icono de selección */}
-            {getOptionIcon(option)}
+          return (
+            <button
+              key={option.originalIndex}
+              onClick={() => handleSelect(option.value)}
+              disabled={showingFeedback || eliminated}
+              className="w-full text-left p-3 border-2 rounded-lg transition-all hover:shadow-sm"
+              style={{
+                borderColor: optionStyle.borderColor || 'var(--color-border)',
+                backgroundColor: optionStyle.backgroundColor || 'transparent',
+                opacity: optionStyle.opacity || 1,
+                textDecoration: optionStyle.textDecoration || 'none',
+                cursor: optionStyle.cursor || (showingFeedback ? 'default' : 'pointer')
+              }}
+            >
+              <div className="flex items-center gap-3">
+                {/* Selection indicator - círculo con check/x */}
+                <div
+                  className="w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0"
+                  style={indicatorStyle}
+                >
+                  {showingFeedback && correct && (config.showCorrectAnswer !== false || selected) && (
+                    <Check size={14} className="text-white" />
+                  )}
+                  {showingFeedback && selected && !correct && (
+                    <X size={14} className="text-white" />
+                  )}
+                  {!showingFeedback && showLetters && (
+                    <span
+                      className="text-xs font-medium"
+                      style={{ color: 'var(--color-text-secondary)' }}
+                    >
+                      {getOptionLetter(displayIndex)}
+                    </span>
+                  )}
+                </div>
 
-            {/* Texto de la opción */}
-            <span className={`flex-1 text-left ${
-              showingFeedback && isOptionCorrect(option.originalIndex)
-                ? 'text-green-800 dark:text-green-200 font-medium'
-                : showingFeedback && isSelected(option.value) && !isOptionCorrect(option.originalIndex)
-                ? 'text-red-800 dark:text-red-200'
-                : 'text-gray-800 dark:text-gray-200'
-            }`}>
-              {option.text}
-            </span>
-
-            {/* Explicación de la opción (si existe y estamos en feedback) */}
-            {showingFeedback && option.explanation && (
-              <div className="absolute left-0 right-0 -bottom-1 translate-y-full px-4 py-2 bg-gray-50 dark:bg-gray-800 rounded-b-xl border-t border-gray-200 dark:border-gray-700">
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  💡 {option.explanation}
-                </p>
+                {/* Option text */}
+                <span style={{ color: 'var(--color-text-primary)' }}>
+                  {option.text}
+                </span>
               </div>
-            )}
-          </button>
-        ))}
+
+              {/* Option explanation (shown after checking) */}
+              {showingFeedback && config.showExplanation !== false && option.explanation && (
+                <div
+                  className="mt-2 ml-9 text-sm"
+                  style={{ color: 'var(--color-text-secondary)' }}
+                >
+                  <Lightbulb className="inline w-4 h-4 mr-1" />
+                  {option.explanation}
+                </div>
+              )}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Explicación general (si existe y estamos en feedback) */}
-      {showingFeedback && explanation && config.showExplanation && (
-        <div className="mt-6 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-          <p className="text-sm text-amber-800 dark:text-amber-200">
-            <span className="font-semibold">💡 Explicación:</span> {explanation}
-          </p>
+      {/* General Explanation */}
+      {showingFeedback && config.showExplanation !== false && explanation && (
+        <div
+          className="p-3 rounded-lg"
+          style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+        >
+          <div className="flex items-start gap-2">
+            <Lightbulb size={18} className="text-yellow-500 mt-0.5 flex-shrink-0" />
+            <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
+              {explanation}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Result Badge (shown after checking) */}
+      {showingFeedback && (
+        <div className="flex justify-end mt-4">
+          {(() => {
+            const selectedArray = multiSelect ? Array.from(selectedSet) : [userAnswer];
+            const allCorrect = selectedArray.length === correctAnswers.length &&
+              selectedArray.every(idx => correctAnswers.includes(idx));
+            const someCorrect = selectedArray.some(idx => correctAnswers.includes(idx)) &&
+              !selectedArray.some(idx => !correctAnswers.includes(idx));
+
+            if (allCorrect) {
+              return (
+                <BaseBadge variant="success" size="lg" className="text-base px-4 py-2">
+                  ¡Correcto! +{config.correctPoints || 10}pts
+                </BaseBadge>
+              );
+            }
+            if (someCorrect && multiSelect) {
+              return (
+                <BaseBadge variant="warning" size="lg" className="text-base px-4 py-2">
+                  Parcial +{config.partialPoints || 5}pts
+                </BaseBadge>
+              );
+            }
+            return (
+              <BaseBadge variant="danger" size="lg" className="text-base px-4 py-2">
+                Incorrecto {config.incorrectPoints || 0}pts
+              </BaseBadge>
+            );
+          })()}
         </div>
       )}
     </div>

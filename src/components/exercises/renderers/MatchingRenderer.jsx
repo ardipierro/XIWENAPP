@@ -15,7 +15,16 @@
 
 import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { Check, X, RotateCcw, ArrowRight } from 'lucide-react';
+import { BaseBadge } from '../../common';
 import { useExercise, FEEDBACK_MODES } from '../core/ExerciseContext';
+
+// Colores por defecto (mismo que otros renderers)
+const DEFAULT_COLORS = {
+  correctColor: '#10b981',
+  incorrectColor: '#ef4444',
+  selectedColor: '#3b82f6',
+  connectedColor: '#8b5cf6'
+};
 
 /**
  * Shuffle array
@@ -52,8 +61,11 @@ export function MatchingRenderer({
   shuffleRight = true,
   mode = 'click',
   showLines = true,
+  colors = {},
   className = ''
 }) {
+  // Merge colors with defaults
+  const colorConfig = { ...DEFAULT_COLORS, ...colors };
   const {
     userAnswer,
     setAnswer,
@@ -166,8 +178,8 @@ export function MatchingRenderer({
 
   // Obtener color de conexión
   const getConnectionColor = (leftIndex, rightIndex) => {
-    if (!showingFeedback) return '#3b82f6'; // blue
-    return isConnectionCorrect(leftIndex, rightIndex) ? '#10b981' : '#ef4444';
+    if (!showingFeedback) return colorConfig.selectedColor;
+    return isConnectionCorrect(leftIndex, rightIndex) ? colorConfig.correctColor : colorConfig.incorrectColor;
   };
 
   // Calcular líneas SVG
@@ -363,14 +375,15 @@ export function MatchingRenderer({
 
       {/* Controles */}
       <div className="mt-6 flex items-center justify-between">
-        <div className="text-sm text-gray-500 dark:text-gray-400">
+        <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
           {Object.keys(connections).length} / {pairs.length} conectados
-        </div>
+        </span>
 
         {!showingFeedback && Object.keys(connections).length > 0 && (
           <button
             onClick={handleReset}
-            className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            className="flex items-center gap-2 text-sm transition-colors"
+            style={{ color: 'var(--color-text-secondary)' }}
           >
             <RotateCcw size={16} />
             Reiniciar
@@ -378,13 +391,22 @@ export function MatchingRenderer({
         )}
 
         {showingFeedback && (
-          <span className={`text-sm font-medium ${
-            allCorrect
-              ? 'text-green-600 dark:text-green-400'
-              : 'text-orange-600 dark:text-orange-400'
-          }`}>
-            {Object.entries(connections).filter(([l, r]) => isConnectionCorrect(parseInt(l), r)).length} / {pairs.length} correctos
-          </span>
+          (() => {
+            const correctCount = Object.entries(connections).filter(([l, r]) => isConnectionCorrect(parseInt(l), r)).length;
+            return allCorrect ? (
+              <BaseBadge variant="success" size="lg" className="text-base px-4 py-2">
+                ¡Perfecto! Todas correctas
+              </BaseBadge>
+            ) : correctCount > 0 ? (
+              <BaseBadge variant="warning" size="lg" className="text-base px-4 py-2">
+                {correctCount} / {pairs.length} correctos
+              </BaseBadge>
+            ) : (
+              <BaseBadge variant="danger" size="lg" className="text-base px-4 py-2">
+                Ninguno correcto
+              </BaseBadge>
+            );
+          })()
         )}
       </div>
     </div>

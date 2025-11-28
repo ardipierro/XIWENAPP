@@ -3,45 +3,106 @@
  * @module components/exercises/renderers/OpenQuestionsRenderer
  *
  * UNIFICA:
- * - container/OpenQuestionsExercise.jsx
+ * - container/OpenQuestionsExercise.jsx (diseño de referencia)
  * - ChainedExerciseViewer.jsx → OpenQuestionsContent
  * - ContentRenderer.jsx → renderizado de open_questions
  *
- * Soporta:
- * - Múltiples preguntas
- * - Respuestas esperadas opcionales
- * - Modo editable vs solo lectura
- * - Auto-guardado de respuestas
+ * Usa los mismos estilos que container/OpenQuestionsExercise.jsx
+ * y los componentes base del sistema de diseño.
  */
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { MessageSquare, Check, Save, AlertCircle } from 'lucide-react';
+import { Check, X, RotateCcw, ChevronRight, Award, Eye, EyeOff } from 'lucide-react';
 import { useExercise } from '../core/ExerciseContext';
-import { BaseButton } from '../../common';
+import { BaseButton, BaseBadge } from '../../common';
+
+// Colores por defecto (mismo que container/OpenQuestionsExercise.jsx)
+const DEFAULT_COLORS = {
+  correctColor: '#10b981',
+  incorrectColor: '#ef4444',
+  partialColor: '#f59e0b'
+};
+
+/**
+ * Normaliza texto para comparación flexible
+ */
+function normalizeText(text, options = {}) {
+  if (!text) return '';
+
+  let normalized = text.trim();
+
+  if (!options.caseSensitive) {
+    normalized = normalized.toLowerCase();
+  }
+
+  if (options.ignoreAccents) {
+    normalized = normalized.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
+  if (options.ignorePunctuation) {
+    normalized = normalized.replace(/[.,!?;:¿¡'"()-]/g, '').replace(/\s+/g, ' ');
+  }
+
+  return normalized;
+}
+
+/**
+ * Calcula similitud entre dos strings
+ */
+function calculateSimilarity(str1, str2) {
+  if (!str1 || !str2) return 0;
+
+  const s1 = str1.toLowerCase();
+  const s2 = str2.toLowerCase();
+
+  if (s1 === s2) return 1;
+
+  const words1 = s1.split(/\s+/);
+  const words2 = s2.split(/\s+/);
+
+  let matches = 0;
+  for (const word of words1) {
+    if (words2.includes(word)) matches++;
+  }
+
+  return matches / Math.max(words1.length, words2.length);
+}
 
 /**
  * OpenQuestionsRenderer - Renderiza preguntas de respuesta libre
  *
+ * Sigue el diseño exacto de container/OpenQuestionsExercise.jsx
+ *
  * @param {Object} props
  * @param {Array} props.questions - Array de {question, answer?, hint?, points?}
  * @param {string} [props.instruction] - Instrucción general
- * @param {boolean} [props.showExpectedAnswers] - Mostrar respuestas esperadas
- * @param {boolean} [props.autoSave] - Auto-guardar respuestas
- * @param {number} [props.minLength] - Longitud mínima de respuesta
+ * @param {boolean} [props.validateAnswers] - Validar respuestas automáticamente
+ * @param {boolean} [props.caseSensitive] - Comparación sensible a mayúsculas
+ * @param {boolean} [props.ignoreAccents] - Ignorar acentos
+ * @param {boolean} [props.ignorePunctuation] - Ignorar puntuación
+ * @param {boolean} [props.acceptPartialMatch] - Aceptar coincidencias parciales
+ * @param {number} [props.partialMatchThreshold] - Umbral de similitud (0-1)
+ * @param {boolean} [props.showCorrectAnswer] - Mostrar respuesta correcta
+ * @param {boolean} [props.allowRetry] - Permitir reintentos
+ * @param {number} [props.maxRetries] - Máximo de reintentos
  * @param {number} [props.maxLength] - Longitud máxima de respuesta
- * @param {string} [props.layout] - 'cards' | 'simple' | 'compact'
- * @param {Function} [props.onSave] - Callback al guardar
+ * @param {Object} [props.colors] - Colores personalizados
  * @param {string} [props.className] - Clases adicionales
  */
 export function OpenQuestionsRenderer({
   questions = [],
   instruction,
-  showExpectedAnswers = false,
-  autoSave = true,
-  minLength = 0,
-  maxLength = 1000,
-  layout = 'cards',
-  onSave,
+  validateAnswers = true,
+  caseSensitive = false,
+  ignoreAccents = true,
+  ignorePunctuation = true,
+  acceptPartialMatch = true,
+  partialMatchThreshold = 0.7,
+  showCorrectAnswer = true,
+  allowRetry = true,
+  maxRetries = 3,
+  maxLength = 500,
+  colors = {},
   className = ''
 }) {
   const {
@@ -51,296 +112,371 @@ export function OpenQuestionsRenderer({
     config
   } = useExercise();
 
-  // Estado local de respuestas
-  const [responses, setResponses] = useState(() =>
-    questions.reduce((acc, _, idx) => {
-      acc[idx] = '';
-      return acc;
-    }, {})
+  // Merge colors with defaults
+  const colorConfig = { ...DEFAULT_COLORS, ...colors };
+
+  // Estado de respuestas del usuario
+  const [answers, setAnswers] = useState(() =>
+    questions.map(() => ({ text: '', status: null, attempts: 0, showAnswer: false }))
   );
-
-  // Estado de guardado
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-
-  // Timer para auto-save
-  const autoSaveTimer = useRef(null);
 
   // Sincronizar con context
   useEffect(() => {
-    setAnswer(responses);
-  }, [responses, setAnswer]);
+    setAnswer(answers.map(a => ({ text: a.text, status: a.status })));
+  }, [answers, setAnswer]);
 
-  // Handler de cambio en textarea
-  const handleChange = useCallback((index, value) => {
-    // Limitar longitud
-    if (maxLength && value.length > maxLength) {
+  /**
+   * Actualizar respuesta de una pregunta
+   */
+  const handleAnswerChange = useCallback((index, value) => {
+    if (value.length > maxLength) {
       value = value.slice(0, maxLength);
     }
+    setAnswers(prev => {
+      const newAnswers = [...prev];
+      newAnswers[index] = { ...newAnswers[index], text: value };
+      return newAnswers;
+    });
+  }, [maxLength]);
 
-    setResponses(prev => ({
-      ...prev,
-      [index]: value
-    }));
+  /**
+   * Verificar respuesta individual
+   */
+  const checkAnswer = useCallback((index) => {
+    const question = questions[index];
+    const userAnswer = answers[index].text;
+    const correctAnswer = question.answer;
 
-    setSaved(false);
-
-    // Auto-save con debounce
-    if (autoSave && onSave) {
-      if (autoSaveTimer.current) {
-        clearTimeout(autoSaveTimer.current);
-      }
-      autoSaveTimer.current = setTimeout(() => {
-        handleSave();
-      }, 2000);
+    if (!correctAnswer || !validateAnswers) {
+      // Sin respuesta definida, marcar como completada
+      setAnswers(prev => {
+        const newAnswers = [...prev];
+        newAnswers[index] = { ...newAnswers[index], status: 'completed' };
+        return newAnswers;
+      });
+      return;
     }
-  }, [maxLength, autoSave, onSave]);
 
-  // Handler de guardado
-  const handleSave = useCallback(async () => {
-    if (!onSave) return;
+    const normalizedUser = normalizeText(userAnswer, { caseSensitive, ignoreAccents, ignorePunctuation });
+    const normalizedCorrect = normalizeText(correctAnswer, { caseSensitive, ignoreAccents, ignorePunctuation });
 
-    setSaving(true);
-    try {
-      await onSave(responses);
-      setSaved(true);
-    } catch (error) {
-      console.error('Error saving responses:', error);
-    } finally {
-      setSaving(false);
-    }
-  }, [responses, onSave]);
+    let status = 'incorrect';
 
-  // Cleanup timer
-  useEffect(() => {
-    return () => {
-      if (autoSaveTimer.current) {
-        clearTimeout(autoSaveTimer.current);
+    if (normalizedUser === normalizedCorrect) {
+      status = 'correct';
+    } else if (acceptPartialMatch) {
+      const similarity = calculateSimilarity(normalizedUser, normalizedCorrect);
+      if (similarity >= partialMatchThreshold) {
+        status = 'partial';
       }
-    };
+    }
+
+    setAnswers(prev => {
+      const newAnswers = [...prev];
+      newAnswers[index] = {
+        ...newAnswers[index],
+        status,
+        attempts: newAnswers[index].attempts + 1
+      };
+      return newAnswers;
+    });
+  }, [questions, answers, validateAnswers, caseSensitive, ignoreAccents, ignorePunctuation, acceptPartialMatch, partialMatchThreshold]);
+
+  /**
+   * Reintentar pregunta
+   */
+  const retryQuestion = useCallback((index) => {
+    setAnswers(prev => {
+      const newAnswers = [...prev];
+      newAnswers[index] = { ...newAnswers[index], status: null, text: '' };
+      return newAnswers;
+    });
   }, []);
 
-  // Verificar si todas las preguntas tienen respuesta
-  const allAnswered = Object.values(responses).every(r => r.trim().length >= minLength);
+  /**
+   * Mostrar/ocultar respuesta correcta
+   */
+  const toggleShowAnswer = useCallback((index) => {
+    setAnswers(prev => {
+      const newAnswers = [...prev];
+      newAnswers[index] = { ...newAnswers[index], showAnswer: !newAnswers[index].showAnswer };
+      return newAnswers;
+    });
+  }, []);
 
-  // Contador de caracteres
-  const getCharCount = (index) => {
-    const length = responses[index]?.length || 0;
-    if (maxLength) {
-      return `${length}/${maxLength}`;
-    }
-    return length;
+  /**
+   * Obtener estilo del borde según status
+   */
+  const getBorderStyle = (status) => {
+    if (!status) return { borderColor: 'var(--color-border)' };
+
+    const colorMap = {
+      correct: colorConfig.correctColor,
+      partial: colorConfig.partialColor,
+      incorrect: colorConfig.incorrectColor,
+      completed: '#6b7280'
+    };
+
+    return {
+      borderColor: colorMap[status] || 'var(--color-border)',
+      borderWidth: '2px'
+    };
   };
 
-  // Renderizar pregunta individual
-  const renderQuestion = (question, index) => {
-    const isAnswered = responses[index]?.trim().length >= minLength;
-
-    if (layout === 'compact') {
-      return (
-        <div key={index} className="space-y-2">
-          <div className="flex items-start gap-2">
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 flex items-center justify-center text-sm font-bold">
-              {index + 1}
-            </span>
-            <p className="text-gray-900 dark:text-white flex-1">
-              {question.question}
-            </p>
-          </div>
-          <textarea
-            value={responses[index] || ''}
-            onChange={(e) => handleChange(index, e.target.value)}
-            disabled={showingFeedback}
-            placeholder="Escribe tu respuesta..."
-            rows={2}
-            className="w-full px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-          />
-        </div>
-      );
+  /**
+   * Obtener icono según status
+   */
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'correct':
+        return <Check className="w-5 h-5" style={{ color: colorConfig.correctColor }} />;
+      case 'partial':
+        return <Check className="w-5 h-5" style={{ color: colorConfig.partialColor }} />;
+      case 'incorrect':
+        return <X className="w-5 h-5" style={{ color: colorConfig.incorrectColor }} />;
+      default:
+        return null;
     }
-
-    if (layout === 'simple') {
-      return (
-        <div key={index} className="space-y-3 pb-4 border-b border-gray-200 dark:border-gray-700 last:border-0">
-          <div className="flex items-start gap-3">
-            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 flex items-center justify-center font-bold">
-              {index + 1}
-            </span>
-            <div className="flex-1">
-              <p className="font-medium text-gray-900 dark:text-white">
-                {question.question}
-              </p>
-              {question.hint && (
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  💡 {question.hint}
-                </p>
-              )}
-            </div>
-          </div>
-          <textarea
-            value={responses[index] || ''}
-            onChange={(e) => handleChange(index, e.target.value)}
-            disabled={showingFeedback}
-            placeholder="Escribe tu respuesta..."
-            rows={3}
-            className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y"
-          />
-        </div>
-      );
-    }
-
-    // Layout 'cards' (default)
-    return (
-      <div
-        key={index}
-        className={`rounded-xl border-2 overflow-hidden transition-colors ${
-          isAnswered
-            ? 'border-green-200 dark:border-green-800 bg-green-50/30 dark:bg-green-900/10'
-            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
-        }`}
-      >
-        {/* Header */}
-        <div className={`px-4 py-3 flex items-center justify-between ${
-          isAnswered
-            ? 'bg-green-50 dark:bg-green-900/20'
-            : 'bg-gray-50 dark:bg-gray-800/50'
-        }`}>
-          <div className="flex items-center gap-3">
-            <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-              isAnswered
-                ? 'bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-200'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-            }`}>
-              {isAnswered ? <Check size={18} /> : index + 1}
-            </span>
-            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              Pregunta {index + 1} de {questions.length}
-            </span>
-          </div>
-
-          {question.points && (
-            <span className="text-xs font-medium px-2 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
-              {question.points} pts
-            </span>
-          )}
-        </div>
-
-        {/* Contenido */}
-        <div className="p-4 space-y-4">
-          {/* Pregunta */}
-          <p className="text-lg font-medium text-gray-900 dark:text-white">
-            {question.question}
-          </p>
-
-          {/* Hint */}
-          {question.hint && (
-            <div className="flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-3">
-              <MessageSquare size={16} className="flex-shrink-0 mt-0.5" />
-              <span>{question.hint}</span>
-            </div>
-          )}
-
-          {/* Textarea */}
-          <div className="relative">
-            <textarea
-              value={responses[index] || ''}
-              onChange={(e) => handleChange(index, e.target.value)}
-              disabled={showingFeedback}
-              placeholder="Escribe tu respuesta aquí..."
-              rows={4}
-              className={`w-full px-4 py-3 rounded-xl border-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-colors resize-y ${
-                isAnswered
-                  ? 'border-green-300 dark:border-green-700 focus:ring-green-200 dark:focus:ring-green-800'
-                  : 'border-gray-200 dark:border-gray-700 focus:ring-blue-200 dark:focus:ring-blue-800 focus:border-blue-500'
-              }`}
-            />
-
-            {/* Contador de caracteres */}
-            <span className={`absolute bottom-3 right-3 text-xs ${
-              responses[index]?.length >= maxLength * 0.9
-                ? 'text-orange-500'
-                : 'text-gray-400'
-            }`}>
-              {getCharCount(index)}
-            </span>
-          </div>
-
-          {/* Respuesta esperada (si está habilitado y en feedback) */}
-          {showExpectedAnswers && question.answer && showingFeedback && (
-            <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-              <p className="text-sm">
-                <span className="font-medium text-blue-700 dark:text-blue-300">
-                  Respuesta esperada:
-                </span>
-                <span className="ml-2 text-blue-600 dark:text-blue-400">
-                  {question.answer}
-                </span>
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-    );
   };
+
+  // Calcular progreso
+  const progress = Math.round(
+    (answers.filter(a => a.status || a.text.trim()).length / questions.length) * 100
+  );
+
+  // Contar resultados
+  const correctCount = answers.filter(a => a.status === 'correct').length;
+  const partialCount = answers.filter(a => a.status === 'partial').length;
 
   return (
-    <div className={`open-questions-renderer ${className}`}>
+    <div className={`open-questions-renderer w-full space-y-4 ${className}`}>
+      {/* Barra de progreso */}
+      <div className="flex items-center gap-3 mb-4">
+        <div
+          className="flex-1 h-2 rounded-full overflow-hidden"
+          style={{ backgroundColor: 'var(--color-bg-tertiary)' }}
+        >
+          <div
+            className="h-full transition-all duration-300"
+            style={{
+              width: `${progress}%`,
+              backgroundColor: 'var(--color-primary, #8b5cf6)'
+            }}
+          />
+        </div>
+        <span className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
+          {progress}%
+        </span>
+      </div>
+
       {/* Instrucción */}
       {instruction && (
-        <div className="mb-6 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
-          <p className="text-blue-800 dark:text-blue-200">
+        <div
+          className="p-4 rounded-lg"
+          style={{
+            backgroundColor: 'var(--color-bg-secondary)',
+            border: '1px solid var(--color-border)'
+          }}
+        >
+          <p style={{ color: 'var(--color-text-secondary)' }}>
             {instruction}
           </p>
         </div>
       )}
 
       {/* Lista de preguntas */}
-      <div className={`space-y-${layout === 'compact' ? '4' : '6'}`}>
-        {questions.map((question, index) => renderQuestion(question, index))}
+      <div className="space-y-6">
+        {questions.map((q, index) => {
+          const answer = answers[index];
+          const canRetry = allowRetry &&
+            answer.status === 'incorrect' &&
+            answer.attempts < maxRetries;
+
+          return (
+            <div
+              key={index}
+              className="p-4 rounded-lg transition-all"
+              style={{
+                backgroundColor: 'var(--color-bg-secondary)',
+                ...getBorderStyle(answer.status)
+              }}
+            >
+              {/* Pregunta */}
+              <div className="flex items-start gap-3 mb-3">
+                <span
+                  className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-white"
+                  style={{ backgroundColor: 'var(--color-primary, #8b5cf6)' }}
+                >
+                  {index + 1}
+                </span>
+                <p
+                  className="text-lg font-medium pt-1 flex-1"
+                  style={{ color: 'var(--color-text-primary)' }}
+                >
+                  {q.question}
+                </p>
+                {answer.status && getStatusIcon(answer.status)}
+              </div>
+
+              {/* Textarea para respuesta */}
+              <div className="ml-11">
+                <textarea
+                  value={answer.text}
+                  onChange={(e) => handleAnswerChange(index, e.target.value)}
+                  placeholder="Escribe tu respuesta aquí..."
+                  rows={2}
+                  maxLength={maxLength}
+                  disabled={answer.status === 'correct' || showingFeedback}
+                  className="w-full p-3 rounded-lg border resize-none transition-colors focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-60 disabled:cursor-not-allowed"
+                  style={{
+                    backgroundColor: 'var(--color-bg-primary)',
+                    borderColor: 'var(--color-border)',
+                    color: 'var(--color-text-primary)'
+                  }}
+                />
+
+                {/* Contador de caracteres */}
+                <div className="flex justify-end mt-1">
+                  <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                    {answer.text.length}/{maxLength}
+                  </span>
+                </div>
+
+                {/* Acciones */}
+                <div className="flex items-center gap-2 mt-2">
+                  {!answer.status && answer.text.trim() && !showingFeedback && (
+                    <BaseButton
+                      size="sm"
+                      variant="primary"
+                      icon={ChevronRight}
+                      onClick={() => checkAnswer(index)}
+                    >
+                      Verificar
+                    </BaseButton>
+                  )}
+
+                  {canRetry && !showingFeedback && (
+                    <BaseButton
+                      size="sm"
+                      variant="secondary"
+                      icon={RotateCcw}
+                      onClick={() => retryQuestion(index)}
+                    >
+                      Reintentar ({maxRetries - answer.attempts} restantes)
+                    </BaseButton>
+                  )}
+
+                  {showCorrectAnswer && q.answer && answer.status && answer.status !== 'correct' && (
+                    <BaseButton
+                      size="sm"
+                      variant="ghost"
+                      icon={answer.showAnswer ? EyeOff : Eye}
+                      onClick={() => toggleShowAnswer(index)}
+                    >
+                      {answer.showAnswer ? 'Ocultar' : 'Ver'} respuesta
+                    </BaseButton>
+                  )}
+                </div>
+
+                {/* Respuesta correcta */}
+                {answer.showAnswer && q.answer && (
+                  <div
+                    className="mt-3 p-3 rounded-lg"
+                    style={{
+                      backgroundColor: `${colorConfig.correctColor}10`,
+                      border: `1px solid ${colorConfig.correctColor}40`
+                    }}
+                  >
+                    <p className="text-sm">
+                      <span className="font-semibold" style={{ color: colorConfig.correctColor }}>
+                        Respuesta correcta:
+                      </span>
+                      <span className="ml-2" style={{ color: 'var(--color-text-primary)' }}>
+                        {q.answer}
+                      </span>
+                    </p>
+                  </div>
+                )}
+
+                {/* Feedback de respuesta */}
+                {answer.status === 'correct' && (
+                  <div
+                    className="mt-2 flex items-center gap-2"
+                    style={{ color: colorConfig.correctColor }}
+                  >
+                    <Check className="w-4 h-4" />
+                    <span className="text-sm font-medium">¡Correcto!</span>
+                  </div>
+                )}
+
+                {answer.status === 'partial' && (
+                  <div
+                    className="mt-2 flex items-center gap-2"
+                    style={{ color: colorConfig.partialColor }}
+                  >
+                    <Check className="w-4 h-4" />
+                    <span className="text-sm font-medium">¡Casi! Respuesta parcialmente correcta</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      {/* Footer con estado y acciones */}
-      <div className="mt-6 flex items-center justify-between">
-        {/* Progreso */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-            <Check size={16} className={allAnswered ? 'text-green-500' : 'text-gray-400'} />
-            <span>
-              {Object.values(responses).filter(r => r.trim().length >= minLength).length} / {questions.length} respondidas
-            </span>
+      {/* Resumen cuando showingFeedback */}
+      {showingFeedback && (
+        <div
+          className="mt-6 p-6 rounded-lg"
+          style={{
+            background: 'linear-gradient(to right, var(--color-bg-secondary), var(--color-bg-tertiary))',
+            border: '1px solid var(--color-border)'
+          }}
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <Award className="w-8 h-8 text-purple-500" />
+            <h3 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+              Resumen
+            </h3>
+          </div>
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <p className="text-2xl font-bold" style={{ color: colorConfig.correctColor }}>
+                {correctCount}
+              </p>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Correctas</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold" style={{ color: colorConfig.partialColor }}>
+                {partialCount}
+              </p>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Parciales</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold" style={{ color: colorConfig.incorrectColor }}>
+                {answers.filter(a => a.status === 'incorrect' || (a.text.trim() && !a.status)).length}
+              </p>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Por revisar</p>
+            </div>
           </div>
 
-          {/* Indicador de guardado */}
-          {autoSave && (
-            <span className={`text-xs ${
-              saving ? 'text-blue-500' : saved ? 'text-green-500' : 'text-transparent'
-            }`}>
-              {saving ? 'Guardando...' : saved ? '✓ Guardado' : ''}
-            </span>
-          )}
+          {/* Result Badge */}
+          <div className="flex justify-center mt-4">
+            {correctCount === questions.length ? (
+              <BaseBadge variant="success" size="lg" className="text-base px-4 py-2">
+                ¡Perfecto! Todas correctas
+              </BaseBadge>
+            ) : correctCount + partialCount > 0 ? (
+              <BaseBadge variant="warning" size="lg" className="text-base px-4 py-2">
+                {Math.round(((correctCount + partialCount * 0.5) / questions.length) * 100)}% de acierto
+              </BaseBadge>
+            ) : (
+              <BaseBadge variant="danger" size="lg" className="text-base px-4 py-2">
+                Revisa las respuestas
+              </BaseBadge>
+            )}
+          </div>
         </div>
-
-        {/* Botón guardar manual */}
-        {onSave && !autoSave && (
-          <BaseButton
-            variant="secondary"
-            size="sm"
-            icon={Save}
-            onClick={handleSave}
-            loading={saving}
-            disabled={!allAnswered}
-          >
-            Guardar respuestas
-          </BaseButton>
-        )}
-      </div>
-
-      {/* Nota informativa */}
-      {minLength > 0 && (
-        <p className="mt-4 text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
-          <AlertCircle size={12} />
-          Cada respuesta debe tener al menos {minLength} caracteres
-        </p>
       )}
     </div>
   );
