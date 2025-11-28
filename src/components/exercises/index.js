@@ -88,6 +88,9 @@ export { FillBlankRenderer } from './renderers/FillBlankRenderer';
 export { OpenQuestionsRenderer } from './renderers/OpenQuestionsRenderer';
 export { TrueFalseRenderer } from './renderers/TrueFalseRenderer';
 export { MatchingRenderer } from './renderers/MatchingRenderer';
+export { WordHighlightRenderer } from './renderers/WordHighlightRenderer';
+export { DragDropRenderer } from './renderers/DragDropRenderer';
+export { DialoguesRenderer } from './renderers/DialoguesRenderer';
 
 // Contenido
 export { VideoRenderer } from './renderers/VideoRenderer';

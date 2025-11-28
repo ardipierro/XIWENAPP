@@ -4,10 +4,9 @@
  * @updated 2025-11-28 - Migrado a renderers unificados
  */
 
-import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { X, Loader2, Edit2, Maximize2, Minimize2, RotateCcw, Type } from 'lucide-react';
 import { BaseModal, BaseButton } from './common';
-import WordHighlightExercise from './container/WordHighlightExercise';
 import ChainedExerciseViewer from './ChainedExerciseViewer';
 import { getDisplayClasses, getDisplayStyles, mergeDisplaySettings } from '../constants/displaySettings';
 import logger from '../utils/logger';
@@ -24,25 +23,13 @@ import {
   ReadingRenderer,
   AudioRenderer,
   VideoRenderer,
+  WordHighlightRenderer,
+  DragDropRenderer,
+  DialoguesRenderer,
   ChainedLayout,
   FEEDBACK_MODES
 } from './exercises';
 
-// Lazy load de componentes de ejercicios que aún no tienen renderer unificado
-const DragDropBlanksExercise = lazy(() => import('./container/DragDropBlanksExercise'));
-const DialoguesExercise = lazy(() => import('./container/DialoguesExercise'));
-
-/**
- * Spinner de carga para lazy components
- */
-const ExerciseLoader = () => (
-  <div className="flex items-center justify-center py-12">
-    <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--color-primary)' }} />
-    <span className="ml-3" style={{ color: 'var(--color-text-secondary)' }}>
-      Cargando ejercicio...
-    </span>
-  </div>
-);
 
 /**
  * Tipos de ejercicio soportados
@@ -416,27 +403,65 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
     }
 
     switch (exerciseType) {
-      case EXERCISE_TYPES.HIGHLIGHT:
-        return (
-          <WordHighlightExercise
-            text={cleanContent}
-            config={config}
-            onComplete={handleComplete}
-            onActionsChange={handleActionsChange}
-          />
-        );
+      case EXERCISE_TYPES.HIGHLIGHT: {
+        // ✅ Config por defecto para marcar palabras
+        const defaultConfig = {
+          feedbackMode: FEEDBACK_MODES.INSTANT,
+          soundEnabled: true,
+          showCorrectAnswer: true,
+          correctPoints: 10,
+          incorrectPoints: -5
+        };
 
-      case EXERCISE_TYPES.DRAGDROP:
+        const highlightConfig = config ? { ...defaultConfig, ...config } : defaultConfig;
+        console.log('⚙️ Final Word Highlight Config being used:', highlightConfig);
+
+        // ✅ Aplicar displaySettings
+        const mergedDisplaySettings = mergeDisplaySettings(displaySettings, 'word-highlight');
+        const displayClasses = getDisplayClasses(mergedDisplaySettings);
+
         return (
-          <Suspense fallback={<ExerciseLoader />}>
-            <DragDropBlanksExercise
+          <ExerciseProvider config={highlightConfig} onComplete={handleComplete}>
+            <WordHighlightRenderer
               text={cleanContent}
-              config={config}
-              onComplete={handleComplete}
-              onActionsChange={handleActionsChange}
+              instruction="Haz clic en las palabras correctas"
+              wordsDisappear={false}
+              showTargetCount={true}
+              className={`${displayClasses.text} ${displayClasses.content}`}
             />
-          </Suspense>
+          </ExerciseProvider>
         );
+      }
+
+      case EXERCISE_TYPES.DRAGDROP: {
+        // ✅ Config por defecto para arrastrar y soltar
+        const defaultConfig = {
+          feedbackMode: FEEDBACK_MODES.ON_SUBMIT,
+          soundEnabled: true,
+          showCorrectAnswer: true,
+          correctPoints: 10,
+          incorrectPoints: -5
+        };
+
+        const dragConfig = config ? { ...defaultConfig, ...config } : defaultConfig;
+        console.log('⚙️ Final Drag Drop Config being used:', dragConfig);
+
+        // ✅ Aplicar displaySettings
+        const mergedDisplaySettings = mergeDisplaySettings(displaySettings, 'drag-drop');
+        const displayClasses = getDisplayClasses(mergedDisplaySettings);
+
+        return (
+          <ExerciseProvider config={dragConfig} onComplete={handleComplete}>
+            <DragDropRenderer
+              text={cleanContent}
+              instruction="Arrastra las palabras a su posición correcta"
+              shuffleWords={true}
+              showWordBank={true}
+              className={`${displayClasses.text} ${displayClasses.content}`}
+            />
+          </ExerciseProvider>
+        );
+      }
 
       case EXERCISE_TYPES.FILLBLANKS: {
         // ✅ Usar configuración guardada si existe, sino usar defaults
@@ -510,17 +535,21 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
         );
       }
 
-      case EXERCISE_TYPES.DIALOGUES:
+      case EXERCISE_TYPES.DIALOGUES: {
+        // ✅ Dialogues es contenido, no ejercicio interactivo - NO usa ExerciseContext
+        const mergedDisplaySettings = mergeDisplaySettings(displaySettings, 'dialogues');
+        const displayClasses = getDisplayClasses(mergedDisplaySettings);
+
         return (
-          <Suspense fallback={<ExerciseLoader />}>
-            <DialoguesExercise
-              content={cleanContent}
-              config={config}
-              onComplete={handleComplete}
-              onActionsChange={handleActionsChange}
-            />
-          </Suspense>
+          <DialoguesRenderer
+            text={cleanContent}
+            title="Diálogo"
+            alternateAlignment={true}
+            showCharacterCount={true}
+            className={`${displayClasses.text} ${displayClasses.content}`}
+          />
         );
+      }
 
       case EXERCISE_TYPES.OPEN_QUESTIONS: {
         // ✅ Usar configuración guardada si existe, sino usar defaults
