@@ -1,7 +1,7 @@
 /**
  * @fileoverview Exercise Viewer Modal - Visualización interactiva de ejercicios
  * @module components/ExerciseViewerModal
- * @updated 2025-11-25 - Fixed exercise.body priority
+ * @updated 2025-11-28 - Migrado a renderers unificados
  */
 
 import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
@@ -13,12 +13,18 @@ import { getDisplayClasses, getDisplayStyles, mergeDisplaySettings } from '../co
 import logger from '../utils/logger';
 import { parseExerciseFile, parseChainedExercises, parseQuestions, CHAIN_MARKERS } from '../utils/exerciseParser.js';
 
-// Lazy load de componentes de ejercicios adicionales
+// Importar arquitectura unificada de ejercicios
+import {
+  ExerciseProvider,
+  MultipleChoiceRenderer,
+  FillBlankRenderer,
+  OpenQuestionsRenderer,
+  FEEDBACK_MODES
+} from './exercises';
+
+// Lazy load de componentes de ejercicios que aún no tienen renderer unificado
 const DragDropBlanksExercise = lazy(() => import('./container/DragDropBlanksExercise'));
-const FillInBlanksExercise = lazy(() => import('./container/FillInBlanksExercise'));
 const DialoguesExercise = lazy(() => import('./container/DialoguesExercise'));
-const OpenQuestionsExercise = lazy(() => import('./container/OpenQuestionsExercise'));
-const MultipleChoiceExercise = lazy(() => import('./container/MultipleChoiceExercise'));
 
 /**
  * Spinner de carga para lazy components
@@ -356,17 +362,23 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
           </Suspense>
         );
 
-      case EXERCISE_TYPES.FILLBLANKS:
+      case EXERCISE_TYPES.FILLBLANKS: {
+        // Usar renderer unificado FillBlankRenderer
+        const fillConfig = {
+          feedbackMode: FEEDBACK_MODES.INSTANT,
+          soundEnabled: true,
+          showCorrectAnswer: true
+        };
+
         return (
-          <Suspense fallback={<ExerciseLoader />}>
-            <FillInBlanksExercise
+          <ExerciseProvider config={fillConfig} onComplete={handleComplete}>
+            <FillBlankRenderer
               text={cleanContent}
-              config={config}
-              onComplete={handleComplete}
-              onActionsChange={handleActionsChange}
+              caseSensitive={false}
             />
-          </Suspense>
+          </ExerciseProvider>
         );
+      }
 
       case EXERCISE_TYPES.DIALOGUES:
         return (
@@ -381,90 +393,75 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
         );
 
       case EXERCISE_TYPES.OPEN_QUESTIONS: {
+        // Usar renderer unificado OpenQuestionsRenderer
+        const openConfig = {
+          feedbackMode: FEEDBACK_MODES.ON_SUBMIT,
+          soundEnabled: true,
+          showCorrectAnswer: true
+        };
+
         // Si cleanContent ya es un objeto parseado con las preguntas, usarlo directamente
+        let questions = [];
+
         if (typeof cleanContent === 'object' && cleanContent.questions) {
-          logger.info('Using already parsed open questions data', 'ExerciseViewerModal');
-          return (
-            <Suspense fallback={<ExerciseLoader />}>
-              <OpenQuestionsExercise
-                questions={cleanContent.questions}
-                config={config || {}}
-                onComplete={handleComplete}
-              />
-            </Suspense>
-          );
-        }
+          questions = cleanContent.questions;
+        } else {
+          // Si es texto plano, parsearlo
+          try {
+            const exercises = parseExerciseFile(cleanContent, 'General');
+            const openQuestionsData = exercises.find(ex => ex.type === 'open_questions');
 
-        // Si es texto plano, parsearlo
-        try {
-          console.log('%c🔄 PARSEANDO TEXTO PLANO', 'background: purple; color: white; font-size: 14px; padding: 3px;');
-          console.log('📝 cleanContent type:', typeof cleanContent);
-          console.log('📝 cleanContent value:', cleanContent);
-
-          const exercises = parseExerciseFile(cleanContent, 'General');
-          console.log('📦 Parsed exercises:', exercises);
-
-          const openQuestionsData = exercises.find(ex => ex.type === 'open_questions');
-          console.log('🎯 Found open_questions data:', openQuestionsData);
-
-          if (!openQuestionsData || !openQuestionsData.questions) {
+            if (!openQuestionsData || !openQuestionsData.questions) {
+              return (
+                <div className="text-center py-12">
+                  <p style={{ color: 'var(--color-text-secondary)' }}>
+                    No se pudieron parsear las preguntas de respuesta libre.
+                  </p>
+                </div>
+              );
+            }
+            questions = openQuestionsData.questions;
+          } catch (error) {
+            logger.error('Error parsing open questions:', error);
             return (
               <div className="text-center py-12">
                 <p style={{ color: 'var(--color-text-secondary)' }}>
-                  No se pudieron parsear las preguntas de respuesta libre.
+                  Error al parsear el ejercicio: {error.message}
                 </p>
-                <div className="mt-4 p-4 rounded-lg text-left max-w-md mx-auto" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
-                  <pre className="text-xs whitespace-pre-wrap" style={{ color: 'var(--color-text-tertiary)' }}>
-                    {typeof cleanContent === 'string' ? cleanContent?.substring(0, 300) : JSON.stringify(cleanContent, null, 2).substring(0, 300)}...
-                  </pre>
-                </div>
               </div>
             );
           }
-
-          return (
-            <Suspense fallback={<ExerciseLoader />}>
-              <OpenQuestionsExercise
-                questions={openQuestionsData.questions}
-                config={config || {}}
-                onComplete={handleComplete}
-              />
-            </Suspense>
-          );
-        } catch (error) {
-          logger.error('Error parsing open questions:', error);
-          return (
-            <div className="text-center py-12">
-              <p style={{ color: 'var(--color-text-secondary)' }}>
-                Error al parsear el ejercicio: {error.message}
-              </p>
-              <div className="mt-4 p-4 rounded-lg text-left max-w-md mx-auto" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
-                <pre className="text-xs whitespace-pre-wrap" style={{ color: 'var(--color-text-tertiary)' }}>
-                  {typeof cleanContent === 'string' ? cleanContent : JSON.stringify(cleanContent, null, 2)}
-                </pre>
-              </div>
-            </div>
-          );
         }
+
+        return (
+          <ExerciseProvider config={openConfig} onComplete={handleComplete}>
+            <OpenQuestionsRenderer
+              questions={questions}
+              showExpectedAnswer={true}
+            />
+          </ExerciseProvider>
+        );
       }
 
       case EXERCISE_TYPES.MULTIPLE_CHOICE: {
-        // Usar el parser que YA FUNCIONA en el juego por turnos
-        try {
-          console.log('%c🎯 PARSEANDO MULTIPLE CHOICE (usando parseQuestions)', 'background: orange; color: white; font-size: 14px; padding: 3px;');
-          console.log('📝 cleanContent:', cleanContent);
+        // Usar renderer unificado MultipleChoiceRenderer
+        const mcConfig = {
+          feedbackMode: FEEDBACK_MODES.INSTANT,
+          soundEnabled: true,
+          showCorrectAnswer: true,
+          showExplanation: true
+        };
 
+        try {
           // Limpiar contenido: quitar marcador #opcion_multiple si existe
           let textToProcess = cleanContent;
           const lines = cleanContent.split('\n');
           if (lines[0] && (lines[0].toLowerCase().trim().startsWith('#opcion') || lines[0].toLowerCase().trim().startsWith('#multiple'))) {
             textToProcess = lines.slice(1).join('\n').trim();
           }
-          console.log('📝 textToProcess (sin marcador):', textToProcess);
 
           // parseQuestions devuelve array de preguntas en formato correcto
           const questions = parseQuestions(textToProcess, 'General');
-          console.log('📦 Parsed questions:', questions);
 
           if (!questions || questions.length === 0) {
             return (
@@ -472,23 +469,27 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
                 <p style={{ color: 'var(--color-text-secondary)' }}>
                   No se pudieron parsear las preguntas de opción múltiple.
                 </p>
-                <div className="mt-4 p-4 rounded-lg text-left max-w-md mx-auto" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
-                  <pre className="text-xs whitespace-pre-wrap" style={{ color: 'var(--color-text-tertiary)' }}>
-                    {cleanContent?.substring(0, 300)}...
-                  </pre>
-                </div>
               </div>
             );
           }
 
+          // Para múltiples preguntas, renderizar cada una
+          // El renderer espera una sola pregunta, así que renderizamos la primera
+          // TODO: Usar ChainedLayout para múltiples preguntas
+          const firstQuestion = questions[0];
+          const correctIndex = firstQuestion.options?.findIndex(opt => opt.correct) ?? 0;
+          const optionTexts = firstQuestion.options?.map(opt => opt.text) || [];
+
           return (
-            <Suspense fallback={<ExerciseLoader />}>
-              <MultipleChoiceExercise
-                questions={questions}
-                config={config || {}}
-                onComplete={handleComplete}
+            <ExerciseProvider config={mcConfig} onComplete={handleComplete}>
+              <MultipleChoiceRenderer
+                question={firstQuestion.question}
+                options={optionTexts}
+                correctAnswer={correctIndex}
+                explanation={firstQuestion.explanation}
+                showLetters={true}
               />
-            </Suspense>
+            </ExerciseProvider>
           );
         } catch (error) {
           logger.error('Error parsing multiple choice:', error);
@@ -497,11 +498,6 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
               <p style={{ color: 'var(--color-text-secondary)' }}>
                 Error al parsear el ejercicio: {error.message}
               </p>
-              <div className="mt-4 p-4 rounded-lg text-left max-w-md mx-auto" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
-                <pre className="text-xs whitespace-pre-wrap" style={{ color: 'var(--color-text-tertiary)' }}>
-                  {cleanContent}
-                </pre>
-              </div>
             </div>
           );
         }
