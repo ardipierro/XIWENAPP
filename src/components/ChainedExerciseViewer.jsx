@@ -32,6 +32,17 @@ import {
 import { parseChainedExercises, EXERCISE_TYPES, CHAIN_MARKERS } from '../utils/exerciseParser';
 import { BaseButton, BaseBadge } from './common';
 
+// Importar arquitectura unificada de ejercicios
+import {
+  ExerciseProvider,
+  MultipleChoiceRenderer,
+  FillBlankRenderer,
+  OpenQuestionsRenderer,
+  TrueFalseRenderer,
+  MatchingRenderer,
+  FEEDBACK_MODES
+} from './exercises';
+
 /**
  * Iconos y colores por tipo de ejercicio
  */
@@ -543,178 +554,129 @@ function DragDropContent({ data }) {
   );
 }
 
+/**
+ * OpenQuestionsContent - Usa el renderer unificado OpenQuestionsRenderer
+ */
 function OpenQuestionsContent({ data }) {
+  // Configuración para feedback instantáneo
+  const config = {
+    feedbackMode: FEEDBACK_MODES.ON_SUBMIT,
+    soundEnabled: true,
+    showCorrectAnswer: true
+  };
+
   return (
-    <div className="space-y-4">
-      {data.questions?.map((q, i) => (
-        <div key={i} className="space-y-2">
-          <div className="flex items-start gap-3">
-            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 flex items-center justify-center text-sm font-bold">
-              {i + 1}
-            </span>
-            <p className="text-zinc-900 dark:text-white font-medium">
-              {q.question}
-            </p>
-          </div>
-          <div className="ml-9">
-            <textarea
-              placeholder="Escribe tu respuesta..."
-              className="w-full p-3 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white resize-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              rows={2}
-            />
-            {q.answer && (
-              <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-                <span className="font-medium">Respuesta esperada:</span> {q.answer}
-              </p>
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
+    <ExerciseProvider config={config}>
+      <OpenQuestionsRenderer
+        questions={data.questions || []}
+        showExpectedAnswer={true}
+      />
+    </ExerciseProvider>
   );
 }
 
+/**
+ * MCQContent - Usa el renderer unificado MultipleChoiceRenderer
+ */
 function MCQContent({ data }) {
-  const [selected, setSelected] = useState(null);
+  // Encontrar el índice de la respuesta correcta
+  const correctAnswerIndex = data.options?.findIndex(opt => opt.correct) ?? 0;
+
+  // Extraer solo los textos de las opciones
+  const optionTexts = data.options?.map(opt => opt.text) || [];
+
+  // Configuración para feedback instantáneo
+  const config = {
+    feedbackMode: FEEDBACK_MODES.INSTANT,
+    soundEnabled: true,
+    showCorrectAnswer: true,
+    showExplanation: true
+  };
 
   return (
-    <div className="space-y-4">
-      <p className="text-zinc-900 dark:text-white font-medium">
-        {data.question}
-      </p>
-      <div className="space-y-2">
-        {data.options?.map((opt, i) => (
-          <button
-            key={i}
-            onClick={() => setSelected(i)}
-            className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
-              selected === i
-                ? opt.correct
-                  ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                  : 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-zinc-200 dark:border-zinc-700 hover:border-zinc-300 dark:hover:border-zinc-600'
-            }`}
-          >
-            <span className={`${selected === i && opt.correct ? 'text-green-700 dark:text-green-300' : ''}`}>
-              {opt.text}
-            </span>
-            {selected === i && opt.correct && (
-              <CheckCircle size={16} className="inline ml-2 text-green-500" />
-            )}
-          </button>
-        ))}
-      </div>
-      {data.explanation && selected !== null && (
-        <p className="text-sm text-zinc-600 dark:text-zinc-400 p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
-          💡 {data.explanation}
-        </p>
-      )}
-    </div>
+    <ExerciseProvider config={config}>
+      <MultipleChoiceRenderer
+        question={data.question}
+        options={optionTexts}
+        correctAnswer={correctAnswerIndex}
+        explanation={data.explanation}
+        showLetters={true}
+      />
+    </ExerciseProvider>
   );
 }
 
+/**
+ * FillBlankContent - Usa el renderer unificado FillBlankRenderer
+ */
 function FillBlankContent({ data }) {
-  const [answer, setAnswer] = useState('');
+  // Configuración para feedback instantáneo
+  const config = {
+    feedbackMode: FEEDBACK_MODES.INSTANT,
+    soundEnabled: true,
+    showCorrectAnswer: true
+  };
 
+  // El renderer espera 'text' con formato *palabra* o ___palabra___
+  // data.sentence viene con formato ___respuesta___ del parser
   return (
-    <div className="space-y-4">
-      <div className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg text-lg">
-        {data.sentence?.split(/___+/).map((part, i, arr) => (
-          <span key={i}>
-            {part}
-            {i < arr.length - 1 && (
-              <input
-                type="text"
-                value={answer}
-                onChange={(e) => setAnswer(e.target.value)}
-                className="mx-1 px-2 py-1 w-32 border-b-2 border-orange-400 bg-transparent focus:outline-none focus:border-orange-600 text-center"
-                placeholder="..."
-              />
-            )}
-          </span>
-        ))}
-      </div>
-      {data.answers?.length > 0 && (
-        <p className="text-xs text-zinc-500">
-          <span className="font-medium">Respuestas aceptadas:</span> {data.answers.join(', ')}
-        </p>
-      )}
-    </div>
+    <ExerciseProvider config={config}>
+      <FillBlankRenderer
+        text={data.sentence}
+        answers={data.answers || []}
+        caseSensitive={false}
+      />
+    </ExerciseProvider>
   );
 }
 
+/**
+ * MatchingContent - Usa el renderer unificado MatchingRenderer
+ */
 function MatchingContent({ data }) {
+  // Configuración para feedback instantáneo
+  const config = {
+    feedbackMode: FEEDBACK_MODES.INSTANT,
+    soundEnabled: true,
+    showCorrectAnswer: true
+  };
+
   return (
-    <div className="space-y-4">
-      <p className="text-zinc-900 dark:text-white font-medium">
-        {data.title}
-      </p>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          {data.pairs?.map((pair, i) => (
-            <div
-              key={`left-${i}`}
-              className="p-3 bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-800 rounded-lg text-center"
-            >
-              {pair.left}
-            </div>
-          ))}
-        </div>
-        <div className="space-y-2">
-          {[...data.pairs].sort(() => Math.random() - 0.5).map((pair, i) => (
-            <div
-              key={`right-${i}`}
-              className="p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg text-center"
-            >
-              {pair.right}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+    <ExerciseProvider config={config}>
+      <MatchingRenderer
+        title={data.title}
+        pairs={data.pairs || []}
+        shuffleRight={true}
+      />
+    </ExerciseProvider>
   );
 }
 
+/**
+ * TrueFalseContent - Usa el renderer unificado TrueFalseRenderer
+ */
 function TrueFalseContent({ data }) {
-  const [selected, setSelected] = useState(null);
+  // Configuración para feedback instantáneo
+  const config = {
+    feedbackMode: FEEDBACK_MODES.INSTANT,
+    soundEnabled: true,
+    showCorrectAnswer: true,
+    showExplanation: true
+  };
+
+  // Convertir dato único a formato array esperado por el renderer
+  const statements = [{
+    statement: data.statement,
+    correct: data.correct,
+    explanation: data.explanation
+  }];
 
   return (
-    <div className="space-y-4">
-      <p className="text-zinc-900 dark:text-white font-medium">
-        {data.statement}
-      </p>
-      <div className="flex gap-4">
-        <button
-          onClick={() => setSelected(true)}
-          className={`flex-1 p-4 rounded-lg border-2 font-medium transition-all ${
-            selected === true
-              ? data.correct === true
-                ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700'
-                : 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700'
-              : 'border-zinc-200 dark:border-zinc-700 hover:border-teal-300'
-          }`}
-        >
-          ✓ Verdadero
-        </button>
-        <button
-          onClick={() => setSelected(false)}
-          className={`flex-1 p-4 rounded-lg border-2 font-medium transition-all ${
-            selected === false
-              ? data.correct === false
-                ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700'
-                : 'border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700'
-              : 'border-zinc-200 dark:border-zinc-700 hover:border-teal-300'
-          }`}
-        >
-          ✗ Falso
-        </button>
-      </div>
-      {data.explanation && selected !== null && (
-        <p className="text-sm text-zinc-600 dark:text-zinc-400 p-3 bg-zinc-50 dark:bg-zinc-800 rounded-lg">
-          💡 {data.explanation}
-        </p>
-      )}
-    </div>
+    <ExerciseProvider config={config}>
+      <TrueFalseRenderer
+        statements={statements}
+      />
+    </ExerciseProvider>
   );
 }
 
