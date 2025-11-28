@@ -82,11 +82,17 @@ export { ExerciseWrapper } from './core/ExerciseWrapper';
 // RENDERERS (Componentes de renderizado)
 // ============================================
 
+// Ejercicios
 export { MultipleChoiceRenderer } from './renderers/MultipleChoiceRenderer';
 export { FillBlankRenderer } from './renderers/FillBlankRenderer';
 export { OpenQuestionsRenderer } from './renderers/OpenQuestionsRenderer';
 export { TrueFalseRenderer } from './renderers/TrueFalseRenderer';
 export { MatchingRenderer } from './renderers/MatchingRenderer';
+
+// Contenido
+export { VideoRenderer } from './renderers/VideoRenderer';
+export { AudioRenderer } from './renderers/AudioRenderer';
+export { ReadingRenderer } from './renderers/ReadingRenderer';
 
 // ============================================
 // LAYOUTS (Contenedores de presentación)
@@ -94,6 +100,7 @@ export { MatchingRenderer } from './renderers/MatchingRenderer';
 
 export { ModalLayout } from './layouts/ModalLayout';
 export { ChainedLayout } from './layouts/ChainedLayout';
+export { GameLayout } from './layouts/GameLayout';
 
 // ============================================
 // TIPOS (para TypeScript/JSDoc)
