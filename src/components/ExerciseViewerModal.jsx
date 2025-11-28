@@ -19,6 +19,11 @@ import {
   MultipleChoiceRenderer,
   FillBlankRenderer,
   OpenQuestionsRenderer,
+  TrueFalseRenderer,
+  MatchingRenderer,
+  ReadingRenderer,
+  AudioRenderer,
+  VideoRenderer,
   ChainedLayout,
   FEEDBACK_MODES
 } from './exercises';
@@ -49,6 +54,11 @@ const EXERCISE_TYPES = {
   DIALOGUES: 'dialogues',
   OPEN_QUESTIONS: 'open-questions',
   MULTIPLE_CHOICE: 'multiple-choice',
+  TRUE_FALSE: 'true-false',
+  MATCHING: 'matching',
+  READING: 'reading',
+  AUDIO: 'audio',
+  VIDEO: 'video',
   CHAINED: 'chained-exercises' // Múltiples ejercicios encadenados
 };
 
@@ -116,6 +126,63 @@ function detectExerciseType(content) {
     return {
       type: EXERCISE_TYPES.OPEN_QUESTIONS,
       cleanContent: content // Mantener el contenido completo para el parser
+    };
+  }
+
+  // Detectar VERDADERO/FALSO
+  if (firstLine.includes('#verdadero_falso') ||
+      firstLine.includes('#verdadero-falso') ||
+      firstLine.includes('#true_false') ||
+      firstLine.includes('#true-false') ||
+      firstLine.includes('#vf') ||
+      firstLine.includes('[tipo:true_false]')) {
+    return {
+      type: EXERCISE_TYPES.TRUE_FALSE,
+      cleanContent: lines.slice(1).join('\n').trim()
+    };
+  }
+
+  // Detectar EMPAREJAR / MATCHING
+  if (firstLine.includes('#emparejar') ||
+      firstLine.includes('#matching') ||
+      firstLine.includes('#relacionar') ||
+      firstLine.includes('#unir') ||
+      firstLine.includes('[tipo:matching]')) {
+    return {
+      type: EXERCISE_TYPES.MATCHING,
+      cleanContent: lines.slice(1).join('\n').trim()
+    };
+  }
+
+  // Detectar LECTURA / READING
+  if (firstLine.includes('#lectura') ||
+      firstLine.includes('#reading') ||
+      firstLine.includes('#leer') ||
+      firstLine.includes('[tipo:reading]')) {
+    return {
+      type: EXERCISE_TYPES.READING,
+      cleanContent: lines.slice(1).join('\n').trim()
+    };
+  }
+
+  // Detectar AUDIO
+  if (firstLine.includes('#audio') ||
+      firstLine.includes('[tipo:audio]') ||
+      /\.(mp3|wav|ogg|m4a)$/i.test(content)) {
+    return {
+      type: EXERCISE_TYPES.AUDIO,
+      cleanContent: lines.slice(1).join('\n').trim()
+    };
+  }
+
+  // Detectar VIDEO (por marcador o URL)
+  if (firstLine.includes('#video') ||
+      firstLine.includes('[tipo:video]') ||
+      /youtube\.com|youtu\.be|vimeo\.com/i.test(content) ||
+      /\.(mp4|webm|mov|avi)$/i.test(content)) {
+    return {
+      type: EXERCISE_TYPES.VIDEO,
+      cleanContent: lines.slice(1).join('\n').trim()
     };
   }
 
@@ -702,6 +769,165 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
             </div>
           );
         }
+      }
+
+      case EXERCISE_TYPES.TRUE_FALSE: {
+        // ✅ Config por defecto para V/F
+        const defaultConfig = {
+          feedbackMode: FEEDBACK_MODES.INSTANT,
+          soundEnabled: true,
+          showCorrectAnswer: true,
+          showExplanation: true
+        };
+
+        const tfConfig = config ? { ...defaultConfig, ...config } : defaultConfig;
+        console.log('⚙️ Final True/False Config being used:', tfConfig);
+
+        // Parse statements: cada línea es una afirmación
+        // Formato: "V:La Tierra es redonda" o "F:El sol es frío" o simplemente "La Tierra es redonda (V)"
+        const lines = cleanContent.split('\n').filter(l => l.trim());
+        const statements = lines.map(line => {
+          const trimmed = line.trim();
+
+          // Formato "V:" o "F:"
+          if (trimmed.match(/^(V|F):/i)) {
+            const isTrue = trimmed[0].toUpperCase() === 'V';
+            const statement = trimmed.slice(2).trim();
+            return { statement, correct: isTrue };
+          }
+
+          // Formato "(V)" o "(F)" al final
+          if (trimmed.match(/\((V|F)\)$/i)) {
+            const match = trimmed.match(/\((V|F)\)$/i);
+            const isTrue = match[1].toUpperCase() === 'V';
+            const statement = trimmed.replace(/\((V|F)\)$/i, '').trim();
+            return { statement, correct: isTrue };
+          }
+
+          // Sin indicador: asumir verdadero por defecto
+          return { statement: trimmed, correct: true };
+        }).filter(s => s.statement);
+
+        // ✅ Aplicar displaySettings
+        const mergedDisplaySettings = mergeDisplaySettings(displaySettings, 'true-false');
+        const displayClasses = getDisplayClasses(mergedDisplaySettings);
+
+        return (
+          <ExerciseProvider config={tfConfig} onComplete={handleComplete}>
+            <TrueFalseRenderer
+              statements={statements}
+              className={`${displayClasses.text} ${displayClasses.content}`}
+            />
+          </ExerciseProvider>
+        );
+      }
+
+      case EXERCISE_TYPES.MATCHING: {
+        // ✅ Config por defecto para Emparejar
+        const defaultConfig = {
+          feedbackMode: FEEDBACK_MODES.ON_SUBMIT,
+          soundEnabled: true,
+          showCorrectAnswer: true
+        };
+
+        const matchConfig = config ? { ...defaultConfig, ...config } : defaultConfig;
+        console.log('⚙️ Final Matching Config being used:', matchConfig);
+
+        // Parse pairs: formato "izquierda -> derecha" o "izquierda : derecha"
+        const lines = cleanContent.split('\n').filter(l => l.trim());
+        const pairs = lines.map(line => {
+          const trimmed = line.trim();
+
+          // Separador "->" o ":"
+          const separator = trimmed.includes('->') ? '->' : ':';
+          const parts = trimmed.split(separator).map(p => p.trim());
+
+          if (parts.length === 2) {
+            return { left: parts[0], right: parts[1] };
+          }
+          return null;
+        }).filter(Boolean);
+
+        if (pairs.length === 0) {
+          return (
+            <div className="text-center py-12">
+              <p style={{ color: 'var(--color-text-secondary)' }}>
+                Formato incorrecto. Usa: "izquierda -> derecha" o "izquierda : derecha"
+              </p>
+            </div>
+          );
+        }
+
+        // ✅ Aplicar displaySettings
+        const mergedDisplaySettings = mergeDisplaySettings(displaySettings, 'matching');
+        const displayClasses = getDisplayClasses(mergedDisplaySettings);
+
+        return (
+          <ExerciseProvider config={matchConfig} onComplete={handleComplete}>
+            <MatchingRenderer
+              pairs={pairs}
+              shuffleRight={true}
+              mode="click"
+              showLines={true}
+              className={`${displayClasses.text} ${displayClasses.content}`}
+            />
+          </ExerciseProvider>
+        );
+      }
+
+      case EXERCISE_TYPES.READING: {
+        // ✅ ReadingRenderer no usa ExerciseContext (es contenido, no ejercicio)
+        // Aplicar displaySettings
+        const mergedDisplaySettings = mergeDisplaySettings(displaySettings, 'reading');
+        const displayClasses = getDisplayClasses(mergedDisplaySettings);
+
+        return (
+          <ReadingRenderer
+            text={cleanContent}
+            className={`${displayClasses.text} ${displayClasses.content}`}
+          />
+        );
+      }
+
+      case EXERCISE_TYPES.AUDIO: {
+        // Parse: primera línea es URL, resto es transcripción
+        const lines = cleanContent.split('\n');
+        const url = lines[0].trim();
+        const transcript = lines.slice(1).join('\n').trim();
+
+        // ✅ Aplicar displaySettings
+        const mergedDisplaySettings = mergeDisplaySettings(displaySettings, 'audio');
+        const displayClasses = getDisplayClasses(mergedDisplaySettings);
+
+        return (
+          <AudioRenderer
+            url={url}
+            transcript={transcript}
+            showTranscript={true}
+            allowRecording={false}
+            className={`${displayClasses.text} ${displayClasses.content}`}
+          />
+        );
+      }
+
+      case EXERCISE_TYPES.VIDEO: {
+        // Parse: primera línea es URL, resto es descripción
+        const lines = cleanContent.split('\n');
+        const url = lines[0].trim();
+        const description = lines.slice(1).join('\n').trim();
+
+        // ✅ Aplicar displaySettings
+        const mergedDisplaySettings = mergeDisplaySettings(displaySettings, 'video');
+        const displayClasses = getDisplayClasses(mergedDisplaySettings);
+
+        return (
+          <VideoRenderer
+            url={url}
+            description={description}
+            controls={true}
+            className={`${displayClasses.text} ${displayClasses.content}`}
+          />
+        );
       }
 
       case EXERCISE_TYPES.CHAINED:
