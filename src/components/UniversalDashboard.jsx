@@ -275,15 +275,14 @@ function HomeView({ user, onNavigate }) {
       )}
 
       {/* Tarjetas de acceso */}
-      <div className={`${getGridColumnsClass('default')} gap-4`}>
+      <div className={`${getGridColumnsClass('compact')} gap-3`}>
         {visibleCards.map((card) => (
           <UniversalCard
             key={card.path}
-            variant="default"
-            size="md"
+            variant="compact"
+            size="sm"
             icon={card.icon}
             title={card.title}
-            description={card.description}
             onClick={() => onNavigate && onNavigate(card.path)}
           />
         ))}
