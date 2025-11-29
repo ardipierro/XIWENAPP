@@ -155,19 +155,12 @@ function MyCourses({ user, onSelectCourse }) {
   };
 
   const getContentTypeBadge = (type) => {
-    const typeNames = {
-      lesson: 'Lección',
-      video: 'Video',
-      reading: 'Lectura',
-      link: 'Enlace'
-    };
-
-    const Icon = getContentTypeIcon(type);
-
     return (
-      <BaseBadge variant="default" icon={Icon} size="sm">
-        {typeNames[type] || type}
-      </BaseBadge>
+      <CategoryBadge
+        type="content"
+        value={type}
+        size="sm"
+      />
     );
   };
 

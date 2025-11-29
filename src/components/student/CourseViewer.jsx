@@ -10,7 +10,7 @@ import { getCourseProgress, getNextContent } from '../../firebase/studentProgres
 import { ensureStudentProfile } from '../../firebase/firestore';
 import { getCourseContents, getCourseExercises } from '../../firebase/relationships';
 import BaseButton from '../common/BaseButton';
-import { BaseTabs } from '../common';
+import { BaseTabs, CategoryBadge } from '../common';
 
 function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPlayExercise }) {
   const [activeTab, setActiveTab] = useState('content'); // 'content', 'exercises', 'progress'
@@ -257,7 +257,6 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
               <div className="exercises-grid">
                 {courseExercises.map(exercise => {
                   const isCompleted = isExerciseCompleted(exercise.id);
-                  const difficultyBadge = getDifficultyBadge(exercise.difficulty);
                   return (
                     <div
                       key={exercise.id}
@@ -276,9 +275,13 @@ function CourseViewer({ user, courseId, courseData, onBack, onPlayContent, onPla
                       </div>
                       <h4 className="exercise-card-title">{exercise.title}</h4>
                       <div className="exercise-card-meta">
-                        <span className={`difficulty-badge ${difficultyBadge.class}`}>
-                          {difficultyBadge.label}
-                        </span>
+                        {exercise.difficulty && (
+                          <CategoryBadge
+                            type="difficulty"
+                            value={exercise.difficulty}
+                            size="sm"
+                          />
+                        )}
                         {exercise.questions?.length > 0 && (
                           <span className="questions-count">
                             {exercise.questions.length} preguntas

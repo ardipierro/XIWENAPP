@@ -65,6 +65,9 @@ const GuardianView = lazy(() => import('./guardian/GuardianView'));
 // ADE1 Content Viewer
 const ADE1ContentViewer = lazy(() => import('./ADE1ContentViewer'));
 
+// Modal Layout Test
+const ModalLayoutTest = lazy(() => import('./exercises/layouts/ModalLayoutTest'));
+
 /**
  * Vista de inicio con accesos directos
  */
@@ -148,6 +151,8 @@ function HomeView({ user, onNavigate }) {
       permission: 'play-live-games',
       hideForStudents: true // Ocultar para estudiantes
     },
+    // ✅ DESACTIVADO TEMPORALMENTE - Tarjeta "Unirse a Juego" para estudiantes
+    /*
     {
       title: 'Unirse a Juego',
       description: 'Ingresa el código para unirte a un juego en vivo',
@@ -157,6 +162,7 @@ function HomeView({ user, onNavigate }) {
       showOnlyForStudents: true, // Mostrar solo para estudiantes
       isExternal: true // Indica que es una ruta externa al dashboard
     },
+    */
     {
       title: 'ADE1 2026 - Fonética',
       description: 'Libro interactivo con 120+ slides y ejercicios',
@@ -164,6 +170,13 @@ function HomeView({ user, onNavigate }) {
       path: '/dashboard/ade1-content',
       permission: null, // Disponible para todos
       hideForStudents: true // Ocultar para estudiantes
+    },
+    {
+      title: '🧪 Test Modal Layout',
+      description: 'Prueba el nuevo sistema de renderizado de ejercicios',
+      icon: Zap,
+      path: '/dashboard/test-modal-layout',
+      permission: 'manage-system-settings' // Solo admin
     }
   ];
 
@@ -275,18 +288,32 @@ function HomeView({ user, onNavigate }) {
       )}
 
       {/* Tarjetas de acceso */}
-      <div className={`${getGridColumnsClass('default')} gap-4`}>
-        {visibleCards.map((card) => (
-          <UniversalCard
-            key={card.path}
-            variant="default"
-            size="md"
-            icon={card.icon}
-            title={card.title}
-            description={card.description}
-            onClick={() => onNavigate && onNavigate(card.path)}
-          />
-        ))}
+      <div className={`${getGridColumnsClass('compact')} gap-3`}>
+        {visibleCards.map((card) => {
+          const CardIcon = card.icon;
+          return (
+            <UniversalCard
+              key={card.path}
+              variant="compact"
+              size="sm"
+              showHeader={false}
+              title={card.title}
+              onClick={() => onNavigate && onNavigate(card.path)}
+            >
+              {/* Icono + título en el contenido (sin header) */}
+              <div className="flex items-center gap-3">
+                {CardIcon && (
+                  <div className="flex-shrink-0 p-2 rounded-lg" style={{ backgroundColor: 'var(--color-bg-tertiary)' }}>
+                    <CardIcon size={24} strokeWidth={2} style={{ color: 'var(--color-text-primary)' }} />
+                  </div>
+                )}
+                <h3 className="text-sm font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                  {card.title}
+                </h3>
+              </div>
+            </UniversalCard>
+          );
+        })}
       </div>
     </div>
   );
@@ -613,6 +640,11 @@ function UniversalDashboardInner() {
             case '/dashboard/system-settings':
               if (!can('manage-system-settings')) return <PlaceholderView title="Sin acceso" />;
               return <SettingsPanel />;
+
+            // TEST MODAL LAYOUT (Admin) - Prueba del nuevo sistema de renderizado
+            case '/dashboard/test-modal-layout':
+              if (!can('manage-system-settings')) return <PlaceholderView title="Sin acceso" />;
+              return <ModalLayoutTest />;
 
             default:
               return <PlaceholderView title="Página no encontrada" />;

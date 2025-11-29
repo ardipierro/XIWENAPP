@@ -1423,13 +1423,13 @@ export function getGlobalBadgeConfig() {
       const parsed = JSON.parse(saved);
       const merged = { ...DEFAULT_GLOBAL_BADGE_CONFIG, ...parsed };
 
-      // Log para debugging
-      console.log('✅ Badge config loaded from storage:', {
-        size: merged.size,
-        defaultBadgeStyle: merged.defaultBadgeStyle,
-        borderRadius: merged.borderRadius,
-        colorPalette: merged.colorPalette
-      });
+      // Log para debugging (deshabilitado para reducir spam)
+      // console.log('✅ Badge config loaded from storage:', {
+      //   size: merged.size,
+      //   defaultBadgeStyle: merged.defaultBadgeStyle,
+      //   borderRadius: merged.borderRadius,
+      //   colorPalette: merged.colorPalette
+      // });
 
       return merged;
     }
@@ -1518,6 +1518,8 @@ export function saveIconLibraryConfig(config) {
  */
 export function resetIconLibraryConfig() {
   localStorage.removeItem(ICON_LIBRARY_STORAGE_KEY);
+  // Disparar evento para notificar el reset
+  window.dispatchEvent(new CustomEvent('iconLibraryChange', { detail: DEFAULT_ICON_LIBRARY_CONFIG }));
   return DEFAULT_ICON_LIBRARY_CONFIG;
 }
 
@@ -1981,6 +1983,8 @@ export function saveBadgeConfig(config) {
   try {
     localStorage.setItem(BADGE_CONFIG_STORAGE_KEY, JSON.stringify(config));
     applyBadgeColors(config);
+    // 🔥 CRÍTICO: Disparar evento para que todos los CategoryBadge se actualicen
+    window.dispatchEvent(new Event('xiwen_badge_config_changed'));
     return true;
   } catch (err) {
     console.error('Error saving badge config:', err);
@@ -1994,6 +1998,8 @@ export function saveBadgeConfig(config) {
 export function resetBadgeConfig() {
   localStorage.removeItem(BADGE_CONFIG_STORAGE_KEY);
   applyBadgeColors(DEFAULT_BADGE_CONFIG);
+  // 🔥 CRÍTICO: Disparar evento para que todos los CategoryBadge se actualicen
+  window.dispatchEvent(new Event('xiwen_badge_config_changed'));
 }
 
 /**

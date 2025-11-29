@@ -304,33 +304,35 @@ function TopBar({ user, userRole, onToggleSidebar, sidebarOpen, onMenuAction, ha
               )}
             </button>
 
-            {/* Mensajes */}
-            <button
-              onClick={() => onMenuAction?.('messages')}
-              className="relative flex items-center justify-center
-                         w-9 h-9 p-2
-                         bg-transparent border-none cursor-pointer
-                         rounded-md text-zinc-900 dark:text-white
-                         hover:bg-zinc-100 dark:hover:bg-zinc-800
-                         transition-colors"
-              aria-label="Mensajes"
-              title="Mensajes"
-            >
-              <MessageCircle size={20} strokeWidth={2} />
-              {messageCount > 0 && (
-                <span
-                  className="absolute top-1 right-1
-                             min-w-[18px] h-[18px] px-1.5
-                             flex items-center justify-center
-                             bg-red-500 text-white
-                             text-[10px] font-bold leading-none
-                             rounded-full"
-                  aria-label={`${messageCount} mensajes sin leer`}
-                >
-                  {messageCount}
-                </span>
-              )}
-            </button>
+            {/* Mensajes - Oculto para estudiantes */}
+            {!['student', 'listener', 'trial'].includes(userRole) && (
+              <button
+                onClick={() => onMenuAction?.('messages')}
+                className="relative flex items-center justify-center
+                           w-9 h-9 p-2
+                           bg-transparent border-none cursor-pointer
+                           rounded-md text-zinc-900 dark:text-white
+                           hover:bg-zinc-100 dark:hover:bg-zinc-800
+                           transition-colors"
+                aria-label="Mensajes"
+                title="Mensajes"
+              >
+                <MessageCircle size={20} strokeWidth={2} />
+                {messageCount > 0 && (
+                  <span
+                    className="absolute top-1 right-1
+                               min-w-[18px] h-[18px] px-1.5
+                               flex items-center justify-center
+                               bg-red-500 text-white
+                               text-[10px] font-bold leading-none
+                               rounded-full"
+                    aria-label={`${messageCount} mensajes sin leer`}
+                  >
+                    {messageCount}
+                  </span>
+                )}
+              </button>
+            )}
 
             {/* Divider - Oculto en móvil */}
             <div

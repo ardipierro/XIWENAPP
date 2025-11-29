@@ -165,6 +165,8 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
   const [viewingContainer, setViewingContainer] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [newlyCreatedId, setNewlyCreatedId] = useState(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [exerciseDisplaySettings, setExerciseDisplaySettings] = useState(null);
 
   // Cargar contenidos
   useEffect(() => {
@@ -403,6 +405,20 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
     }
   };
 
+  /**
+   * Toggle fullscreen mode
+   */
+  const handleToggleFullscreen = () => {
+    setIsFullscreen(prev => !prev);
+  };
+
+  /**
+   * Handle display settings change
+   */
+  const handleDisplaySettingsChange = (settings) => {
+    setExerciseDisplaySettings(settings);
+  };
+
   // Render
   if (loading) {
     return <BaseLoading variant="fullscreen" text="Cargando contenidos..." />;
@@ -625,9 +641,15 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
         onClose={() => {
           setShowExerciseViewer(false);
           setViewingExercise(null);
+          setIsFullscreen(false);
+          setExerciseDisplaySettings(null);
         }}
         exercise={viewingExercise}
         onEdit={handleEdit}
+        displaySettings={exerciseDisplaySettings}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={handleToggleFullscreen}
+        onDisplaySettingsChange={handleDisplaySettingsChange}
       />
 
       {/* Container Viewer - Para ver contenedores con sus contenidos */}
@@ -761,16 +783,23 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
       }
       if (content.metadata?.difficulty) {
         listBadges.push(
-          <span key="difficulty" className={`text-xs font-medium px-2 py-0.5 rounded-full ${getDifficultyClasses(content.metadata.difficulty)}`}>
-            {content.metadata.difficulty}
-          </span>
+          <CategoryBadge
+            key="difficulty"
+            type="difficulty"
+            value={content.metadata.difficulty}
+            size="sm"
+          />
         );
       }
       content.metadata?.tags?.slice(0, 2).forEach((tag, idx) => {
         listBadges.push(
-          <span key={`tag-${idx}`} className="text-xs px-2 py-0.5 rounded-full text-gray-600 bg-gray-100 dark:text-gray-400 dark:bg-gray-800">
+          <BaseBadge
+            key={`tag-${idx}`}
+            variant="secondary"
+            size="sm"
+          >
             {tag}
-          </span>
+          </BaseBadge>
         );
       });
     }
@@ -848,13 +877,12 @@ function ContentCard({ content, viewMode, onEdit, onDelete, onView, isNew = fals
     // Badge de dificultad
     if (content.metadata?.difficulty) {
       contentBadges.push(
-        <BaseBadge
+        <CategoryBadge
           key="difficulty"
-          variant="warning"
+          type="difficulty"
+          value={content.metadata.difficulty}
           size="sm"
-        >
-          {content.metadata.difficulty}
-        </BaseBadge>
+        />
       );
     }
   }

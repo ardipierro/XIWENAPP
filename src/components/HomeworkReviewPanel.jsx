@@ -245,21 +245,128 @@ export default function HomeworkReviewPanel({ teacherId }) {
     setShowCameraModal(false);
   };
 
+  // Header siempre visible (fuera del loading/empty check)
+  const renderHeader = () => (
+    <div className="flex items-start justify-between mb-6">
+      <div className="flex items-center gap-3">
+        <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
+          <ClipboardList className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Tareas</h1>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">{reviews.length} {reviews.length === 1 ? 'tarea' : 'tareas'}</p>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <BaseButton
+          variant="secondary"
+          size="md"
+          onClick={() => setShowCameraModal(true)}
+          icon={Camera}
+          className="sm:min-w-[145px]"
+        >
+          <span className="hidden sm:inline">Tomar Foto</span>
+        </BaseButton>
+        <BaseButton
+          variant="primary"
+          size="md"
+          onClick={() => setShowUploadModal(true)}
+          icon={Upload}
+          className="sm:min-w-[145px]"
+        >
+          <span className="hidden sm:inline">Subir Tarea</span>
+        </BaseButton>
+      </div>
+    </div>
+  );
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <BaseLoading variant="spinner" size="lg" text="Cargando correcciones pendientes..." />
+      <div className="w-full">
+        {renderHeader()}
+        <div className="flex items-center justify-center py-12">
+          <BaseLoading variant="spinner" size="lg" text="Cargando correcciones pendientes..." />
+        </div>
+
+        {/* Upload Modal */}
+        {showUploadModal && (
+          <BaseModal
+            isOpen={true}
+            onClose={() => setShowUploadModal(false)}
+            title="Subir Tarea Manual"
+            size="lg"
+          >
+            <ManualHomeworkUpload
+              teacherId={teacherId || user?.uid}
+              userRole={user?.role}
+              onSuccess={handleUploadSuccess}
+              onCancel={() => setShowUploadModal(false)}
+            />
+          </BaseModal>
+        )}
+
+        {/* Camera Upload Modal */}
+        {showCameraModal && (
+          <StudentCameraUpload
+            studentId={null}
+            studentName=""
+            teacherId={teacherId || user?.uid}
+            onSuccess={handleCameraSuccess}
+            onClose={() => setShowCameraModal(false)}
+          />
+        )}
       </div>
     );
   }
 
   if (reviews.length === 0) {
     return (
-      <BaseEmptyState
-        icon={CheckCircle}
-        title="No hay correcciones pendientes"
-        description="Todas las tareas enviadas han sido revisadas"
-      />
+      <div className="w-full">
+        {renderHeader()}
+        <BaseEmptyState
+          icon={CheckCircle}
+          title="No hay correcciones pendientes"
+          description="Todas las tareas enviadas han sido revisadas"
+          action={
+            <div className="flex items-center gap-2 mt-4">
+              <BaseButton onClick={() => setShowCameraModal(true)} variant="secondary" icon={Camera}>
+                Tomar Foto
+              </BaseButton>
+              <BaseButton onClick={() => setShowUploadModal(true)} variant="primary" icon={Upload}>
+                Subir Tarea
+              </BaseButton>
+            </div>
+          }
+        />
+
+        {/* Upload Modal */}
+        {showUploadModal && (
+          <BaseModal
+            isOpen={true}
+            onClose={() => setShowUploadModal(false)}
+            title="Subir Tarea Manual"
+            size="lg"
+          >
+            <ManualHomeworkUpload
+              teacherId={teacherId || user?.uid}
+              userRole={user?.role}
+              onSuccess={handleUploadSuccess}
+              onCancel={() => setShowUploadModal(false)}
+            />
+          </BaseModal>
+        )}
+
+        {/* Camera Upload Modal */}
+        {showCameraModal && (
+          <StudentCameraUpload
+            studentId={null}
+            studentName=""
+            teacherId={teacherId || user?.uid}
+            onSuccess={handleCameraSuccess}
+            onClose={() => setShowCameraModal(false)}
+          />
+        )}
+      </div>
     );
   }
 
@@ -308,37 +415,7 @@ export default function HomeworkReviewPanel({ teacherId }) {
   return (
     <div className="w-full">
       {/* Page Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
-            <ClipboardList className="w-6 h-6 text-primary-600 dark:text-primary-400" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Tareas</h1>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">{reviews.length} {reviews.length === 1 ? 'tarea' : 'tareas'}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <BaseButton
-            variant="secondary"
-            size="md"
-            onClick={() => setShowCameraModal(true)}
-            icon={Camera}
-            className="sm:min-w-[145px]"
-          >
-            <span className="hidden sm:inline">Tomar Foto</span>
-          </BaseButton>
-          <BaseButton
-            variant="primary"
-            size="md"
-            onClick={() => setShowUploadModal(true)}
-            icon={Upload}
-            className="sm:min-w-[145px]"
-          >
-            <span className="hidden sm:inline">Subir Tarea</span>
-          </BaseButton>
-        </div>
-      </div>
+      {renderHeader()}
 
       {/* SearchBar with Unified Filters */}
       <SearchBar
