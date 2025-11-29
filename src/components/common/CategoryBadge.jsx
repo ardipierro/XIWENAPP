@@ -189,19 +189,17 @@ function CategoryBadge({
 
   // 🆕 OBTENER PRESET APLICABLE
   // El preset tiene la máxima prioridad y se combina con la config del badge
-  // CRÍTICO: Recalcular preset cada vez que cambia presetConfig
+  // CRÍTICO: FORZAR RECÁLCULO EN CADA RENDER leyendo directamente de localStorage
   const badgeKeyStr = badgeKey || (type && value ? `${type}_${value}` : null);
-  const appliedPreset = useMemo(() => {
-    if (!badgeKeyStr) return null;
-    const preset = getPresetForBadge(badgeKeyStr, badgeConfig.category);
 
-    // DEBUG: Log para verificar qué preset se está aplicando
-    if (preset.enabled === false) {
-      logger.info(`🚫 Badge ${badgeKeyStr} está OCULTO por preset`, 'CategoryBadge');
-    }
+  // ❌ ELIMINADO useMemo - causaba problemas de cache
+  // ✅ AHORA se calcula en cada render leyendo localStorage fresco
+  const appliedPreset = badgeKeyStr ? getPresetForBadge(badgeKeyStr, badgeConfig.category) : null;
 
-    return preset;
-  }, [badgeKeyStr, badgeConfig.category, presetConfig, badgeConfigKey]); // Depende de presetConfig Y badgeConfigKey
+  // DEBUG: Log para verificar qué preset se está aplicando
+  if (appliedPreset && appliedPreset.enabled === false) {
+    logger.debug(`🚫 Badge ${badgeKeyStr} (${badgeConfig.category}) está OCULTO por preset`, 'CategoryBadge');
+  }
 
   // 🆕 Si el badge está deshabilitado por preset o config, no renderizar nada
   const isEnabled = appliedPreset ? appliedPreset.enabled !== false : badgeConfig.enabled !== false;
