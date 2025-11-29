@@ -193,8 +193,15 @@ function CategoryBadge({
   const badgeKeyStr = badgeKey || (type && value ? `${type}_${value}` : null);
   const appliedPreset = useMemo(() => {
     if (!badgeKeyStr) return null;
-    return getPresetForBadge(badgeKeyStr, badgeConfig.category);
-  }, [badgeKeyStr, badgeConfig.category, presetConfig]); // Depende de presetConfig para re-calcular
+    const preset = getPresetForBadge(badgeKeyStr, badgeConfig.category);
+
+    // DEBUG: Log para verificar qué preset se está aplicando
+    if (preset.enabled === false) {
+      logger.info(`🚫 Badge ${badgeKeyStr} está OCULTO por preset`, 'CategoryBadge');
+    }
+
+    return preset;
+  }, [badgeKeyStr, badgeConfig.category, presetConfig, badgeConfigKey]); // Depende de presetConfig Y badgeConfigKey
 
   // 🆕 Si el badge está deshabilitado por preset o config, no renderizar nada
   const isEnabled = appliedPreset ? appliedPreset.enabled !== false : badgeConfig.enabled !== false;
