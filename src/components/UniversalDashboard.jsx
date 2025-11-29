@@ -487,12 +487,18 @@ function UniversalDashboardInner() {
             case '/dashboard/content':
               return <PlaceholderView title="Mi Contenido" />;
 
-            // CALENDARIO - Todos los roles
+            // CALENDARIO - Solo para teachers, admin y guardian (NO estudiantes)
             case '/dashboard/calendar':
+              if (['student', 'listener', 'trial'].includes(effectiveUser.role)) {
+                return <PlaceholderView title="Calendario no disponible para estudiantes" />;
+              }
               return <UnifiedCalendar userId={effectiveUser.uid} userRole={effectiveUser.role} />;
 
-            // MENSAJES - Todos los roles con permiso send-messages
+            // MENSAJES - Solo para teachers, admin y guardian (NO estudiantes)
             case '/dashboard/messages':
+              if (['student', 'listener', 'trial'].includes(effectiveUser.role)) {
+                return <PlaceholderView title="Mensajes no disponibles para estudiantes" />;
+              }
               if (!can('send-messages')) return <PlaceholderView title="Sin acceso a mensajes" />;
               return <MessagesPanel user={effectiveUser} />;
 
