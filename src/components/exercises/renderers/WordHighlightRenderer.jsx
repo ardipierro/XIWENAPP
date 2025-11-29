@@ -161,11 +161,11 @@ export function WordHighlightRenderer({
 
     merged.gameSettings = {
       ...defaultGameSettings,
-      ...(externalConfig.gameSettings || {})
+      ...(externalConfig?.gameSettings || {})
     };
 
     // Deep merge sound
-    if (externalConfig.gameSettings?.sound) {
+    if (externalConfig?.gameSettings?.sound) {
       merged.gameSettings.sound = {
         ...defaultGameSettings.sound,
         ...externalConfig.gameSettings.sound,
@@ -177,7 +177,7 @@ export function WordHighlightRenderer({
     }
 
     // Deep merge hints
-    if (externalConfig.gameSettings?.hints) {
+    if (externalConfig?.gameSettings?.hints) {
       merged.gameSettings.hints = {
         ...defaultGameSettings.hints,
         ...externalConfig.gameSettings.hints
@@ -185,7 +185,7 @@ export function WordHighlightRenderer({
     }
 
     // Deep merge timer
-    if (externalConfig.gameSettings?.timer) {
+    if (externalConfig?.gameSettings?.timer) {
       merged.gameSettings.timer = {
         ...defaultGameSettings.timer,
         ...externalConfig.gameSettings.timer,
