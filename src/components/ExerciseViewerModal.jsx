@@ -23,14 +23,12 @@ import {
   ReadingRenderer,
   AudioRenderer,
   VideoRenderer,
+  WordHighlightRenderer,
   DragDropRenderer,
   DialoguesRenderer,
   ChainedLayout,
   FEEDBACK_MODES
 } from './exercises';
-
-// Componentes container standalone (no migrados a unified)
-import WordHighlightExercise from './container/WordHighlightExercise';
 
 
 /**
@@ -405,21 +403,31 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
     }
 
     switch (exerciseType) {
-      case EXERCISE_TYPES.HIGHLIGHT:
-        // ⚠️ USAR COMPONENTE ORIGINAL - NO migrado a unified renderer
-        // El componente WordHighlightExercise es standalone y maneja su propio estado
+      case EXERCISE_TYPES.HIGHLIGHT: {
+        // ✅ WordHighlightRenderer COMPLETO con núcleo unificado
+        const defaultConfig = {
+          feedbackMode: FEEDBACK_MODES.INSTANT,
+          soundEnabled: true,
+          showCorrectAnswer: true,
+          correctPoints: 10,
+          incorrectPoints: -5
+        };
+
+        const highlightConfig = config ? { ...defaultConfig, ...config } : defaultConfig;
+
         return (
-          <WordHighlightExercise
-            text={cleanContent}
-            config={config}
-            onComplete={handleComplete}
-            onActionsChange={handleActionsChange}
-            displaySettings={displaySettings}
-            isFullscreen={isFullscreen}
-            onDisplaySettingsChange={handleDisplaySettingsChange}
-            onToggleFullscreen={handleToggleFullscreen}
-          />
+          <ExerciseProvider config={highlightConfig} onComplete={handleComplete}>
+            <WordHighlightRenderer
+              text={cleanContent}
+              config={config}
+              displaySettings={displaySettings}
+              isFullscreen={isFullscreen}
+              onDisplaySettingsChange={handleDisplaySettingsChange}
+              onToggleFullscreen={handleToggleFullscreen}
+            />
+          </ExerciseProvider>
         );
+      }
 
       case EXERCISE_TYPES.DRAGDROP: {
         // ✅ Config por defecto para arrastrar y soltar
