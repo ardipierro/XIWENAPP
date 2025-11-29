@@ -22,7 +22,6 @@ import {
   // Trophy, // Ya no se usa - Gamificación eliminada
   CalendarDays,
   CheckSquare,
-  FileCheck,
   CheckCircle,
   MessageCircle,
   DollarSign,
@@ -102,8 +101,6 @@ function SideMenu({ isOpen, userRole, onNavigate, onMenuAction, currentScreen, h
           { icon: GraduationCap, label: 'Alumnos', path: '/teacher', action: 'students' },
           { icon: BookOpen, label: 'Contenidos', path: '/teacher', action: 'unifiedContent' },
           { icon: Calendar, label: 'Clases', path: '/teacher', action: 'classSessions' },
-          { icon: CheckSquare, label: 'Asignaciones', path: '/teacher', action: 'assignments' },
-          { icon: FileCheck, label: 'Calificar', path: '/teacher', action: 'grading' },
           { icon: CheckCircle, label: 'Tareas', path: '/teacher', action: 'homeworkReview' },
           { icon: CalendarDays, label: 'Calendario', path: '/teacher', action: 'calendar' },
           { icon: MessageCircle, label: 'Mensajes', path: '/teacher', action: 'messages' },

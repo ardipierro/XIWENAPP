@@ -65,11 +65,8 @@ export function useScreenNavigation() {
     'liveClasses': 'liveClasses',
     'liveGame': 'liveGame', // Live Game Setup
     'setup': 'setup', // Game Setup (GameContainer)
-    'assignments': 'assignments', // Assignment Manager (Teacher)
-    'grading': 'grading', // Grading Interface (Teacher)
     'homeworkReview': 'homeworkReview', // Homework Review Panel (Teacher/Admin)
     'calendar': 'calendar', // Unified Calendar (Teacher/Student)
-    'assignmentsView': 'assignmentsView', // Student Assignments View
     'quickCorrection': 'quickCorrection', // Quick Homework Correction (Student)
     'gamification': 'gamification', // Gamification Panel (Student)
     'messages': 'messages', // Messages Panel (Teacher/Student)

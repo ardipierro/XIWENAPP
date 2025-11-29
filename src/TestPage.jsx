@@ -1,6 +1,5 @@
 import { useState } from 'react';
-// REMOVED: AssignmentManager and StudentAssignmentsView (legacy components deleted)
-import GradingInterface from './components/GradingInterface';
+// REMOVED: Legacy components (AssignmentManager, StudentAssignmentsView, GradingInterface)
 import GamificationPanel from './components/GamificationPanel';
 import UnifiedCalendar from './components/UnifiedCalendar';
 import GuardianLinkingInterface from './components/GuardianLinkingInterface';
@@ -14,16 +13,7 @@ import { BaseButton } from './components/common';
 export default function TestPage() {
   const [currentView, setCurrentView] = useState('menu');
   const [testUserId] = useState('test-user-123');
-  const [testTeacherId] = useState('test-teacher-456');
   const [testAdminId] = useState('test-admin-789');
-
-  // Mock assignment for grading
-  const mockAssignment = {
-    id: 'test-assignment-1',
-    title: 'Tarea de Prueba - Matemáticas',
-    points: 100,
-    deadline: new Date()
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
@@ -41,18 +31,6 @@ export default function TestPage() {
         {/* Menu */}
         {currentView === 'menu' && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="card p-6">
-              <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">
-                ✅ Grading Interface
-              </h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                Interfaz de calificación
-              </p>
-              <BaseButton variant="primary" onClick={() => setCurrentView('grading')}>
-                Probar
-              </BaseButton>
-            </div>
-
             <div className="card p-6">
               <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">
                 🏆 Gamification Panel
@@ -125,15 +103,7 @@ export default function TestPage() {
         )}
 
         {/* Component Views */}
-        {/* REMOVED: assignments and student views (legacy components deleted) */}
-
-        {currentView === 'grading' && (
-          <GradingInterface
-            assignment={mockAssignment}
-            teacherId={testTeacherId}
-            onClose={() => setCurrentView('menu')}
-          />
-        )}
+        {/* REMOVED: Legacy views (assignments, student, grading) */}
 
         {currentView === 'gamification' && (
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
