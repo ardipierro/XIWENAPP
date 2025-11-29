@@ -180,15 +180,17 @@ export default function StudentHomeworkView({ user }) {
             variant="secondary"
             onClick={() => setShowCameraModal(true)}
             icon={Camera}
+            title="Tomar Foto"
           >
-            Tomar Foto
+            <span className="hidden sm:inline">Tomar Foto</span>
           </BaseButton>
           <BaseButton
             variant="primary"
             onClick={() => setShowUploadModal(true)}
             icon={Upload}
+            title="Subir Tarea"
           >
-            Subir Tarea
+            <span className="hidden sm:inline">Subir Tarea</span>
           </BaseButton>
         </div>
       </div>
@@ -226,11 +228,11 @@ export default function StudentHomeworkView({ user }) {
             description="Toma una foto o sube una imagen de tu tarea"
             action={
               <div className="flex items-center gap-2">
-                <BaseButton onClick={() => setShowCameraModal(true)} variant="secondary" icon={Camera}>
-                  Tomar Foto
+                <BaseButton onClick={() => setShowCameraModal(true)} variant="secondary" icon={Camera} title="Tomar Foto">
+                  <span className="hidden sm:inline">Tomar Foto</span>
                 </BaseButton>
-                <BaseButton onClick={() => setShowUploadModal(true)} variant="primary" icon={Upload}>
-                  Subir Tarea
+                <BaseButton onClick={() => setShowUploadModal(true)} variant="primary" icon={Upload} title="Subir Tarea">
+                  <span className="hidden sm:inline">Subir Tarea</span>
                 </BaseButton>
               </div>
             }
