@@ -404,6 +404,8 @@ function useBadgeConfig() {
    * CRÍTICO: Guarda INMEDIATAMENTE para que los cambios se apliquen en tiempo real
    */
   const updateCategoryPreset = useCallback((category, presetName) => {
+    console.log('🔥 updateCategoryPreset LLAMADO:', { category, presetName });
+
     setPresetConfig((prev) => {
       const updated = {
         ...prev,
@@ -412,10 +414,17 @@ function useBadgeConfig() {
           [category]: presetName,
         },
       };
+
+      console.log('💾 Guardando preset config:', updated);
+
       // CRÍTICO: Guardar inmediatamente en localStorage para aplicación en tiempo real
-      saveBadgePresetConfig(updated);
+      const saved = saveBadgePresetConfig(updated);
+      console.log('✅ Resultado de saveBadgePresetConfig:', saved);
+
       // Disparar evento para que CategoryBadge se actualice
       window.dispatchEvent(new CustomEvent('badgePresetConfigChange', { detail: updated }));
+      console.log('📡 Evento badgePresetConfigChange disparado');
+
       logger.info(`Category ${category} preset set to: ${presetName} (saved immediately)`, 'useBadgeConfig');
       return updated;
     });
