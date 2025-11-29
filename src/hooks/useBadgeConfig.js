@@ -401,47 +401,67 @@ function useBadgeConfig() {
 
   /**
    * 🆕 Actualizar preset de una categoría
+   * CRÍTICO: Guarda INMEDIATAMENTE para que los cambios se apliquen en tiempo real
    */
   const updateCategoryPreset = useCallback((category, presetName) => {
-    setPresetConfig((prev) => ({
-      ...prev,
-      categories: {
-        ...prev.categories,
-        [category]: presetName,
-      },
-    }));
+    setPresetConfig((prev) => {
+      const updated = {
+        ...prev,
+        categories: {
+          ...prev.categories,
+          [category]: presetName,
+        },
+      };
+      // CRÍTICO: Guardar inmediatamente en localStorage para aplicación en tiempo real
+      saveBadgePresetConfig(updated);
+      // Disparar evento para que CategoryBadge se actualice
+      window.dispatchEvent(new CustomEvent('badgePresetConfigChange', { detail: updated }));
+      logger.info(`Category ${category} preset set to: ${presetName} (saved immediately)`, 'useBadgeConfig');
+      return updated;
+    });
     setHasChanges(true);
-    logger.info(`Category ${category} preset set to: ${presetName}`, 'useBadgeConfig');
   }, []);
 
   /**
    * 🆕 Actualizar override de preset individual
+   * CRÍTICO: Guarda INMEDIATAMENTE para aplicación en tiempo real
    */
   const updateBadgePreset = useCallback((badgeKey, presetName) => {
-    setPresetConfig((prev) => ({
-      ...prev,
-      overrides: {
-        ...prev.overrides,
-        [badgeKey]: presetName,
-      },
-    }));
+    setPresetConfig((prev) => {
+      const updated = {
+        ...prev,
+        overrides: {
+          ...prev.overrides,
+          [badgeKey]: presetName,
+        },
+      };
+      // Guardar inmediatamente
+      saveBadgePresetConfig(updated);
+      window.dispatchEvent(new CustomEvent('badgePresetConfigChange', { detail: updated }));
+      logger.info(`Badge ${badgeKey} preset override set to: ${presetName} (saved immediately)`, 'useBadgeConfig');
+      return updated;
+    });
     setHasChanges(true);
-    logger.info(`Badge ${badgeKey} preset override set to: ${presetName}`, 'useBadgeConfig');
   }, []);
 
   /**
    * 🆕 Eliminar override de preset individual
+   * CRÍTICO: Guarda INMEDIATAMENTE para aplicación en tiempo real
    */
   const removeBadgePreset = useCallback((badgeKey) => {
     setPresetConfig((prev) => {
       const { [badgeKey]: removed, ...remaining } = prev.overrides || {};
-      return {
+      const updated = {
         ...prev,
         overrides: remaining,
       };
+      // Guardar inmediatamente
+      saveBadgePresetConfig(updated);
+      window.dispatchEvent(new CustomEvent('badgePresetConfigChange', { detail: updated }));
+      logger.info(`Badge ${badgeKey} preset override removed (saved immediately)`, 'useBadgeConfig');
+      return updated;
     });
     setHasChanges(true);
-    logger.info(`Badge ${badgeKey} preset override removed`, 'useBadgeConfig');
   }, []);
 
   /**

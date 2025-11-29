@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { getContainerContents, CONTENT_TYPES } from '../../firebase/content';
-import { ExpandableModal } from '../common';
+import { ExpandableModal, CategoryBadge } from '../common';
 import ContentViewer from '../ContentViewer';
 import ExerciseViewerModal from '../ExerciseViewerModal';
 import QuickDisplayFAB from '../QuickDisplayFAB';
@@ -209,12 +209,7 @@ function ContainerViewer({ container, isOpen, onClose }) {
             {/* Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-2">
-                <span
-                  className="px-2.5 py-1 rounded-full text-xs font-medium"
-                  style={{ backgroundColor: `${containerColor}20`, color: containerColor }}
-                >
-                  📦 Contenedor
-                </span>
+                <CategoryBadge type="content" value="container" size="sm" />
                 <span className="text-sm text-gray-500 dark:text-gray-400">
                   {contents.length} {contents.length === 1 ? 'contenido' : 'contenidos'}
                 </span>
@@ -293,13 +288,9 @@ function ContainerViewer({ container, isOpen, onClose }) {
                         {content.title || 'Sin título'}
                       </h5>
                       <div className="flex items-center gap-2 mt-1">
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${colorClass}`}>
-                          {typeLabel}
-                        </span>
+                        <CategoryBadge type="content" value={content.type} size="sm" />
                         {content.metadata?.difficulty && (
-                          <span className="text-xs text-gray-500 dark:text-gray-400">
-                            • {content.metadata.difficulty}
-                          </span>
+                          <CategoryBadge type="difficulty" value={content.metadata.difficulty} size="sm" />
                         )}
                         {content.metadata?.duration && (
                           <span className="text-xs text-gray-500 dark:text-gray-400">

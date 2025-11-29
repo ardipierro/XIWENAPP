@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { getContainerContents, CONTENT_TYPES } from '../../firebase/content';
 import ContainerViewer from './ContainerViewer';
+import { CategoryBadge } from '../common';
 import logger from '../../utils/logger';
 
 /**
@@ -130,12 +131,7 @@ function ContainerCard({ container, compact = false, className = '' }) {
             {/* Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <span
-                  className="px-2 py-0.5 rounded-full text-xs font-medium"
-                  style={{ backgroundColor: `${containerColor}20`, color: containerColor }}
-                >
-                  📦 Contenedor
-                </span>
+                <CategoryBadge type="content" value="container" size="sm" />
               </div>
               <h4 className="font-semibold text-gray-900 dark:text-white truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                 {container.title || 'Sin título'}

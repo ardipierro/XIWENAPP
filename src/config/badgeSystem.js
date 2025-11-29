@@ -88,6 +88,15 @@ export const DEFAULT_BADGE_CONFIG = {
     description: 'Sesión interactiva',
     category: 'contentType'
   },
+  CONTENT_CONTAINER: {
+    variant: 'info',
+    color: '#6366f1',
+    label: 'Contenedor',
+    icon: '📦',
+    heroicon: 'FolderIcon',
+    description: 'Carpeta/colección de contenidos',
+    category: 'contentType'
+  },
 
   // ========================================
   // TIPOS DE EJERCICIO
@@ -1813,6 +1822,7 @@ export const BADGE_MAPPINGS = {
     'link': 'CONTENT_LINK',
     'exercise': 'CONTENT_EXERCISE',
     'live-game': 'CONTENT_LIVEGAME',
+    'container': 'CONTENT_CONTAINER',
   },
 
   // Tipo de ejercicio → Badge key
