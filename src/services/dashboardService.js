@@ -10,8 +10,7 @@ import {
   loadCourses,
   getAllUsers
 } from '../firebase/firestore';
-import { getContentByTeacher } from '../firebase/content';
-import { getExercisesByTeacher } from '../firebase/exercises';
+import { getContentByTeacher, getExercises } from '../firebase/content';
 import { getTeacherSessions } from '../firebase/classSessions';
 import logger from '../utils/logger';
 
@@ -35,7 +34,7 @@ export async function loadDashboardData(teacherId, isAdmin) {
     // Si es profesor (no admin), cargar su contenido y ejercicios
     if (!isAdmin) {
       promises.push(getContentByTeacher(teacherId));
-      promises.push(getExercisesByTeacher(teacherId));
+      promises.push(getExercises(teacherId));
       promises.push(getTeacherSessions(teacherId));
     }
 
@@ -147,7 +146,7 @@ export async function refreshDashboardData(currentScreen, teacherId, isAdmin) {
         return { content };
 
       case 'exercises':
-        const exercises = await getExercisesByTeacher(teacherId);
+        const exercises = await getExercises(teacherId);
         return { exercises };
 
       case 'classes':

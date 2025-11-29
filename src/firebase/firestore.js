@@ -729,48 +729,44 @@ export const getStudentGameHistory = async (studentId) => {
 
 
 // ============================================
-// CURSOS
+// CURSOS (LEGACY WRAPPER - USA contents)
 // ============================================
 
 /**
- * Crear nuevo curso
- */
-export const createCourse = async (courseData) => {
-  try {
-    const coursesRef = collection(db, 'courses');
-    const docRef = await addDoc(coursesRef, {
-      ...courseData,
-      students: courseData.students || [],
-      active: true,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-    logger.debug('✅ Curso creado con ID:', docRef.id);
-    return docRef.id;
-  } catch (error) {
-    logger.error('❌ Error creando curso:', error);
-    return null;
-  }
-};
-
-/**
- * Cargar todos los cursos
+ * @deprecated Usar getCourses() de firebase/content.js
+ * Wrapper de compatibilidad que carga cursos desde la colección 'contents'
+ * Mapea campos para compatibilidad con código legacy
  */
 export const loadCourses = async () => {
   try {
-    const coursesRef = collection(db, 'courses');
-    const q = query(coursesRef, orderBy('name', 'asc'));
+    // Cargar desde colección 'contents' con type='course'
+    const contentsRef = collection(db, 'contents');
+    const q = query(
+      contentsRef,
+      where('type', '==', 'course'),
+      orderBy('title', 'asc')
+    );
     const querySnapshot = await getDocs(q);
-    
+
     const courses = [];
-    querySnapshot.forEach((doc) => {
+    querySnapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      // Mapear campos para compatibilidad legacy
       courses.push({
-        id: doc.id,
-        ...doc.data()
+        id: docSnap.id,
+        name: data.title, // Legacy espera 'name', nuevo sistema usa 'title'
+        title: data.title,
+        description: data.body || data.description,
+        active: data.status !== 'archived',
+        students: [], // Ya no se guarda así, usar content_assignments
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+        createdBy: data.createdBy,
+        ...data
       });
     });
-    
-    logger.debug(`✅ ${courses.length} cursos cargados desde Firestore`);
+
+    logger.debug(`✅ ${courses.length} cursos cargados desde contents`);
     return courses;
   } catch (error) {
     logger.error('❌ Error cargando cursos:', error);
@@ -778,549 +774,66 @@ export const loadCourses = async () => {
   }
 };
 
-/**
- * Actualizar datos de un curso
- */
-export const updateCourse = async (courseId, courseData) => {
-  try {
-    const courseRef = doc(db, 'courses', courseId);
-    await updateDoc(courseRef, {
-      ...courseData,
-      updatedAt: serverTimestamp()
-    });
-    logger.debug('✅ Curso actualizado');
-    return true;
-  } catch (error) {
-    logger.error('❌ Error actualizando curso:', error);
-    return false;
-  }
-};
-
-/**
- * Eliminar un curso (soft delete - lo marca como inactivo)
- */
-export const deleteCourse = async (courseId) => {
-  try {
-    const courseRef = doc(db, 'courses', courseId);
-    await updateDoc(courseRef, {
-      active: false,
-      updatedAt: serverTimestamp()
-    });
-    logger.debug('✅ Curso marcado como inactivo');
-    return true;
-  } catch (error) {
-    logger.error('❌ Error eliminando curso:', error);
-    return false;
-  }
-};
-
-/**
- * Inscribir alumno a un curso
- */
-export const enrollStudent = async (courseId, studentId) => {
-  try {
-    const courseRef = doc(db, 'courses', courseId);
-    const courseSnap = await getDoc(courseRef);
-    
-    if (courseSnap.exists()) {
-      const currentStudents = courseSnap.data().students || [];
-      
-      // Verificar si ya está inscrito
-      if (currentStudents.includes(studentId)) {
-        logger.debug('ℹ️ El alumno ya está inscrito en este curso');
-        return true;
-      }
-      
-      await updateDoc(courseRef, {
-        students: [...currentStudents, studentId],
-        updatedAt: serverTimestamp()
-      });
-      
-      logger.debug('✅ Alumno inscrito al curso');
-      return true;
-    }
-    return false;
-  } catch (error) {
-    logger.error('❌ Error inscribiendo alumno:', error);
-    return false;
-  }
-};
-
-/**
- * Desinscribir alumno de un curso
- */
-export const unenrollStudent = async (courseId, studentId) => {
-  try {
-    const courseRef = doc(db, 'courses', courseId);
-    const courseSnap = await getDoc(courseRef);
-    
-    if (courseSnap.exists()) {
-      const currentStudents = courseSnap.data().students || [];
-      const updatedStudents = currentStudents.filter(id => id !== studentId);
-      
-      await updateDoc(courseRef, {
-        students: updatedStudents,
-        updatedAt: serverTimestamp()
-      });
-      
-      logger.debug('✅ Alumno desinscrito del curso');
-      return true;
-    }
-    return false;
-  } catch (error) {
-    logger.error('❌ Error desinscribiendo alumno:', error);
-    return false;
-  }
-};
-
-/**
- * Obtener alumnos de un curso específico
- */
-export const getCourseStudents = async (courseId) => {
-  try {
-    const courseRef = doc(db, 'courses', courseId);
-    const courseSnap = await getDoc(courseRef);
-    
-    if (!courseSnap.exists()) {
-      return [];
-    }
-    
-    const studentIds = courseSnap.data().students || [];
-    
-    if (studentIds.length === 0) {
-      return [];
-    }
-    
-    // Cargar datos completos de cada alumno
-    const studentsPromises = studentIds.map(id => 
-      getDoc(doc(db, 'students', id))
-    );
-    
-    const studentsSnaps = await Promise.all(studentsPromises);
-    
-    const students = studentsSnaps
-      .filter(snap => snap.exists())
-      .map(snap => ({
-        id: snap.id,
-        ...snap.data()
-      }));
-    
-    logger.debug(`✅ ${students.length} alumnos cargados del curso`);
-    return students;
-  } catch (error) {
-    logger.error('❌ Error cargando alumnos del curso:', error);
-    return [];
-  }
-};
-
 // ============================================
-// LECCIONES (LESSONS)
+// INSCRIPCIONES (ENROLLMENTS) - LEGACY
+// @deprecated Usar content_assignments en su lugar
+// Estas funciones se mantienen temporalmente para compatibilidad
 // ============================================
 
 /**
- * Crear una nueva lección para un curso
- */
-export const createLesson = async (courseId, lessonData) => {
-  try {
-    const { title, type, content, order } = lessonData;
-
-    const lessonRef = await addDoc(collection(db, 'lessons'), {
-      courseId,
-      title,
-      type, // 'text', 'video', 'audio', 'interactive'
-      content,
-      order: order || 0,
-      active: true,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-
-    logger.debug('✅ Lección creada:', lessonRef.id);
-    return lessonRef.id;
-  } catch (error) {
-    logger.error('❌ Error creando lección:', error);
-    return null;
-  }
-};
-
-/**
- * Obtener todas las lecciones de un curso
- */
-export const getCourseLessons = async (courseId) => {
-  try {
-    // Query simple sin orderBy para evitar índice compuesto
-    const lessonsQuery = query(
-      collection(db, 'lessons'),
-      where('courseId', '==', courseId)
-    );
-
-    const snapshot = await getDocs(lessonsQuery);
-    // Filtrar activas y ordenar en el cliente
-    const lessons = snapshot.docs
-      .map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }))
-      .filter(lesson => lesson.active !== false)
-      .sort((a, b) => (a.order || 0) - (b.order || 0));
-
-    logger.debug(`✅ ${lessons.length} lecciones cargadas para curso ${courseId}`);
-    return lessons;
-  } catch (error) {
-    logger.error('❌ Error cargando lecciones:', error);
-    return [];
-  }
-};
-
-/**
- * Obtener una lección específica por ID
- */
-export const getLesson = async (lessonId) => {
-  try {
-    const lessonRef = doc(db, 'lessons', lessonId);
-    const lessonSnap = await getDoc(lessonRef);
-
-    if (lessonSnap.exists()) {
-      return {
-        id: lessonSnap.id,
-        ...lessonSnap.data()
-      };
-    }
-
-    logger.warn('⚠️ Lección no encontrada:', lessonId);
-    return null;
-  } catch (error) {
-    logger.error('❌ Error obteniendo lección:', error);
-    return null;
-  }
-};
-
-/**
- * Actualizar una lección existente
- */
-export const updateLesson = async (lessonId, lessonData) => {
-  try {
-    const lessonRef = doc(db, 'lessons', lessonId);
-
-    await updateDoc(lessonRef, {
-      ...lessonData,
-      updatedAt: serverTimestamp()
-    });
-
-    logger.debug('✅ Lección actualizada:', lessonId);
-    return true;
-  } catch (error) {
-    logger.error('❌ Error actualizando lección:', error);
-    return false;
-  }
-};
-
-/**
- * Eliminar una lección (soft delete)
- */
-export const deleteLesson = async (lessonId) => {
-  try {
-    const lessonRef = doc(db, 'lessons', lessonId);
-
-    await updateDoc(lessonRef, {
-      active: false,
-      updatedAt: serverTimestamp()
-    });
-
-    logger.debug('✅ Lección eliminada (soft delete):', lessonId);
-    return true;
-  } catch (error) {
-    logger.error('❌ Error eliminando lección:', error);
-    return false;
-  }
-};
-
-/**
- * Reordenar lecciones de un curso
- */
-export const reorderLessons = async (lessonUpdates) => {
-  try {
-    const updates = lessonUpdates.map(({ id, order }) => {
-      const lessonRef = doc(db, 'lessons', id);
-      return updateDoc(lessonRef, {
-        order,
-        updatedAt: serverTimestamp()
-      });
-    });
-
-    await Promise.all(updates);
-    logger.debug('✅ Lecciones reordenadas');
-    return true;
-  } catch (error) {
-    logger.error('❌ Error reordenando lecciones:', error);
-    return false;
-  }
-};
-
-// ============================================
-// INSCRIPCIONES (ENROLLMENTS)
-// ============================================
-
-/**
- * Inscribir alumno en un curso (crear registro de inscripción)
+ * @deprecated Usar assignContentToStudent() en su lugar
+ * Wrapper que usa content_assignments en lugar de enrollments
  */
 export const enrollStudentInCourse = async (studentId, courseId) => {
-  try {
-    // Verificar si ya está inscrito
-    const enrollmentsRef = collection(db, 'enrollments');
-    const q = query(
-      enrollmentsRef,
-      where('studentId', '==', studentId),
-      where('courseId', '==', courseId)
-    );
-    const existingEnrollment = await getDocs(q);
-
-    if (!existingEnrollment.empty) {
-      logger.debug('ℹ️ El alumno ya está inscrito en este curso');
-      return existingEnrollment.docs[0].id;
-    }
-
-    // Crear nueva inscripción
-    const enrollmentRef = await addDoc(enrollmentsRef, {
-      studentId,
-      courseId,
-      enrolledAt: serverTimestamp(),
-      progress: {
-        completedLessons: [],
-        lastAccessedLesson: null,
-        percentComplete: 0
-      },
-      status: 'active', // active, completed, paused
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-
-    logger.debug('✅ Alumno inscrito en curso:', enrollmentRef.id);
-    return enrollmentRef.id;
-  } catch (error) {
-    logger.error('❌ Error inscribiendo alumno:', error);
-    return null;
-  }
+  logger.warn('⚠️ enrollStudentInCourse está deprecated. Usar assignContentToStudent()');
+  // Redirigir a content_assignments
+  return assignContentToStudent(studentId, courseId);
 };
 
 /**
- * Desinscribir alumno de un curso
+ * @deprecated Usar unassignContentFromStudent() en su lugar
  */
 export const unenrollStudentFromCourse = async (studentId, courseId) => {
-  try {
-    const enrollmentsRef = collection(db, 'enrollments');
-    const q = query(
-      enrollmentsRef,
-      where('studentId', '==', studentId),
-      where('courseId', '==', courseId)
-    );
-    const querySnapshot = await getDocs(q);
-
-    if (querySnapshot.empty) {
-      logger.debug('ℹ️ No se encontró inscripción para desinscribir');
-      return false;
-    }
-
-    // Eliminar registro de inscripción
-    const enrollmentId = querySnapshot.docs[0].id;
-    await deleteDoc(doc(db, 'enrollments', enrollmentId));
-
-    logger.debug('✅ Alumno desinscrito del curso');
-    return true;
-  } catch (error) {
-    logger.error('❌ Error desinscribiendo alumno:', error);
-    return false;
-  }
+  logger.warn('⚠️ unenrollStudentFromCourse está deprecated. Usar unassignContentFromStudent()');
+  return unassignContentFromStudent(studentId, courseId);
 };
 
 /**
- * Obtener todos los cursos en los que está inscrito un alumno
+ * @deprecated Usar getStudentContentAssignments() en su lugar
+ * Wrapper que carga desde content_assignments
  */
 export const getStudentEnrollments = async (studentId) => {
+  logger.warn('⚠️ getStudentEnrollments está deprecated. Usar getStudentContentAssignments()');
   try {
-    const enrollmentsRef = collection(db, 'enrollments');
-    const q = query(enrollmentsRef, where('studentId', '==', studentId));
-    const querySnapshot = await getDocs(q);
-
-    if (querySnapshot.empty) {
-      return [];
-    }
-
-    // Obtener datos completos de cada curso
-    const enrollments = [];
-    for (const enrollDoc of querySnapshot.docs) {
-      const enrollmentData = enrollDoc.data();
-      const courseRef = doc(db, 'courses', enrollmentData.courseId);
-      const courseSnap = await getDoc(courseRef);
-
-      if (courseSnap.exists()) {
-        enrollments.push({
-          enrollmentId: enrollDoc.id,
-          course: {
-            id: courseSnap.id,
-            ...courseSnap.data()
-          },
-          progress: enrollmentData.progress,
-          status: enrollmentData.status,
-          enrolledAt: enrollmentData.enrolledAt
-        });
-      }
-    }
-
-    logger.debug(`✅ ${enrollments.length} inscripciones cargadas para el alumno`);
-    return enrollments;
+    const assignments = await getStudentContentAssignments(studentId);
+    // Mapear a formato legacy para compatibilidad
+    return assignments.map(a => ({
+      enrollmentId: a.id,
+      courseId: a.contentId,
+      course: {
+        id: a.contentId,
+        name: a.contentName,
+        title: a.contentName
+      },
+      progress: a.progress,
+      status: a.status,
+      enrolledAt: a.assignedAt
+    }));
   } catch (error) {
-    logger.error('❌ Error cargando inscripciones del alumno:', error);
+    logger.error('❌ Error cargando inscripciones:', error);
     return [];
   }
 };
 
 /**
- * Obtener todos los alumnos inscritos en un curso
- */
-export const getCourseEnrollments = async (courseId) => {
-  try {
-    const enrollmentsRef = collection(db, 'enrollments');
-    const q = query(enrollmentsRef, where('courseId', '==', courseId));
-    const querySnapshot = await getDocs(q);
-
-    if (querySnapshot.empty) {
-      return [];
-    }
-
-    // Obtener datos completos de cada alumno
-    const enrollments = [];
-    for (const enrollDoc of querySnapshot.docs) {
-      const enrollmentData = enrollDoc.data();
-      const studentRef = doc(db, 'students', enrollmentData.studentId);
-      const studentSnap = await getDoc(studentRef);
-
-      if (studentSnap.exists()) {
-        enrollments.push({
-          enrollmentId: enrollDoc.id,
-          student: {
-            id: studentSnap.id,
-            ...studentSnap.data()
-          },
-          progress: enrollmentData.progress,
-          status: enrollmentData.status,
-          enrolledAt: enrollmentData.enrolledAt
-        });
-      }
-    }
-
-    logger.debug(`✅ ${enrollments.length} alumnos inscritos en el curso`);
-    return enrollments;
-  } catch (error) {
-    logger.error('❌ Error cargando inscripciones del curso:', error);
-    return [];
-  }
-};
-
-/**
- * Obtener progreso de un alumno en un curso específico
- */
-export const getEnrollmentProgress = async (studentId, courseId) => {
-  try {
-    const enrollmentsRef = collection(db, 'enrollments');
-    const q = query(
-      enrollmentsRef,
-      where('studentId', '==', studentId),
-      where('courseId', '==', courseId)
-    );
-    const querySnapshot = await getDocs(q);
-
-    if (querySnapshot.empty) {
-      return null;
-    }
-
-    const enrollmentData = querySnapshot.docs[0].data();
-    return enrollmentData.progress;
-  } catch (error) {
-    logger.error('❌ Error obteniendo progreso:', error);
-    return null;
-  }
-};
-
-/**
- * Actualizar progreso de un alumno en un curso
- */
-export const updateEnrollmentProgress = async (studentId, courseId, progressData) => {
-  try {
-    const enrollmentsRef = collection(db, 'enrollments');
-    const q = query(
-      enrollmentsRef,
-      where('studentId', '==', studentId),
-      where('courseId', '==', courseId)
-    );
-    const querySnapshot = await getDocs(q);
-
-    if (querySnapshot.empty) {
-      logger.debug('⚠️ No se encontró inscripción para actualizar');
-      return false;
-    }
-
-    const enrollmentId = querySnapshot.docs[0].id;
-    const enrollmentRef = doc(db, 'enrollments', enrollmentId);
-
-    await updateDoc(enrollmentRef, {
-      progress: progressData,
-      updatedAt: serverTimestamp()
-    });
-
-    logger.debug('✅ Progreso actualizado');
-    return true;
-  } catch (error) {
-    logger.error('❌ Error actualizando progreso:', error);
-    return false;
-  }
-};
-
-/**
- * Obtener número de cursos asignados a un alumno
- */
-export const getStudentEnrolledCoursesCount = async (studentId) => {
-  try {
-    const enrollmentsRef = collection(db, 'enrollments');
-    const q = query(enrollmentsRef, where('studentId', '==', studentId));
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.size;
-  } catch (error) {
-    logger.error('❌ Error contando cursos:', error);
-    return 0;
-  }
-};
-
-/**
- * BATCH: Obtener conteos de enrollments para múltiples estudiantes de una vez
- * Soluciona el problema N+1 - de 100 queries a 1 query
- * @param {string[]} studentIds - Array de IDs de estudiantes
- * @returns {Object} Objeto con studentId como key y count como value
+ * @deprecated Ya no se usa - los conteos se obtienen de content_assignments
  */
 export const getBatchEnrollmentCounts = async (studentIds = []) => {
-  try {
-    if (studentIds.length === 0) return {};
-
-    // Una sola query que trae TODOS los enrollments
-    const enrollmentsRef = collection(db, 'enrollments');
-    const querySnapshot = await getDocs(enrollmentsRef);
-
-    // Agrupar por studentId en el cliente
-    const counts = {};
-    studentIds.forEach(id => counts[id] = 0); // Inicializar en 0
-
-    querySnapshot.forEach(doc => {
-      const data = doc.data();
-      if (data.studentId && studentIds.includes(data.studentId)) {
-        counts[data.studentId] = (counts[data.studentId] || 0) + 1;
-      }
-    });
-
-    return counts;
-  } catch (error) {
-    logger.error('❌ Error obteniendo enrollments batch:', error);
-    return {};
-  }
+  logger.warn('⚠️ getBatchEnrollmentCounts está deprecated');
+  // Retornar objeto vacío con conteos en 0
+  const counts = {};
+  studentIds.forEach(id => counts[id] = 0);
+  return counts;
 };
 
 // ============================================

@@ -17,7 +17,7 @@ import {
   updateLandingSection,
   resetLandingConfig
 } from '../../firebase/landingConfig';
-import { getExercisesByTeacher } from '../../firebase/exercises';
+import { getExercises } from '../../firebase/content';
 import {
   BaseCard,
   BaseButton,
@@ -81,7 +81,7 @@ function LandingPageTab() {
   const loadExercises = async () => {
     try {
       setLoadingExercises(true);
-      const data = await getExercisesByTeacher(user.uid);
+      const data = await getExercises(user.uid);
       setExercises(data);
       logger.debug('Exercises loaded:', data.length);
     } catch (err) {

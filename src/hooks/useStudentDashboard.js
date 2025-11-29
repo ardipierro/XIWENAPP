@@ -8,7 +8,7 @@ import logger from '../utils/logger';
 import {
   getStudentGameHistory,
   ensureStudentProfile,
-  getStudentEnrollments
+  getStudentContentAssignments
 } from '../firebase/firestore';
 import { getStudentInstances } from '../firebase/classInstances';
 import { subscribeToLiveWhiteboards } from '../firebase/whiteboard';
@@ -98,11 +98,21 @@ export function useStudentDashboard(user, studentProp) {
         if (profileData) {
           // Load data in parallel
           const dataStart = performance.now();
-          const [history, enrollments, sessions] = await Promise.all([
+          const [history, contentAssignments, sessions] = await Promise.all([
             getStudentGameHistory(profileData.id),
-            getStudentEnrollments(profileData.id),
+            getStudentContentAssignments(profileData.id),
             getStudentInstances(profileData.id) // NUEVO SISTEMA: class_instances
           ]);
+
+          // Formatear para compatibilidad con UI existente
+          const enrollments = contentAssignments.map(a => ({
+            enrollmentId: a.id,
+            courseId: a.contentId,
+            course: { id: a.contentId, name: a.contentName, title: a.contentName },
+            progress: a.progress,
+            status: a.status,
+            enrolledAt: a.assignedAt
+          }));
 
           logger.debug(`⏱️ [useStudentDashboard] Datos paralelos: ${(performance.now() - dataStart).toFixed(0)}ms`);
 
