@@ -189,8 +189,12 @@ function CategoryBadge({
 
   // 🆕 OBTENER PRESET APLICABLE
   // El preset tiene la máxima prioridad y se combina con la config del badge
+  // CRÍTICO: Recalcular preset cada vez que cambia presetConfig
   const badgeKeyStr = badgeKey || (type && value ? `${type}_${value}` : null);
-  const appliedPreset = badgeKeyStr ? getPresetForBadge(badgeKeyStr, badgeConfig.category) : null;
+  const appliedPreset = useMemo(() => {
+    if (!badgeKeyStr) return null;
+    return getPresetForBadge(badgeKeyStr, badgeConfig.category);
+  }, [badgeKeyStr, badgeConfig.category, presetConfig]); // Depende de presetConfig para re-calcular
 
   // 🆕 Si el badge está deshabilitado por preset o config, no renderizar nada
   const isEnabled = appliedPreset ? appliedPreset.enabled !== false : badgeConfig.enabled !== false;
