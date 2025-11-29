@@ -2,7 +2,7 @@
  * @fileoverview Panel de Configuración reorganizado en 3 pestañas principales
  * - General: Idioma, notificaciones, cuenta
  * - Diseño y Apariencia: Temas, fuentes, badges, card system
- * - Avanzado: Credenciales IA, caché de audio, landing page
+ * - Avanzado: Credenciales IA, Configurar IA, caché de audio, landing page
  * @module components/SettingsPanel
  */
 

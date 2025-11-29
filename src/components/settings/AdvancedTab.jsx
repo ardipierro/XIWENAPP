@@ -1,20 +1,24 @@
 /**
- * @fileoverview Pestaña de Configuración Avanzada - Agrupa Credenciales IA, Caché de Audio y Landing Page
+ * @fileoverview Pestaña de Configuración Avanzada - Agrupa Credenciales IA, Configurar IA, Caché de Audio y Landing Page
  * @module components/settings/AdvancedTab
  */
 
 import { useState } from 'react';
-import { Key, Database, Home } from 'lucide-react';
+import { Key, Database, Home, Lightbulb, Save } from 'lucide-react';
 import BaseTabs from '../common/BaseTabs';
 import CredentialsTab from './CredentialsTab';
 import AudioCacheTab from './AudioCacheTab';
 import LandingPageTab from './LandingPageTab';
+import ConfigBackupTab from './ConfigBackupTab';
+import AIConfigPanel from '../AIConfigPanel';
 
 function AdvancedTab() {
   const [activeSubTab, setActiveSubTab] = useState('credentials');
 
   const subTabs = [
     { id: 'credentials', label: 'Credenciales IA', icon: Key },
+    { id: 'ai-config', label: 'Configurar IA', icon: Lightbulb },
+    { id: 'backup', label: 'Backup Configuraciones', icon: Save },
     { id: 'cache', label: 'Caché de Audio', icon: Database },
     { id: 'landing', label: 'Landing Page', icon: Home }
   ];
@@ -37,6 +41,18 @@ function AdvancedTab() {
         {activeSubTab === 'credentials' && (
           <div className="w-full">
             <CredentialsTab />
+          </div>
+        )}
+
+        {activeSubTab === 'ai-config' && (
+          <div className="w-full">
+            <AIConfigPanel />
+          </div>
+        )}
+
+        {activeSubTab === 'backup' && (
+          <div className="w-full">
+            <ConfigBackupTab />
           </div>
         )}
 

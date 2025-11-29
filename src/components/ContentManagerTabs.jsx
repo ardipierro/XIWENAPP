@@ -5,11 +5,10 @@
  */
 
 import { useState } from 'react';
-import { Layers, Sparkles, Lightbulb, BookOpen, CreditCard, Box } from 'lucide-react';
+import { Layers, CreditCard, Box } from 'lucide-react';
 import PageHeader from './common/PageHeader';
 import BaseTabs from './common/BaseTabs';
 import UnifiedContentManager from './UnifiedContentManager';
-import AIConfigPanel from './AIConfigPanel';
 import ContainerConfig from './ContainerConfig';
 // import InteractiveBookViewer from './InteractiveBookViewer'; // TEMPORALMENTE DESHABILITADO
 import FlashCardManager from './FlashCardManager';
@@ -17,7 +16,7 @@ import { usePermissions } from '../hooks/usePermissions';
 
 /**
  * Definición de las pestañas
- * NOTA: Exercise Builder ahora está integrado dentro de "Configurar IA"
+ * NOTA: "Configurar IA" fue movido a Configuración > Avanzado
  */
 const TABS = [
   {
@@ -25,12 +24,6 @@ const TABS = [
     label: 'Contenidos',
     icon: Layers,
     permission: 'create-content',
-  },
-  {
-    id: 'ai-config',
-    label: 'Configurar IA',
-    icon: Lightbulb,
-    permission: 'configure-ai',
   },
   {
     id: 'container',
@@ -85,8 +78,6 @@ export function ContentManagerTabs({ user, userRole }) {
     switch (activeTab) {
       case 'content':
         return <UnifiedContentManager user={user} />;
-      case 'ai-config':
-        return <AIConfigPanel />;
       case 'container':
         return <ContainerConfig />;
       case 'flashcards':
