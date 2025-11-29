@@ -11,3 +11,6 @@ build/
 # Lighthouse reports
 lighthouse-*-report.html
 .lighthouseci/
+
+# API Keys template (user fills with real keys)
+my-api-keys.json
