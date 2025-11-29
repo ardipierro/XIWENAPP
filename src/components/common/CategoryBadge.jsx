@@ -196,10 +196,17 @@ function CategoryBadge({
   // ✅ AHORA se calcula en cada render leyendo localStorage fresco
   const appliedPreset = badgeKeyStr ? getPresetForBadge(badgeKeyStr, badgeConfig.category) : null;
 
-  // DEBUG: Log para verificar qué preset se está aplicando
-  if (appliedPreset && appliedPreset.enabled === false) {
-    logger.debug(`🚫 Badge ${badgeKeyStr} (${badgeConfig.category}) está OCULTO por preset`, 'CategoryBadge');
-  }
+  // 🔍 DEBUG MEGA VERBOSE: Mostrar TODO
+  console.log('🔍 CategoryBadge:', {
+    badgeKeyStr,
+    category: badgeConfig.category,
+    label: badgeConfig.label,
+    presetName: appliedPreset?.name,
+    enabled: appliedPreset?.enabled,
+    showIcon: appliedPreset?.showIcon,
+    showText: appliedPreset?.showText,
+    showBackground: appliedPreset?.showBackground
+  });
 
   // 🆕 Si el badge está deshabilitado por preset o config, no renderizar nada
   const isEnabled = appliedPreset ? appliedPreset.enabled !== false : badgeConfig.enabled !== false;
