@@ -381,6 +381,22 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
   }, []);
 
   /**
+   * Callback para cambios de displaySettings
+   */
+  const handleDisplaySettingsChange = useCallback((newSettings) => {
+    // Aquí podrías guardar en localStorage si es necesario
+    logger.debug('Display settings updated:', newSettings);
+  }, []);
+
+  /**
+   * Callback para toggle fullscreen
+   */
+  const handleToggleFullscreen = useCallback(() => {
+    // Toggle fullscreen logic si es necesario
+    logger.debug('Toggle fullscreen');
+  }, []);
+
+  /**
    * Renderizar wrapper según el tipo
    */
   const renderExercise = () => {
