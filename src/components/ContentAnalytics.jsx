@@ -40,6 +40,7 @@ import {
 } from '../firebase/contentAnalytics';
 import { formatTimeSpent } from '../firebase/courseProgress';
 import { getAllContent } from '../firebase/content';
+import { CategoryBadge } from './common';
 import logger from '../utils/logger';
 
 /**
@@ -109,9 +110,7 @@ function TopContentsList({ contents, allContents }) {
               {getContentTitle(content.contentId)}
             </h4>
             <div className="flex items-center gap-3 mt-1">
-              <span className={`text-xs px-2 py-0.5 rounded ${typeColors[getContentType(content.contentId)] || 'bg-zinc-100 dark:bg-zinc-700'}`}>
-                {getContentType(content.contentId)}
-              </span>
+              <CategoryBadge type="content" value={getContentType(content.contentId)} size="sm" />
               <span className="text-xs style={{ color: 'var(--color-text-muted)' }}">
                 {content.views} vistas
               </span>

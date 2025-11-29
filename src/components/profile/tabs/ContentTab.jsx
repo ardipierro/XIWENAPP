@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react';
 import { FileText, BookOpen, Video, Link as LinkIcon, Trophy, Calendar } from 'lucide-react';
 import { getStudentContentAssignments } from '../../../firebase/firestore';
+import { CategoryBadge } from '../../common';
 import logger from '../../../utils/logger';
 
 /**
@@ -108,29 +109,9 @@ function ContentCard({ content }) {
     }
   };
 
+  // Usar CategoryBadge del sistema universal de badges
   const getTypeBadge = () => {
-    const badges = {
-      lesson: 'bg-gray-100 dark:bg-gray-800/20 text-gray-700 dark:text-gray-400',
-      reading: 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400',
-      video: 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400',
-      link: 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400',
-      exercise: 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400'
-    };
-
-    const labels = {
-      lesson: 'Lección',
-      reading: 'Lectura',
-      video: 'Video',
-      link: 'Enlace',
-      exercise: 'Ejercicio'
-    };
-
-    return (
-      <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${badges[type] || 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-400'}`}>
-        {getTypeIcon()}
-        {labels[type] || type}
-      </div>
-    );
+    return <CategoryBadge type="content" value={type} size="sm" />;
   };
 
   return (
@@ -166,18 +147,7 @@ function ContentCard({ content }) {
             )}
 
             {contentData.metadata?.difficulty && (
-              <div className="flex items-center gap-1">
-                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                  contentData.metadata.difficulty === 'beginner'
-                    ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400'
-                    : contentData.metadata.difficulty === 'intermediate'
-                    ? 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400'
-                    : 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-400'
-                }`}>
-                  {contentData.metadata.difficulty === 'beginner' ? 'Principiante' :
-                   contentData.metadata.difficulty === 'intermediate' ? 'Intermedio' : 'Avanzado'}
-                </span>
-              </div>
+              <CategoryBadge type="difficulty" value={contentData.metadata.difficulty} size="sm" />
             )}
           </div>
         </div>
