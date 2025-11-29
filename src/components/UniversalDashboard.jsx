@@ -184,7 +184,7 @@ function HomeView({ user, onNavigate }) {
   const visibleCards = quickAccessCards.filter(card => {
     // Ocultar tarjetas marcadas para estudiantes
     // ✅ user es effectiveUser (pasado como prop desde UniversalDashboardInner)
-    if (card.hideForStudents && user.role === 'student') {
+    if (card.hideForStudents && ['student', 'listener', 'trial'].includes(user.role)) {
       return false;
     }
 
