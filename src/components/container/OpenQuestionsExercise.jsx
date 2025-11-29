@@ -6,9 +6,11 @@
  * Ideal para: contrarios, transformaciones, traducciones, etc.
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Check, X, RotateCcw, ChevronRight, Award, Eye, EyeOff } from 'lucide-react';
 import { BaseButton } from '../common';
+import QuickDisplayFAB from '../QuickDisplayFAB';
+import { getDisplayClasses, getDisplayStyles, mergeDisplaySettings } from '../../constants/displaySettings';
 import gameSounds from '../../utils/gameSounds';
 import logger from '../../utils/logger';
 
@@ -60,7 +62,29 @@ function calculateSimilarity(str1, str2) {
 /**
  * Componente principal del ejercicio
  */
-function OpenQuestionsExercise({ questions = [], config = {}, onComplete }) {
+function OpenQuestionsExercise({ questions = [], config = {}, onComplete, displaySettings = null, isFullscreen = false, onDisplaySettingsChange, onToggleFullscreen }) {
+  // Display settings
+  const [liveDisplaySettings, setLiveDisplaySettings] = useState(displaySettings);
+
+  useEffect(() => {
+    if (displaySettings) {
+      setLiveDisplaySettings(displaySettings);
+    }
+  }, [displaySettings]);
+
+  const mergedDisplaySettings = useMemo(
+    () => mergeDisplaySettings(liveDisplaySettings, 'exercise'),
+    [liveDisplaySettings]
+  );
+  const displayClasses = useMemo(() => getDisplayClasses(mergedDisplaySettings), [mergedDisplaySettings]);
+  const displayStyles = useMemo(() => getDisplayStyles(mergedDisplaySettings), [mergedDisplaySettings]);
+
+  const handleDisplaySettingsChange = useCallback((newSettings) => {
+    setLiveDisplaySettings(newSettings);
+    onDisplaySettingsChange?.(newSettings);
+    logger.debug('Display settings actualizados desde FAB', 'OpenQuestionsExercise');
+  }, [onDisplaySettingsChange]);
+
   // Merge config con defaults
   const mergedConfig = useMemo(() => ({
     textareaRows: 2,
@@ -254,8 +278,9 @@ function OpenQuestionsExercise({ questions = [], config = {}, onComplete }) {
   }, [answers, questions.length]);
 
   return (
-    <div className="w-full space-y-4">
-      {/* Barra de progreso */}
+    <>
+      <div className={`w-full space-y-4 ${displayClasses.container}`} style={displayStyles}>
+        {/* Barra de progreso */}
       <div className="flex items-center gap-3 mb-4">
         <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
           <div
@@ -443,7 +468,16 @@ function OpenQuestionsExercise({ questions = [], config = {}, onComplete }) {
           </div>
         </div>
       )}
-    </div>
+      </div>
+
+      {/* QuickDisplayFAB para ajustes rápidos de visualización */}
+      <QuickDisplayFAB
+        initialSettings={displaySettings}
+        onSettingsChange={handleDisplaySettingsChange}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={onToggleFullscreen}
+      />
+    </>
   );
 }
 

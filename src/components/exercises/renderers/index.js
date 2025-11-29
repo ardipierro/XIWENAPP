@@ -8,6 +8,9 @@
  * - OpenQuestionsRenderer: Respuesta libre
  * - TrueFalseRenderer: Verdadero/Falso
  * - MatchingRenderer: Emparejar
+ * - WordHighlightRenderer: Resaltar palabras
+ * - DragDropRenderer: Arrastrar y soltar
+ * - DialoguesRenderer: Diálogos
  *
  * Renderers de contenido:
  * - VideoRenderer: Videos (YouTube, Vimeo, local)
@@ -21,6 +24,9 @@ export { FillBlankRenderer } from './FillBlankRenderer';
 export { OpenQuestionsRenderer } from './OpenQuestionsRenderer';
 export { TrueFalseRenderer } from './TrueFalseRenderer';
 export { MatchingRenderer } from './MatchingRenderer';
+export { WordHighlightRenderer } from './WordHighlightRenderer';
+export { DragDropRenderer } from './DragDropRenderer';
+export { DialoguesRenderer } from './DialoguesRenderer';
 
 // Renderers de contenido
 export { VideoRenderer } from './VideoRenderer';
@@ -33,6 +39,9 @@ export { default as FillBlankRendererDefault } from './FillBlankRenderer';
 export { default as OpenQuestionsRendererDefault } from './OpenQuestionsRenderer';
 export { default as TrueFalseRendererDefault } from './TrueFalseRenderer';
 export { default as MatchingRendererDefault } from './MatchingRenderer';
+export { default as WordHighlightRendererDefault } from './WordHighlightRenderer';
+export { default as DragDropRendererDefault } from './DragDropRenderer';
+export { default as DialoguesRendererDefault } from './DialoguesRenderer';
 
 // Re-export defaults - Contenido
 export { default as VideoRendererDefault } from './VideoRenderer';

@@ -16,13 +16,8 @@ import { Check, X, Lightbulb } from 'lucide-react';
 import { BaseButton, BaseBadge } from '../../common';
 import { useExercise, FEEDBACK_MODES } from '../core/ExerciseContext';
 
-// Colores por defecto (mismo que container/MultipleChoiceExercise.jsx)
-const DEFAULT_COLORS = {
-  correctColor: '#10b981',
-  incorrectColor: '#ef4444',
-  selectedColor: '#3b82f6',
-  partialColor: '#f59e0b'
-};
+// ✅ ELIMINADO: colores hardcoded - ahora usa variables CSS del tema
+// Los colores se obtienen de globals.css (--color-success, --color-error, --color-accent, --color-warning)
 
 /**
  * Shuffle array using Fisher-Yates algorithm
@@ -80,9 +75,6 @@ export function MultipleChoiceRenderer({
     config,
     checkAnswer
   } = useExercise();
-
-  // Merge colors with defaults
-  const colorConfig = { ...DEFAULT_COLORS, ...colors };
 
   // Normalizar opciones a formato objeto
   const normalizedOptions = useMemo(() => {
@@ -195,8 +187,8 @@ export function MultipleChoiceRenderer({
     if (!showingFeedback) {
       if (selected) {
         return {
-          borderColor: colorConfig.selectedColor,
-          backgroundColor: `${colorConfig.selectedColor}15`
+          borderColor: 'var(--color-accent)',
+          backgroundColor: 'var(--color-accent-bg)'
         };
       }
       return {};
@@ -205,15 +197,15 @@ export function MultipleChoiceRenderer({
     // After checking - mostrar correcta solo si está configurado O si fue seleccionada
     if (correct && (config.showCorrectAnswer !== false || selected)) {
       return {
-        borderColor: colorConfig.correctColor,
-        backgroundColor: `${colorConfig.correctColor}15`
+        borderColor: 'var(--color-success)',
+        backgroundColor: 'var(--color-success-bg)'
       };
     }
 
     if (selected && !correct) {
       return {
-        borderColor: colorConfig.incorrectColor,
-        backgroundColor: `${colorConfig.incorrectColor}15`
+        borderColor: 'var(--color-error)',
+        backgroundColor: 'var(--color-error-bg)'
       };
     }
 
@@ -228,21 +220,21 @@ export function MultipleChoiceRenderer({
     if (showingFeedback) {
       if (correct && (config.showCorrectAnswer !== false || selected)) {
         return {
-          borderColor: colorConfig.correctColor,
-          backgroundColor: correct ? colorConfig.correctColor : 'transparent'
+          borderColor: 'var(--color-success)',
+          backgroundColor: correct ? 'var(--color-success)' : 'transparent'
         };
       }
       if (selected && !correct) {
         return {
-          borderColor: colorConfig.incorrectColor,
-          backgroundColor: colorConfig.incorrectColor
+          borderColor: 'var(--color-error)',
+          backgroundColor: 'var(--color-error)'
         };
       }
       return { borderColor: 'var(--color-border)' };
     }
 
     if (selected) {
-      return { borderColor: colorConfig.selectedColor };
+      return { borderColor: 'var(--color-accent)' };
     }
 
     return { borderColor: 'var(--color-border)' };
@@ -345,7 +337,7 @@ export function MultipleChoiceRenderer({
           style={{ backgroundColor: 'var(--color-bg-secondary)' }}
         >
           <div className="flex items-start gap-2">
-            <Lightbulb size={18} className="text-yellow-500 mt-0.5 flex-shrink-0" />
+            <Lightbulb size={18} className="mt-0.5 flex-shrink-0" style={{ color: 'var(--color-warning)' }} />
             <p className="text-sm" style={{ color: 'var(--color-text-primary)' }}>
               {explanation}
             </p>

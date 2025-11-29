@@ -14,6 +14,8 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Check, X, Lightbulb, ChevronRight, RotateCcw, Clock } from 'lucide-react';
 import { BaseButton, BaseBadge } from '../common';
+import QuickDisplayFAB from '../QuickDisplayFAB';
+import { getDisplayClasses, getDisplayStyles, mergeDisplaySettings } from '../../constants/displaySettings';
 import PropTypes from 'prop-types';
 import { playCorrectSound, playIncorrectSound, playCompletionSound } from '../../utils/gameSounds';
 
@@ -456,8 +458,33 @@ function MultipleChoiceExercise({
   questions = [],
   config: userConfig = {},
   onComplete,
-  onQuestionAnswer
+  onQuestionAnswer,
+  displaySettings = null,
+  isFullscreen = false,
+  onDisplaySettingsChange,
+  onToggleFullscreen
 }) {
+  // Display settings
+  const [liveDisplaySettings, setLiveDisplaySettings] = useState(displaySettings);
+
+  useEffect(() => {
+    if (displaySettings) {
+      setLiveDisplaySettings(displaySettings);
+    }
+  }, [displaySettings]);
+
+  const mergedDisplaySettings = useMemo(
+    () => mergeDisplaySettings(liveDisplaySettings, 'exercise'),
+    [liveDisplaySettings]
+  );
+  const displayClasses = useMemo(() => getDisplayClasses(mergedDisplaySettings), [mergedDisplaySettings]);
+  const displayStyles = useMemo(() => getDisplayStyles(mergedDisplaySettings), [mergedDisplaySettings]);
+
+  const handleDisplaySettingsChange = useCallback((newSettings) => {
+    setLiveDisplaySettings(newSettings);
+    onDisplaySettingsChange?.(newSettings);
+  }, [onDisplaySettingsChange]);
+
   // Merge user config with defaults
   const config = useMemo(() => ({
     ...DEFAULT_CONFIG,
@@ -623,8 +650,9 @@ function MultipleChoiceExercise({
   }
 
   return (
-    <div className="space-y-4">
-      {/* Progress indicator - CLICKEABLE */}
+    <>
+      <div className={`space-y-4 ${displayClasses.container}`} style={displayStyles}>
+        {/* Progress indicator - CLICKEABLE */}
       <div className="flex items-center justify-between text-base mb-4" style={{ color: 'var(--color-text-secondary)' }}>
         <span className="font-medium">Pregunta {currentQuestionIndex + 1} de {questions.length}</span>
         <div className="flex gap-2">
@@ -673,7 +701,16 @@ function MultipleChoiceExercise({
           </BaseButton>
         </div>
       )}
-    </div>
+      </div>
+
+      {/* QuickDisplayFAB para ajustes rápidos de visualización */}
+      <QuickDisplayFAB
+        initialSettings={displaySettings}
+        onSettingsChange={handleDisplaySettingsChange}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={onToggleFullscreen}
+      />
+    </>
   );
 }
 

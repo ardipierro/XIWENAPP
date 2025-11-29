@@ -30,6 +30,8 @@ import {
   Square
 } from 'lucide-react';
 import { BaseButton } from '../common';
+import QuickDisplayFAB from '../QuickDisplayFAB';
+import { getDisplayClasses, getDisplayStyles, mergeDisplaySettings } from '../../constants/displaySettings';
 import logger from '../../utils/logger';
 import {
   playCorrectSound,
@@ -48,12 +50,43 @@ import {
  * Componente wrapper para ejercicios de marcar palabras
  * Parsea texto con asteriscos y permite clickear palabras
  */
-function WordHighlightExercise({ text, config, onComplete, onActionsChange }) {
+function WordHighlightExercise({ text, config, onComplete, onActionsChange, displaySettings = null, isFullscreen = false, onDisplaySettingsChange, onToggleFullscreen }) {
+  // ✅ VALIDACIÓN DEFENSIVA: Verificar que text sea una cadena válida
+  const [validationError, setValidationError] = useState(null);
+
+  useEffect(() => {
+    // Validar que text existe y es una cadena
+    if (!text || typeof text !== 'string') {
+      setValidationError('El contenido del ejercicio no es válido. Se esperaba texto con palabras marcadas con asteriscos (*palabra*).');
+      return;
+    }
+
+    // Validar que el texto contiene el formato esperado (asteriscos)
+    const hasAsterisks = text.includes('*');
+    if (!hasAsterisks) {
+      setValidationError('El ejercicio no tiene el formato correcto. Se esperaban palabras marcadas con asteriscos (ejemplo: *palabra*).');
+      return;
+    }
+
+    // Detectar si es contenido de ejercicios encadenados (incompatible)
+    const hasChainMarkers = text.match(/#(marcar|arrastrar|opcion|multiple|rellenar|verdadero|falso|dialogo)/i);
+    if (hasChainMarkers) {
+      setValidationError('Este contenido parece ser de ejercicios encadenados, no compatible con el visualizador de marcado de palabras.');
+      return;
+    }
+
+    // Si todo está bien, limpiar error
+    setValidationError(null);
+  }, [text]);
+
   const [clickedWords, setClickedWords] = useState(new Set());
   const [score, setScore] = useState(0);
   const [feedback, setFeedback] = useState(null);
   const [isFinished, setIsFinished] = useState(false);
   const [showResults, setShowResults] = useState(false);
+
+  // Display settings: combina los guardados con los ajustes temporales
+  const [liveDisplaySettings, setLiveDisplaySettings] = useState(displaySettings);
 
   // Estados para hints
   const [hintedWords, setHintedWords] = useState(new Set());
@@ -75,6 +108,28 @@ function WordHighlightExercise({ text, config, onComplete, onActionsChange }) {
   const timerRef = useRef(null);
   const hintTimerRef = useRef(null);
   const overtimeIntervalRef = useRef(null);
+
+  // Sincronizar displaySettings cuando cambie externamente
+  useEffect(() => {
+    if (displaySettings) {
+      setLiveDisplaySettings(displaySettings);
+    }
+  }, [displaySettings]);
+
+  // Calcular estilos de visualización
+  const mergedDisplaySettings = useMemo(
+    () => mergeDisplaySettings(liveDisplaySettings, 'exercise'),
+    [liveDisplaySettings]
+  );
+  const displayClasses = useMemo(() => getDisplayClasses(mergedDisplaySettings), [mergedDisplaySettings]);
+  const displayStyles = useMemo(() => getDisplayStyles(mergedDisplaySettings), [mergedDisplaySettings]);
+
+  // Handler para cambios de display settings desde el FAB
+  const handleDisplaySettingsChange = useCallback((newSettings) => {
+    setLiveDisplaySettings(newSettings);
+    onDisplaySettingsChange?.(newSettings);
+    logger.debug('Display settings actualizados desde FAB', 'WordHighlightExercise');
+  }, [onDisplaySettingsChange]);
 
   // Configuración por defecto
   const defaultConfig = {
@@ -190,57 +245,77 @@ function WordHighlightExercise({ text, config, onComplete, onActionsChange }) {
    * Preserva saltos de línea para mostrar oraciones separadas
    */
   const parsedContent = useMemo(() => {
-    const parts = [];
-    let lastIndex = 0;
-    const regex = /\*([^*]+)\*/g;
-    let match;
+    // ✅ VALIDACIÓN DEFENSIVA: Si text no es válido, retornar array vacío
+    if (!text || typeof text !== 'string') {
+      logger.error('parsedContent: text es inválido', 'WordHighlightExercise');
+      return [];
+    }
 
-    /**
-     * Procesa un fragmento de texto extrayendo palabras y saltos de línea
-     */
-    const processTextFragment = (fragment) => {
-      // Regex que captura palabras O saltos de línea como elementos separados
-      const tokenRegex = /(\S+)|(\n)/g;
-      let tokenMatch;
-      while ((tokenMatch = tokenRegex.exec(fragment)) !== null) {
-        if (tokenMatch[1]) {
-          // Es una palabra
-          parts.push({ text: tokenMatch[1], isTarget: false, isLineBreak: false });
-        } else if (tokenMatch[2]) {
-          // Es un salto de línea
-          parts.push({ text: '\n', isTarget: false, isLineBreak: true });
+    try {
+      const parts = [];
+      let lastIndex = 0;
+      const regex = /\*([^*]+)\*/g;
+      let match;
+
+      /**
+       * Procesa un fragmento de texto extrayendo palabras y saltos de línea
+       */
+      const processTextFragment = (fragment) => {
+        if (!fragment) return;
+
+        // Regex que captura palabras O saltos de línea como elementos separados
+        const tokenRegex = /(\S+)|(\n)/g;
+        let tokenMatch;
+        while ((tokenMatch = tokenRegex.exec(fragment)) !== null) {
+          if (tokenMatch[1]) {
+            // Es una palabra
+            parts.push({ text: tokenMatch[1], isTarget: false, isLineBreak: false });
+          } else if (tokenMatch[2]) {
+            // Es un salto de línea
+            parts.push({ text: '\n', isTarget: false, isLineBreak: true });
+          }
         }
+      };
+
+      while ((match = regex.exec(text)) !== null) {
+        if (match.index > lastIndex) {
+          const beforeText = text.slice(lastIndex, match.index);
+          processTextFragment(beforeText);
+        }
+        parts.push({ text: match[1], isTarget: true, isLineBreak: false });
+        lastIndex = regex.lastIndex;
       }
-    };
 
-    while ((match = regex.exec(text)) !== null) {
-      if (match.index > lastIndex) {
-        const beforeText = text.slice(lastIndex, match.index);
-        processTextFragment(beforeText);
+      if (lastIndex < text.length) {
+        const afterText = text.slice(lastIndex);
+        processTextFragment(afterText);
       }
-      parts.push({ text: match[1], isTarget: true, isLineBreak: false });
-      lastIndex = regex.lastIndex;
-    }
 
-    if (lastIndex < text.length) {
-      const afterText = text.slice(lastIndex);
-      processTextFragment(afterText);
+      return parts;
+    } catch (error) {
+      logger.error('Error parsing text content', 'WordHighlightExercise', error);
+      return [];
     }
-
-    return parts;
   }, [text]);
 
   // Contar palabras objetivo
   const targetWords = useMemo(() => {
-    return parsedContent.filter(p => p.isTarget);
+    if (!parsedContent || !Array.isArray(parsedContent)) {
+      return [];
+    }
+    return parsedContent.filter(p => p && p.isTarget);
   }, [parsedContent]);
 
-  const totalTargets = targetWords.length;
+  const totalTargets = targetWords.length || 0;
 
   // Contar aciertos
   const correctClicks = useMemo(() => {
+    if (!parsedContent || !Array.isArray(parsedContent)) {
+      return 0;
+    }
     let count = 0;
     parsedContent.forEach((part, index) => {
+      if (!part) return;
       const wordKey = `${index}-${part.text}`;
       if (part.isTarget && clickedWords.has(wordKey)) {
         count++;
@@ -251,8 +326,12 @@ function WordHighlightExercise({ text, config, onComplete, onActionsChange }) {
 
   // Índices de palabras objetivo no encontradas (para hints)
   const unfoundTargetIndices = useMemo(() => {
+    if (!parsedContent || !Array.isArray(parsedContent)) {
+      return [];
+    }
     const indices = [];
     parsedContent.forEach((part, index) => {
+      if (!part) return;
       const wordKey = `${index}-${part.text}`;
       if (part.isTarget && !clickedWords.has(wordKey)) {
         indices.push(index);
@@ -541,12 +620,19 @@ function WordHighlightExercise({ text, config, onComplete, onActionsChange }) {
    * Comprobar respuestas (modo noFeedback)
    */
   const handleCheck = () => {
+    // ✅ Validar que parsedContent existe antes de procesar
+    if (!parsedContent || !Array.isArray(parsedContent)) {
+      logger.error('handleCheck: parsedContent es inválido', 'WordHighlightExercise');
+      return;
+    }
+
     // Calcular puntaje final
     let finalScore = 0;
     let correct = 0;
     let incorrect = 0;
 
     parsedContent.forEach((part, index) => {
+      if (!part) return;
       const wordKey = `${index}-${part.text}`;
       if (clickedWords.has(wordKey)) {
         if (part.isTarget) {
@@ -816,10 +902,49 @@ function WordHighlightExercise({ text, config, onComplete, onActionsChange }) {
     }
   }, [isFinished, gameSettings.feedbackMode, onActionsChange]);
 
+  // ✅ Si hay error de validación, mostrar mensaje y salir
+  if (validationError) {
+    return (
+      <div className="p-6 bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800 rounded-lg">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="text-red-600 dark:text-red-400 flex-shrink-0 mt-1" size={32} />
+          <div>
+            <h3 className="font-semibold text-red-900 dark:text-red-100 mb-2 text-lg">
+              Formato de Ejercicio Incompatible
+            </h3>
+            <p className="text-red-700 dark:text-red-300 mb-3">
+              {validationError}
+            </p>
+            <div className="p-3 bg-red-100 dark:bg-red-950 rounded-lg">
+              <p className="text-sm text-red-800 dark:text-red-200 mb-2">
+                <strong>Formato esperado:</strong>
+              </p>
+              <code className="text-xs block p-2 bg-white dark:bg-zinc-900 rounded">
+                El gato *corre* por el jardín. Los pájaros *vuelan* alto.
+              </code>
+              <p className="text-xs text-red-600 dark:text-red-400 mt-2">
+                Las palabras entre asteriscos (*) son las que el estudiante debe marcar.
+              </p>
+            </div>
+            <details className="mt-3">
+              <summary className="text-sm cursor-pointer text-red-600 dark:text-red-400 font-semibold">
+                Ver contenido recibido
+              </summary>
+              <pre className="text-xs mt-2 p-3 bg-red-100 dark:bg-red-950 rounded overflow-auto max-h-48">
+                {typeof text === 'string' ? text.substring(0, 500) : JSON.stringify(text, null, 2)}
+              </pre>
+            </details>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full p-6">
-      {/* Estilos para animaciones */}
-      <style>{`
+    <>
+      <div className={`w-full ${displayClasses.container}`} style={displayStyles}>
+        {/* Estilos para animaciones */}
+        <style>{`
         @keyframes pulse-glow {
           0%, 100% { box-shadow: 0 0 5px 2px rgba(251, 191, 36, 0.4); }
           50% { box-shadow: 0 0 15px 5px rgba(251, 191, 36, 0.8); }
@@ -1036,23 +1161,31 @@ function WordHighlightExercise({ text, config, onComplete, onActionsChange }) {
           lineHeight: '2.2'
         }}
       >
-        {parsedContent.map((part, index) => {
-          // Renderizar saltos de línea
-          if (part.isLineBreak) {
-            return <br key={index} />;
-          }
+        {parsedContent && Array.isArray(parsedContent) && parsedContent.length > 0 ? (
+          parsedContent.map((part, index) => {
+            if (!part) return null;
 
-          return (
-            <span
-              key={index}
-              onClick={() => handleWordClick(part.text, part.isTarget, index)}
-              style={getWordStyle(index, part.text, part.isTarget)}
-              className="hover:opacity-80 select-none"
-            >
-              {renderWord(part, index)}{' '}
-            </span>
-          );
-        })}
+            // Renderizar saltos de línea
+            if (part.isLineBreak) {
+              return <br key={index} />;
+            }
+
+            return (
+              <span
+                key={index}
+                onClick={() => handleWordClick(part.text, part.isTarget, index)}
+                style={getWordStyle(index, part.text, part.isTarget)}
+                className="hover:opacity-80 select-none"
+              >
+                {renderWord(part, index)}{' '}
+              </span>
+            );
+          })
+        ) : (
+          <div className="text-center py-8 text-zinc-500 dark:text-zinc-400">
+            No se pudo parsear el contenido del ejercicio.
+          </div>
+        )}
       </div>
 
       {/* Leyenda de hints si están activos */}
@@ -1084,7 +1217,16 @@ function WordHighlightExercise({ text, config, onComplete, onActionsChange }) {
           </div>
         )}
       </div>
-    </div>
+      </div>
+
+      {/* QuickDisplayFAB para ajustes rápidos de visualización */}
+      <QuickDisplayFAB
+        initialSettings={displaySettings}
+        onSettingsChange={handleDisplaySettingsChange}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={onToggleFullscreen}
+      />
+    </>
   );
 }
 

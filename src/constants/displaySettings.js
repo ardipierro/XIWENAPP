@@ -79,7 +79,9 @@ export const FONT_SIZE_OPTIONS = {
   BASE: 'base',   // 16px
   LG: 'lg',       // 18px
   XL: 'xl',       // 20px
-  XXL: '2xl'      // 24px
+  XXL: '2xl',     // 24px
+  XXXL: '3xl',    // 30px
+  XXXXL: '4xl'    // 36px
 };
 
 export const FONT_SIZE_LABELS = {
@@ -87,7 +89,9 @@ export const FONT_SIZE_LABELS = {
   [FONT_SIZE_OPTIONS.BASE]: 'Normal',
   [FONT_SIZE_OPTIONS.LG]: 'Grande',
   [FONT_SIZE_OPTIONS.XL]: 'Extra Grande',
-  [FONT_SIZE_OPTIONS.XXL]: 'Muy Grande'
+  [FONT_SIZE_OPTIONS.XXL]: 'Muy Grande',
+  [FONT_SIZE_OPTIONS.XXXL]: 'Enorme',
+  [FONT_SIZE_OPTIONS.XXXXL]: 'Gigante'
 };
 
 export const FONT_SIZE_CLASSES = {
@@ -95,7 +99,9 @@ export const FONT_SIZE_CLASSES = {
   [FONT_SIZE_OPTIONS.BASE]: 'text-base',
   [FONT_SIZE_OPTIONS.LG]: 'text-lg',
   [FONT_SIZE_OPTIONS.XL]: 'text-xl',
-  [FONT_SIZE_OPTIONS.XXL]: 'text-2xl'
+  [FONT_SIZE_OPTIONS.XXL]: 'text-2xl',
+  [FONT_SIZE_OPTIONS.XXXL]: 'text-3xl',
+  [FONT_SIZE_OPTIONS.XXXXL]: 'text-4xl'
 };
 
 export const FONT_SIZE_PX = {
@@ -103,7 +109,9 @@ export const FONT_SIZE_PX = {
   [FONT_SIZE_OPTIONS.BASE]: '16px',
   [FONT_SIZE_OPTIONS.LG]: '18px',
   [FONT_SIZE_OPTIONS.XL]: '20px',
-  [FONT_SIZE_OPTIONS.XXL]: '24px'
+  [FONT_SIZE_OPTIONS.XXL]: '24px',
+  [FONT_SIZE_OPTIONS.XXXL]: '30px',
+  [FONT_SIZE_OPTIONS.XXXXL]: '36px'
 };
 
 // ============================================

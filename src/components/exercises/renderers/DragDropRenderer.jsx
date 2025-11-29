@@ -17,12 +17,8 @@ import { Check, X, GripVertical, RotateCcw, Trophy } from 'lucide-react';
 import { BaseBadge, BaseButton } from '../../common';
 import { useExercise, FEEDBACK_MODES } from '../core/ExerciseContext';
 
-// Colores por defecto
-const DEFAULT_COLORS = {
-  correctColor: '#10b981',
-  incorrectColor: '#ef4444',
-  emptyColor: '#94a3b8'
-};
+// ✅ ELIMINADO: colores hardcoded - ahora usa variables CSS del tema
+// Los colores se obtienen de globals.css (--color-success, --color-error, etc.)
 
 /**
  * Parsear texto y extraer blanks
@@ -116,9 +112,6 @@ export function DragDropRenderer({
     checkAnswer
   } = useExercise();
 
-  // Merge colors with defaults
-  const colorConfig = { ...DEFAULT_COLORS, ...colors };
-
   // Parsear texto
   const { segments, words } = useMemo(() => parseTextWithBlanks(text), [text]);
 
@@ -141,27 +134,6 @@ export function DragDropRenderer({
   useEffect(() => {
     setAnswer(placedWords);
   }, [placedWords, setAnswer]);
-
-  /**
-   * Verificar todas las palabras cuando showingFeedback cambie
-   */
-  useEffect(() => {
-    if (showingFeedback) {
-      const results = {};
-      segments.forEach(seg => {
-        if (seg.type === 'blank') {
-          const placedWordIdx = placedWords[seg.index];
-          if (placedWordIdx !== undefined) {
-            const placedWord = words.find(w => w.index === placedWordIdx);
-            results[seg.index] = placedWord?.word === seg.correctWord;
-          } else {
-            results[seg.index] = false;
-          }
-        }
-      });
-      setValidation(results);
-    }
-  }, [showingFeedback, placedWords, segments, words]);
 
   /**
    * Handlers de drag and drop
@@ -238,21 +210,21 @@ export function DragDropRenderer({
     if (showingFeedback) {
       if (isCorrect) {
         return {
-          backgroundColor: `${colorConfig.correctColor}20`,
-          borderColor: colorConfig.correctColor,
-          color: colorConfig.correctColor
+          backgroundColor: 'var(--color-success-bg)',
+          borderColor: 'var(--color-success)',
+          color: 'var(--color-success)'
         };
       }
       if (hasWord) {
         return {
-          backgroundColor: `${colorConfig.incorrectColor}20`,
-          borderColor: colorConfig.incorrectColor,
-          color: colorConfig.incorrectColor
+          backgroundColor: 'var(--color-error-bg)',
+          borderColor: 'var(--color-error)',
+          color: 'var(--color-error)'
         };
       }
       return {
         backgroundColor: 'transparent',
-        borderColor: colorConfig.emptyColor,
+        borderColor: 'var(--color-border)',
         color: 'var(--color-text-muted)'
       };
     }
@@ -260,14 +232,14 @@ export function DragDropRenderer({
     if (hasWord) {
       return {
         backgroundColor: 'var(--color-bg-tertiary)',
-        borderColor: 'var(--color-primary, #8b5cf6)',
+        borderColor: 'var(--color-accent)',
         color: 'var(--color-text-primary)'
       };
     }
 
     return {
       backgroundColor: 'transparent',
-      borderColor: colorConfig.emptyColor,
+      borderColor: 'var(--color-border)',
       borderStyle: 'dashed',
       color: 'var(--color-text-muted)'
     };
@@ -290,22 +262,63 @@ export function DragDropRenderer({
         </div>
       )}
 
-      {/* Header con progreso */}
+      {/* Header con progreso y botón verificar */}
       <div className="flex items-center justify-between mb-4">
         <span className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>
           {placedCount}/{blanksCount} colocadas
         </span>
 
-        {!showingFeedback && placedCount > 0 && (
-          <BaseButton
-            size="sm"
-            variant="ghost"
-            icon={RotateCcw}
-            onClick={handleReset}
-          >
-            Reiniciar
-          </BaseButton>
-        )}
+        <div className="flex items-center gap-2">
+          {!showingFeedback && placedCount > 0 && (
+            <>
+              <BaseButton
+                size="sm"
+                variant="ghost"
+                icon={RotateCcw}
+                onClick={handleReset}
+              >
+                Reiniciar
+              </BaseButton>
+
+              {placedCount === blanksCount && !showingFeedback && (
+                <BaseButton
+                  size="sm"
+                  variant="primary"
+                  icon={Check}
+                  onClick={() => {
+                    // Construir respuestas para validar
+                    const correctAnswers = {};
+                    const userAnswers = {};
+                    const results = {};
+
+                    segments.forEach(seg => {
+                      if (seg.type === 'blank') {
+                        correctAnswers[seg.index] = seg.correctWord;
+                        const placedWordIdx = placedWords[seg.index];
+                        if (placedWordIdx !== undefined) {
+                          const placedWord = words.find(w => w.index === placedWordIdx);
+                          userAnswers[seg.index] = placedWord?.word || '';
+                          results[seg.index] = placedWord?.word === seg.correctWord;
+                        } else {
+                          userAnswers[seg.index] = '';
+                          results[seg.index] = false;
+                        }
+                      }
+                    });
+
+                    // Actualizar validación visual
+                    setValidation(results);
+
+                    // Reportar al ExerciseProvider
+                    checkAnswer(correctAnswers, userAnswers);
+                  }}
+                >
+                  Verificar
+                </BaseButton>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {/* Banco de palabras */}
@@ -347,11 +360,10 @@ export function DragDropRenderer({
 
       {/* Texto con blanks */}
       <div
-        className="p-4 rounded-lg text-lg leading-relaxed"
+        className={`p-4 rounded-lg leading-relaxed ${className}`}
         style={{
           backgroundColor: 'var(--color-bg-secondary)',
-          color: 'var(--color-text-primary)',
-          lineHeight: '2.5'
+          color: 'var(--color-text-primary)'
         }}
       >
         {segments.map((segment, idx) => {
@@ -392,9 +404,9 @@ export function DragDropRenderer({
                   {showingFeedback && (
                     <span className="ml-2">
                       {isCorrect ? (
-                        <Check size={14} style={{ color: colorConfig.correctColor }} />
+                        <Check size={14} style={{ color: 'var(--color-success)' }} />
                       ) : (
-                        <X size={14} style={{ color: colorConfig.incorrectColor }} />
+                        <X size={14} style={{ color: 'var(--color-error)' }} />
                       )}
                     </span>
                   )}
@@ -407,7 +419,7 @@ export function DragDropRenderer({
               {showingFeedback && !isCorrect && config.showCorrectAnswer !== false && (
                 <span
                   className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs whitespace-nowrap"
-                  style={{ color: colorConfig.correctColor }}
+                  style={{ color: 'var(--color-success)' }}
                 >
                   ({segment.correctWord})
                 </span>
@@ -422,14 +434,14 @@ export function DragDropRenderer({
         <div className="mt-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
-              <Check size={16} style={{ color: colorConfig.correctColor }} />
-              <span className="text-sm font-medium" style={{ color: colorConfig.correctColor }}>
+              <Check size={16} style={{ color: 'var(--color-success)' }} />
+              <span className="text-sm font-medium" style={{ color: 'var(--color-success)' }}>
                 {correctCount} correctas
               </span>
             </div>
             <div className="flex items-center gap-1">
-              <X size={16} style={{ color: colorConfig.incorrectColor }} />
-              <span className="text-sm font-medium" style={{ color: colorConfig.incorrectColor }}>
+              <X size={16} style={{ color: 'var(--color-error)' }} />
+              <span className="text-sm font-medium" style={{ color: 'var(--color-error)' }}>
                 {blanksCount - correctCount} incorrectas
               </span>
             </div>

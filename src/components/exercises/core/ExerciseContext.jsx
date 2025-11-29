@@ -227,6 +227,21 @@ export function ExerciseProvider({
   configRef.current = mergedConfig;
 
   // ============================================
+  // AUTO-START (Universal)
+  // ============================================
+
+  useEffect(() => {
+    // Iniciar automáticamente cuando el provider se monta
+    if (state.status === EXERCISE_STATES.IDLE) {
+      dispatch({
+        type: 'START',
+        payload: { timerSeconds: configRef.current.timerSeconds }
+      });
+      logger.debug('Exercise auto-started', 'ExerciseContext');
+    }
+  }, []); // Solo al montar
+
+  // ============================================
   // TIMER
   // ============================================
 
@@ -297,6 +312,23 @@ export function ExerciseProvider({
           correctAnswer.every(a => userAnswer.includes(a));
       } else {
         isCorrect = correctAnswer.includes(userAnswer);
+      }
+    } else if (typeof correctAnswer === 'object' && correctAnswer !== null) {
+      // Comparar objetos/diccionarios
+      if (typeof userAnswer === 'object' && userAnswer !== null) {
+        const correctKeys = Object.keys(correctAnswer);
+        const userKeys = Object.keys(userAnswer);
+
+        // Verificar si todas las claves correctas coinciden con las del usuario
+        isCorrect = correctKeys.every(key => {
+          const correctVal = correctAnswer[key];
+          const userVal = userAnswer[key];
+
+          // Comparar valores (puede ser string, number, etc.)
+          return correctVal === userVal;
+        });
+      } else {
+        isCorrect = false;
       }
     } else {
       isCorrect = userAnswer === correctAnswer;

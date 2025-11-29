@@ -227,7 +227,7 @@ export function ReadingRenderer({
             onClick={() => setShowDefinitions(!showDefinitions)}
             className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm transition-colors"
             style={{
-              backgroundColor: showDefinitions ? 'var(--color-primary, #3b82f6)' : 'var(--color-bg-secondary)',
+              backgroundColor: showDefinitions ? 'var(--color-accent)' : 'var(--color-bg-secondary)',
               color: showDefinitions ? 'white' : 'var(--color-text-secondary)',
               border: '1px solid var(--color-border)'
             }}
@@ -279,24 +279,27 @@ export function ReadingRenderer({
             <span
               key={idx}
               onClick={() => handleWordClick(segment)}
-              className={`relative inline-block cursor-pointer rounded px-0.5 mx-0.5 transition-all ${
-                highlightOnHover ? 'hover:ring-2 hover:ring-blue-400' : ''
-              } ${isSelected ? 'ring-2 ring-blue-500' : ''}`}
+              className="relative inline-block cursor-pointer rounded px-0.5 mx-0.5 transition-all"
               style={{
                 backgroundColor: isLearned
-                  ? 'rgba(16, 185, 129, 0.2)'
-                  : 'rgba(59, 130, 246, 0.15)',
+                  ? 'var(--color-success-bg)'
+                  : 'var(--color-accent-bg)',
                 color: isLearned
-                  ? '#059669'
-                  : 'var(--color-primary, #3b82f6)',
-                fontWeight: '500'
+                  ? 'var(--color-success)'
+                  : 'var(--color-accent)',
+                fontWeight: '500',
+                ...(highlightOnHover && {
+                  ':hover': { boxShadow: '0 0 0 2px var(--color-accent)' }
+                }),
+                ...(isSelected && { boxShadow: '0 0 0 2px var(--color-accent)' })
               }}
             >
               {segment.word}
               {isLearned && (
                 <Check
                   size={12}
-                  className="inline ml-0.5 text-green-500"
+                  className="inline ml-0.5"
+                  style={{ color: 'var(--color-success)' }}
                 />
               )}
 
@@ -324,7 +327,7 @@ export function ReadingRenderer({
           className="mt-4 p-4 rounded-xl"
           style={{
             backgroundColor: 'var(--color-bg-secondary)',
-            border: '2px solid var(--color-primary, #3b82f6)'
+            border: '2px solid var(--color-accent)'
           }}
         >
           <div className="flex items-start justify-between">
@@ -332,16 +335,19 @@ export function ReadingRenderer({
               <div className="flex items-center gap-2 mb-2">
                 <span
                   className="text-xl font-bold"
-                  style={{ color: 'var(--color-primary, #3b82f6)' }}
+                  style={{ color: 'var(--color-accent)' }}
                 >
                   {selectedWord.word}
                 </span>
                 {allowTTS && (
                   <button
                     onClick={speakWord}
-                    className="p-1 rounded hover:bg-blue-100 dark:hover:bg-blue-900/30"
+                    className="p-1 rounded transition-colors"
+                    style={{
+                      color: 'var(--color-accent)'
+                    }}
                   >
-                    <Volume2 size={18} className="text-blue-500" />
+                    <Volume2 size={18} />
                   </button>
                 )}
               </div>
@@ -397,20 +403,19 @@ export function ReadingRenderer({
                 <button
                   key={idx}
                   onClick={() => handleWordClick(word)}
-                  className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                    isLearned ? 'ring-1 ring-green-400' : ''
-                  }`}
+                  className="px-3 py-1.5 rounded-lg text-sm transition-colors"
                   style={{
                     backgroundColor: isLearned
-                      ? 'rgba(16, 185, 129, 0.1)'
+                      ? 'var(--color-success-bg)'
                       : 'var(--color-bg-tertiary)',
                     color: isLearned
-                      ? '#059669'
-                      : 'var(--color-text-primary)'
+                      ? 'var(--color-success)'
+                      : 'var(--color-text-primary)',
+                    ...(isLearned && { boxShadow: '0 0 0 1px var(--color-success)' })
                   }}
                 >
                   {word.word}
-                  {isLearned && <Check size={12} className="inline ml-1" />}
+                  {isLearned && <Check size={12} className="inline ml-1" style={{ color: 'var(--color-success)' }} />}
                 </button>
               );
             })}
@@ -488,7 +493,7 @@ export function ReadingRenderer({
                       {answerData && !answerData.isCorrect && q.answer && (
                         <p
                           className="mt-2 text-sm"
-                          style={{ color: '#10b981' }}
+                          style={{ color: 'var(--color-success)' }}
                         >
                           Respuesta correcta: {q.answer}
                         </p>

@@ -24,6 +24,8 @@ import {
 } from 'lucide-react';
 import PropTypes from 'prop-types';
 import { BaseBadge } from '../common';
+import QuickDisplayFAB from '../QuickDisplayFAB';
+import { getDisplayClasses, getDisplayStyles, mergeDisplaySettings } from '../../constants/displaySettings';
 import AudioPlayer from '../interactive-book/AudioPlayer';
 import { getCharacterVoiceConfig } from '../interactive-book/CharacterVoiceManager';
 import { DEFAULT_CONFIG, STORAGE_KEY } from './DialoguesConfig';
@@ -282,8 +284,34 @@ function DialoguesExercise({
   content,
   config: propConfig,
   onComplete,
-  onActionsChange
+  onActionsChange,
+  displaySettings = null,
+  isFullscreen = false,
+  onDisplaySettingsChange,
+  onToggleFullscreen
 }) {
+  // Display settings
+  const [liveDisplaySettings, setLiveDisplaySettings] = useState(displaySettings);
+
+  useEffect(() => {
+    if (displaySettings) {
+      setLiveDisplaySettings(displaySettings);
+    }
+  }, [displaySettings]);
+
+  const mergedDisplaySettings = useMemo(
+    () => mergeDisplaySettings(liveDisplaySettings, 'exercise'),
+    [liveDisplaySettings]
+  );
+  const displayClasses = useMemo(() => getDisplayClasses(mergedDisplaySettings), [mergedDisplaySettings]);
+  const displayStyles = useMemo(() => getDisplayStyles(mergedDisplaySettings), [mergedDisplaySettings]);
+
+  const handleDisplaySettingsChange = useCallback((newSettings) => {
+    setLiveDisplaySettings(newSettings);
+    onDisplaySettingsChange?.(newSettings);
+    logger.debug('Display settings actualizados desde FAB', 'DialoguesExercise');
+  }, [onDisplaySettingsChange]);
+
   // Cargar config desde props o localStorage
   const [config, setConfig] = useState(() => {
     if (propConfig) return { ...DEFAULT_CONFIG, ...propConfig };
@@ -418,8 +446,9 @@ function DialoguesExercise({
   }
 
   return (
-    <div className="space-y-4">
-      {/* Header con info */}
+    <>
+      <div className={`space-y-4 ${displayClasses.container}`} style={displayStyles}>
+        {/* Header con info */}
       <div className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
         <div className="flex items-center gap-3">
           <MessageCircle className="w-5 h-5 text-cyan-500" />
@@ -641,7 +670,16 @@ function DialoguesExercise({
           )}
         </div>
       )}
-    </div>
+      </div>
+
+      {/* QuickDisplayFAB para ajustes rápidos de visualización */}
+      <QuickDisplayFAB
+        initialSettings={displaySettings}
+        onSettingsChange={handleDisplaySettingsChange}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={onToggleFullscreen}
+      />
+    </>
   );
 }
 

@@ -16,12 +16,8 @@ import { Check, X, RotateCcw, ChevronRight, Award, Eye, EyeOff } from 'lucide-re
 import { useExercise } from '../core/ExerciseContext';
 import { BaseButton, BaseBadge } from '../../common';
 
-// Colores por defecto (mismo que container/OpenQuestionsExercise.jsx)
-const DEFAULT_COLORS = {
-  correctColor: '#10b981',
-  incorrectColor: '#ef4444',
-  partialColor: '#f59e0b'
-};
+// ✅ ELIMINADO: colores hardcoded - ahora usa variables CSS del tema
+// Los colores se obtienen de globals.css (--color-success, --color-error, --color-warning)
 
 /**
  * Normaliza texto para comparación flexible
@@ -111,9 +107,6 @@ export function OpenQuestionsRenderer({
     showingFeedback,
     config
   } = useExercise();
-
-  // Merge colors with defaults
-  const colorConfig = { ...DEFAULT_COLORS, ...colors };
 
   // Estado de respuestas del usuario
   const [answers, setAnswers] = useState(() =>
@@ -211,10 +204,10 @@ export function OpenQuestionsRenderer({
     if (!status) return { borderColor: 'var(--color-border)' };
 
     const colorMap = {
-      correct: colorConfig.correctColor,
-      partial: colorConfig.partialColor,
-      incorrect: colorConfig.incorrectColor,
-      completed: '#6b7280'
+      correct: 'var(--color-success)',
+      partial: 'var(--color-warning)',
+      incorrect: 'var(--color-error)',
+      completed: 'var(--color-text-muted)'
     };
 
     return {
@@ -229,11 +222,11 @@ export function OpenQuestionsRenderer({
   const getStatusIcon = (status) => {
     switch (status) {
       case 'correct':
-        return <Check className="w-5 h-5" style={{ color: colorConfig.correctColor }} />;
+        return <Check className="w-5 h-5" style={{ color: 'var(--color-success)' }} />;
       case 'partial':
-        return <Check className="w-5 h-5" style={{ color: colorConfig.partialColor }} />;
+        return <Check className="w-5 h-5" style={{ color: 'var(--color-warning)' }} />;
       case 'incorrect':
-        return <X className="w-5 h-5" style={{ color: colorConfig.incorrectColor }} />;
+        return <X className="w-5 h-5" style={{ color: 'var(--color-error)' }} />;
       default:
         return null;
     }
@@ -305,7 +298,7 @@ export function OpenQuestionsRenderer({
               <div className="flex items-start gap-3 mb-3">
                 <span
                   className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-white"
-                  style={{ backgroundColor: 'var(--color-primary, #8b5cf6)' }}
+                  style={{ backgroundColor: 'var(--color-accent)' }}
                 >
                   {index + 1}
                 </span>
@@ -383,12 +376,12 @@ export function OpenQuestionsRenderer({
                   <div
                     className="mt-3 p-3 rounded-lg"
                     style={{
-                      backgroundColor: `${colorConfig.correctColor}10`,
-                      border: `1px solid ${colorConfig.correctColor}40`
+                      backgroundColor: 'var(--color-success-bg)',
+                      border: '1px solid var(--color-success)'
                     }}
                   >
                     <p className="text-sm">
-                      <span className="font-semibold" style={{ color: colorConfig.correctColor }}>
+                      <span className="font-semibold" style={{ color: 'var(--color-success)' }}>
                         Respuesta correcta:
                       </span>
                       <span className="ml-2" style={{ color: 'var(--color-text-primary)' }}>
@@ -402,7 +395,7 @@ export function OpenQuestionsRenderer({
                 {answer.status === 'correct' && (
                   <div
                     className="mt-2 flex items-center gap-2"
-                    style={{ color: colorConfig.correctColor }}
+                    style={{ color: 'var(--color-success)' }}
                   >
                     <Check className="w-4 h-4" />
                     <span className="text-sm font-medium">¡Correcto!</span>
@@ -412,7 +405,7 @@ export function OpenQuestionsRenderer({
                 {answer.status === 'partial' && (
                   <div
                     className="mt-2 flex items-center gap-2"
-                    style={{ color: colorConfig.partialColor }}
+                    style={{ color: 'var(--color-warning)' }}
                   >
                     <Check className="w-4 h-4" />
                     <span className="text-sm font-medium">¡Casi! Respuesta parcialmente correcta</span>
@@ -434,26 +427,26 @@ export function OpenQuestionsRenderer({
           }}
         >
           <div className="flex items-center gap-3 mb-4">
-            <Award className="w-8 h-8 text-purple-500" />
+            <Award className="w-8 h-8" style={{ color: 'var(--color-accent)' }} />
             <h3 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
               Resumen
             </h3>
           </div>
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <p className="text-2xl font-bold" style={{ color: colorConfig.correctColor }}>
+              <p className="text-2xl font-bold" style={{ color: 'var(--color-success)' }}>
                 {correctCount}
               </p>
               <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Correctas</p>
             </div>
             <div>
-              <p className="text-2xl font-bold" style={{ color: colorConfig.partialColor }}>
+              <p className="text-2xl font-bold" style={{ color: 'var(--color-warning)' }}>
                 {partialCount}
               </p>
               <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Parciales</p>
             </div>
             <div>
-              <p className="text-2xl font-bold" style={{ color: colorConfig.incorrectColor }}>
+              <p className="text-2xl font-bold" style={{ color: 'var(--color-error)' }}>
                 {answers.filter(a => a.status === 'incorrect' || (a.text.trim() && !a.status)).length}
               </p>
               <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Por revisar</p>

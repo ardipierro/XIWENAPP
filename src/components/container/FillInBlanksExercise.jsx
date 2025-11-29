@@ -15,6 +15,8 @@ import {
   Lightbulb
 } from 'lucide-react';
 import { BaseButton } from '../common';
+import QuickDisplayFAB from '../QuickDisplayFAB';
+import { getDisplayClasses, getDisplayStyles, mergeDisplaySettings } from '../../constants/displaySettings';
 import {
   playCorrectSound,
   playIncorrectSound,
@@ -27,13 +29,35 @@ import logger from '../../utils/logger';
 /**
  * Componente de ejercicio Fill in the Blanks
  */
-function FillInBlanksExercise({ text, config, onComplete, onActionsChange }) {
+function FillInBlanksExercise({ text, config, onComplete, onActionsChange, displaySettings = null, isFullscreen = false, onDisplaySettingsChange, onToggleFullscreen }) {
   const [answers, setAnswers] = useState({});
   const [feedback, setFeedback] = useState(null);
   const [isFinished, setIsFinished] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [hints, setHints] = useState({});
   const inputRefs = useRef({});
+
+  // Display settings
+  const [liveDisplaySettings, setLiveDisplaySettings] = useState(displaySettings);
+
+  useEffect(() => {
+    if (displaySettings) {
+      setLiveDisplaySettings(displaySettings);
+    }
+  }, [displaySettings]);
+
+  const mergedDisplaySettings = useMemo(
+    () => mergeDisplaySettings(liveDisplaySettings, 'exercise'),
+    [liveDisplaySettings]
+  );
+  const displayClasses = useMemo(() => getDisplayClasses(mergedDisplaySettings), [mergedDisplaySettings]);
+  const displayStyles = useMemo(() => getDisplayStyles(mergedDisplaySettings), [mergedDisplaySettings]);
+
+  const handleDisplaySettingsChange = useCallback((newSettings) => {
+    setLiveDisplaySettings(newSettings);
+    onDisplaySettingsChange?.(newSettings);
+    logger.debug('Display settings actualizados desde FAB', 'FillInBlanksExercise');
+  }, [onDisplaySettingsChange]);
 
   // Configuración por defecto
   const defaultConfig = {
@@ -284,8 +308,9 @@ function FillInBlanksExercise({ text, config, onComplete, onActionsChange }) {
   }, [isFinished, filledCount, onActionsChange]);
 
   return (
-    <div className="w-full p-6">
-      {/* Header */}
+    <>
+      <div className={`w-full ${displayClasses.container}`} style={displayStyles}>
+        {/* Header */}
       <div className="flex items-center justify-end mb-6">
         <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
           {filledCount} / {parsedContent.blanks.length} completados
@@ -425,8 +450,16 @@ function FillInBlanksExercise({ text, config, onComplete, onActionsChange }) {
           </p>
         </div>
       )}
+      </div>
 
-    </div>
+      {/* QuickDisplayFAB para ajustes rápidos de visualización */}
+      <QuickDisplayFAB
+        initialSettings={displaySettings}
+        onSettingsChange={handleDisplaySettingsChange}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={onToggleFullscreen}
+      />
+    </>
   );
 }
 

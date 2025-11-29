@@ -268,7 +268,10 @@ export function AudioRenderer({
       {error && (
         <div
           className="p-4 rounded-lg mb-4"
-          style={{ backgroundColor: '#fef2f2', color: '#dc2626' }}
+          style={{
+            backgroundColor: 'var(--color-error-bg)',
+            color: 'var(--color-error)'
+          }}
         >
           {error}
         </div>
@@ -292,7 +295,7 @@ export function AudioRenderer({
             className="h-full rounded-full transition-all"
             style={{
               width: `${progress}%`,
-              backgroundColor: 'var(--color-primary, #3b82f6)'
+              backgroundColor: 'var(--color-accent)'
             }}
           />
           {/* Marcadores de segmentos */}
@@ -303,8 +306,8 @@ export function AudioRenderer({
               style={{
                 left: `${(segment.start / duration) * 100}%`,
                 width: `${((segment.end - segment.start) / duration) * 100}%`,
-                backgroundColor: currentSegment === segment ? 'rgba(59, 130, 246, 0.3)' : 'transparent',
-                borderLeft: '2px solid var(--color-primary, #3b82f6)'
+                backgroundColor: currentSegment === segment ? 'var(--color-accent-bg)' : 'transparent',
+                borderLeft: '2px solid var(--color-accent)'
               }}
               onClick={(e) => {
                 e.stopPropagation();
@@ -356,7 +359,7 @@ export function AudioRenderer({
             onClick={handlePlayPause}
             className="p-4 rounded-full transition-colors"
             style={{
-              backgroundColor: 'var(--color-primary, #3b82f6)',
+              backgroundColor: 'var(--color-accent)',
               color: 'white'
             }}
           >
@@ -379,10 +382,11 @@ export function AudioRenderer({
           {/* Loop */}
           <button
             onClick={handleLoop}
-            className={`p-2 rounded-full transition-colors ${isLooping ? 'ring-2 ring-blue-400' : ''}`}
+            className="p-2 rounded-full transition-colors"
             style={{
-              backgroundColor: isLooping ? 'var(--color-primary, #3b82f6)' : 'var(--color-bg-tertiary)',
-              color: isLooping ? 'white' : 'var(--color-text-secondary)'
+              backgroundColor: isLooping ? 'var(--color-accent)' : 'var(--color-bg-tertiary)',
+              color: isLooping ? 'white' : 'var(--color-text-secondary)',
+              ...(isLooping && { boxShadow: '0 0 0 2px var(--color-accent)' })
             }}
             title="Repetir"
           >
@@ -460,15 +464,13 @@ export function AudioRenderer({
               <button
                 key={idx}
                 onClick={() => goToSegment(segment)}
-                className={`w-full text-left p-3 rounded-lg transition-colors ${
-                  currentSegment === segment ? 'ring-2' : ''
-                }`}
+                className="w-full text-left p-3 rounded-lg transition-colors"
                 style={{
                   backgroundColor: currentSegment === segment
-                    ? 'rgba(59, 130, 246, 0.1)'
+                    ? 'var(--color-accent-bg)'
                     : 'var(--color-bg-secondary)',
                   border: '1px solid var(--color-border)',
-                  ringColor: 'var(--color-primary, #3b82f6)'
+                  ...(currentSegment === segment && { boxShadow: '0 0 0 2px var(--color-accent)' })
                 }}
               >
                 <div className="flex items-center gap-3">

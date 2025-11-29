@@ -190,7 +190,7 @@ function QuickDisplayFAB({
   const canIncrease = fontSizeIndex < FONT_SIZE_ORDER.length - 1;
 
   const fabContent = (
-    <div className={`fixed ${positionClasses} z-50`}>
+    <div className={`fixed ${positionClasses}`} style={{ zIndex: 10002 }}>
       {/* Panel de ajustes */}
       {isOpen && (
         <div

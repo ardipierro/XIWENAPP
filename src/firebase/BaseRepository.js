@@ -83,18 +83,41 @@ export class BaseRepository {
    */
   async set(id, data, options = { merge: true, addTimestamps: true }) {
     try {
-      const docRef = doc(db, this.collectionName, id);
-      const docData = options.addTimestamps
-        ? {
-            ...data,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp()
-          }
-        : data;
+      console.log(`🔥 📝 BASEREPO SET - Collection: ${this.collectionName}, ID: ${id}`);
+      console.log('🔥 📝 BASEREPO SET - Input data:', data);
+      console.log('🔥 📝 BASEREPO SET - Options:', options);
 
+      const docRef = doc(db, this.collectionName, id);
+
+      let docData = { ...data };
+
+      if (options.addTimestamps) {
+        // Si es merge, verificar si el documento existe para preservar createdAt
+        if (options.merge) {
+          const existingDoc = await getDoc(docRef);
+          if (existingDoc.exists()) {
+            console.log('🔥 📝 BASEREPO SET - Documento YA EXISTE, actualizando');
+            // Documento existe: solo actualizar updatedAt, preservar createdAt
+            docData.updatedAt = serverTimestamp();
+          } else {
+            console.log('🔥 📝 BASEREPO SET - Documento NUEVO, agregando timestamps');
+            // Documento nuevo: agregar tanto createdAt como updatedAt
+            docData.createdAt = serverTimestamp();
+            docData.updatedAt = serverTimestamp();
+          }
+        } else {
+          // No es merge: siempre agregar ambos timestamps
+          docData.createdAt = serverTimestamp();
+          docData.updatedAt = serverTimestamp();
+        }
+      }
+
+      console.log('🔥 📝 BASEREPO SET - Data final ANTES de guardar:', docData);
       await setDoc(docRef, docData, { merge: options.merge });
+      console.log('🔥 📝 BASEREPO SET - ✅ Guardado exitosamente');
       return { success: true };
     } catch (error) {
+      console.error('🔥 📝 BASEREPO SET - ❌ ERROR:', error);
       logger.error(`❌ Error seteando documento en ${this.collectionName}:`, error);
       return { success: false, error: error.message };
     }

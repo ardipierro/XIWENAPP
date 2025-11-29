@@ -102,6 +102,7 @@ export function ChainedLayout({
 
   // Progreso
   const progress = (completedExercises.size / exercises.length) * 100;
+  const allCompleted = completedExercises.size === exercises.length;
 
   if (exercises.length === 0) {
     return (
@@ -168,6 +169,25 @@ export function ChainedLayout({
               className="h-full bg-gradient-to-r from-green-400 to-green-500 transition-all duration-500"
               style={{ width: `${progress}%` }}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Banner de completación */}
+      {allCompleted && (
+        <div className="mb-4 p-4 rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-300 dark:border-green-700">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-green-500 flex items-center justify-center">
+                <CheckCircle className="text-white" size={24} />
+              </div>
+              <div>
+                <p className="font-bold text-green-800 dark:text-green-200">¡Serie Completada!</p>
+                <p className="text-sm text-green-700 dark:text-green-300">
+                  Has completado todos los ejercicios ({exercises.length}/{exercises.length})
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       )}

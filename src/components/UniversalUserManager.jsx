@@ -190,10 +190,13 @@ export default function UniversalUserManager({ user, userRole }) {
    */
   const handleCreateUser = async (formData) => {
     try {
+      console.log('🔥 INICIO - Creating user:', formData);
       logger.debug('📝 Creating user:', formData);
       const result = await createUser(formData);
+      console.log('🔥 RESULTADO createUser:', result);
 
       if (result.success) {
+        console.log('🔥 SUCCESS - Usuario creado, mostrando mensaje...');
         setSuccessMessage(
           isAdmin()
             ? `Usuario ${formData.name || formData.email} creado exitosamente`
@@ -201,12 +204,22 @@ export default function UniversalUserManager({ user, userRole }) {
         );
         setTimeout(() => setSuccessMessage(''), 5000);
 
+        // Esperar un momento para que Firestore sincronice los serverTimestamp()
+        console.log('🔥 ⏳ Esperando 500ms para que Firestore sincronice...');
+        logger.debug('⏳ Esperando 500ms para que Firestore sincronice...');
+        await new Promise(resolve => setTimeout(resolve, 500));
+
         // Recargar lista
-        await userManagement.loadUsers();
+        console.log('🔥 🔄 Recargando lista de usuarios...');
+        logger.debug('🔄 Recargando lista de usuarios...');
+        const reloadedUsers = await userManagement.loadUsers();
+        console.log('🔥 ✅ Lista recargada. Total usuarios:', reloadedUsers?.length || 0);
+        logger.debug('✅ Lista de usuarios recargada');
       }
 
       return result;
     } catch (error) {
+      console.error('🔥 ❌ ERROR creating user:', error);
       logger.error('❌ Error creating user:', error);
       setErrorMessage(`Error al crear usuario: ${error.message}`);
       setTimeout(() => setErrorMessage(''), 5000);

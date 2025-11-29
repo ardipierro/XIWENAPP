@@ -186,7 +186,18 @@
       "Bash(start check-credential.html)",
       "Bash(start \"https://console.firebase.google.com/project/xiwen-app-2026/firestore/data/~2Fai_credentials~2Fopenai\")",
       "Bash(start test-parser.html)",
-      "Bash(del /q nul 2)"
+      "Bash(del /q nul 2)",
+      "Bash(start diagnose-users.html)",
+      "Bash(start check-auth-vs-firestore.html)",
+      "Bash(start diagnose-auth-sync.html)",
+      "Bash(start find-zombie-users.html)",
+      "Bash(start delete-zombies.html)",
+      "Bash(start check-containers.html)",
+      "Bash(start cleanup-exercises.html)",
+      "Bash(start \"https://console.firebase.google.com/project/xiwen-app-2026/firestore/databases/-default-/data/~2Fexercises\")",
+      "Bash(start \"https://console.firebase.google.com/project/xiwen-app-2026/firestore/databases/-default-/data/~2Fexercise_chains\")",
+      "Bash(move delete-all-exercises.js delete-all-exercises.cjs)",
+      "Bash(firebase firestore:delete:*)"
     ],
     "deny": [],
     "ask": []

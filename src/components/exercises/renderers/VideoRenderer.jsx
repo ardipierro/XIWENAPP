@@ -314,8 +314,11 @@ export function VideoRenderer({
                   {markers.map((marker, idx) => (
                     <div
                       key={idx}
-                      className="absolute top-0 w-1 h-3 bg-yellow-400 rounded -translate-y-1/2 cursor-pointer"
-                      style={{ left: `${(marker.time / duration) * 100}%` }}
+                      className="absolute top-0 w-1 h-3 rounded -translate-y-1/2 cursor-pointer"
+                      style={{
+                        left: `${(marker.time / duration) * 100}%`,
+                        backgroundColor: 'var(--color-warning)'
+                      }}
                       onClick={(e) => {
                         e.stopPropagation();
                         goToMarker(marker.time);

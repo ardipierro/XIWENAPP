@@ -82,6 +82,8 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
           </div>
         </button>
 
+        {/* Configuración - ✅ DESACTIVADO TEMPORALMENTE */}
+        {/*
         <button
           className="dropdown-option menu-item"
           onClick={() => alert('Funcionalidad de configuración en desarrollo')}
@@ -91,6 +93,7 @@ function UserMenu({ user, userRole, onClose, onChangeAvatar, onViewProfile }) {
             <div className="dropdown-option-title menu-item-text">Configuración</div>
           </div>
         </button>
+        */}
 
         {/* Cerrar sesión */}
         <button

@@ -548,18 +548,33 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
       }
 
       case EXERCISE_TYPES.DIALOGUES: {
-        // ✅ Dialogues es contenido, no ejercicio interactivo - NO usa ExerciseContext
-        const mergedDisplaySettings = mergeDisplaySettings(displaySettings, 'dialogues');
-        const displayClasses = getDisplayClasses(mergedDisplaySettings);
+        // ✅ DialoguesRenderer COMPLETO con núcleo unificado y audio integration
+        const defaultConfig = {
+          feedbackMode: FEEDBACK_MODES.INSTANT,
+          soundEnabled: true,
+          showCorrectAnswer: true,
+          correctPoints: 10,
+          // Dialogues-specific config
+          showAvatars: true,
+          showCharacterNames: true,
+          ttsEnabled: true,
+          exerciseMode: 'read', // 'read', 'fill-blank', 'order', 'comprehension'
+          bubbleStyle: 'rounded'
+        };
+
+        const dialogueConfig = config ? { ...defaultConfig, ...config } : defaultConfig;
 
         return (
-          <DialoguesRenderer
-            text={cleanContent}
-            title="Diálogo"
-            alternateAlignment={true}
-            showCharacterCount={true}
-            className={`${displayClasses.text} ${displayClasses.content}`}
-          />
+          <ExerciseProvider config={dialogueConfig} onComplete={handleComplete}>
+            <DialoguesRenderer
+              text={cleanContent}
+              config={config}
+              displaySettings={displaySettings}
+              isFullscreen={isFullscreen}
+              onDisplaySettingsChange={handleDisplaySettingsChange}
+              onToggleFullscreen={handleToggleFullscreen}
+            />
+          </ExerciseProvider>
         );
       }
 

@@ -24,23 +24,29 @@ export function useUserManagement(currentUser, permissions = {}) {
   const loadUsers = useCallback(async () => {
     try {
       setLoading(true);
+      console.log('🔥 📥 LOADUSERS - Iniciando carga de usuarios...');
       logger.debug('📥 Loading users...');
 
       // Cargar usuarios según permisos
       let loadedUsers;
       if (permissions.canViewAll) {
         // Admin: ver todos
+        console.log('🔥 🔍 LOADUSERS - Modo ADMIN: Loading ALL users');
         logger.debug('🔍 Loading ALL users (admin mode)');
         loadedUsers = await getAllUsers({ activeOnly: true });
+        console.log(`🔥 📋 LOADUSERS - Found ${loadedUsers.length} users:`, loadedUsers.map(u => ({ id: u.id, email: u.email, role: u.role, active: u.active })));
         logger.debug(`📋 Found ${loadedUsers.length} users from getAllUsers:`, loadedUsers.map(u => ({ id: u.id, email: u.email, role: u.role, active: u.active })));
       } else {
         // Teacher: solo estudiantes
+        console.log('🔥 🔍 LOADUSERS - Modo TEACHER: Loading STUDENTS only');
         logger.debug('🔍 Loading STUDENTS only (teacher mode)');
         loadedUsers = await getAllUsers({ role: 'student', activeOnly: true });
+        console.log(`🔥 📋 LOADUSERS - Found ${loadedUsers.length} students`);
         logger.debug(`📋 Found ${loadedUsers.length} students from getAllUsers`);
       }
 
       // Cargar créditos para cada usuario en paralelo
+      console.log('🔥 💰 LOADUSERS - Cargando créditos para cada usuario...');
       const usersWithCredits = await Promise.all(
         loadedUsers.map(async (user) => {
           try {
@@ -56,11 +62,14 @@ export function useUserManagement(currentUser, permissions = {}) {
         })
       );
 
+      console.log('🔥 ✅ LOADUSERS - Seteando usuarios en estado. Total:', usersWithCredits.length);
       setUsers(usersWithCredits);
+      console.log('🔥 👥 LOADUSERS - Lista final:', usersWithCredits.map(u => ({ id: u.id, email: u.email, name: u.name, role: u.role })));
       logger.debug(`✅ Loaded ${usersWithCredits.length} users with credits`);
       logger.debug('👥 Final users list:', usersWithCredits.map(u => ({ id: u.id, email: u.email, name: u.name, role: u.role })));
       return usersWithCredits;
     } catch (error) {
+      console.error('🔥 ❌ LOADUSERS - ERROR:', error);
       logger.error('❌ Error loading users:', error);
       throw error;
     } finally {

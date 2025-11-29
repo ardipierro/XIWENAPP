@@ -139,7 +139,7 @@ function AddUserModal({ isOpen, onClose, onUserCreated, userRole, isAdmin }) {
   // Prepare role options for BaseSelect
   const roleOptions = availableRoles.map(role => ({
     value: role,
-    label: `${ROLE_INFO[role].icon} ${ROLE_INFO[role].name}`
+    label: `${ROLE_INFO[role].emoji} ${ROLE_INFO[role].name}`
   }));
 
   return (

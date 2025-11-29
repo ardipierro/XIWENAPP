@@ -9,15 +9,39 @@
  * - quiz: Ocultar celdas para practicar
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Volume2, Eye, EyeOff, RotateCcw, ChevronLeft, ChevronRight, Lightbulb } from 'lucide-react';
 import { BaseButton } from '../common';
+import QuickDisplayFAB from '../QuickDisplayFAB';
+import { getDisplayClasses, getDisplayStyles, mergeDisplaySettings } from '../../constants/displaySettings';
 import logger from '../../utils/logger';
 
 /**
  * Componente principal de visualización
  */
-function InfoTableDisplay({ data = {}, config = {} }) {
+function InfoTableDisplay({ data = {}, config = {}, displaySettings = null, isFullscreen = false, onDisplaySettingsChange, onToggleFullscreen }) {
+  // Display settings
+  const [liveDisplaySettings, setLiveDisplaySettings] = useState(displaySettings);
+
+  useEffect(() => {
+    if (displaySettings) {
+      setLiveDisplaySettings(displaySettings);
+    }
+  }, [displaySettings]);
+
+  const mergedDisplaySettings = useMemo(
+    () => mergeDisplaySettings(liveDisplaySettings, 'exercise'),
+    [liveDisplaySettings]
+  );
+  const displayClasses = useMemo(() => getDisplayClasses(mergedDisplaySettings), [mergedDisplaySettings]);
+  const displayStyles = useMemo(() => getDisplayStyles(mergedDisplaySettings), [mergedDisplaySettings]);
+
+  const handleDisplaySettingsChange = useCallback((newSettings) => {
+    setLiveDisplaySettings(newSettings);
+    onDisplaySettingsChange?.(newSettings);
+    logger.debug('Display settings actualizados desde FAB', 'InfoTableDisplay');
+  }, [onDisplaySettingsChange]);
+
   // Merge config con defaults
   const mergedConfig = useMemo(() => ({
     tableStyle: 'striped',
@@ -442,8 +466,9 @@ function InfoTableDisplay({ data = {}, config = {} }) {
   };
 
   return (
-    <div className="w-full space-y-4">
-      {/* Título */}
+    <>
+      <div className={`w-full space-y-4 ${displayClasses.container}`} style={displayStyles}>
+        {/* Título */}
       {title && (
         <h3
           className="text-xl font-bold flex items-center gap-2"
@@ -497,7 +522,16 @@ function InfoTableDisplay({ data = {}, config = {} }) {
           ))}
         </div>
       )}
-    </div>
+      </div>
+
+      {/* QuickDisplayFAB para ajustes rápidos de visualización */}
+      <QuickDisplayFAB
+        initialSettings={displaySettings}
+        onSettingsChange={handleDisplaySettingsChange}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={onToggleFullscreen}
+      />
+    </>
   );
 }
 

@@ -71,7 +71,6 @@ import {
   EntryOptionsMenu
 } from './diary';
 import SortableDiaryEntry from './diary/SortableDiaryEntry';
-import WordHighlightExercise from './container/WordHighlightExercise';
 import ContainerCard from './container/ContainerCard';
 import SelectionDetector from './translation/SelectionDetector';
 
@@ -625,7 +624,7 @@ function ClassDailyLog({ logId, user, onBack }) {
                 <CategoryBadge
                   type="content"
                   value={content.type}
-                  size="xs"
+                  size="sm"
                 />
               </div>
             )}
@@ -636,7 +635,7 @@ function ClassDailyLog({ logId, user, onBack }) {
                 <CategoryBadge
                   type="content"
                   value={content.type}
-                  size="xs"
+                  size="sm"
                 />
                 {isTeacher ? (
                   <input
@@ -701,6 +700,11 @@ function ClassDailyLog({ logId, user, onBack }) {
   };
 
   const renderContentBody = (content) => {
+    console.log('🎨 RENDER CONTENT BODY - ClassDailyLog');
+    console.log('📝 content.title:', content.title);
+    console.log('📦 content.type:', content.type);
+    console.log('🔍 content.metadata:', content.metadata);
+
     switch (content.type) {
       case 'text-block':
         // Nuevo: Bloque de texto editable con características avanzadas y título editable
@@ -762,32 +766,22 @@ function ClassDailyLog({ logId, user, onBack }) {
         );
 
       case 'exercise':
-        // Detectar ejercicios generados con IA
-        if (content.metadata?.exerciseType === 'ai_generated') {
-          // Cargar configuración desde localStorage
-          const savedConfig = localStorage.getItem('wordHighlightConfig');
-          const config = savedConfig ? JSON.parse(savedConfig) : null;
+        // Ejercicios AI generados: NO usar InSituContentEditor (no tienen estructura editable)
+        const isAIGenerated = content.metadata?.exerciseType === 'ai_generated';
 
+        if (isAIGenerated) {
+          // Renderizar directamente sin editor in-situ
           return (
-            <WordHighlightExercise
-              text={content.content}
-              config={config}
-              onComplete={(result) => {
-                // Adaptar resultado al formato esperado por handleExerciseComplete
-                handleExerciseComplete({
-                  exerciseId: content.id,
-                  logId: logId,
-                  answer: { clickedWords: result.totalClicks, score: result.score },
-                  correct: result.score > 0,
-                  timestamp: Date.now(),
-                  exerciseType: 'ai_generated'
-                });
-              }}
+            <UnifiedExerciseRenderer
+              content={content}
+              onComplete={handleExerciseComplete}
+              readOnly={log?.status === 'ended'}
+              logId={logId}
             />
           );
         }
 
-        // Ejercicios normales del Exercise Builder
+        // Ejercicios del Exercise Builder: permitir edición in-situ para profesores
         return isTeacher ? (
           <InSituContentEditor
             content={content}

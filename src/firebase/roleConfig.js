@@ -32,42 +32,49 @@ export const ROLE_INFO = {
     name: 'Administrador',
     description: 'Acceso total al sistema, puede gestionar usuarios y roles',
     icon: 'Crown',
+    emoji: '👑',
     color: '#ef4444' // rojo
   },
   [ROLES.TEACHER]: {
     name: 'Profesor',
     description: 'Puede crear juegos, gestionar alumnos y ver estadísticas',
     icon: 'UserCog',
+    emoji: '👨‍🏫',
     color: '#a1a1aa' // gris
   },
   [ROLES.STUDENT]: {
     name: 'Alumno',
     description: 'Acceso completo a juegos y progreso personal',
     icon: 'GraduationCap',
+    emoji: '🎓',
     color: '#71717a' // gris oscuro
   },
   [ROLES.GUARDIAN]: {
     name: 'Padre/Tutor',
     description: 'Puede ver el desempeño de estudiantes vinculados',
     icon: 'Users',
+    emoji: '👨‍👩‍👧',
     color: '#10b981' // verde
   },
   [ROLES.LISTENER]: {
     name: 'Oyente',
     description: 'Solo lectura, no puede participar en juegos',
     icon: 'Ear',
+    emoji: '👂',
     color: '#10b981' // verde
   },
   [ROLES.TRIAL]: {
     name: 'Alumno de Prueba',
     description: 'Acceso limitado temporal para pruebas',
     icon: 'Target',
+    emoji: '🎯',
     color: '#f59e0b' // naranja
   },
   [ROLES.TRIAL_TEACHER]: {
     name: 'Profesor de Prueba',
     description: 'Acceso limitado temporal para profesores',
     icon: 'FlaskConical',
+    emoji: '🧪',
     color: '#d1d5db' // gris claro
   }
 };

@@ -6,7 +6,7 @@
  * como elementos arrastrables. El alumno debe arrastrarlas a su posición correcta.
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   CheckCircle,
   XCircle,
@@ -15,6 +15,8 @@ import {
   GripVertical
 } from 'lucide-react';
 import { BaseButton } from '../common';
+import QuickDisplayFAB from '../QuickDisplayFAB';
+import { getDisplayClasses, getDisplayStyles, mergeDisplaySettings } from '../../constants/displaySettings';
 import {
   playCorrectSound,
   playIncorrectSound,
@@ -26,12 +28,37 @@ import logger from '../../utils/logger';
 /**
  * Componente de ejercicio Drag and Drop
  */
-function DragDropBlanksExercise({ text, config, onComplete, onActionsChange }) {
+function DragDropBlanksExercise({ text, config, onComplete, onActionsChange, displaySettings = null, isFullscreen = false, onDisplaySettingsChange, onToggleFullscreen }) {
   const [placedWords, setPlacedWords] = useState({});
   const [draggedWord, setDraggedWord] = useState(null);
   const [feedback, setFeedback] = useState(null);
   const [isFinished, setIsFinished] = useState(false);
   const [showResults, setShowResults] = useState(false);
+
+  // Display settings: combina los guardados con los ajustes temporales
+  const [liveDisplaySettings, setLiveDisplaySettings] = useState(displaySettings);
+
+  // Sincronizar displaySettings cuando cambie externamente
+  useEffect(() => {
+    if (displaySettings) {
+      setLiveDisplaySettings(displaySettings);
+    }
+  }, [displaySettings]);
+
+  // Calcular estilos de visualización
+  const mergedDisplaySettings = useMemo(
+    () => mergeDisplaySettings(liveDisplaySettings, 'exercise'),
+    [liveDisplaySettings]
+  );
+  const displayClasses = useMemo(() => getDisplayClasses(mergedDisplaySettings), [mergedDisplaySettings]);
+  const displayStyles = useMemo(() => getDisplayStyles(mergedDisplaySettings), [mergedDisplaySettings]);
+
+  // Handler para cambios de display settings desde el FAB
+  const handleDisplaySettingsChange = useCallback((newSettings) => {
+    setLiveDisplaySettings(newSettings);
+    onDisplaySettingsChange?.(newSettings);
+    logger.debug('Display settings actualizados desde FAB', 'DragDropBlanksExercise');
+  }, [onDisplaySettingsChange]);
 
   // Configuración por defecto
   const defaultConfig = {
@@ -298,8 +325,9 @@ function DragDropBlanksExercise({ text, config, onComplete, onActionsChange }) {
   }, [isFinished, placedWords, onActionsChange]);
 
   return (
-    <div className="w-full p-6">
-      {/* Header */}
+    <>
+      <div className={`w-full ${displayClasses.container}`} style={displayStyles}>
+        {/* Header */}
       <div className="flex items-center justify-end mb-6">
         <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
           {Object.keys(placedWords).length} / {parsedContent.blanks.length} colocadas
@@ -427,8 +455,16 @@ function DragDropBlanksExercise({ text, config, onComplete, onActionsChange }) {
           )}
         </div>
       </div>
+      </div>
 
-    </div>
+      {/* QuickDisplayFAB para ajustes rápidos de visualización */}
+      <QuickDisplayFAB
+        initialSettings={displaySettings}
+        onSettingsChange={handleDisplaySettingsChange}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={onToggleFullscreen}
+      />
+    </>
   );
 }
 

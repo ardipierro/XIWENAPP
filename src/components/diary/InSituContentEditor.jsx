@@ -270,12 +270,17 @@ function EditableExerciseFields({ data, onChange }) {
 
   // MEJORA 3: Detección automática de campos de texto adicionales
   const detectAdditionalFields = () => {
+    // Verificar que exerciseData existe y es un objeto
+    if (!exerciseData || typeof exerciseData !== 'object') {
+      return [];
+    }
+
     const excludedKeys = [
       'type', 'id', 'correctAnswer', 'correctAnswers', 'correct',
       'question', 'instruction', 'sentence', 'text', 'explanation',
       'hints', 'options', 'pairs', 'blanks', 'items', 'sentences',
       'title', 'description', 'points', 'difficulty', 'timeLimit',
-      'metadata', 'createdAt', 'updatedAt'
+      'metadata', 'createdAt', 'updatedAt', 'raw'
     ];
 
     const additionalFields = Object.entries(exerciseData)

@@ -16,11 +16,8 @@ import { CheckCircle, XCircle, Lightbulb } from 'lucide-react';
 import { BaseBadge } from '../../common';
 import { useExercise, FEEDBACK_MODES } from '../core/ExerciseContext';
 
-// Colores por defecto (mismo que container/FillInBlanksExercise.jsx)
-const DEFAULT_COLORS = {
-  correctColor: '#10b981',
-  incorrectColor: '#ef4444'
-};
+// ✅ ELIMINADO: colores hardcoded - ahora usa variables CSS del tema
+// Los colores se obtienen de globals.css (--color-success, --color-error, --color-warning)
 
 /**
  * Parsear texto y extraer blanks
@@ -136,9 +133,6 @@ export function FillBlankRenderer({
     checkAnswer
   } = useExercise();
 
-  // Merge colors with defaults
-  const colorConfig = { ...DEFAULT_COLORS, ...colors };
-
   // Parsear texto
   const { segments, blanks } = useMemo(() => parseTextWithBlanks(text), [text]);
 
@@ -218,9 +212,9 @@ export function FillBlankRenderer({
 
     if (showingFeedback) {
       return {
-        backgroundColor: isCorrect ? `${colorConfig.correctColor}20` : `${colorConfig.incorrectColor}20`,
-        borderColor: isCorrect ? colorConfig.correctColor : colorConfig.incorrectColor,
-        color: isCorrect ? colorConfig.correctColor : colorConfig.incorrectColor
+        backgroundColor: isCorrect ? 'var(--color-success-bg)' : 'var(--color-error-bg)',
+        borderColor: isCorrect ? 'var(--color-success)' : 'var(--color-error)',
+        color: isCorrect ? 'var(--color-success)' : 'var(--color-error)'
       };
     }
 
@@ -307,7 +301,8 @@ export function FillBlankRenderer({
               {allowHints && !showingFeedback && !hasHint && segment.correctWord && (
                 <button
                   onClick={() => handleShowHint(segment.index, segment.correctWord)}
-                  className="ml-1 p-1 rounded hover:bg-amber-100 dark:hover:bg-amber-900/30 text-amber-500"
+                  className="ml-1 p-1 rounded transition-colors"
+                  style={{ color: 'var(--color-warning)' }}
                   title={`Ver pista (-${hintPenalty} pts)`}
                 >
                   <Lightbulb className="w-4 h-4" />
@@ -316,7 +311,7 @@ export function FillBlankRenderer({
 
               {/* Mostrar respuesta correcta si falló */}
               {showingFeedback && !isCorrect && segment.correctWord && config.showCorrectAnswer !== false && (
-                <span className="ml-1 text-xs font-medium" style={{ color: colorConfig.correctColor }}>
+                <span className="ml-1 text-xs font-medium" style={{ color: 'var(--color-success)' }}>
                   ({segment.correctWord})
                 </span>
               )}
@@ -337,7 +332,7 @@ export function FillBlankRenderer({
           <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
             Presiona <kbd className="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-xs">Enter</kbd> para avanzar al siguiente campo.
             {allowHints && (
-              <> Usa el icono <Lightbulb className="w-3 h-3 inline text-amber-500" /> para ver pistas (-{hintPenalty} pts).</>
+              <> Usa el icono <Lightbulb className="w-3 h-3 inline" style={{ color: 'var(--color-warning)' }} /> para ver pistas (-{hintPenalty} pts).</>
             )}
           </p>
         </div>
@@ -348,21 +343,21 @@ export function FillBlankRenderer({
         <div className="mt-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-1">
-              <CheckCircle size={16} style={{ color: colorConfig.correctColor }} />
-              <span className="text-sm font-medium" style={{ color: colorConfig.correctColor }}>
+              <CheckCircle size={16} style={{ color: 'var(--color-success)' }} />
+              <span className="text-sm font-medium" style={{ color: 'var(--color-success)' }}>
                 {correctCount} correctas
               </span>
             </div>
             <div className="flex items-center gap-1">
-              <XCircle size={16} style={{ color: colorConfig.incorrectColor }} />
-              <span className="text-sm font-medium" style={{ color: colorConfig.incorrectColor }}>
+              <XCircle size={16} style={{ color: 'var(--color-error)' }} />
+              <span className="text-sm font-medium" style={{ color: 'var(--color-error)' }}>
                 {blanks.length - correctCount} incorrectas
               </span>
             </div>
           </div>
 
           {hintCount > 0 && (
-            <div className="flex items-center gap-1 text-amber-500">
+            <div className="flex items-center gap-1" style={{ color: 'var(--color-warning)' }}>
               <Lightbulb className="w-4 h-4" />
               <span className="text-sm">
                 {hintCount} pista{hintCount !== 1 ? 's' : ''} usada{hintCount !== 1 ? 's' : ''} (-{hintCount * hintPenalty} pts)

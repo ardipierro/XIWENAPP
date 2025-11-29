@@ -299,20 +299,29 @@ export function validateData(schema, data) {
       data: validatedData
     };
   } catch (error) {
+    console.error('🔥 ❌ VALIDATION ERROR:', error);
     if (error instanceof z.ZodError) {
       const errors = {};
-      error.errors.forEach(err => {
-        const path = err.path.join('.');
-        errors[path] = err.message;
-      });
+      // ZodError tiene la propiedad 'issues' en lugar de 'errors'
+      const issues = error.issues || error.errors || [];
+      if (Array.isArray(issues) && issues.length > 0) {
+        issues.forEach(err => {
+          const path = err.path.join('.');
+          errors[path] = err.message;
+        });
+      } else {
+        console.error('🔥 ❌ No issues found in ZodError:', error);
+        errors.general = 'Error de validación: ' + (error.message || 'Unknown');
+      }
       return {
         success: false,
         errors
       };
     }
+    console.error('🔥 ❌ Not a ZodError:', error);
     return {
       success: false,
-      errors: { general: 'Error de validación desconocido' }
+      errors: { general: 'Error de validación desconocido: ' + (error.message || 'Unknown') }
     };
   }
 }

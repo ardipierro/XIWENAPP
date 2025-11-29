@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { FileText, CheckCircle, Clock, AlertCircle, Calendar, Sparkles } from 'lucide-react';
+import { FileText, CheckCircle, Clock, AlertCircle, Calendar, Sparkles, Upload, Camera } from 'lucide-react';
 import { getReviewsByStudent, REVIEW_STATUS } from '../../../firebase/homework_reviews';
 import {
   getBadgeByKey,
@@ -13,6 +13,9 @@ import {
   getBadgeTextColor,
   getBadgeStyles
 } from '../../../config/badgeSystem';
+import { BaseButton, BaseModal } from '../../common';
+import ManualHomeworkUpload from '../../homework/ManualHomeworkUpload';
+import StudentCameraUpload from '../../homework/StudentCameraUpload';
 import logger from '../../../utils/logger';
 
 /**
@@ -24,6 +27,8 @@ function TasksTab({ user }) {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [badgeConfigVersion, setBadgeConfigVersion] = useState(0);
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showCameraModal, setShowCameraModal] = useState(false);
 
   useEffect(() => {
     loadHomework();
@@ -60,6 +65,16 @@ function TasksTab({ user }) {
     }
   };
 
+  const handleUploadSuccess = () => {
+    loadHomework();
+    setShowUploadModal(false);
+  };
+
+  const handleCameraSuccess = () => {
+    loadHomework();
+    setShowCameraModal(false);
+  };
+
 
   if (loading) {
     return (
@@ -71,6 +86,34 @@ function TasksTab({ user }) {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Header con botones */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
+            Mis Tareas
+          </h2>
+          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+            {reviews.length} {reviews.length === 1 ? 'tarea enviada' : 'tareas enviadas'}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <BaseButton
+            variant="secondary"
+            onClick={() => setShowCameraModal(true)}
+            icon={Camera}
+          >
+            Tomar Foto
+          </BaseButton>
+          <BaseButton
+            variant="primary"
+            onClick={() => setShowUploadModal(true)}
+            icon={Upload}
+          >
+            Subir Tarea
+          </BaseButton>
+        </div>
+      </div>
+
       {/* Lista de tareas */}
       {reviews.length > 0 ? (
         <div className="space-y-3">
@@ -90,10 +133,47 @@ function TasksTab({ user }) {
           <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
             No hay tareas
           </h3>
-          <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+          <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
             Aún no has enviado tareas
           </p>
+          <div className="flex items-center justify-center gap-2">
+            <BaseButton onClick={() => setShowCameraModal(true)} variant="secondary" icon={Camera}>
+              Tomar Foto
+            </BaseButton>
+            <BaseButton onClick={() => setShowUploadModal(true)} variant="primary" icon={Upload}>
+              Subir Tarea
+            </BaseButton>
+          </div>
         </div>
+      )}
+
+      {/* Upload Modal */}
+      {showUploadModal && (
+        <BaseModal
+          isOpen={true}
+          onClose={() => setShowUploadModal(false)}
+          title="Subir Tarea"
+          size="lg"
+        >
+          <ManualHomeworkUpload
+            teacherId={user?.uid}
+            userRole="student"
+            preselectedStudentId={user?.uid}
+            onSuccess={handleUploadSuccess}
+            onCancel={() => setShowUploadModal(false)}
+          />
+        </BaseModal>
+      )}
+
+      {/* Camera Upload Modal */}
+      {showCameraModal && (
+        <StudentCameraUpload
+          studentId={user?.uid}
+          studentName={user?.displayName || user?.name || 'Estudiante'}
+          teacherId={user?.teacherId || user?.uid}
+          onSuccess={handleCameraSuccess}
+          onClose={() => setShowCameraModal(false)}
+        />
       )}
     </div>
   );

@@ -332,14 +332,12 @@ function LiveGameSetup({ user, onSessionCreated, onBack }) {
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 label="Categoría seleccionada"
-              >
-                <option value="">-- Selecciona una categoría --</option>
-                {Object.keys(categoriesData).map(categoryName => (
-                  <option key={categoryName} value={categoryName}>
-                    {categoryName} ({parseQuestions(categoriesData[categoryName]).length} preguntas)
-                  </option>
-                ))}
-              </BaseSelect>
+                placeholder="-- Selecciona una categoría --"
+                options={Object.keys(categoriesData).map(categoryName => ({
+                  value: categoryName,
+                  label: `${categoryName} (${parseQuestions(categoriesData[categoryName]).length} preguntas)`
+                }))}
+              />
             </div>
           )}
 
@@ -414,26 +412,17 @@ function LiveGameSetup({ user, onSessionCreated, onBack }) {
             </div>
           ) : (
             <>
-              <select
+              <BaseSelect
                 value=""
                 onChange={(e) => handleStudentSelect(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2"
-                style={{
-                  background: 'var(--color-bg-secondary)',
-                  borderColor: 'var(--color-border)',
-                  color: 'var(--color-text-primary)'
-                }}
-              >
-                <option value="">-- Selecciona un estudiante ({availableStudents.length} disponibles) --</option>
-                {availableStudents
+                placeholder={`-- Selecciona un estudiante (${availableStudents.length} disponibles) --`}
+                options={availableStudents
                   .filter(student => !students.some(s => s.trim().toLowerCase() === student.name.toLowerCase()))
-                  .map(student => (
-                    <option key={student.id} value={student.id}>
-                      {student.name}{student.grade ? ` (${student.grade}${student.section || ''})` : ''}
-                    </option>
-                  ))
-                }
-              </select>
+                  .map(student => ({
+                    value: student.id,
+                    label: `${student.name}${student.grade ? ` (${student.grade}${student.section || ''})` : ''}`
+                  }))}
+              />
 
               {availableStudents.length === 0 && (
                 <p className="mt-2 text-xs text-orange-600 bg-orange-50 dark:bg-orange-900/20 p-2 rounded flex items-center gap-2">

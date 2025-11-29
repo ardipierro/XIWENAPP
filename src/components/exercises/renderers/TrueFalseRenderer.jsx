@@ -17,12 +17,8 @@ import { Check, X, HelpCircle } from 'lucide-react';
 import { BaseBadge } from '../../common';
 import { useExercise, FEEDBACK_MODES } from '../core/ExerciseContext';
 
-// Colores por defecto (mismo que otros renderers)
-const DEFAULT_COLORS = {
-  correctColor: '#10b981',
-  incorrectColor: '#ef4444',
-  selectedColor: '#3b82f6'
-};
+// ✅ ELIMINADO: colores hardcoded - ahora usa variables CSS del tema
+// Los colores se obtienen de globals.css (--color-success, --color-error, --color-accent)
 
 /**
  * TrueFalseRenderer - Renderiza ejercicios de Verdadero/Falso
@@ -44,8 +40,6 @@ export function TrueFalseRenderer({
   colors = {},
   className = ''
 }) {
-  // Merge colors with defaults
-  const colorConfig = { ...DEFAULT_COLORS, ...colors };
   const {
     userAnswer,
     setAnswer,
@@ -93,21 +87,40 @@ export function TrueFalseRenderer({
     const isCorrect = isCorrectAnswer(index);
 
     if (mode === 'cards') {
+      // Determinar estilos según estado
+      let cardStyle = {};
+      if (showingFeedback) {
+        if (isCorrect) {
+          cardStyle = {
+            borderColor: 'var(--color-success)',
+            backgroundColor: 'var(--color-success-bg)'
+          };
+        } else {
+          cardStyle = {
+            borderColor: 'var(--color-error)',
+            backgroundColor: 'var(--color-error-bg)'
+          };
+        }
+      } else if (answered) {
+        cardStyle = {
+          borderColor: 'var(--color-accent)',
+          backgroundColor: 'var(--color-accent-bg)'
+        };
+      } else {
+        cardStyle = {
+          borderColor: 'var(--color-border)',
+          backgroundColor: 'var(--color-bg-primary)'
+        };
+      }
+
       return (
         <div
           key={index}
-          className={`rounded-xl border-2 p-5 transition-all ${
-            showingFeedback
-              ? isCorrect
-                ? 'border-green-300 dark:border-green-700 bg-green-50 dark:bg-green-900/20'
-                : 'border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20'
-              : answered
-              ? 'border-blue-300 dark:border-blue-700 bg-blue-50 dark:bg-blue-900/10'
-              : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800'
-          }`}
+          className="rounded-xl border-2 p-5 transition-all"
+          style={cardStyle}
         >
           {/* Afirmación */}
-          <p className="text-lg text-gray-900 dark:text-white mb-4">
+          <p className="text-lg mb-4" style={{ color: 'var(--color-text-primary)' }}>
             {statement.statement}
           </p>
 
@@ -116,15 +129,19 @@ export function TrueFalseRenderer({
             <button
               onClick={() => handleAnswer(index, true)}
               disabled={showingFeedback}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold transition-all ${
-                showingFeedback && statement.correct
-                  ? 'bg-green-500 text-white'
+              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold transition-all"
+              style={{
+                backgroundColor: showingFeedback && statement.correct
+                  ? 'var(--color-success)'
                   : showingFeedback && answers[index] === true && !statement.correct
-                  ? 'bg-red-500 text-white'
+                  ? 'var(--color-error)'
                   : answers[index] === true
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-green-100 dark:hover:bg-green-900/30'
-              }`}
+                  ? 'var(--color-accent)'
+                  : 'var(--color-bg-secondary)',
+                color: (showingFeedback || answers[index] === true)
+                  ? 'white'
+                  : 'var(--color-text-primary)'
+              }}
             >
               <Check size={20} />
               {trueLabel}
@@ -133,15 +150,19 @@ export function TrueFalseRenderer({
             <button
               onClick={() => handleAnswer(index, false)}
               disabled={showingFeedback}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold transition-all ${
-                showingFeedback && !statement.correct
-                  ? 'bg-green-500 text-white'
+              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-semibold transition-all"
+              style={{
+                backgroundColor: showingFeedback && !statement.correct
+                  ? 'var(--color-success)'
                   : showingFeedback && answers[index] === false && statement.correct
-                  ? 'bg-red-500 text-white'
+                  ? 'var(--color-error)'
                   : answers[index] === false
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-red-100 dark:hover:bg-red-900/30'
-              }`}
+                  ? 'var(--color-accent)'
+                  : 'var(--color-bg-secondary)',
+                color: (showingFeedback || answers[index] === false)
+                  ? 'white'
+                  : 'var(--color-text-primary)'
+              }}
             >
               <X size={20} />
               {falseLabel}
@@ -150,8 +171,8 @@ export function TrueFalseRenderer({
 
           {/* Explicación */}
           {showingFeedback && statement.explanation && (
-            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+            <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--color-border)' }}>
+              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
                 💡 {statement.explanation}
               </p>
             </div>
@@ -159,11 +180,13 @@ export function TrueFalseRenderer({
 
           {/* Feedback icon */}
           {showingFeedback && (
-            <div className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center ${
-              isCorrect
-                ? 'bg-green-100 dark:bg-green-800 text-green-600 dark:text-green-300'
-                : 'bg-red-100 dark:bg-red-800 text-red-600 dark:text-red-300'
-            }`}>
+            <div
+              className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center"
+              style={{
+                backgroundColor: isCorrect ? 'var(--color-success-bg)' : 'var(--color-error-bg)',
+                color: isCorrect ? 'var(--color-success)' : 'var(--color-error)'
+              }}
+            >
               {isCorrect ? <Check size={18} /> : <X size={18} />}
             </div>
           )}
@@ -172,31 +195,42 @@ export function TrueFalseRenderer({
     }
 
     // Mode 'buttons' o 'toggle'
+    // Determinar estilos según estado
+    let rowStyle = {};
+    if (showingFeedback) {
+      if (isCorrect) {
+        rowStyle = { backgroundColor: 'var(--color-success-bg)' };
+      } else {
+        rowStyle = { backgroundColor: 'var(--color-error-bg)' };
+      }
+    } else {
+      rowStyle = { backgroundColor: 'var(--color-bg-secondary)' };
+    }
+
     return (
       <div
         key={index}
-        className={`flex items-start gap-4 p-4 rounded-xl transition-all ${
-          showingFeedback
-            ? isCorrect
-              ? 'bg-green-50 dark:bg-green-900/20'
-              : 'bg-red-50 dark:bg-red-900/20'
-            : 'bg-gray-50 dark:bg-gray-800/50'
-        }`}
+        className="flex items-start gap-4 p-4 rounded-xl transition-all"
+        style={rowStyle}
       >
         {/* Número */}
-        <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-          showingFeedback
-            ? isCorrect
-              ? 'bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-200'
-              : 'bg-red-100 dark:bg-red-800 text-red-700 dark:text-red-200'
-            : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
-        }`}>
+        <span
+          className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"
+          style={{
+            backgroundColor: showingFeedback
+              ? (isCorrect ? 'var(--color-success-bg)' : 'var(--color-error-bg)')
+              : 'var(--color-bg-tertiary)',
+            color: showingFeedback
+              ? (isCorrect ? 'var(--color-success)' : 'var(--color-error)')
+              : 'var(--color-text-secondary)'
+          }}
+        >
           {index + 1}
         </span>
 
         {/* Contenido */}
         <div className="flex-1">
-          <p className="text-gray-900 dark:text-white mb-3">
+          <p className="mb-3" style={{ color: 'var(--color-text-primary)' }}>
             {statement.statement}
           </p>
 
@@ -205,15 +239,20 @@ export function TrueFalseRenderer({
             <button
               onClick={() => handleAnswer(index, true)}
               disabled={showingFeedback}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-                showingFeedback && statement.correct
-                  ? 'bg-green-500 text-white'
+              className="px-4 py-2 rounded-lg font-medium text-sm transition-all"
+              style={{
+                backgroundColor: showingFeedback && statement.correct
+                  ? 'var(--color-success)'
                   : showingFeedback && answers[index] === true && !statement.correct
-                  ? 'bg-red-500 text-white'
+                  ? 'var(--color-error)'
                   : answers[index] === true
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-green-400'
-              }`}
+                  ? 'var(--color-accent)'
+                  : 'var(--color-bg-primary)',
+                color: (showingFeedback || answers[index] === true)
+                  ? 'white'
+                  : 'var(--color-text-primary)',
+                border: (showingFeedback || answers[index] === true) ? 'none' : '1px solid var(--color-border)'
+              }}
             >
               ✓ {trueLabel}
             </button>
@@ -221,15 +260,20 @@ export function TrueFalseRenderer({
             <button
               onClick={() => handleAnswer(index, false)}
               disabled={showingFeedback}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-                showingFeedback && !statement.correct
-                  ? 'bg-green-500 text-white'
+              className="px-4 py-2 rounded-lg font-medium text-sm transition-all"
+              style={{
+                backgroundColor: showingFeedback && !statement.correct
+                  ? 'var(--color-success)'
                   : showingFeedback && answers[index] === false && statement.correct
-                  ? 'bg-red-500 text-white'
+                  ? 'var(--color-error)'
                   : answers[index] === false
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-red-400'
-              }`}
+                  ? 'var(--color-accent)'
+                  : 'var(--color-bg-primary)',
+                color: (showingFeedback || answers[index] === false)
+                  ? 'white'
+                  : 'var(--color-text-primary)',
+                border: (showingFeedback || answers[index] === false) ? 'none' : '1px solid var(--color-border)'
+              }}
             >
               ✗ {falseLabel}
             </button>
@@ -237,7 +281,7 @@ export function TrueFalseRenderer({
 
           {/* Explicación */}
           {showingFeedback && statement.explanation && (
-            <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">
+            <p className="mt-3 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
               💡 {statement.explanation}
             </p>
           )}
@@ -250,7 +294,7 @@ export function TrueFalseRenderer({
     <div className={`true-false-renderer ${className}`}>
       {/* Instrucción */}
       {instruction && (
-        <p className="text-gray-600 dark:text-gray-400 mb-6">
+        <p className="mb-6" style={{ color: 'var(--color-text-secondary)' }}>
           {instruction}
         </p>
       )}

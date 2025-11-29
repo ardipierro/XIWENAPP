@@ -18,13 +18,8 @@ import { Check, X, RotateCcw, ArrowRight } from 'lucide-react';
 import { BaseBadge } from '../../common';
 import { useExercise, FEEDBACK_MODES } from '../core/ExerciseContext';
 
-// Colores por defecto (mismo que otros renderers)
-const DEFAULT_COLORS = {
-  correctColor: '#10b981',
-  incorrectColor: '#ef4444',
-  selectedColor: '#3b82f6',
-  connectedColor: '#8b5cf6'
-};
+// ✅ ELIMINADO: colores hardcoded - ahora usa variables CSS del tema
+// Los colores se obtienen de globals.css (--color-success, --color-error, --color-accent)
 
 /**
  * Shuffle array
@@ -64,8 +59,6 @@ export function MatchingRenderer({
   colors = {},
   className = ''
 }) {
-  // Merge colors with defaults
-  const colorConfig = { ...DEFAULT_COLORS, ...colors };
   const {
     userAnswer,
     setAnswer,
@@ -178,8 +171,8 @@ export function MatchingRenderer({
 
   // Obtener color de conexión
   const getConnectionColor = (leftIndex, rightIndex) => {
-    if (!showingFeedback) return colorConfig.selectedColor;
-    return isConnectionCorrect(leftIndex, rightIndex) ? colorConfig.correctColor : colorConfig.incorrectColor;
+    if (!showingFeedback) return 'var(--color-accent)';
+    return isConnectionCorrect(leftIndex, rightIndex) ? 'var(--color-success)' : 'var(--color-error)';
   };
 
   // Calcular líneas SVG
@@ -227,20 +220,20 @@ export function MatchingRenderer({
     <div className={`matching-renderer ${className}`}>
       {/* Título */}
       {title && (
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+        <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
           {title}
         </h3>
       )}
 
       {/* Instrucción */}
       {instruction && (
-        <p className="text-gray-600 dark:text-gray-400 mb-4">
+        <p className="mb-4" style={{ color: 'var(--color-text-secondary)' }}>
           {instruction}
         </p>
       )}
 
       {!instruction && (
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+        <p className="text-sm mb-4" style={{ color: 'var(--color-text-muted)' }}>
           Conecta los elementos de la izquierda con los de la derecha
         </p>
       )}
@@ -274,7 +267,7 @@ export function MatchingRenderer({
         {/* Columna izquierda */}
         <div className="flex-1 space-y-3">
           {leftTitle && (
-            <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">
+            <h4 className="text-sm font-medium mb-3" style={{ color: 'var(--color-text-secondary)' }}>
               {leftTitle}
             </h4>
           )}
@@ -287,35 +280,59 @@ export function MatchingRenderer({
             const isIncorrect = isConnected && showingFeedback &&
               !isConnectionCorrect(leftIndex, connections[leftIndex]);
 
+            // Determinar estilos
+            let buttonStyle = {};
+            if (isCorrect) {
+              buttonStyle = {
+                borderColor: 'var(--color-success)',
+                backgroundColor: 'var(--color-success-bg)'
+              };
+            } else if (isIncorrect) {
+              buttonStyle = {
+                borderColor: 'var(--color-error)',
+                backgroundColor: 'var(--color-error-bg)'
+              };
+            } else if (isSelected) {
+              buttonStyle = {
+                borderColor: 'var(--color-accent)',
+                backgroundColor: 'var(--color-accent-bg)',
+                boxShadow: '0 0 0 2px var(--color-accent)'
+              };
+            } else if (isConnected) {
+              buttonStyle = {
+                borderColor: 'var(--color-accent)',
+                backgroundColor: 'var(--color-accent-bg)',
+                opacity: 0.7
+              };
+            } else {
+              buttonStyle = {
+                borderColor: 'var(--color-border)',
+                backgroundColor: 'var(--color-bg-primary)'
+              };
+            }
+
             return (
               <button
                 key={leftIndex}
                 ref={el => leftRefs.current[leftIndex] = el}
                 onClick={() => handleLeftClick(leftIndex)}
                 disabled={showingFeedback}
-                className={`w-full p-4 rounded-xl border-2 text-left transition-all relative z-10 ${
-                  isCorrect
-                    ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                    : isIncorrect
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                    : isSelected
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-200'
-                    : isConnected
-                    ? 'border-blue-400 bg-blue-50/50 dark:bg-blue-900/10'
-                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-blue-300'
-                }`}
+                className="w-full p-4 rounded-xl border-2 text-left transition-all relative z-10"
+                style={buttonStyle}
               >
-                <span className="text-gray-900 dark:text-white">
+                <span style={{ color: 'var(--color-text-primary)' }}>
                   {pair.left}
                 </span>
 
                 {/* Indicador de estado */}
                 {showingFeedback && isConnected && (
-                  <span className={`absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center ${
-                    isCorrect
-                      ? 'bg-green-100 dark:bg-green-800 text-green-600 dark:text-green-300'
-                      : 'bg-red-100 dark:bg-red-800 text-red-600 dark:text-red-300'
-                  }`}>
+                  <span
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full flex items-center justify-center"
+                    style={{
+                      backgroundColor: isCorrect ? 'var(--color-success-bg)' : 'var(--color-error-bg)',
+                      color: isCorrect ? 'var(--color-success)' : 'var(--color-error)'
+                    }}
+                  >
                     {isCorrect ? <Check size={14} /> : <X size={14} />}
                   </span>
                 )}
@@ -326,13 +343,13 @@ export function MatchingRenderer({
 
         {/* Indicador central */}
         <div className="flex-shrink-0 flex flex-col items-center justify-center gap-2 py-4">
-          <ArrowRight size={24} className="text-gray-400" />
+          <ArrowRight size={24} style={{ color: 'var(--color-text-muted)' }} />
         </div>
 
         {/* Columna derecha */}
         <div className="flex-1 space-y-3">
           {rightTitle && (
-            <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">
+            <h4 className="text-sm font-medium mb-3" style={{ color: 'var(--color-text-secondary)' }}>
               {rightTitle}
             </h4>
           )}
@@ -346,25 +363,47 @@ export function MatchingRenderer({
             const isIncorrect = isConnected && showingFeedback &&
               !isConnectionCorrect(parseInt(connectedLeft), rightIndex);
 
+            // Determinar estilos
+            let buttonStyle = {};
+            if (isCorrect) {
+              buttonStyle = {
+                borderColor: 'var(--color-success)',
+                backgroundColor: 'var(--color-success-bg)'
+              };
+            } else if (isIncorrect) {
+              buttonStyle = {
+                borderColor: 'var(--color-error)',
+                backgroundColor: 'var(--color-error-bg)'
+              };
+            } else if (isSelected) {
+              buttonStyle = {
+                borderColor: 'var(--color-accent)',
+                backgroundColor: 'var(--color-accent-bg)',
+                boxShadow: '0 0 0 2px var(--color-accent)'
+              };
+            } else if (isConnected) {
+              buttonStyle = {
+                borderColor: 'var(--color-accent)',
+                backgroundColor: 'var(--color-accent-bg)',
+                opacity: 0.7
+              };
+            } else {
+              buttonStyle = {
+                borderColor: 'var(--color-border)',
+                backgroundColor: 'var(--color-bg-primary)'
+              };
+            }
+
             return (
               <button
                 key={rightIndex}
                 ref={el => rightRefs.current[rightIndex] = el}
                 onClick={() => handleRightClick(rightIndex)}
                 disabled={showingFeedback}
-                className={`w-full p-4 rounded-xl border-2 text-left transition-all relative z-10 ${
-                  isCorrect
-                    ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                    : isIncorrect
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                    : isSelected
-                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 ring-2 ring-purple-200'
-                    : isConnected
-                    ? 'border-purple-400 bg-purple-50/50 dark:bg-purple-900/10'
-                    : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-purple-300'
-                }`}
+                className="w-full p-4 rounded-xl border-2 text-left transition-all relative z-10"
+                style={buttonStyle}
               >
-                <span className="text-gray-900 dark:text-white">
+                <span style={{ color: 'var(--color-text-primary)' }}>
                   {item.text}
                 </span>
               </button>
@@ -382,8 +421,8 @@ export function MatchingRenderer({
         {!showingFeedback && Object.keys(connections).length > 0 && (
           <button
             onClick={handleReset}
-            className="flex items-center gap-2 text-sm transition-colors"
-            style={{ color: 'var(--color-text-secondary)' }}
+            className="flex items-center gap-2 text-sm transition-colors hover:opacity-80"
+            style={{ color: 'var(--color-accent)' }}
           >
             <RotateCcw size={16} />
             Reiniciar

@@ -404,23 +404,37 @@ export const addStudent = async (studentData) => {
 };
 
 /**
- * Cargar todos los alumnos
+ * Cargar todos los alumnos (desde la colección 'users' con role: 'student')
  */
 export const loadStudents = async () => {
   try {
-    const studentsRef = collection(db, 'students');
-    const q = query(studentsRef, orderBy('name', 'asc'));
+    const usersRef = collection(db, 'users');
+    const q = query(
+      usersRef,
+      where('role', 'in', ['student', 'trial', 'listener'])
+    );
     const querySnapshot = await getDocs(q);
-    
+
     const students = [];
     querySnapshot.forEach((doc) => {
-      students.push({
-        id: doc.id,
-        ...doc.data()
-      });
+      const data = doc.data();
+      // Solo incluir usuarios activos
+      if (data.active !== false) {
+        students.push({
+          id: doc.id,
+          ...data
+        });
+      }
     });
-    
-    logger.debug(`✅ ${students.length} alumnos cargados desde Firestore`);
+
+    // Ordenar en memoria por nombre
+    students.sort((a, b) => {
+      const nameA = (a.name || '').toLowerCase();
+      const nameB = (b.name || '').toLowerCase();
+      return nameA.localeCompare(nameB);
+    });
+
+    logger.debug(`✅ ${students.length} alumnos cargados desde Firestore (collection: users)`);
     return students;
   } catch (error) {
     logger.error('❌ Error cargando alumnos:', error);

@@ -106,7 +106,8 @@ export function WordHighlightRenderer({
     setAnswer,
     showingFeedback,
     config: contextConfig,
-    submitAnswer
+    checkAnswer,
+    complete
   } = useExercise();
 
   // Merge external config con context config
@@ -512,7 +513,8 @@ export function WordHighlightRenderer({
       }
     });
 
-    setScore(finalScore - overtimePenalties);
+    const totalScore = finalScore - overtimePenalties;
+    setScore(totalScore);
     setIsFinished(true);
     setShowResults(true);
 
@@ -524,6 +526,16 @@ export function WordHighlightRenderer({
     if (timerRef.current) clearInterval(timerRef.current);
     if (overtimeIntervalRef.current) clearInterval(overtimeIntervalRef.current);
     if (hintTimerRef.current) clearInterval(hintTimerRef.current);
+
+    // Reportar al ExerciseProvider
+    const isCorrect = correct === totalTargets && incorrect === 0;
+    complete({
+      isCorrect,
+      score: totalScore,
+      correct,
+      incorrect,
+      total: totalTargets
+    });
   };
 
   // Verificar si palabra está en rango de hint
@@ -724,7 +736,7 @@ export function WordHighlightRenderer({
 
   return (
     <>
-      <div className={`word-highlight-renderer w-full ${className}`}>
+      <div className="word-highlight-renderer w-full">
         <style>{`
           @keyframes pulse-glow {
             0%, 100% { box-shadow: 0 0 5px 2px rgba(251, 191, 36, 0.4); }
@@ -895,11 +907,10 @@ export function WordHighlightRenderer({
 
         {/* Texto del ejercicio */}
         <div
-          className="text-lg leading-relaxed mb-6 p-4 rounded-lg"
+          className={`leading-relaxed mb-6 p-4 rounded-lg ${className}`}
           style={{
             backgroundColor: 'var(--color-bg-secondary)',
-            color: 'var(--color-text-primary)',
-            lineHeight: '2.2'
+            color: 'var(--color-text-primary)'
           }}
         >
           {parsedContent.map((part, index) => {
