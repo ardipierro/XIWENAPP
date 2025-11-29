@@ -23,12 +23,14 @@ import {
   ReadingRenderer,
   AudioRenderer,
   VideoRenderer,
-  WordHighlightRenderer,
   DragDropRenderer,
   DialoguesRenderer,
   ChainedLayout,
   FEEDBACK_MODES
 } from './exercises';
+
+// Componentes container standalone (no migrados a unified)
+import WordHighlightExercise from './container/WordHighlightExercise';
 
 
 /**
@@ -403,35 +405,21 @@ function ExerciseViewerModal({ isOpen, onClose, exercise, onEdit, displaySetting
     }
 
     switch (exerciseType) {
-      case EXERCISE_TYPES.HIGHLIGHT: {
-        // ✅ Config por defecto para marcar palabras
-        const defaultConfig = {
-          feedbackMode: FEEDBACK_MODES.INSTANT,
-          soundEnabled: true,
-          showCorrectAnswer: true,
-          correctPoints: 10,
-          incorrectPoints: -5
-        };
-
-        const highlightConfig = config ? { ...defaultConfig, ...config } : defaultConfig;
-        console.log('⚙️ Final Word Highlight Config being used:', highlightConfig);
-
-        // ✅ Aplicar displaySettings
-        const mergedDisplaySettings = mergeDisplaySettings(displaySettings, 'word-highlight');
-        const displayClasses = getDisplayClasses(mergedDisplaySettings);
-
+      case EXERCISE_TYPES.HIGHLIGHT:
+        // ⚠️ USAR COMPONENTE ORIGINAL - NO migrado a unified renderer
+        // El componente WordHighlightExercise es standalone y maneja su propio estado
         return (
-          <ExerciseProvider config={highlightConfig} onComplete={handleComplete}>
-            <WordHighlightRenderer
-              text={cleanContent}
-              instruction="Haz clic en las palabras correctas"
-              wordsDisappear={false}
-              showTargetCount={true}
-              className={`${displayClasses.text} ${displayClasses.content}`}
-            />
-          </ExerciseProvider>
+          <WordHighlightExercise
+            text={cleanContent}
+            config={config}
+            onComplete={handleComplete}
+            onActionsChange={handleActionsChange}
+            displaySettings={displaySettings}
+            isFullscreen={isFullscreen}
+            onDisplaySettingsChange={handleDisplaySettingsChange}
+            onToggleFullscreen={handleToggleFullscreen}
+          />
         );
-      }
 
       case EXERCISE_TYPES.DRAGDROP: {
         // ✅ Config por defecto para arrastrar y soltar
