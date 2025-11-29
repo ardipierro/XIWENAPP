@@ -29,18 +29,15 @@ import {
 import { ROLES, ROLE_INFO, isAdminEmail } from '../firebase/roleConfig';
 import { updateUser, deleteUser } from '../firebase/users';
 import {
-  getStudentEnrollments,
-  enrollStudentInCourse,
-  unenrollStudentFromCourse,
   getStudentContentAssignments,
   assignContentToStudent,
   unassignContentFromStudent,
   getTeacherStudents,
   assignStudentToTeacher,
   unassignStudentFromTeacher,
-  getAvailableStudents
+  getAvailableStudents,
+  loadCourses // @deprecated - wrapper que usa contents
 } from '../firebase/firestore';
-import { loadCourses } from '../firebase/firestore';
 import { getAllContent } from '../firebase/content';
 import { getUserCredits } from '../firebase/credits';
 import {
@@ -156,11 +153,20 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate, inM
   const loadCoursesData = async () => {
     setLoadingCourses(true);
     try {
-      // Cargar cursos matriculados
-      const enrollments = await getStudentEnrollments(selectedUser.id);
+      // Cargar contenidos asignados y filtrar por tipo 'course'
+      const allAssignments = await getStudentContentAssignments(selectedUser.id);
+      const courseAssignments = allAssignments.filter(a => a.contentType === 'course');
+      // Formatear para compatibilidad con UI existente
+      const enrollments = courseAssignments.map(a => ({
+        enrollmentId: a.id,
+        course: { id: a.contentId, name: a.contentName, title: a.contentName },
+        progress: a.progress,
+        status: a.status,
+        enrolledAt: a.assignedAt
+      }));
       setEnrolledCourses(enrollments);
 
-      // Cargar todos los cursos disponibles
+      // Cargar todos los cursos disponibles (desde contents)
       const allCourses = await loadCourses();
       const activeCourses = allCourses.filter(c => c.active !== false);
       setAvailableCourses(activeCourses);
@@ -317,8 +323,9 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate, inM
 
   const handleEnrollCourse = async (courseId) => {
     try {
-      const enrollmentId = await enrollStudentInCourse(selectedUser.id, courseId);
-      if (enrollmentId) {
+      // Usar nuevo sistema de content_assignments
+      const assignmentId = await assignContentToStudent(selectedUser.id, courseId);
+      if (assignmentId) {
         showMessage('success', 'Curso asignado exitosamente');
         await loadCoursesData();
       }
@@ -330,7 +337,8 @@ function UserProfile({ selectedUser, currentUser, isAdmin, onBack, onUpdate, inM
 
   const handleUnenrollCourse = async (courseId) => {
     try {
-      const success = await unenrollStudentFromCourse(selectedUser.id, courseId);
+      // Usar nuevo sistema de content_assignments
+      const success = await unassignContentFromStudent(selectedUser.id, courseId);
       if (success) {
         showMessage('success', 'Curso desasignado exitosamente');
         await loadCoursesData();

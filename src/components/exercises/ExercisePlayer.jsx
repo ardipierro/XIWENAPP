@@ -2,7 +2,7 @@ import logger from '../../utils/logger';
 
 import { useState, useEffect } from 'react';
 import { AlertTriangle, PartyPopper, Smile, Zap, Check, X, RotateCcw } from 'lucide-react';
-import { getExerciseById } from '../../firebase/exercises';
+import { getContentById } from '../../firebase/content';
 import MultipleChoiceExercise from './types/MultipleChoiceExercise';
 import BaseButton from '../common/BaseButton';
 
@@ -20,7 +20,7 @@ function ExercisePlayer({ exerciseId, user, onBack, onComplete }) {
   const loadExercise = async () => {
     try {
       setLoading(true);
-      const data = await getExerciseById(exerciseId);
+      const data = await getContentById(exerciseId);
 
       if (!data) {
         setError('Ejercicio no encontrado');
