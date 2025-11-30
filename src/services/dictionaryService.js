@@ -436,7 +436,7 @@ function calculateSpanishRelevance(entry, query) {
     score += 100;
   }
   // BONUS: Solo una palabra en la primera parte de la definición (+150)
-  if (defWords.length === 1 || (defWords.length === 2 && defWords[0].split(/\s+/).length === 1)) {
+  if (defSegments.length === 1 || (defSegments.length === 2 && defSegments[0].split(/\s+/).length === 1)) {
     score += 150;
   }
 
