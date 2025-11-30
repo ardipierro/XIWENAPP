@@ -13,7 +13,7 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Pencil, X, Upload, Trash2, User as UserIcon, BookOpen, FileText, Users, Save, CreditCard, UsersRound, Coins, Eye } from 'lucide-react';
+import { Pencil, X, Upload, Trash2, User as UserIcon, BookOpen, FileText, Users, Save, CreditCard, UsersRound, Coins, Eye, Image as ImageIcon, Grid3X3 } from 'lucide-react';
 import BaseModal from './common/BaseModal';
 import { BaseButton } from './common';
 import CategoryBadge from './common/CategoryBadge';
@@ -39,6 +39,8 @@ import CreditsTab from './profile/tabs/CreditsTab';
 import GuardiansTab from './profile/tabs/GuardiansTab';
 import { AVATARS } from './AvatarSelector';
 import UserAvatar from './UserAvatar';
+import PicsumSelector from './PicsumSelector';
+import { isPicsumUrl } from '../utils/picsumHelpers';
 import {
   getUserAvatar,
   updateUserAvatar,
@@ -104,6 +106,7 @@ function UserProfileModal({
   const [showAvatarOptions, setShowAvatarOptions] = useState(false);
   const [activeTab, setActiveTab] = useState('info');
   const [isEditing, setIsEditing] = useState(false);
+  const [imageSelectionTab, setImageSelectionTab] = useState('picsum'); // 'upload', 'picsum', 'icon'
 
   // Estados de imagen
   const [uploadedAvatarUrl, setUploadedAvatarUrl] = useState(null);
@@ -258,10 +261,10 @@ function UserProfileModal({
   const handleSelectIconAvatar = async (avatarId) => {
     try {
       // Si había una imagen subida previamente, eliminarla
-      if (uploadedAvatarUrl) {
+      if (uploadedAvatarUrl && !isPicsumUrl(uploadedAvatarUrl)) {
         await deleteAvatarImage(normalizedUser.uid);
-        setUploadedAvatarUrl(null);
       }
+      setUploadedAvatarUrl(null);
 
       await updateUserAvatar(normalizedUser.uid, avatarId);
       setShowAvatarOptions(false);
@@ -272,6 +275,47 @@ function UserProfileModal({
     } catch (err) {
       logger.error('Error updating avatar:', err);
       setError('Error al actualizar el avatar');
+    }
+  };
+
+  // Handler para selección de avatar de Picsum
+  const handleSelectPicsumAvatar = async (url, id) => {
+    try {
+      // Si había una imagen subida previamente (no Picsum), eliminarla
+      if (uploadedAvatarUrl && !isPicsumUrl(uploadedAvatarUrl)) {
+        await deleteAvatarImage(normalizedUser.uid);
+      }
+
+      await updateUserAvatar(normalizedUser.uid, url);
+      setUploadedAvatarUrl(url);
+      setShowAvatarOptions(false);
+      setAvatarKey(prev => prev + 1);
+      setSuccess('Avatar de Picsum aplicado correctamente');
+
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      logger.error('Error updating Picsum avatar:', err);
+      setError('Error al aplicar el avatar');
+    }
+  };
+
+  // Handler para selección de banner de Picsum
+  const handleSelectPicsumBanner = async (url, id) => {
+    try {
+      // Si había un banner subido previamente (no Picsum), eliminarlo
+      if (uploadedBannerUrl && !isPicsumUrl(uploadedBannerUrl)) {
+        await deleteBannerImage(normalizedUser.uid);
+      }
+
+      await updateUserBanner(normalizedUser.uid, url);
+      setUserBanner(url);
+      setUploadedBannerUrl(url);
+      setSuccess('Banner de Picsum aplicado correctamente');
+
+      if (onUpdate) onUpdate();
+    } catch (err) {
+      logger.error('Error updating Picsum banner:', err);
+      setError('Error al aplicar el banner');
     }
   };
 
@@ -502,11 +546,11 @@ function UserProfileModal({
 
           {/* Profile Header - Avatar + Info - ABSOLUTAMENTE dentro del banner */}
           <div className="absolute bottom-0 left-0 right-0 px-4 md:px-6 pb-4">
-            <div className="flex flex-col sm:flex-row items-center sm:items-end gap-2 md:gap-3">
+            <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 md:gap-3">
             {/* Avatar Container */}
-            <div className="relative group flex-shrink-0">
+            <div className="relative group flex-shrink-0 flex items-center justify-center">
               {/* Avatar Universal con sombra */}
-              <div className="shadow-2xl rounded-full">
+              <div className="shadow-2xl rounded-full flex items-center justify-center">
                 <UserAvatar
                   key={avatarKey}
                   userId={normalizedUser?.uid}
@@ -683,13 +727,14 @@ function UserProfileModal({
           </div>
         )}
 
-        {/* Avatar Options - Expandible - FIJO */}
+        {/* Avatar & Banner Options - Expandible con Tabs */}
         {showAvatarOptions && (isOwnProfile || isAdmin) && (
-          <div className="px-4 md:px-6 pt-4 flex-shrink-0">
+          <div className="px-4 md:px-6 pt-4 flex-shrink-0 max-h-[50vh] overflow-y-auto">
             <div className="rounded-lg p-4 border bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800">
-              <div className="flex items-center justify-between mb-3">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-                  Cambiar avatar
+                  Personalizar perfil
                 </h3>
                 <button
                   onClick={() => setShowAvatarOptions(false)}
@@ -699,83 +744,191 @@ function UserProfileModal({
                 </button>
               </div>
 
-              {/* Upload Avatar Option */}
-              <div className="mb-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
-                <label
-                  htmlFor="avatar-upload"
-                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg
-                             bg-white dark:bg-zinc-800 border-2 border-zinc-300 dark:border-zinc-700
-                             hover:border-gray-400 dark:hover:border-gray-400
-                             cursor-pointer transition-all text-sm font-semibold"
+              {/* Tabs de selección */}
+              <div className="flex gap-1 mb-4 p-1 bg-zinc-200 dark:bg-zinc-800 rounded-lg">
+                <button
+                  onClick={() => setImageSelectionTab('picsum')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-semibold transition-all ${
+                    imageSelectionTab === 'picsum'
+                      ? 'bg-white dark:bg-zinc-700 text-purple-600 dark:text-purple-400 shadow-sm'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                  }`}
                 >
-                  <Upload size={18} strokeWidth={2} />
-                  Subir avatar personalizado
-                </label>
-                <input
-                  id="avatar-upload"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleAvatarUpload}
-                  disabled={uploading}
-                  className="hidden"
-                />
-                <p className="mt-2 text-xs text-center text-zinc-500 dark:text-zinc-400">
-                  JPG, PNG o GIF (máx 5MB)
-                </p>
+                  <ImageIcon size={14} strokeWidth={2} />
+                  Galería
+                </button>
+                <button
+                  onClick={() => setImageSelectionTab('icon')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-semibold transition-all ${
+                    imageSelectionTab === 'icon'
+                      ? 'bg-white dark:bg-zinc-700 text-purple-600 dark:text-purple-400 shadow-sm'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                  }`}
+                >
+                  <Grid3X3 size={14} strokeWidth={2} />
+                  Iconos
+                </button>
+                <button
+                  onClick={() => setImageSelectionTab('upload')}
+                  className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md text-xs font-semibold transition-all ${
+                    imageSelectionTab === 'upload'
+                      ? 'bg-white dark:bg-zinc-700 text-purple-600 dark:text-purple-400 shadow-sm'
+                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200'
+                  }`}
+                >
+                  <Upload size={14} strokeWidth={2} />
+                  Subir
+                </button>
               </div>
 
-              {/* Upload Banner Option */}
-              <div className="mb-4 pb-4 border-b border-zinc-200 dark:border-zinc-800">
-                <label
-                  htmlFor="banner-upload-2"
-                  className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg
-                             bg-white dark:bg-zinc-800 border-2 border-zinc-300 dark:border-zinc-700
-                             hover:border-purple-500 dark:hover:border-purple-500
-                             cursor-pointer transition-all text-sm font-semibold"
-                >
-                  <Upload size={18} strokeWidth={2} />
-                  {userBanner ? 'Cambiar banner' : 'Subir banner'}
-                </label>
-                <input
-                  id="banner-upload-2"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleBannerUpload}
-                  disabled={uploading}
-                  className="hidden"
-                />
-                {userBanner && (
-                  <button
-                    onClick={handleRemoveBanner}
-                    className="mt-2 w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg
-                               bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800
-                               hover:bg-red-100 dark:hover:bg-red-900/30
-                               transition-all text-sm font-semibold text-red-600 dark:text-red-400"
-                  >
-                    <Trash2 size={16} strokeWidth={2} />
-                    Eliminar banner
-                  </button>
-                )}
-              </div>
+              {/* Tab: Galería Picsum */}
+              {imageSelectionTab === 'picsum' && (
+                <div className="space-y-6">
+                  {/* Avatar Picsum */}
+                  <div>
+                    <h4 className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-3 flex items-center gap-2">
+                      <UserIcon size={14} strokeWidth={2} />
+                      Avatar
+                    </h4>
+                    <PicsumSelector
+                      type="avatar"
+                      currentUrl={uploadedAvatarUrl}
+                      user={normalizedUser}
+                      onSelect={handleSelectPicsumAvatar}
+                      showAutoSelect={true}
+                      compact={false}
+                    />
+                  </div>
 
-              {/* Icon Avatars */}
-              <p className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 mb-2">O elige un ícono:</p>
-              <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-2">
-                {Object.entries(AVATARS).map(([key, { icon: Icon, label }]) => (
-                  <button
-                    key={key}
-                    className={`aspect-square rounded-lg flex items-center justify-center transition-all ${
-                      !uploadedAvatarUrl
-                        ? 'bg-gray-100 dark:bg-indigo-900/20 border-2 border-gray-400'
-                        : 'bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 hover:border-indigo-400'
-                    }`}
-                    onClick={() => handleSelectIconAvatar(key)}
-                    title={label}
-                  >
-                    <Icon size={24} strokeWidth={2} />
-                  </button>
-                ))}
-              </div>
+                  {/* Banner Picsum */}
+                  <div className="pt-4 border-t border-zinc-200 dark:border-zinc-700">
+                    <h4 className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-3 flex items-center gap-2">
+                      <ImageIcon size={14} strokeWidth={2} />
+                      Banner
+                    </h4>
+                    <PicsumSelector
+                      type="banner"
+                      currentUrl={userBanner}
+                      user={normalizedUser}
+                      onSelect={handleSelectPicsumBanner}
+                      showAutoSelect={true}
+                      compact={false}
+                    />
+                    {userBanner && (
+                      <button
+                        onClick={handleRemoveBanner}
+                        className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg
+                                   bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800
+                                   hover:bg-red-100 dark:hover:bg-red-900/30
+                                   transition-all text-sm font-semibold text-red-600 dark:text-red-400"
+                      >
+                        <Trash2 size={16} strokeWidth={2} />
+                        Eliminar banner
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Tab: Iconos */}
+              {imageSelectionTab === 'icon' && (
+                <div>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mb-3">
+                    Elige un ícono como avatar:
+                  </p>
+                  <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-9 gap-2">
+                    {Object.entries(AVATARS).map(([key, { icon: Icon, label }]) => (
+                      <button
+                        key={key}
+                        className={`aspect-square rounded-lg flex items-center justify-center transition-all ${
+                          !uploadedAvatarUrl && !isPicsumUrl(uploadedAvatarUrl)
+                            ? 'bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-400 dark:border-purple-600'
+                            : 'bg-white dark:bg-zinc-800 border-2 border-zinc-200 dark:border-zinc-700 hover:border-purple-400 dark:hover:border-purple-500'
+                        }`}
+                        onClick={() => handleSelectIconAvatar(key)}
+                        title={label}
+                      >
+                        <Icon size={24} strokeWidth={2} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Tab: Subir imagen */}
+              {imageSelectionTab === 'upload' && (
+                <div className="space-y-4">
+                  {/* Upload Avatar */}
+                  <div>
+                    <h4 className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-2 flex items-center gap-2">
+                      <UserIcon size={14} strokeWidth={2} />
+                      Subir avatar personalizado
+                    </h4>
+                    <label
+                      htmlFor="avatar-upload"
+                      className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg
+                                 bg-white dark:bg-zinc-800 border-2 border-dashed border-zinc-300 dark:border-zinc-600
+                                 hover:border-purple-400 dark:hover:border-purple-500
+                                 cursor-pointer transition-all text-sm font-semibold"
+                    >
+                      <Upload size={18} strokeWidth={2} />
+                      {uploading ? 'Subiendo...' : 'Elegir imagen'}
+                    </label>
+                    <input
+                      id="avatar-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      disabled={uploading}
+                      className="hidden"
+                    />
+                    <p className="mt-1 text-xs text-center text-zinc-400">
+                      JPG, PNG o GIF (máx 5MB)
+                    </p>
+                  </div>
+
+                  {/* Upload Banner */}
+                  <div className="pt-4 border-t border-zinc-200 dark:border-zinc-700">
+                    <h4 className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 mb-2 flex items-center gap-2">
+                      <ImageIcon size={14} strokeWidth={2} />
+                      Subir banner personalizado
+                    </h4>
+                    <label
+                      htmlFor="banner-upload-2"
+                      className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg
+                                 bg-white dark:bg-zinc-800 border-2 border-dashed border-zinc-300 dark:border-zinc-600
+                                 hover:border-purple-400 dark:hover:border-purple-500
+                                 cursor-pointer transition-all text-sm font-semibold"
+                    >
+                      <Upload size={18} strokeWidth={2} />
+                      {uploading ? 'Subiendo...' : (userBanner ? 'Cambiar banner' : 'Elegir imagen')}
+                    </label>
+                    <input
+                      id="banner-upload-2"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleBannerUpload}
+                      disabled={uploading}
+                      className="hidden"
+                    />
+                    <p className="mt-1 text-xs text-center text-zinc-400">
+                      Recomendado: 800x200px
+                    </p>
+                    {userBanner && (
+                      <button
+                        onClick={handleRemoveBanner}
+                        className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg
+                                   bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800
+                                   hover:bg-red-100 dark:hover:bg-red-900/30
+                                   transition-all text-sm font-semibold text-red-600 dark:text-red-400"
+                      >
+                        <Trash2 size={16} strokeWidth={2} />
+                        Eliminar banner
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
