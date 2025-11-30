@@ -65,6 +65,20 @@ export async function loadDictionary() {
 }
 
 /**
+ * Normaliza una entrada para soportar ambos formatos (compacto y extendido)
+ * Formato compacto: {s, t, p, d}
+ * Formato extendido: {simplified, traditional, pinyin, definitions_es}
+ */
+function normalizeEntry(entry) {
+  return {
+    s: entry.s || entry.simplified || '',
+    t: entry.t || entry.traditional || '',
+    p: entry.p || entry.pinyin || '',
+    d: entry.d || entry.definitions_es || entry.definitions || []
+  };
+}
+
+/**
  * Construye índices de búsqueda para acceso O(1)
  * @param {Array} entries - Entradas del diccionario
  */
@@ -77,40 +91,47 @@ function buildSearchIndex(entries) {
   };
 
   entries.forEach((entry, index) => {
+    const norm = normalizeEntry(entry);
+
     // Índice por caracteres simplificados
-    if (!dictionaryIndex.bySimplified.has(entry.s)) {
-      dictionaryIndex.bySimplified.set(entry.s, []);
+    if (norm.s && !dictionaryIndex.bySimplified.has(norm.s)) {
+      dictionaryIndex.bySimplified.set(norm.s, []);
     }
-    dictionaryIndex.bySimplified.get(entry.s).push(index);
+    if (norm.s) dictionaryIndex.bySimplified.get(norm.s).push(index);
 
     // Índice por caracteres tradicionales
-    if (!dictionaryIndex.byTraditional.has(entry.t)) {
-      dictionaryIndex.byTraditional.set(entry.t, []);
+    if (norm.t && !dictionaryIndex.byTraditional.has(norm.t)) {
+      dictionaryIndex.byTraditional.set(norm.t, []);
     }
-    dictionaryIndex.byTraditional.get(entry.t).push(index);
+    if (norm.t) dictionaryIndex.byTraditional.get(norm.t).push(index);
 
     // Índice por pinyin (normalizado sin espacios y sin tonos)
-    const pinyinKey = normalizePinyin(entry.p);
-    if (!dictionaryIndex.byPinyin.has(pinyinKey)) {
-      dictionaryIndex.byPinyin.set(pinyinKey, []);
+    if (norm.p) {
+      const pinyinKey = normalizePinyin(norm.p);
+      if (!dictionaryIndex.byPinyin.has(pinyinKey)) {
+        dictionaryIndex.byPinyin.set(pinyinKey, []);
+      }
+      dictionaryIndex.byPinyin.get(pinyinKey).push(index);
     }
-    dictionaryIndex.byPinyin.get(pinyinKey).push(index);
 
     // Índice por palabras en español
-    entry.d.forEach(def => {
-      const words = def.toLowerCase().split(/\s+/);
-      words.forEach(word => {
-        const cleanWord = word.replace(/[^\w\u00C0-\u017F]/g, '');
-        if (cleanWord.length >= 2) {
-          if (!dictionaryIndex.bySpanish.has(cleanWord)) {
-            dictionaryIndex.bySpanish.set(cleanWord, []);
+    if (norm.d && Array.isArray(norm.d)) {
+      norm.d.forEach(def => {
+        if (!def) return;
+        const words = def.toLowerCase().split(/\s+/);
+        words.forEach(word => {
+          const cleanWord = word.replace(/[^\w\u00C0-\u017F]/g, '');
+          if (cleanWord.length >= 2) {
+            if (!dictionaryIndex.bySpanish.has(cleanWord)) {
+              dictionaryIndex.bySpanish.set(cleanWord, []);
+            }
+            if (!dictionaryIndex.bySpanish.get(cleanWord).includes(index)) {
+              dictionaryIndex.bySpanish.get(cleanWord).push(index);
+            }
           }
-          if (!dictionaryIndex.bySpanish.get(cleanWord).includes(index)) {
-            dictionaryIndex.bySpanish.get(cleanWord).push(index);
-          }
-        }
+        });
       });
-    });
+    }
   });
 
   logger.info(`Índices construidos: ${dictionaryIndex.bySimplified.size} chino, ${dictionaryIndex.bySpanish.size} español`, 'dictionaryService');
@@ -238,7 +259,8 @@ function searchByChinese(query, limit) {
   if (results.length === 0) {
     dictionaryCache.forEach((entry, idx) => {
       if (results.length >= limit) return;
-      if (entry.s.includes(query) || entry.t.includes(query)) {
+      const norm = normalizeEntry(entry);
+      if (norm.s.includes(query) || norm.t.includes(query)) {
         results.push(formatEntry(entry));
       }
     });
@@ -319,12 +341,13 @@ function searchBySpanish(query, limit, fuzzy) {
  * Formatea una entrada del diccionario para el resultado
  */
 function formatEntry(entry) {
+  const norm = normalizeEntry(entry);
   return {
-    word: entry.s,
-    simplified: entry.s,
-    traditional: entry.t,
-    pinyin: entry.p,
-    meanings: entry.d,
+    word: norm.s,
+    simplified: norm.s,
+    traditional: norm.t,
+    pinyin: norm.p,
+    meanings: norm.d,
     source: 'cedict'
   };
 }
