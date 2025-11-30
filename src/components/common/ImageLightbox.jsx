@@ -172,7 +172,7 @@ export default function ImageLightbox({
           }}
           className="bg-white/10 hover:bg-white/20 border-white/20 text-white"
         >
-          <ZoomOut size={18} />
+          <ZoomOut size={18} className="text-white" />
         </BaseButton>
         <BaseButton
           variant="outline"
@@ -183,7 +183,7 @@ export default function ImageLightbox({
           }}
           className="bg-white/10 hover:bg-white/20 border-white/20 text-white"
         >
-          <Maximize2 size={18} />
+          <Maximize2 size={18} className="text-white" />
           <span className="text-xs text-white">{Math.round(scale * 100)}%</span>
         </BaseButton>
         <BaseButton
@@ -195,7 +195,7 @@ export default function ImageLightbox({
           }}
           className="bg-white/10 hover:bg-white/20 border-white/20 text-white"
         >
-          <ZoomIn size={18} />
+          <ZoomIn size={18} className="text-white" />
         </BaseButton>
       </div>
 
