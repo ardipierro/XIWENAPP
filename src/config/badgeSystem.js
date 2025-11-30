@@ -340,122 +340,6 @@ export const DEFAULT_BADGE_CONFIG = {
   },
 
   // ========================================
-  // CATEGORÍAS TEMÁTICAS
-  // ========================================
-  THEME_VOCABULARY: {
-    variant: 'primary',
-    color: '#5b8fa3',
-    label: 'Vocabulario',
-    icon: '📚',
-    heroicon: 'BookOpenIcon',
-    description: 'Palabras y expresiones',
-    category: 'theme'
-  },
-  THEME_GRAMMAR: {
-    variant: 'info',
-    color: '#7a8fa8',
-    label: 'Gramática',
-    icon: '📖',
-    heroicon: 'NewspaperIcon',
-    description: 'Reglas y estructuras',
-    category: 'theme'
-  },
-  THEME_CONVERSATION: {
-    variant: 'success',
-    color: '#10b981',
-    label: 'Conversación',
-    icon: '💬',
-    heroicon: 'ChatBubbleLeftRightIcon',
-    description: 'Diálogo y comunicación',
-    category: 'theme'
-  },
-  THEME_PRONUNCIATION: {
-    variant: 'warning',
-    color: '#f59e0b',
-    label: 'Pronunciación',
-    icon: '🗣️',
-    heroicon: 'SpeakerWaveIcon',
-    description: 'Fonética y entonación',
-    category: 'theme'
-  },
-  THEME_READING: {
-    variant: 'info',
-    color: '#06b6d4',
-    label: 'Comprensión Lectora',
-    icon: '📖',
-    heroicon: 'NewspaperIcon',
-    description: 'Lectura y comprensión',
-    category: 'theme'
-  },
-  THEME_LISTENING: {
-    variant: 'warning',
-    color: '#f59e0b',
-    label: 'Comprensión Auditiva',
-    icon: '🎧',
-    heroicon: 'MusicalNoteIcon',
-    description: 'Escucha y comprensión',
-    category: 'theme'
-  },
-  THEME_WRITING: {
-    variant: 'primary',
-    color: '#5b8fa3',
-    label: 'Escritura',
-    icon: '✍️',
-    heroicon: 'PencilSquareIcon',
-    description: 'Redacción y composición',
-    category: 'theme'
-  },
-  THEME_CULTURE: {
-    variant: 'danger',
-    color: '#ef4444',
-    label: 'Cultura',
-    icon: '🌍',
-    heroicon: 'GlobeAltIcon',
-    description: 'Contexto cultural',
-    category: 'theme'
-  },
-
-  // ========================================
-  // CARACTERÍSTICAS DE CONTENIDO
-  // ========================================
-  FEATURE_AUDIO: {
-    variant: 'warning',
-    color: '#f59e0b',
-    label: 'Con Audio',
-    icon: '🔊',
-    heroicon: 'SpeakerWaveIcon',
-    description: 'Incluye audio TTS o grabado',
-    category: 'feature'
-  },
-  FEATURE_VIDEO: {
-    variant: 'danger',
-    color: '#ef4444',
-    label: 'Con Video',
-    icon: '🎥',
-    heroicon: 'VideoCameraIcon',
-    description: 'Incluye contenido multimedia',
-    category: 'feature'
-  },
-  FEATURE_INTERACTIVE: {
-    variant: 'info',
-    color: '#06b6d4',
-    label: 'Interactivo',
-    icon: '🎮',
-    heroicon: 'PuzzlePieceIcon',
-    description: 'Requiere participación activa',
-    category: 'feature'
-  },
-  FEATURE_AI_GENERATED: {
-    variant: 'info',
-    color: '#7a8fa8',
-    label: 'Generado con IA',
-    icon: '🤖',
-    heroicon: 'CpuChipIcon',
-    description: 'Creado con asistencia de IA',
-    category: 'feature'
-  },
-
-  // ========================================
   // ROLES DE USUARIO
   // ========================================
   ROLE_ADMIN: {
@@ -647,55 +531,6 @@ export const DEFAULT_BADGE_CONFIG = {
   },
 
   // ========================================
-  // ESTADOS DE USUARIO
-  // ========================================
-  USER_ACTIVE: {
-    variant: 'success',
-    color: '#10b981',
-    label: 'Activo',
-    icon: '✅',
-    heroicon: 'CheckCircleIcon',
-    description: 'Usuario activo en el sistema',
-    category: 'user_status'
-  },
-  USER_INACTIVE: {
-    variant: 'default',
-    color: '#71717a',
-    label: 'Inactivo',
-    icon: '⏸️',
-    heroicon: 'PauseCircleIcon',
-    description: 'Usuario inactivo',
-    category: 'user_status'
-  },
-  USER_ONLINE: {
-    variant: 'success',
-    color: '#22c55e',
-    label: 'En línea',
-    icon: '🟢',
-    heroicon: 'SignalIcon',
-    description: 'Usuario conectado',
-    category: 'user_status'
-  },
-  USER_OFFLINE: {
-    variant: 'default',
-    color: '#a1a1aa',
-    label: 'Desconectado',
-    icon: '⚪',
-    heroicon: 'MinusCircleIcon',
-    description: 'Usuario desconectado',
-    category: 'user_status'
-  },
-  USER_SUSPENDED: {
-    variant: 'danger',
-    color: '#ef4444',
-    label: 'Suspendido',
-    icon: '🚫',
-    heroicon: 'NoSymbolIcon',
-    description: 'Usuario suspendido',
-    category: 'user_status'
-  },
-
-  // ========================================
   // PROVEEDORES DE VIDEO
   // ========================================
   PROVIDER_LIVEKIT: {
@@ -775,54 +610,6 @@ export const DEFAULT_BADGE_CONFIG = {
     category: 'schedule_type'
   },
 
-  // ========================================
-  // ESTADOS DE INSCRIPCIÓN
-  // ========================================
-  ENROLLMENT_ACTIVE: {
-    variant: 'success',
-    color: '#10b981',
-    label: 'Activa',
-    icon: '✅',
-    heroicon: 'CheckCircleIcon',
-    description: 'Inscripción activa',
-    category: 'enrollment_status'
-  },
-  ENROLLMENT_PAUSED: {
-    variant: 'warning',
-    color: '#f59e0b',
-    label: 'Pausada',
-    icon: '⏸️',
-    heroicon: 'PauseCircleIcon',
-    description: 'Inscripción en pausa',
-    category: 'enrollment_status'
-  },
-  ENROLLMENT_CANCELLED: {
-    variant: 'danger',
-    color: '#ef4444',
-    label: 'Cancelada',
-    icon: '❌',
-    heroicon: 'XCircleIcon',
-    description: 'Inscripción cancelada',
-    category: 'enrollment_status'
-  },
-  ENROLLMENT_COMPLETED: {
-    variant: 'info',
-    color: '#06b6d4',
-    label: 'Completada',
-    icon: '🎓',
-    heroicon: 'AcademicCapIcon',
-    description: 'Curso completado',
-    category: 'enrollment_status'
-  },
-  ENROLLMENT_EXPIRED: {
-    variant: 'default',
-    color: '#71717a',
-    label: 'Expirada',
-    icon: '⏰',
-    heroicon: 'ClockIcon',
-    description: 'Inscripción expirada',
-    category: 'enrollment_status'
-  },
 };
 
 // ============================================
@@ -1213,17 +1000,13 @@ export const DEFAULT_BADGE_PRESET_CONFIG = {
     difficulty: 'full',          // Dificultad: completo
     cefr: 'full',               // Niveles CEFR: completo
     status: 'textOnly',         // Estados: solo texto
-    theme: 'full',              // Temas: completo
-    feature: 'iconOnly',        // Características: solo icono
     role: 'full',               // Roles: completo
     homework_status: 'minimal', // Corrección: minimalista
     credits: 'full',            // Créditos: completo
     gamification: 'iconOnly',   // Gamificación: solo icono
     session_status: 'textOnly', // Estados de sesión: solo texto
-    user_status: 'iconOnly',    // Estados de usuario: solo icono
     video_provider: 'iconOnly', // Proveedores: solo icono
     schedule_type: 'textOnly',  // Tipos de programación: solo texto
-    enrollment_status: 'textOnly', // Estados de inscripción: solo texto
   },
 
   // Overrides individuales por badge específico (opcional)
@@ -1719,18 +1502,6 @@ export const BADGE_CATEGORIES = {
     systemCategory: true,
     warning: 'Los estados del sistema (Borrador, Publicado, etc.) son fijos. Los badges custom son solo para uso decorativo.',
   },
-  theme: {
-    label: 'Categorías Temáticas',
-    description: 'Áreas de conocimiento lingüístico',
-    icon: '🎯',
-    allowCustom: true,
-  },
-  feature: {
-    label: 'Características',
-    description: 'Atributos especiales del contenido',
-    icon: '⭐',
-    allowCustom: true,
-  },
   role: {
     label: 'Roles de Usuario',
     description: 'Perfiles y permisos en el sistema',
@@ -1771,14 +1542,6 @@ export const BADGE_CATEGORIES = {
     systemCategory: true,
     warning: 'Los estados de sesión son funcionales y controlan el flujo de las clases en vivo.',
   },
-  user_status: {
-    label: 'Estados de Usuario',
-    description: 'Estados de actividad y conexión de usuarios',
-    icon: '👤',
-    allowCustom: true,
-    systemCategory: true,
-    warning: 'Los estados de usuario son funcionales.',
-  },
   video_provider: {
     label: 'Proveedores de Video',
     description: 'Plataformas de videoconferencia',
@@ -1794,14 +1557,6 @@ export const BADGE_CATEGORIES = {
     allowCustom: true,
     systemCategory: true,
     warning: 'Los tipos de programación son funcionales.',
-  },
-  enrollment_status: {
-    label: 'Estados de Inscripción',
-    description: 'Estados del ciclo de vida de inscripciones',
-    icon: '📋',
-    allowCustom: true,
-    systemCategory: true,
-    warning: 'Los estados de inscripción controlan acceso a cursos.',
   },
 };
 
@@ -1901,15 +1656,6 @@ export const BADGE_MAPPINGS = {
     'cancelled': 'SESSION_CANCELLED',
   },
 
-  // User Status → Badge key
-  user_status: {
-    'active': 'USER_ACTIVE',
-    'inactive': 'USER_INACTIVE',
-    'online': 'USER_ONLINE',
-    'offline': 'USER_OFFLINE',
-    'suspended': 'USER_SUSPENDED',
-  },
-
   // Video Provider → Badge key
   video_provider: {
     'livekit': 'PROVIDER_LIVEKIT',
@@ -1927,14 +1673,6 @@ export const BADGE_MAPPINGS = {
     'onetime': 'SCHEDULE_ONETIME',
   },
 
-  // Enrollment Status → Badge key
-  enrollment_status: {
-    'active': 'ENROLLMENT_ACTIVE',
-    'paused': 'ENROLLMENT_PAUSED',
-    'cancelled': 'ENROLLMENT_CANCELLED',
-    'completed': 'ENROLLMENT_COMPLETED',
-    'expired': 'ENROLLMENT_EXPIRED',
-  },
 };
 
 // ============================================
@@ -2093,14 +1831,6 @@ export function getBadgeForSessionStatus(status) {
 }
 
 /**
- * Obtiene la configuración de badge para un estado de usuario
- */
-export function getBadgeForUserStatus(status) {
-  const key = BADGE_MAPPINGS.user_status[status];
-  return getBadgeByKey(key) || DEFAULT_BADGE_CONFIG.USER_ACTIVE;
-}
-
-/**
  * Obtiene la configuración de badge para un proveedor de video
  */
 export function getBadgeForVideoProvider(provider) {
@@ -2114,14 +1844,6 @@ export function getBadgeForVideoProvider(provider) {
 export function getBadgeForScheduleType(type) {
   const key = BADGE_MAPPINGS.schedule_type[type];
   return getBadgeByKey(key) || DEFAULT_BADGE_CONFIG.SCHEDULE_ONETIME;
-}
-
-/**
- * Obtiene la configuración de badge para un estado de inscripción
- */
-export function getBadgeForEnrollmentStatus(status) {
-  const key = BADGE_MAPPINGS.enrollment_status[status];
-  return getBadgeByKey(key) || DEFAULT_BADGE_CONFIG.ENROLLMENT_ACTIVE;
 }
 
 /**
