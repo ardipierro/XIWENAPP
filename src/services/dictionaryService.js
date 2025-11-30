@@ -1,247 +1,403 @@
 /**
- * @fileoverview Dictionary Service - Búsqueda en diccionarios sin usar créditos de IA
- * Soporta MDBG CC-CEDICT, WordReference y Pleco
+ * @fileoverview Dictionary Service - Búsqueda instantánea en diccionarios español-chino
+ * Basado en CC-CEDICT traducido al español
+ * Sin costos de API - Respuesta < 10ms
  * @module services/dictionaryService
  */
 
 import logger from '../utils/logger';
 
-/**
- * MDBG CC-CEDICT Service
- * Base de datos abierta español-chino
- * API: https://www.mdbg.net/chinese/dictionary-api
- */
-async function searchMDBG(word) {
-  try {
-    const url = `https://www.mdbg.net/chinese/dictionary?page=worddict&wdrst=0&wdqb=${encodeURIComponent(word)}`;
-
-    logger.info(`Searching MDBG for: ${word}`, 'dictionaryService');
-
-    // MDBG no tiene API pública JSON, así que usamos scraping ligero
-    // Para producción, se debería usar un proxy o API alternativa
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`MDBG HTTP ${response.status}`);
-    }
-
-    const html = await response.text();
-
-    // Parsear resultados básicos (esto es una implementación simplificada)
-    // En producción se recomienda usar una API dedicada o backend proxy
-    const result = parseMDBGHTML(html, word);
-
-    logger.info(`MDBG found: ${result ? 'Yes' : 'No'}`, 'dictionaryService');
-
-    return result;
-  } catch (error) {
-    logger.error('MDBG search failed', error, 'dictionaryService');
-    return null;
-  }
-}
-
-/**
- * Parser simple de HTML de MDBG (implementación básica)
- */
-function parseMDBGHTML(html, originalWord) {
-  try {
-    // Buscar primer resultado
-    const chineseMatch = html.match(/<div class="hanzi">([^<]+)<\/div>/);
-    const pinyinMatch = html.match(/<div class="pinyin">([^<]+)<\/div>/);
-    const englishMatch = html.match(/<div class="defs">([^<]+)<\/div>/);
-
-    if (!chineseMatch) {
-      return null;
-    }
-
-    return {
-      word: originalWord,
-      chinese: chineseMatch[1].trim(),
-      pinyin: pinyinMatch ? pinyinMatch[1].trim() : '',
-      meanings: englishMatch ? [englishMatch[1].trim()] : [],
-      source: 'mdbg',
-      example: null
-    };
-  } catch (error) {
-    logger.error('MDBG parse error', error, 'dictionaryService');
-    return null;
-  }
-}
-
-/**
- * WordReference Service (mock - requiere API key real)
- */
-async function searchWordReference(word) {
-  try {
-    // NOTA: WordReference requiere API key de pago
-    // Esta es una implementación mock para demostración
-    logger.info(`Searching WordReference for: ${word}`, 'dictionaryService');
-
-    // En producción, hacer la request real:
-    // const response = await fetch(`https://api.wordreference.com/...`);
-
-    // Por ahora retornamos null para indicar que no está implementado
-    logger.warn('WordReference API not implemented (requires paid API key)', 'dictionaryService');
-    return null;
-  } catch (error) {
-    logger.error('WordReference search failed', error, 'dictionaryService');
-    return null;
-  }
-}
-
-/**
- * Pleco Service (mock - requiere API key)
- */
-async function searchPleco(word) {
-  try {
-    logger.info(`Searching Pleco for: ${word}`, 'dictionaryService');
-
-    // NOTA: Pleco no tiene API pública abierta
-    // Esta es una implementación placeholder
-    logger.warn('Pleco API not available (no public API)', 'dictionaryService');
-    return null;
-  } catch (error) {
-    logger.error('Pleco search failed', error, 'dictionaryService');
-    return null;
-  }
-}
-
-/**
- * Diccionario local simplificado (fallback sin conexión)
- * Palabras más comunes en español-chino
- */
-const LOCAL_DICTIONARY = {
-  'hola': {
-    chinese: '你好',
-    pinyin: 'nǐ hǎo',
-    meanings: ['Saludo común', 'Hola', 'Buenos días'],
-    source: 'local'
-  },
-  'adiós': {
-    chinese: '再见',
-    pinyin: 'zàijiàn',
-    meanings: ['Despedida', 'Adiós', 'Hasta luego'],
-    source: 'local'
-  },
-  'gracias': {
-    chinese: '谢谢',
-    pinyin: 'xièxie',
-    meanings: ['Agradecer', 'Gracias'],
-    source: 'local'
-  },
-  'por favor': {
-    chinese: '请',
-    pinyin: 'qǐng',
-    meanings: ['Por favor', 'Forma cortés de pedir algo'],
-    source: 'local'
-  },
-  'sí': {
-    chinese: '是',
-    pinyin: 'shì',
-    meanings: ['Sí', 'Afirmación', 'Ser/estar'],
-    source: 'local'
-  },
-  'no': {
-    chinese: '不',
-    pinyin: 'bù',
-    meanings: ['No', 'Negación'],
-    source: 'local'
-  },
-  'agua': {
-    chinese: '水',
-    pinyin: 'shuǐ',
-    meanings: ['Agua', 'Líquido'],
-    source: 'local'
-  },
-  'comida': {
-    chinese: '食物',
-    pinyin: 'shíwù',
-    meanings: ['Comida', 'Alimento'],
-    source: 'local'
-  },
-  'casa': {
-    chinese: '家',
-    pinyin: 'jiā',
-    meanings: ['Casa', 'Hogar', 'Familia'],
-    source: 'local'
-  },
-  'amigo': {
-    chinese: '朋友',
-    pinyin: 'péngyǒu',
-    meanings: ['Amigo', 'Compañero'],
-    source: 'local'
-  }
+// Cache en memoria para búsquedas frecuentes
+let dictionaryCache = null;
+let dictionaryIndex = {
+  bySimplified: new Map(),
+  byTraditional: new Map(),
+  byPinyin: new Map(),
+  bySpanish: new Map()
 };
+let isLoaded = false;
+let loadingPromise = null;
 
 /**
- * Buscar en diccionario local
+ * Carga el diccionario CEDICT desde el archivo JSON
+ * @returns {Promise<boolean>} true si se cargó correctamente
  */
-function searchLocal(word) {
-  const normalizedWord = word.toLowerCase().trim();
-  const result = LOCAL_DICTIONARY[normalizedWord];
+export async function loadDictionary() {
+  if (isLoaded && dictionaryCache) {
+    return true;
+  }
 
-  if (result) {
-    return {
-      word,
-      ...result
-    };
+  if (loadingPromise) {
+    return loadingPromise;
+  }
+
+  loadingPromise = (async () => {
+    try {
+      logger.info('Cargando diccionario CEDICT...', 'dictionaryService');
+
+      const response = await fetch('/dictionaries/cedict_es_sample.json');
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const data = await response.json();
+      dictionaryCache = data.entries;
+
+      // Construir índices para búsqueda rápida
+      buildSearchIndex(dictionaryCache);
+
+      isLoaded = true;
+      logger.info(`Diccionario cargado: ${dictionaryCache.length} entradas`, 'dictionaryService');
+
+      return true;
+    } catch (error) {
+      logger.error('Error cargando diccionario', error, 'dictionaryService');
+      loadingPromise = null;
+      return false;
+    }
+  })();
+
+  return loadingPromise;
+}
+
+/**
+ * Construye índices de búsqueda para acceso O(1)
+ * @param {Array} entries - Entradas del diccionario
+ */
+function buildSearchIndex(entries) {
+  dictionaryIndex = {
+    bySimplified: new Map(),
+    byTraditional: new Map(),
+    byPinyin: new Map(),
+    bySpanish: new Map()
+  };
+
+  entries.forEach((entry, index) => {
+    // Índice por caracteres simplificados
+    if (!dictionaryIndex.bySimplified.has(entry.s)) {
+      dictionaryIndex.bySimplified.set(entry.s, []);
+    }
+    dictionaryIndex.bySimplified.get(entry.s).push(index);
+
+    // Índice por caracteres tradicionales
+    if (!dictionaryIndex.byTraditional.has(entry.t)) {
+      dictionaryIndex.byTraditional.set(entry.t, []);
+    }
+    dictionaryIndex.byTraditional.get(entry.t).push(index);
+
+    // Índice por pinyin (normalizado sin espacios y sin tonos)
+    const pinyinKey = normalizePinyin(entry.p);
+    if (!dictionaryIndex.byPinyin.has(pinyinKey)) {
+      dictionaryIndex.byPinyin.set(pinyinKey, []);
+    }
+    dictionaryIndex.byPinyin.get(pinyinKey).push(index);
+
+    // Índice por palabras en español
+    entry.d.forEach(def => {
+      const words = def.toLowerCase().split(/\s+/);
+      words.forEach(word => {
+        const cleanWord = word.replace(/[^\w\u00C0-\u017F]/g, '');
+        if (cleanWord.length >= 2) {
+          if (!dictionaryIndex.bySpanish.has(cleanWord)) {
+            dictionaryIndex.bySpanish.set(cleanWord, []);
+          }
+          if (!dictionaryIndex.bySpanish.get(cleanWord).includes(index)) {
+            dictionaryIndex.bySpanish.get(cleanWord).push(index);
+          }
+        }
+      });
+    });
+  });
+
+  logger.info(`Índices construidos: ${dictionaryIndex.bySimplified.size} chino, ${dictionaryIndex.bySpanish.size} español`, 'dictionaryService');
+}
+
+/**
+ * Normaliza pinyin para búsqueda
+ * @param {string} pinyin - Pinyin con marcas de tono
+ * @returns {string} Pinyin normalizado
+ */
+function normalizePinyin(pinyin) {
+  return pinyin
+    .toLowerCase()
+    .replace(/\s+/g, '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, ''); // Quitar diacríticos
+}
+
+/**
+ * Detecta si el texto es chino
+ * @param {string} text - Texto a analizar
+ * @returns {boolean}
+ */
+function isChinese(text) {
+  return /[\u4e00-\u9fff]/.test(text);
+}
+
+/**
+ * Detecta si el texto es pinyin
+ * @param {string} text - Texto a analizar
+ * @returns {boolean}
+ */
+function isPinyin(text) {
+  return /^[a-zA-ZüÜāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ\s]+$/.test(text);
+}
+
+/**
+ * Busca en el diccionario CEDICT
+ * @param {string} query - Término de búsqueda (español, chino o pinyin)
+ * @param {Object} options - Opciones de búsqueda
+ * @returns {Promise<Array>} Resultados de búsqueda
+ */
+export async function searchDictionary(query, options = {}) {
+  const {
+    limit = 10,
+    searchType = 'auto', // 'auto', 'chinese', 'spanish', 'pinyin'
+    fuzzy = true
+  } = options;
+
+  if (!query || !query.trim()) {
+    return [];
+  }
+
+  // Asegurar que el diccionario está cargado
+  if (!isLoaded) {
+    await loadDictionary();
+  }
+
+  if (!dictionaryCache) {
+    logger.warn('Diccionario no disponible', 'dictionaryService');
+    return [];
+  }
+
+  const startTime = performance.now();
+  const normalizedQuery = query.trim().toLowerCase();
+  let results = [];
+
+  // Determinar tipo de búsqueda
+  const detectedType = searchType === 'auto'
+    ? detectSearchType(query)
+    : searchType;
+
+  switch (detectedType) {
+    case 'chinese':
+      results = searchByChinese(query.trim(), limit);
+      break;
+    case 'pinyin':
+      results = searchByPinyin(normalizedQuery, limit, fuzzy);
+      break;
+    case 'spanish':
+    default:
+      results = searchBySpanish(normalizedQuery, limit, fuzzy);
+      break;
+  }
+
+  const elapsed = performance.now() - startTime;
+  logger.info(`Búsqueda "${query}" (${detectedType}): ${results.length} resultados en ${elapsed.toFixed(1)}ms`, 'dictionaryService');
+
+  return results;
+}
+
+/**
+ * Detecta el tipo de búsqueda basado en el input
+ * @param {string} query
+ * @returns {'chinese'|'pinyin'|'spanish'}
+ */
+function detectSearchType(query) {
+  if (isChinese(query)) {
+    return 'chinese';
+  }
+  if (isPinyin(query) && !query.includes(' ') && query.length <= 10) {
+    return 'pinyin';
+  }
+  return 'spanish';
+}
+
+/**
+ * Búsqueda por caracteres chinos
+ */
+function searchByChinese(query, limit) {
+  const results = [];
+
+  // Búsqueda exacta en simplificado
+  const simpIndices = dictionaryIndex.bySimplified.get(query) || [];
+  // Búsqueda exacta en tradicional
+  const tradIndices = dictionaryIndex.byTraditional.get(query) || [];
+
+  const indices = [...new Set([...simpIndices, ...tradIndices])];
+
+  indices.slice(0, limit).forEach(idx => {
+    results.push(formatEntry(dictionaryCache[idx]));
+  });
+
+  // Si no hay resultados exactos, buscar parcial
+  if (results.length === 0) {
+    dictionaryCache.forEach((entry, idx) => {
+      if (results.length >= limit) return;
+      if (entry.s.includes(query) || entry.t.includes(query)) {
+        results.push(formatEntry(entry));
+      }
+    });
+  }
+
+  return results;
+}
+
+/**
+ * Búsqueda por pinyin
+ */
+function searchByPinyin(query, limit, fuzzy) {
+  const results = [];
+  const normalizedQuery = normalizePinyin(query);
+
+  // Búsqueda exacta
+  const exactIndices = dictionaryIndex.byPinyin.get(normalizedQuery) || [];
+  exactIndices.slice(0, limit).forEach(idx => {
+    results.push(formatEntry(dictionaryCache[idx]));
+  });
+
+  // Búsqueda fuzzy si no hay resultados exactos
+  if (results.length === 0 && fuzzy) {
+    dictionaryIndex.byPinyin.forEach((indices, key) => {
+      if (results.length >= limit) return;
+      if (key.includes(normalizedQuery) || normalizedQuery.includes(key)) {
+        indices.slice(0, Math.max(1, limit - results.length)).forEach(idx => {
+          if (results.length < limit) {
+            results.push(formatEntry(dictionaryCache[idx]));
+          }
+        });
+      }
+    });
+  }
+
+  return results;
+}
+
+/**
+ * Búsqueda por español
+ */
+function searchBySpanish(query, limit, fuzzy) {
+  const results = [];
+  const seenIndices = new Set();
+
+  // Búsqueda por palabra exacta
+  const words = query.split(/\s+/).filter(w => w.length >= 2);
+
+  words.forEach(word => {
+    const indices = dictionaryIndex.bySpanish.get(word) || [];
+    indices.forEach(idx => {
+      if (!seenIndices.has(idx) && results.length < limit) {
+        seenIndices.add(idx);
+        results.push(formatEntry(dictionaryCache[idx]));
+      }
+    });
+  });
+
+  // Búsqueda fuzzy si no hay suficientes resultados
+  if (results.length < limit && fuzzy) {
+    dictionaryIndex.bySpanish.forEach((indices, key) => {
+      if (results.length >= limit) return;
+      if (key.startsWith(query) || query.startsWith(key)) {
+        indices.forEach(idx => {
+          if (!seenIndices.has(idx) && results.length < limit) {
+            seenIndices.add(idx);
+            results.push(formatEntry(dictionaryCache[idx]));
+          }
+        });
+      }
+    });
+  }
+
+  return results;
+}
+
+/**
+ * Formatea una entrada del diccionario para el resultado
+ */
+function formatEntry(entry) {
+  return {
+    word: entry.s,
+    simplified: entry.s,
+    traditional: entry.t,
+    pinyin: entry.p,
+    meanings: entry.d,
+    source: 'cedict'
+  };
+}
+
+/**
+ * Obtiene una entrada por caracteres chinos exactos
+ * @param {string} chinese - Caracteres chinos
+ * @returns {Object|null}
+ */
+export function getEntry(chinese) {
+  if (!isLoaded || !dictionaryCache) {
+    return null;
+  }
+
+  const indices = dictionaryIndex.bySimplified.get(chinese) ||
+                  dictionaryIndex.byTraditional.get(chinese) || [];
+
+  if (indices.length > 0) {
+    return formatEntry(dictionaryCache[indices[0]]);
   }
 
   return null;
 }
 
 /**
- * Búsqueda principal en diccionarios
+ * Búsqueda principal en diccionarios (API compatible con versión anterior)
  * @param {string} word - Palabra a buscar
- * @param {Object} config - Configuración de diccionarios
- * @returns {Promise<Object|null>} Resultado de traducción o null
+ * @param {Object} config - Configuración
+ * @returns {Promise<Object|null>}
  */
 export async function searchInDictionaries(word, config = {}) {
-  const {
-    sources = { mdbg: true, wordreference: false, pleco: false },
-    priority = 'mdbg'
-  } = config;
+  const results = await searchDictionary(word, { limit: 1 });
 
-  logger.info(`Dictionary search for: "${word}"`, 'dictionaryService');
+  if (results.length > 0) {
+    return {
+      word,
+      chinese: results[0].simplified,
+      pinyin: results[0].pinyin,
+      meanings: results[0].meanings,
+      source: results[0].source,
+      traditional: results[0].traditional
+    };
+  }
 
-  // 1. Intentar con diccionario local primero (instantáneo)
+  // Fallback al diccionario local básico
   const localResult = searchLocal(word);
   if (localResult) {
-    logger.info('Found in local dictionary', 'dictionaryService');
     return localResult;
   }
 
-  // 2. Buscar según prioridad
-  const searchFunctions = {
-    mdbg: sources.mdbg ? searchMDBG : null,
-    wordreference: sources.wordreference ? searchWordReference : null,
-    pleco: sources.pleco ? searchPleco : null
-  };
-
-  // Intentar con fuente prioritaria primero
-  if (searchFunctions[priority]) {
-    const result = await searchFunctions[priority](word);
-    if (result) {
-      return result;
-    }
-  }
-
-  // Intentar con las demás fuentes
-  for (const [source, searchFn] of Object.entries(searchFunctions)) {
-    if (source !== priority && searchFn) {
-      const result = await searchFn(word);
-      if (result) {
-        return result;
-      }
-    }
-  }
-
-  logger.info('Word not found in any dictionary', 'dictionaryService');
   return null;
 }
 
 /**
- * Agregar palabra al diccionario local (caché personalizado)
+ * Diccionario local simplificado (fallback)
+ */
+const LOCAL_DICTIONARY = {
+  'hola': { chinese: '你好', pinyin: 'nǐ hǎo', meanings: ['Saludo común', 'Hola'], source: 'local' },
+  'adiós': { chinese: '再见', pinyin: 'zàijiàn', meanings: ['Despedida', 'Adiós'], source: 'local' },
+  'gracias': { chinese: '谢谢', pinyin: 'xièxie', meanings: ['Agradecer', 'Gracias'], source: 'local' },
+  'por favor': { chinese: '请', pinyin: 'qǐng', meanings: ['Por favor'], source: 'local' },
+  'sí': { chinese: '是', pinyin: 'shì', meanings: ['Sí', 'Afirmación'], source: 'local' },
+  'no': { chinese: '不', pinyin: 'bù', meanings: ['No', 'Negación'], source: 'local' },
+  'agua': { chinese: '水', pinyin: 'shuǐ', meanings: ['Agua', 'Líquido'], source: 'local' },
+  'comida': { chinese: '食物', pinyin: 'shíwù', meanings: ['Comida', 'Alimento'], source: 'local' },
+  'casa': { chinese: '家', pinyin: 'jiā', meanings: ['Casa', 'Hogar'], source: 'local' },
+  'amigo': { chinese: '朋友', pinyin: 'péngyǒu', meanings: ['Amigo'], source: 'local' }
+};
+
+function searchLocal(word) {
+  const normalizedWord = word.toLowerCase().trim();
+  const result = LOCAL_DICTIONARY[normalizedWord];
+  return result ? { word, ...result } : null;
+}
+
+/**
+ * Agrega palabra al diccionario personalizado (localStorage)
  */
 export function addToLocalDictionary(word, translation) {
   try {
@@ -258,7 +414,6 @@ export function addToLocalDictionary(word, translation) {
 
     localStorage.setItem('xiwen_custom_dictionary', JSON.stringify(customDict));
     logger.info(`Added "${word}" to custom dictionary`, 'dictionaryService');
-
     return true;
   } catch (error) {
     logger.error('Failed to add to custom dictionary', error, 'dictionaryService');
@@ -267,7 +422,7 @@ export function addToLocalDictionary(word, translation) {
 }
 
 /**
- * Obtener diccionario personalizado del usuario
+ * Obtiene el diccionario personalizado
  */
 export function getCustomDictionary() {
   try {
@@ -280,7 +435,7 @@ export function getCustomDictionary() {
 }
 
 /**
- * Limpiar diccionario personalizado
+ * Limpia el diccionario personalizado
  */
 export function clearCustomDictionary() {
   try {
@@ -293,9 +448,41 @@ export function clearCustomDictionary() {
   }
 }
 
+/**
+ * Obtiene estadísticas del diccionario
+ */
+export function getDictionaryStats() {
+  return {
+    loaded: isLoaded,
+    totalEntries: dictionaryCache?.length || 0,
+    indexSizes: {
+      simplified: dictionaryIndex.bySimplified.size,
+      traditional: dictionaryIndex.byTraditional.size,
+      pinyin: dictionaryIndex.byPinyin.size,
+      spanish: dictionaryIndex.bySpanish.size
+    }
+  };
+}
+
+/**
+ * Pre-carga el diccionario en segundo plano
+ */
+export function preloadDictionary() {
+  if (!isLoaded && !loadingPromise) {
+    loadDictionary().catch(err => {
+      logger.error('Error en precarga de diccionario', err, 'dictionaryService');
+    });
+  }
+}
+
 export default {
+  loadDictionary,
+  searchDictionary,
   searchInDictionaries,
+  getEntry,
   addToLocalDictionary,
   getCustomDictionary,
-  clearCustomDictionary
+  clearCustomDictionary,
+  getDictionaryStats,
+  preloadDictionary
 };
