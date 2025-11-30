@@ -1,13 +1,15 @@
 /**
- * @fileoverview Modal para configurar visualización de contenidos y traductor
+ * @fileoverview Modal para configurar visualización de contenidos, traductor y pronunciación
  * @module components/settings/ContentDisplayModal
  */
 
 import { useState, useEffect } from 'react';
-import { Eye, Save } from 'lucide-react';
+import { Eye, Save, Volume2 } from 'lucide-react';
 import { useCardConfig } from '../../contexts/CardConfigContext';
 import { BaseModal, BaseButton, BaseAlert } from '../common';
 import TranslatorConfigCard from './TranslatorConfigCard';
+import SelectionSpeakerConfig from '../SelectionSpeakerConfig';
+import { getAIConfig, saveAIConfig } from '../../firebase/aiConfig';
 import logger from '../../utils/logger';
 
 const DEFAULT_TRANSLATOR_CONFIG = {
@@ -46,9 +48,42 @@ const DEFAULT_TRANSLATOR_CONFIG = {
   }
 };
 
+const DEFAULT_SPEAKER_CONFIG = {
+  enabled: true,
+  provider: 'edgetts',
+  model: 'eleven_multilingual_v2',
+  systemPrompt: '',
+  parameters: {
+    rate: 1.0,
+    stability: 0.5,
+    similarity_boost: 0.75,
+    style: 0.5,
+    use_speaker_boost: true
+  },
+  voices: {
+    edgetts: [
+      { id: 'es-AR-female-1', name: 'Elena (Argentina - Femenina)', voiceId: 'es-AR-ElenaNeural', gender: 'female', accent: 'Argentina', description: 'Voz femenina natural con acento argentino', isDefault: true },
+      { id: 'es-AR-male-1', name: 'Tomás (Argentina - Masculina)', voiceId: 'es-AR-TomasNeural', gender: 'male', accent: 'Argentina', description: 'Voz masculina natural con acento argentino' },
+      { id: 'es-MX-female-1', name: 'Dalia (México - Femenina)', voiceId: 'es-MX-DaliaNeural', gender: 'female', accent: 'México', description: 'Voz femenina natural con acento mexicano' },
+      { id: 'es-MX-male-1', name: 'Jorge (México - Masculina)', voiceId: 'es-MX-JorgeNeural', gender: 'male', accent: 'México', description: 'Voz masculina natural con acento mexicano' },
+      { id: 'es-ES-female-1', name: 'Elvira (España - Femenina)', voiceId: 'es-ES-ElviraNeural', gender: 'female', accent: 'España', description: 'Voz femenina natural con acento español' }
+    ],
+    elevenlabs: [
+      { id: 'bella-premium', name: 'Bella (Premium - Femenina)', voiceId: 'EXAVITQu4vr4xnSDxMaL', gender: 'female', description: 'Voz femenina premium de alta calidad', isDefault: true },
+      { id: 'adam-premium', name: 'Adam (Premium - Masculina)', voiceId: 'pNInz6obpgDQGcFmaJgB', gender: 'male', description: 'Voz masculina premium de alta calidad' },
+      { id: 'domi-premium', name: 'Domi (Premium - Femenina)', voiceId: 'AZnzlk1XvdvUeBnXmlld', gender: 'female', description: 'Voz femenina premium versátil' },
+      { id: 'antoni-premium', name: 'Antoni (Premium - Masculina)', voiceId: 'ErXwobaYiN019PkySvjV', gender: 'male', description: 'Voz masculina premium versátil' }
+    ]
+  },
+  selectedVoiceId: 'es-AR-female-1',
+  allowStudentSelection: false,
+  autoCache: true
+};
+
 function ContentDisplayModal({ isOpen, onClose }) {
   const { contentDisplayConfig, updateContentDisplayConfig } = useCardConfig();
   const [translatorConfig, setTranslatorConfig] = useState(DEFAULT_TRANSLATOR_CONFIG);
+  const [speakerConfig, setSpeakerConfig] = useState(DEFAULT_SPEAKER_CONFIG);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
@@ -66,6 +101,27 @@ function ContentDisplayModal({ isOpen, onClose }) {
     }
   }, [isOpen]);
 
+  // Cargar configuración del speaker desde Firebase
+  useEffect(() => {
+    const loadSpeakerConfig = async () => {
+      try {
+        const aiConfig = await getAIConfig();
+        if (aiConfig?.functions?.selection_speaker) {
+          setSpeakerConfig(aiConfig.functions.selection_speaker);
+          logger.info('Speaker config loaded from Firebase', 'ContentDisplayModal');
+        } else {
+          logger.info('No speaker config in Firebase, using defaults', 'ContentDisplayModal');
+        }
+      } catch (err) {
+        logger.error('Error loading speaker config', err, 'ContentDisplayModal');
+      }
+    };
+
+    if (isOpen) {
+      loadSpeakerConfig();
+    }
+  }, [isOpen]);
+
   const handleSave = async () => {
     try {
       setSaving(true);
@@ -79,9 +135,20 @@ function ContentDisplayModal({ isOpen, onClose }) {
         }
       }
 
-      // Guardar configuración del traductor
+      // Guardar configuración del traductor en localStorage
       localStorage.setItem('xiwen_translator_config', JSON.stringify(translatorConfig));
       window.dispatchEvent(new CustomEvent('xiwen_translator_config_changed', { detail: translatorConfig }));
+
+      // Guardar configuración del speaker en Firebase
+      const currentAIConfig = await getAIConfig() || { functions: {} };
+      const updatedConfig = {
+        ...currentAIConfig,
+        functions: {
+          ...currentAIConfig.functions,
+          selection_speaker: speakerConfig
+        }
+      };
+      await saveAIConfig(updatedConfig);
 
       logger.info('All configurations saved successfully', 'ContentDisplayModal');
       setSuccess('Configuración guardada correctamente');
@@ -98,11 +165,16 @@ function ContentDisplayModal({ isOpen, onClose }) {
     }
   };
 
+  // Handler para guardar config del speaker (desde SelectionSpeakerConfig)
+  const handleSaveSpeakerConfig = async (newConfig) => {
+    setSpeakerConfig(newConfig);
+  };
+
   return (
     <BaseModal
       isOpen={isOpen}
       onClose={onClose}
-      title="Configurar: Contenidos y Traductor"
+      title="Configurar: Traductor, Pronunciación y Visualización"
       icon={Eye}
       size="xl"
       footer={
@@ -244,6 +316,22 @@ function ContentDisplayModal({ isOpen, onClose }) {
               </label>
             </div>
           </div>
+        </div>
+
+        {/* Separador */}
+        <div className="border-t border-gray-200 dark:border-gray-700 my-6"></div>
+
+        {/* SECCIÓN 3: Pronunciación */}
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <Volume2 size={20} className="text-indigo-500" />
+            Pronunciación de Texto Seleccionado
+          </h3>
+          <SelectionSpeakerConfig
+            config={speakerConfig}
+            onSave={handleSaveSpeakerConfig}
+            onClose={() => {}}
+          />
         </div>
       </div>
     </BaseModal>
