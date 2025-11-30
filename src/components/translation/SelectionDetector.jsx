@@ -85,8 +85,9 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
           setShowPopup(false);
         }
       } else {
+        // Solo ocultar botones, NO cerrar popups activos
         setShowButtons(false);
-        setShowPopup(false);
+        // El popup solo se cierra con el botón X o click en backdrop
       }
     }, 100); // ✅ 100ms delay para iOS
   }, [enabled, containerRef]);
