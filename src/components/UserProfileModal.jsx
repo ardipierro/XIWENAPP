@@ -546,11 +546,11 @@ function UserProfileModal({
 
           {/* Profile Header - Avatar + Info - ABSOLUTAMENTE dentro del banner */}
           <div className="absolute bottom-0 left-0 right-0 px-4 md:px-6 pb-4">
-            <div className="flex flex-col sm:flex-row items-center sm:items-end gap-2 md:gap-3">
+            <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 md:gap-3">
             {/* Avatar Container */}
-            <div className="relative group flex-shrink-0">
+            <div className="relative group flex-shrink-0 flex items-center justify-center">
               {/* Avatar Universal con sombra */}
-              <div className="shadow-2xl rounded-full">
+              <div className="shadow-2xl rounded-full flex items-center justify-center">
                 <UserAvatar
                   key={avatarKey}
                   userId={normalizedUser?.uid}
