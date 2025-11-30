@@ -220,6 +220,26 @@ Formato de respuesta (JSON):
         translationData = await translateWithAI(trimmedText, config);
       }
 
+      // BACK-TRANSLATION: Buscar qué significa el chino resultante en español
+      // Esto ayuda a verificar si la traducción es precisa
+      if (translationData?.chinese) {
+        try {
+          const { searchDictionary } = await import('../services/dictionaryService');
+          const backResults = await searchDictionary(translationData.chinese, {
+            limit: 1,
+            searchType: 'chinese'
+          });
+
+          if (backResults.length > 0 && backResults[0].meanings) {
+            translationData.backTranslation = backResults[0].meanings;
+            logger.info(`Back-translation: ${translationData.chinese} → ${backResults[0].meanings.join(', ')}`, 'useTranslator');
+          }
+        } catch (err) {
+          // Si falla la back-translation, no es crítico
+          logger.warn('Failed to get back-translation', 'useTranslator');
+        }
+      }
+
       // Cache the translation
       setCachedTranslation(trimmedText, translationData, sourceLang, targetLang);
 

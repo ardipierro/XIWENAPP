@@ -43,7 +43,7 @@ const TranslationPopup = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  // Close on click outside
+  // Close on click outside - Con delay para evitar cierre inmediato
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (popupRef.current && !popupRef.current.contains(e.target)) {
@@ -51,8 +51,15 @@ const TranslationPopup = ({
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    // Delay de 100ms para evitar que el click que abre el popup lo cierre inmediatamente
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 100);
+
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, [onClose]);
 
   // Handle copy to clipboard
@@ -177,7 +184,7 @@ const TranslationPopup = ({
 
             {/* Chinese Translation */}
             {isSectionEnabled('chinese') && translation.chinese && (
-              <div className="bg-gray-50 dark:bg-gray-800/20 rounded-lg p-3">
+              <div className="bg-gray-50 dark:bg-gray-800/20 rounded-lg p-3 space-y-2">
                 <div className="flex items-baseline gap-2">
                   <span
                     className="font-bold text-gray-900 dark:text-gray-100"
@@ -194,6 +201,13 @@ const TranslationPopup = ({
                     </span>
                   )}
                 </div>
+                {/* Back-translation: verification */}
+                {translation.backTranslation && translation.backTranslation.length > 0 && (
+                  <div className="text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
+                    <span className="font-semibold">↩️ Verifica:</span>{' '}
+                    <span className="italic">{translation.backTranslation.slice(0, 3).join('; ')}</span>
+                  </div>
+                )}
               </div>
             )}
 
@@ -335,6 +349,7 @@ TranslationPopup.propTypes = {
     chinese: PropTypes.string.isRequired,
     pinyin: PropTypes.string,
     meanings: PropTypes.arrayOf(PropTypes.string),
+    backTranslation: PropTypes.arrayOf(PropTypes.string),
     example: PropTypes.shape({
       spanish: PropTypes.string,
       chinese: PropTypes.string
