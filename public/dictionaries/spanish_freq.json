@@ -1,8 +1,8 @@
 {
   "metadata": {
     "source": "FrequencyWords + DeepL",
-    "generated": "2025-11-30T17:04:30.864Z",
-    "entries_count": 100,
+    "generated": "2025-11-30T17:14:05.026Z",
+    "entries_count": 1000,
     "language_source": "es",
     "language_target": "zh",
     "ordered_by": "frequency",
@@ -1107,6 +1107,9906 @@
       "rank": 100,
       "definitions_es": [
         "mucho"
+      ]
+    },
+    {
+      "spanish": "mí",
+      "simplified": "我",
+      "traditional": "我",
+      "pinyin": "",
+      "frequency": 515655,
+      "rank": 101,
+      "definitions_es": [
+        "mí"
+      ]
+    },
+    {
+      "spanish": "quieres",
+      "simplified": "您想",
+      "traditional": "您想",
+      "pinyin": "",
+      "frequency": 515465,
+      "rank": 102,
+      "definitions_es": [
+        "quieres"
+      ]
+    },
+    {
+      "spanish": "siento",
+      "simplified": "对不起",
+      "traditional": "对不起",
+      "pinyin": "",
+      "frequency": 512907,
+      "rank": 103,
+      "definitions_es": [
+        "siento"
+      ]
+    },
+    {
+      "spanish": "señor",
+      "simplified": "先生",
+      "traditional": "先生",
+      "pinyin": "",
+      "frequency": 507728,
+      "rank": 104,
+      "definitions_es": [
+        "señor"
+      ]
+    },
+    {
+      "spanish": "mejor",
+      "simplified": "最好的",
+      "traditional": "最好的",
+      "pinyin": "",
+      "frequency": 500478,
+      "rank": 105,
+      "definitions_es": [
+        "mejor"
+      ]
+    },
+    {
+      "spanish": "hace",
+      "simplified": "前",
+      "traditional": "前",
+      "pinyin": "",
+      "frequency": 495352,
+      "rank": 106,
+      "definitions_es": [
+        "hace"
+      ]
+    },
+    {
+      "spanish": "has",
+      "simplified": "有",
+      "traditional": "有",
+      "pinyin": "",
+      "frequency": 492533,
+      "rank": 107,
+      "definitions_es": [
+        "has"
+      ]
+    },
+    {
+      "spanish": "decir",
+      "simplified": "会说",
+      "traditional": "会说",
+      "pinyin": "",
+      "frequency": 492098,
+      "rank": 108,
+      "definitions_es": [
+        "decir"
+      ]
+    },
+    {
+      "spanish": "también",
+      "simplified": "还",
+      "traditional": "还",
+      "pinyin": "",
+      "frequency": 488057,
+      "rank": 109,
+      "definitions_es": [
+        "también"
+      ]
+    },
+    {
+      "spanish": "sobre",
+      "simplified": "关于",
+      "traditional": "关于",
+      "pinyin": "",
+      "frequency": 478020,
+      "rank": 110,
+      "definitions_es": [
+        "sobre"
+      ]
+    },
+    {
+      "spanish": "dios",
+      "simplified": "神灵",
+      "traditional": "神灵",
+      "pinyin": "",
+      "frequency": 476939,
+      "rank": 111,
+      "definitions_es": [
+        "dios"
+      ]
+    },
+    {
+      "spanish": "sin",
+      "simplified": "不带",
+      "traditional": "不带",
+      "pinyin": "",
+      "frequency": 474770,
+      "rank": 112,
+      "definitions_es": [
+        "sin"
+      ]
+    },
+    {
+      "spanish": "tenemos",
+      "simplified": "我们有",
+      "traditional": "我们有",
+      "pinyin": "",
+      "frequency": 473895,
+      "rank": 113,
+      "definitions_es": [
+        "tenemos"
+      ]
+    },
+    {
+      "spanish": "están",
+      "simplified": "是",
+      "traditional": "是",
+      "pinyin": "",
+      "frequency": 471887,
+      "rank": 114,
+      "definitions_es": [
+        "están"
+      ]
+    },
+    {
+      "spanish": "ti",
+      "simplified": "ti",
+      "traditional": "ti",
+      "pinyin": "",
+      "frequency": 470358,
+      "rank": 115,
+      "definitions_es": [
+        "ti"
+      ]
+    },
+    {
+      "spanish": "puedes",
+      "simplified": "你可以",
+      "traditional": "你可以",
+      "pinyin": "",
+      "frequency": 463318,
+      "rank": 116,
+      "definitions_es": [
+        "puedes"
+      ]
+    },
+    {
+      "spanish": "ver",
+      "simplified": "看看",
+      "traditional": "看看",
+      "pinyin": "",
+      "frequency": 462775,
+      "rank": 117,
+      "definitions_es": [
+        "ver"
+      ]
+    },
+    {
+      "spanish": "hombre",
+      "simplified": "人",
+      "traditional": "人",
+      "pinyin": "",
+      "frequency": 460084,
+      "rank": 118,
+      "definitions_es": [
+        "hombre"
+      ]
+    },
+    {
+      "spanish": "vida",
+      "simplified": "生活",
+      "traditional": "生活",
+      "pinyin": "",
+      "frequency": 453649,
+      "rank": 119,
+      "definitions_es": [
+        "vida"
+      ]
+    },
+    {
+      "spanish": "alguien",
+      "simplified": "有人",
+      "traditional": "有人",
+      "pinyin": "",
+      "frequency": 447141,
+      "rank": 120,
+      "definitions_es": [
+        "alguien"
+      ]
+    },
+    {
+      "spanish": "cosas",
+      "simplified": "事情",
+      "traditional": "事情",
+      "pinyin": "",
+      "frequency": 424801,
+      "rank": 121,
+      "definitions_es": [
+        "cosas"
+      ]
+    },
+    {
+      "spanish": "siempre",
+      "simplified": "始终",
+      "traditional": "始终",
+      "pinyin": "",
+      "frequency": 424363,
+      "rank": 122,
+      "definitions_es": [
+        "siempre"
+      ]
+    },
+    {
+      "spanish": "hasta",
+      "simplified": "至",
+      "traditional": "至",
+      "pinyin": "",
+      "frequency": 423321,
+      "rank": 123,
+      "definitions_es": [
+        "hasta"
+      ]
+    },
+    {
+      "spanish": "ahí",
+      "simplified": "那儿",
+      "traditional": "那儿",
+      "pinyin": "",
+      "frequency": 422871,
+      "rank": 124,
+      "definitions_es": [
+        "ahí"
+      ]
+    },
+    {
+      "spanish": "ir",
+      "simplified": "去",
+      "traditional": "去",
+      "pinyin": "",
+      "frequency": 411198,
+      "rank": 125,
+      "definitions_es": [
+        "ir"
+      ]
+    },
+    {
+      "spanish": "años",
+      "simplified": "岁月",
+      "traditional": "岁月",
+      "pinyin": "",
+      "frequency": 408547,
+      "rank": 126,
+      "definitions_es": [
+        "años"
+      ]
+    },
+    {
+      "spanish": "antes",
+      "simplified": "从前",
+      "traditional": "从前",
+      "pinyin": "",
+      "frequency": 405555,
+      "rank": 127,
+      "definitions_es": [
+        "antes"
+      ]
+    },
+    {
+      "spanish": "estar",
+      "simplified": "是",
+      "traditional": "是",
+      "pinyin": "",
+      "frequency": 402369,
+      "rank": 128,
+      "definitions_es": [
+        "estar"
+      ]
+    },
+    {
+      "spanish": "ni",
+      "simplified": "ni",
+      "traditional": "ni",
+      "pinyin": "",
+      "frequency": 401980,
+      "rank": 129,
+      "definitions_es": [
+        "ni"
+      ]
+    },
+    {
+      "spanish": "poco",
+      "simplified": "小",
+      "traditional": "小",
+      "pinyin": "",
+      "frequency": 397739,
+      "rank": 130,
+      "definitions_es": [
+        "poco"
+      ]
+    },
+    {
+      "spanish": "día",
+      "simplified": "天",
+      "traditional": "天",
+      "pinyin": "",
+      "frequency": 395131,
+      "rank": 131,
+      "definitions_es": [
+        "día"
+      ]
+    },
+    {
+      "spanish": "uno",
+      "simplified": "一种",
+      "traditional": "一种",
+      "pinyin": "",
+      "frequency": 393047,
+      "rank": 132,
+      "definitions_es": [
+        "uno"
+      ]
+    },
+    {
+      "spanish": "noche",
+      "simplified": "夜",
+      "traditional": "夜",
+      "pinyin": "",
+      "frequency": 391078,
+      "rank": 133,
+      "definitions_es": [
+        "noche"
+      ]
+    },
+    {
+      "spanish": "hecho",
+      "simplified": "实事",
+      "traditional": "实事",
+      "pinyin": "",
+      "frequency": 391011,
+      "rank": 134,
+      "definitions_es": [
+        "hecho"
+      ]
+    },
+    {
+      "spanish": "mis",
+      "simplified": "我的",
+      "traditional": "我的",
+      "pinyin": "",
+      "frequency": 385798,
+      "rank": 135,
+      "definitions_es": [
+        "mis"
+      ]
+    },
+    {
+      "spanish": "estamos",
+      "simplified": "我们",
+      "traditional": "我们",
+      "pinyin": "",
+      "frequency": 376563,
+      "rank": 136,
+      "definitions_es": [
+        "estamos"
+      ]
+    },
+    {
+      "spanish": "otra",
+      "simplified": "另一个",
+      "traditional": "另一个",
+      "pinyin": "",
+      "frequency": 368984,
+      "rank": 137,
+      "definitions_es": [
+        "otra"
+      ]
+    },
+    {
+      "spanish": "acuerdo",
+      "simplified": "协议",
+      "traditional": "协议",
+      "pinyin": "",
+      "frequency": 367329,
+      "rank": 138,
+      "definitions_es": [
+        "acuerdo"
+      ]
+    },
+    {
+      "spanish": "trabajo",
+      "simplified": "工作",
+      "traditional": "工作",
+      "pinyin": "",
+      "frequency": 363747,
+      "rank": 139,
+      "definitions_es": [
+        "trabajo"
+      ]
+    },
+    {
+      "spanish": "nosotros",
+      "simplified": "我们",
+      "traditional": "我们",
+      "pinyin": "",
+      "frequency": 357836,
+      "rank": 140,
+      "definitions_es": [
+        "nosotros"
+      ]
+    },
+    {
+      "spanish": "parece",
+      "simplified": "看起来",
+      "traditional": "看起来",
+      "pinyin": "",
+      "frequency": 355615,
+      "rank": 141,
+      "definitions_es": [
+        "parece"
+      ]
+    },
+    {
+      "spanish": "gente",
+      "simplified": "人民",
+      "traditional": "人民",
+      "pinyin": "",
+      "frequency": 354586,
+      "rank": 142,
+      "definitions_es": [
+        "gente"
+      ]
+    },
+    {
+      "spanish": "sea",
+      "simplified": "是",
+      "traditional": "是",
+      "pinyin": "",
+      "frequency": 352790,
+      "rank": 143,
+      "definitions_es": [
+        "sea"
+      ]
+    },
+    {
+      "spanish": "padre",
+      "simplified": "父亲",
+      "traditional": "父亲",
+      "pinyin": "",
+      "frequency": 351051,
+      "rank": 144,
+      "definitions_es": [
+        "padre"
+      ]
+    },
+    {
+      "spanish": "mira",
+      "simplified": "看看",
+      "traditional": "看看",
+      "pinyin": "",
+      "frequency": 349779,
+      "rank": 145,
+      "definitions_es": [
+        "mira"
+      ]
+    },
+    {
+      "spanish": "mismo",
+      "simplified": "一样",
+      "traditional": "一样",
+      "pinyin": "",
+      "frequency": 347834,
+      "rank": 146,
+      "definitions_es": [
+        "mismo"
+      ]
+    },
+    {
+      "spanish": "dijo",
+      "simplified": "说过",
+      "traditional": "说过",
+      "pinyin": "",
+      "frequency": 342900,
+      "rank": 147,
+      "definitions_es": [
+        "dijo"
+      ]
+    },
+    {
+      "spanish": "nadie",
+      "simplified": "没人",
+      "traditional": "没人",
+      "pinyin": "",
+      "frequency": 339772,
+      "rank": 148,
+      "definitions_es": [
+        "nadie"
+      ]
+    },
+    {
+      "spanish": "quiere",
+      "simplified": "想要",
+      "traditional": "想要",
+      "pinyin": "",
+      "frequency": 332148,
+      "rank": 149,
+      "definitions_es": [
+        "quiere"
+      ]
+    },
+    {
+      "spanish": "podría",
+      "simplified": "可以",
+      "traditional": "可以",
+      "pinyin": "",
+      "frequency": 329332,
+      "rank": 150,
+      "definitions_es": [
+        "podría"
+      ]
+    },
+    {
+      "spanish": "hablar",
+      "simplified": "说",
+      "traditional": "说",
+      "pinyin": "",
+      "frequency": 327201,
+      "rank": 151,
+      "definitions_es": [
+        "hablar"
+      ]
+    },
+    {
+      "spanish": "vas",
+      "simplified": "前往",
+      "traditional": "前往",
+      "pinyin": "",
+      "frequency": 327127,
+      "rank": 152,
+      "definitions_es": [
+        "vas"
+      ]
+    },
+    {
+      "spanish": "ellos",
+      "simplified": "她们",
+      "traditional": "她们",
+      "pinyin": "",
+      "frequency": 323892,
+      "rank": 153,
+      "definitions_es": [
+        "ellos"
+      ]
+    },
+    {
+      "spanish": "sr.",
+      "simplified": "先生",
+      "traditional": "先生",
+      "pinyin": "",
+      "frequency": 321637,
+      "rank": 154,
+      "definitions_es": [
+        "sr."
+      ]
+    },
+    {
+      "spanish": "tal",
+      "simplified": "例如",
+      "traditional": "例如",
+      "pinyin": "",
+      "frequency": 317926,
+      "rank": 155,
+      "definitions_es": [
+        "tal"
+      ]
+    },
+    {
+      "spanish": "pasa",
+      "simplified": "前往",
+      "traditional": "前往",
+      "pinyin": "",
+      "frequency": 315529,
+      "rank": 156,
+      "definitions_es": [
+        "pasa"
+      ]
+    },
+    {
+      "spanish": "fuera",
+      "simplified": "外",
+      "traditional": "外",
+      "pinyin": "",
+      "frequency": 311571,
+      "rank": 157,
+      "definitions_es": [
+        "fuera"
+      ]
+    },
+    {
+      "spanish": "después",
+      "simplified": "则",
+      "traditional": "则",
+      "pinyin": "",
+      "frequency": 311500,
+      "rank": 158,
+      "definitions_es": [
+        "después"
+      ]
+    },
+    {
+      "spanish": "han",
+      "simplified": "有",
+      "traditional": "有",
+      "pinyin": "",
+      "frequency": 308501,
+      "rank": 159,
+      "definitions_es": [
+        "han"
+      ]
+    },
+    {
+      "spanish": "desde",
+      "simplified": "从",
+      "traditional": "从",
+      "pinyin": "",
+      "frequency": 303620,
+      "rank": 160,
+      "definitions_es": [
+        "desde"
+      ]
+    },
+    {
+      "spanish": "dinero",
+      "simplified": "钱",
+      "traditional": "钱",
+      "pinyin": "",
+      "frequency": 300518,
+      "rank": 161,
+      "definitions_es": [
+        "dinero"
+      ]
+    },
+    {
+      "spanish": "mundo",
+      "simplified": "世界",
+      "traditional": "世界",
+      "pinyin": "",
+      "frequency": 298208,
+      "rank": 162,
+      "definitions_es": [
+        "mundo"
+      ]
+    },
+    {
+      "spanish": "claro",
+      "simplified": "当然",
+      "traditional": "当然",
+      "pinyin": "",
+      "frequency": 296584,
+      "rank": 163,
+      "definitions_es": [
+        "claro"
+      ]
+    },
+    {
+      "spanish": "momento",
+      "simplified": "时间",
+      "traditional": "时间",
+      "pinyin": "",
+      "frequency": 294559,
+      "rank": 164,
+      "definitions_es": [
+        "momento"
+      ]
+    },
+    {
+      "spanish": "les",
+      "simplified": "女同性恋",
+      "traditional": "女同性恋",
+      "pinyin": "",
+      "frequency": 294439,
+      "rank": 165,
+      "definitions_es": [
+        "les"
+      ]
+    },
+    {
+      "spanish": "tener",
+      "simplified": "有",
+      "traditional": "有",
+      "pinyin": "",
+      "frequency": 292932,
+      "rank": 166,
+      "definitions_es": [
+        "tener"
+      ]
+    },
+    {
+      "spanish": "estado",
+      "simplified": "国",
+      "traditional": "国",
+      "pinyin": "",
+      "frequency": 292015,
+      "rank": 167,
+      "definitions_es": [
+        "estado"
+      ]
+    },
+    {
+      "spanish": "otro",
+      "simplified": "另一个",
+      "traditional": "另一个",
+      "pinyin": "",
+      "frequency": 290565,
+      "rank": 168,
+      "definitions_es": [
+        "otro"
+      ]
+    },
+    {
+      "spanish": "había",
+      "simplified": "曾经",
+      "traditional": "曾经",
+      "pinyin": "",
+      "frequency": 289157,
+      "rank": 169,
+      "definitions_es": [
+        "había"
+      ]
+    },
+    {
+      "spanish": "mañana",
+      "simplified": "明天",
+      "traditional": "明天",
+      "pinyin": "",
+      "frequency": 283391,
+      "rank": 170,
+      "definitions_es": [
+        "mañana"
+      ]
+    },
+    {
+      "spanish": "tenía",
+      "simplified": "曾经",
+      "traditional": "曾经",
+      "pinyin": "",
+      "frequency": 282966,
+      "rank": 171,
+      "definitions_es": [
+        "tenía"
+      ]
+    },
+    {
+      "spanish": "madre",
+      "simplified": "母亲",
+      "traditional": "母亲",
+      "pinyin": "",
+      "frequency": 281646,
+      "rank": 172,
+      "definitions_es": [
+        "madre"
+      ]
+    },
+    {
+      "spanish": "vale",
+      "simplified": "传票",
+      "traditional": "传票",
+      "pinyin": "",
+      "frequency": 280447,
+      "rank": 173,
+      "definitions_es": [
+        "vale"
+      ]
+    },
+    {
+      "spanish": "lugar",
+      "simplified": "地点",
+      "traditional": "地点",
+      "pinyin": "",
+      "frequency": 280315,
+      "rank": 174,
+      "definitions_es": [
+        "lugar"
+      ]
+    },
+    {
+      "spanish": "haciendo",
+      "simplified": "通过",
+      "traditional": "通过",
+      "pinyin": "",
+      "frequency": 278317,
+      "rank": 175,
+      "definitions_es": [
+        "haciendo"
+      ]
+    },
+    {
+      "spanish": "donde",
+      "simplified": "其中",
+      "traditional": "其中",
+      "pinyin": "",
+      "frequency": 277524,
+      "rank": 176,
+      "definitions_es": [
+        "donde"
+      ]
+    },
+    {
+      "spanish": "seguro",
+      "simplified": "保险",
+      "traditional": "保险",
+      "pinyin": "",
+      "frequency": 277231,
+      "rank": 177,
+      "definitions_es": [
+        "seguro"
+      ]
+    },
+    {
+      "spanish": "sabe",
+      "simplified": "知道",
+      "traditional": "知道",
+      "pinyin": "",
+      "frequency": 273895,
+      "rank": 178,
+      "definitions_es": [
+        "sabe"
+      ]
+    },
+    {
+      "spanish": "podemos",
+      "simplified": "我们可以",
+      "traditional": "我们可以",
+      "pinyin": "",
+      "frequency": 272425,
+      "rank": 179,
+      "definitions_es": [
+        "podemos"
+      ]
+    },
+    {
+      "spanish": "tus",
+      "simplified": "您的",
+      "traditional": "您的",
+      "pinyin": "",
+      "frequency": 271677,
+      "rank": 180,
+      "definitions_es": [
+        "tus"
+      ]
+    },
+    {
+      "spanish": "espera",
+      "simplified": "轮候",
+      "traditional": "轮候",
+      "pinyin": "",
+      "frequency": 270741,
+      "rank": 181,
+      "definitions_es": [
+        "espera"
+      ]
+    },
+    {
+      "spanish": "nuevo",
+      "simplified": "新",
+      "traditional": "新",
+      "pinyin": "",
+      "frequency": 269895,
+      "rank": 182,
+      "definitions_es": [
+        "nuevo"
+      ]
+    },
+    {
+      "spanish": "sido",
+      "simplified": "一直以来",
+      "traditional": "一直以来",
+      "pinyin": "",
+      "frequency": 269505,
+      "rank": 183,
+      "definitions_es": [
+        "sido"
+      ]
+    },
+    {
+      "spanish": "cosa",
+      "simplified": "事情",
+      "traditional": "事情",
+      "pinyin": "",
+      "frequency": 269054,
+      "rank": 184,
+      "definitions_es": [
+        "cosa"
+      ]
+    },
+    {
+      "spanish": "hijo",
+      "simplified": "儿子",
+      "traditional": "儿子",
+      "pinyin": "",
+      "frequency": 267856,
+      "rank": 185,
+      "definitions_es": [
+        "hijo"
+      ]
+    },
+    {
+      "spanish": "allí",
+      "simplified": "那儿",
+      "traditional": "那儿",
+      "pinyin": "",
+      "frequency": 267215,
+      "rank": 186,
+      "definitions_es": [
+        "allí"
+      ]
+    },
+    {
+      "spanish": "menos",
+      "simplified": "更少",
+      "traditional": "更少",
+      "pinyin": "",
+      "frequency": 263837,
+      "rank": 187,
+      "definitions_es": [
+        "menos"
+      ]
+    },
+    {
+      "spanish": "tipo",
+      "simplified": "类型",
+      "traditional": "类型",
+      "pinyin": "",
+      "frequency": 262340,
+      "rank": 188,
+      "definitions_es": [
+        "tipo"
+      ]
+    },
+    {
+      "spanish": "amigo",
+      "simplified": "朋友",
+      "traditional": "朋友",
+      "pinyin": "",
+      "frequency": 258356,
+      "rank": 189,
+      "definitions_es": [
+        "amigo"
+      ]
+    },
+    {
+      "spanish": "gran",
+      "simplified": "大",
+      "traditional": "大",
+      "pinyin": "",
+      "frequency": 257648,
+      "rank": 190,
+      "definitions_es": [
+        "gran"
+      ]
+    },
+    {
+      "spanish": "nuestro",
+      "simplified": "我们的",
+      "traditional": "我们的",
+      "pinyin": "",
+      "frequency": 254046,
+      "rank": 191,
+      "definitions_es": [
+        "nuestro"
+      ]
+    },
+    {
+      "spanish": "mujer",
+      "simplified": "女性",
+      "traditional": "女性",
+      "pinyin": "",
+      "frequency": 249627,
+      "rank": 192,
+      "definitions_es": [
+        "mujer"
+      ]
+    },
+    {
+      "spanish": "mamá",
+      "simplified": "妈",
+      "traditional": "妈",
+      "pinyin": "",
+      "frequency": 247700,
+      "rank": 193,
+      "definitions_es": [
+        "mamá"
+      ]
+    },
+    {
+      "spanish": "luego",
+      "simplified": "则",
+      "traditional": "则",
+      "pinyin": "",
+      "frequency": 245811,
+      "rank": 194,
+      "definitions_es": [
+        "luego"
+      ]
+    },
+    {
+      "spanish": "papá",
+      "simplified": "爸爸",
+      "traditional": "爸爸",
+      "pinyin": "",
+      "frequency": 243251,
+      "rank": 195,
+      "definitions_es": [
+        "papá"
+      ]
+    },
+    {
+      "spanish": "días",
+      "simplified": "天数",
+      "traditional": "天数",
+      "pinyin": "",
+      "frequency": 243003,
+      "rank": 196,
+      "definitions_es": [
+        "días"
+      ]
+    },
+    {
+      "spanish": "dice",
+      "simplified": "说",
+      "traditional": "说",
+      "pinyin": "",
+      "frequency": 240795,
+      "rank": 197,
+      "definitions_es": [
+        "dice"
+      ]
+    },
+    {
+      "spanish": "hoy",
+      "simplified": "今天",
+      "traditional": "今天",
+      "pinyin": "",
+      "frequency": 240395,
+      "rank": 198,
+      "definitions_es": [
+        "hoy"
+      ]
+    },
+    {
+      "spanish": "tres",
+      "simplified": "三",
+      "traditional": "三",
+      "pinyin": "",
+      "frequency": 239782,
+      "rank": 199,
+      "definitions_es": [
+        "tres"
+      ]
+    },
+    {
+      "spanish": "buena",
+      "simplified": "好",
+      "traditional": "好",
+      "pinyin": "",
+      "frequency": 238330,
+      "rank": 200,
+      "definitions_es": [
+        "buena"
+      ]
+    },
+    {
+      "spanish": "necesito",
+      "simplified": "我需要",
+      "traditional": "我需要",
+      "pinyin": "",
+      "frequency": 237654,
+      "rank": 201,
+      "definitions_es": [
+        "necesito"
+      ]
+    },
+    {
+      "spanish": "dije",
+      "simplified": "我说",
+      "traditional": "我说",
+      "pinyin": "",
+      "frequency": 235936,
+      "rank": 202,
+      "definitions_es": [
+        "dije"
+      ]
+    },
+    {
+      "spanish": "oye",
+      "simplified": "嘿",
+      "traditional": "嘿",
+      "pinyin": "",
+      "frequency": 234324,
+      "rank": 203,
+      "definitions_es": [
+        "oye"
+      ]
+    },
+    {
+      "spanish": "gusta",
+      "simplified": "喜欢",
+      "traditional": "喜欢",
+      "pinyin": "",
+      "frequency": 233367,
+      "rank": 204,
+      "definitions_es": [
+        "gusta"
+      ]
+    },
+    {
+      "spanish": "quería",
+      "simplified": "想要的",
+      "traditional": "想要的",
+      "pinyin": "",
+      "frequency": 230602,
+      "rank": 205,
+      "definitions_es": [
+        "quería"
+      ]
+    },
+    {
+      "spanish": "será",
+      "simplified": "将",
+      "traditional": "将",
+      "pinyin": "",
+      "frequency": 230159,
+      "rank": 206,
+      "definitions_es": [
+        "será"
+      ]
+    },
+    {
+      "spanish": "haber",
+      "simplified": "看看",
+      "traditional": "看看",
+      "pinyin": "",
+      "frequency": 229602,
+      "rank": 207,
+      "definitions_es": [
+        "haber"
+      ]
+    },
+    {
+      "spanish": "parte",
+      "simplified": "部分",
+      "traditional": "部分",
+      "pinyin": "",
+      "frequency": 229038,
+      "rank": 208,
+      "definitions_es": [
+        "parte"
+      ]
+    },
+    {
+      "spanish": "todas",
+      "simplified": "一应俱全",
+      "traditional": "一应俱全",
+      "pinyin": "",
+      "frequency": 227146,
+      "rank": 209,
+      "definitions_es": [
+        "todas"
+      ]
+    },
+    {
+      "spanish": "crees",
+      "simplified": "你认为",
+      "traditional": "你认为",
+      "pinyin": "",
+      "frequency": 225748,
+      "rank": 210,
+      "definitions_es": [
+        "crees"
+      ]
+    },
+    {
+      "spanish": "buen",
+      "simplified": "好",
+      "traditional": "好",
+      "pinyin": "",
+      "frequency": 224802,
+      "rank": 211,
+      "definitions_es": [
+        "buen"
+      ]
+    },
+    {
+      "spanish": "conmigo",
+      "simplified": "与我",
+      "traditional": "与我",
+      "pinyin": "",
+      "frequency": 224527,
+      "rank": 212,
+      "definitions_es": [
+        "conmigo"
+      ]
+    },
+    {
+      "spanish": "nombre",
+      "simplified": "名字",
+      "traditional": "名字",
+      "pinyin": "",
+      "frequency": 222406,
+      "rank": 213,
+      "definitions_es": [
+        "nombre"
+      ]
+    },
+    {
+      "spanish": "mierda",
+      "simplified": "大便",
+      "traditional": "大便",
+      "pinyin": "",
+      "frequency": 221567,
+      "rank": 214,
+      "definitions_es": [
+        "mierda"
+      ]
+    },
+    {
+      "spanish": "nuestra",
+      "simplified": "我们的",
+      "traditional": "我们的",
+      "pinyin": "",
+      "frequency": 221503,
+      "rank": 215,
+      "definitions_es": [
+        "nuestra"
+      ]
+    },
+    {
+      "spanish": "mal",
+      "simplified": "坏的",
+      "traditional": "坏的",
+      "pinyin": "",
+      "frequency": 220024,
+      "rank": 216,
+      "definitions_es": [
+        "mal"
+      ]
+    },
+    {
+      "spanish": "debe",
+      "simplified": "应",
+      "traditional": "应",
+      "pinyin": "",
+      "frequency": 218223,
+      "rank": 217,
+      "definitions_es": [
+        "debe"
+      ]
+    },
+    {
+      "spanish": "realmente",
+      "simplified": "的确",
+      "traditional": "的确",
+      "pinyin": "",
+      "frequency": 217847,
+      "rank": 218,
+      "definitions_es": [
+        "realmente"
+      ]
+    },
+    {
+      "spanish": "estas",
+      "simplified": "这些",
+      "traditional": "这些",
+      "pinyin": "",
+      "frequency": 216844,
+      "rank": 219,
+      "definitions_es": [
+        "estas"
+      ]
+    },
+    {
+      "spanish": "aún",
+      "simplified": "静止的",
+      "traditional": "静止的",
+      "pinyin": "",
+      "frequency": 215129,
+      "rank": 220,
+      "definitions_es": [
+        "aún"
+      ]
+    },
+    {
+      "spanish": "mío",
+      "simplified": "矿井",
+      "traditional": "矿井",
+      "pinyin": "",
+      "frequency": 212096,
+      "rank": 221,
+      "definitions_es": [
+        "mío"
+      ]
+    },
+    {
+      "spanish": "toda",
+      "simplified": "一应俱全",
+      "traditional": "一应俱全",
+      "pinyin": "",
+      "frequency": 211746,
+      "rank": 222,
+      "definitions_es": [
+        "toda"
+      ]
+    },
+    {
+      "spanish": "hacerlo",
+      "simplified": "动手",
+      "traditional": "动手",
+      "pinyin": "",
+      "frequency": 209901,
+      "rank": 223,
+      "definitions_es": [
+        "hacerlo"
+      ]
+    },
+    {
+      "spanish": "cada",
+      "simplified": "每种",
+      "traditional": "每种",
+      "pinyin": "",
+      "frequency": 209674,
+      "rank": 224,
+      "definitions_es": [
+        "cada"
+      ]
+    },
+    {
+      "spanish": "visto",
+      "simplified": "看看",
+      "traditional": "看看",
+      "pinyin": "",
+      "frequency": 206949,
+      "rank": 225,
+      "definitions_es": [
+        "visto"
+      ]
+    },
+    {
+      "spanish": "importa",
+      "simplified": "这很重要",
+      "traditional": "这很重要",
+      "pinyin": "",
+      "frequency": 203118,
+      "rank": 226,
+      "definitions_es": [
+        "importa"
+      ]
+    },
+    {
+      "spanish": "contigo",
+      "simplified": "和你在一起",
+      "traditional": "和你在一起",
+      "pinyin": "",
+      "frequency": 202208,
+      "rank": 227,
+      "definitions_es": [
+        "contigo"
+      ]
+    },
+    {
+      "spanish": "tienen",
+      "simplified": "有",
+      "traditional": "有",
+      "pinyin": "",
+      "frequency": 200708,
+      "rank": 228,
+      "definitions_es": [
+        "tienen"
+      ]
+    },
+    {
+      "spanish": "hemos",
+      "simplified": "我们有",
+      "traditional": "我们有",
+      "pinyin": "",
+      "frequency": 200028,
+      "rank": 229,
+      "definitions_es": [
+        "hemos"
+      ]
+    },
+    {
+      "spanish": "razón",
+      "simplified": "理由",
+      "traditional": "理由",
+      "pinyin": "",
+      "frequency": 198832,
+      "rank": 230,
+      "definitions_es": [
+        "razón"
+      ]
+    },
+    {
+      "spanish": "alguna",
+      "simplified": "任何",
+      "traditional": "任何",
+      "pinyin": "",
+      "frequency": 198263,
+      "rank": 231,
+      "definitions_es": [
+        "alguna"
+      ]
+    },
+    {
+      "spanish": "tanto",
+      "simplified": "两个",
+      "traditional": "两个",
+      "pinyin": "",
+      "frequency": 197519,
+      "rank": 232,
+      "definitions_es": [
+        "tanto"
+      ]
+    },
+    {
+      "spanish": "saber",
+      "simplified": "知道",
+      "traditional": "知道",
+      "pinyin": "",
+      "frequency": 196610,
+      "rank": 233,
+      "definitions_es": [
+        "saber"
+      ]
+    },
+    {
+      "spanish": "hizo",
+      "simplified": "作出",
+      "traditional": "作出",
+      "pinyin": "",
+      "frequency": 196192,
+      "rank": 234,
+      "definitions_es": [
+        "hizo"
+      ]
+    },
+    {
+      "spanish": "veces",
+      "simplified": "时代",
+      "traditional": "时代",
+      "pinyin": "",
+      "frequency": 195756,
+      "rank": 235,
+      "definitions_es": [
+        "veces"
+      ]
+    },
+    {
+      "spanish": "serio",
+      "simplified": "严重",
+      "traditional": "严重",
+      "pinyin": "",
+      "frequency": 194846,
+      "rank": 236,
+      "definitions_es": [
+        "serio"
+      ]
+    },
+    {
+      "spanish": "ven",
+      "simplified": "看看",
+      "traditional": "看看",
+      "pinyin": "",
+      "frequency": 193452,
+      "rank": 237,
+      "definitions_es": [
+        "ven"
+      ]
+    },
+    {
+      "spanish": "idea",
+      "simplified": "想法",
+      "traditional": "想法",
+      "pinyin": "",
+      "frequency": 193369,
+      "rank": 238,
+      "definitions_es": [
+        "idea"
+      ]
+    },
+    {
+      "spanish": "eh",
+      "simplified": "啊",
+      "traditional": "啊",
+      "pinyin": "",
+      "frequency": 193299,
+      "rank": 239,
+      "definitions_es": [
+        "eh"
+      ]
+    },
+    {
+      "spanish": "tarde",
+      "simplified": "下午",
+      "traditional": "下午",
+      "pinyin": "",
+      "frequency": 191883,
+      "rank": 240,
+      "definitions_es": [
+        "tarde"
+      ]
+    },
+    {
+      "spanish": "problema",
+      "simplified": "问题",
+      "traditional": "问题",
+      "pinyin": "",
+      "frequency": 189963,
+      "rank": 241,
+      "definitions_es": [
+        "problema"
+      ]
+    },
+    {
+      "spanish": "hora",
+      "simplified": "时间",
+      "traditional": "时间",
+      "pinyin": "",
+      "frequency": 189851,
+      "rank": 242,
+      "definitions_es": [
+        "hora"
+      ]
+    },
+    {
+      "spanish": "cierto",
+      "simplified": "真",
+      "traditional": "真",
+      "pinyin": "",
+      "frequency": 189653,
+      "rank": 243,
+      "definitions_es": [
+        "cierto"
+      ]
+    },
+    {
+      "spanish": "dicho",
+      "simplified": "说过",
+      "traditional": "说过",
+      "pinyin": "",
+      "frequency": 187895,
+      "rank": 244,
+      "definitions_es": [
+        "dicho"
+      ]
+    },
+    {
+      "spanish": "quien",
+      "simplified": "谁",
+      "traditional": "谁",
+      "pinyin": "",
+      "frequency": 187133,
+      "rank": 245,
+      "definitions_es": [
+        "quien"
+      ]
+    },
+    {
+      "spanish": "demasiado",
+      "simplified": "太多",
+      "traditional": "太多",
+      "pinyin": "",
+      "frequency": 182668,
+      "rank": 246,
+      "definitions_es": [
+        "demasiado"
+      ]
+    },
+    {
+      "spanish": "amor",
+      "simplified": "爱",
+      "traditional": "爱",
+      "pinyin": "",
+      "frequency": 182326,
+      "rank": 247,
+      "definitions_es": [
+        "amor"
+      ]
+    },
+    {
+      "spanish": "entre",
+      "simplified": "关于",
+      "traditional": "关于",
+      "pinyin": "",
+      "frequency": 181114,
+      "rank": 248,
+      "definitions_es": [
+        "entre"
+      ]
+    },
+    {
+      "spanish": "ve",
+      "simplified": "前往",
+      "traditional": "前往",
+      "pinyin": "",
+      "frequency": 179427,
+      "rank": 249,
+      "definitions_es": [
+        "ve"
+      ]
+    },
+    {
+      "spanish": "pasado",
+      "simplified": "过去",
+      "traditional": "过去",
+      "pinyin": "",
+      "frequency": 178763,
+      "rank": 250,
+      "definitions_es": [
+        "pasado"
+      ]
+    },
+    {
+      "spanish": "familia",
+      "simplified": "家庭",
+      "traditional": "家庭",
+      "pinyin": "",
+      "frequency": 177748,
+      "rank": 251,
+      "definitions_es": [
+        "familia"
+      ]
+    },
+    {
+      "spanish": "estos",
+      "simplified": "这些",
+      "traditional": "这些",
+      "pinyin": "",
+      "frequency": 176532,
+      "rank": 252,
+      "definitions_es": [
+        "estos"
+      ]
+    },
+    {
+      "spanish": "policía",
+      "simplified": "警察",
+      "traditional": "警察",
+      "pinyin": "",
+      "frequency": 175471,
+      "rank": 253,
+      "definitions_es": [
+        "policía"
+      ]
+    },
+    {
+      "spanish": "debería",
+      "simplified": "应",
+      "traditional": "应",
+      "pinyin": "",
+      "frequency": 175394,
+      "rank": 254,
+      "definitions_es": [
+        "debería"
+      ]
+    },
+    {
+      "spanish": "ustedes",
+      "simplified": "你",
+      "traditional": "你",
+      "pinyin": "",
+      "frequency": 174241,
+      "rank": 255,
+      "definitions_es": [
+        "ustedes"
+      ]
+    },
+    {
+      "spanish": "chica",
+      "simplified": "女孩",
+      "traditional": "女孩",
+      "pinyin": "",
+      "frequency": 173210,
+      "rank": 256,
+      "definitions_es": [
+        "chica"
+      ]
+    },
+    {
+      "spanish": "esos",
+      "simplified": "这些",
+      "traditional": "这些",
+      "pinyin": "",
+      "frequency": 171237,
+      "rank": 257,
+      "definitions_es": [
+        "esos"
+      ]
+    },
+    {
+      "spanish": "chicos",
+      "simplified": "男孩",
+      "traditional": "男孩",
+      "pinyin": "",
+      "frequency": 170008,
+      "rank": 258,
+      "definitions_es": [
+        "chicos"
+      ]
+    },
+    {
+      "spanish": "cuenta",
+      "simplified": "账户",
+      "traditional": "账户",
+      "pinyin": "",
+      "frequency": 169714,
+      "rank": 259,
+      "definitions_es": [
+        "cuenta"
+      ]
+    },
+    {
+      "spanish": "haces",
+      "simplified": "你会",
+      "traditional": "你会",
+      "pinyin": "",
+      "frequency": 166985,
+      "rank": 260,
+      "definitions_es": [
+        "haces"
+      ]
+    },
+    {
+      "spanish": "todavía",
+      "simplified": "静止的",
+      "traditional": "静止的",
+      "pinyin": "",
+      "frequency": 166624,
+      "rank": 261,
+      "definitions_es": [
+        "todavía"
+      ]
+    },
+    {
+      "spanish": "salir",
+      "simplified": "前往",
+      "traditional": "前往",
+      "pinyin": "",
+      "frequency": 165591,
+      "rank": 262,
+      "definitions_es": [
+        "salir"
+      ]
+    },
+    {
+      "spanish": "algún",
+      "simplified": "一些",
+      "traditional": "一些",
+      "pinyin": "",
+      "frequency": 163790,
+      "rank": 263,
+      "definitions_es": [
+        "algún"
+      ]
+    },
+    {
+      "spanish": "vaya",
+      "simplified": "前往",
+      "traditional": "前往",
+      "pinyin": "",
+      "frequency": 162833,
+      "rank": 264,
+      "definitions_es": [
+        "vaya"
+      ]
+    },
+    {
+      "spanish": "unos",
+      "simplified": "关于",
+      "traditional": "关于",
+      "pinyin": "",
+      "frequency": 162525,
+      "rank": 265,
+      "definitions_es": [
+        "unos"
+      ]
+    },
+    {
+      "spanish": "veo",
+      "simplified": "看看",
+      "traditional": "看看",
+      "pinyin": "",
+      "frequency": 162326,
+      "rank": 266,
+      "definitions_es": [
+        "veo"
+      ]
+    },
+    {
+      "spanish": "amigos",
+      "simplified": "朋友们",
+      "traditional": "朋友们",
+      "pinyin": "",
+      "frequency": 160684,
+      "rank": 267,
+      "definitions_es": [
+        "amigos"
+      ]
+    },
+    {
+      "spanish": "hermano",
+      "simplified": "兄弟",
+      "traditional": "兄弟",
+      "pinyin": "",
+      "frequency": 159678,
+      "rank": 268,
+      "definitions_es": [
+        "hermano"
+      ]
+    },
+    {
+      "spanish": "pensé",
+      "simplified": "我想",
+      "traditional": "我想",
+      "pinyin": "",
+      "frequency": 159438,
+      "rank": 269,
+      "definitions_es": [
+        "pensé"
+      ]
+    },
+    {
+      "spanish": "sabía",
+      "simplified": "知道",
+      "traditional": "知道",
+      "pinyin": "",
+      "frequency": 156439,
+      "rank": 270,
+      "definitions_es": [
+        "sabía"
+      ]
+    },
+    {
+      "spanish": "cabeza",
+      "simplified": "率领",
+      "traditional": "率领",
+      "pinyin": "",
+      "frequency": 156069,
+      "rank": 271,
+      "definitions_es": [
+        "cabeza"
+      ]
+    },
+    {
+      "spanish": "ah",
+      "simplified": "啊",
+      "traditional": "啊",
+      "pinyin": "",
+      "frequency": 156002,
+      "rank": 272,
+      "definitions_es": [
+        "ah"
+      ]
+    },
+    {
+      "spanish": "cariño",
+      "simplified": "亲爱的",
+      "traditional": "亲爱的",
+      "pinyin": "",
+      "frequency": 153353,
+      "rank": 273,
+      "definitions_es": [
+        "cariño"
+      ]
+    },
+    {
+      "spanish": "digo",
+      "simplified": "我说",
+      "traditional": "我说",
+      "pinyin": "",
+      "frequency": 153149,
+      "rank": 274,
+      "definitions_es": [
+        "digo"
+      ]
+    },
+    {
+      "spanish": "van",
+      "simplified": "面包车",
+      "traditional": "面包车",
+      "pinyin": "",
+      "frequency": 153024,
+      "rank": 275,
+      "definitions_es": [
+        "van"
+      ]
+    },
+    {
+      "spanish": "hombres",
+      "simplified": "男人",
+      "traditional": "男人",
+      "pinyin": "",
+      "frequency": 151647,
+      "rank": 276,
+      "definitions_es": [
+        "hombres"
+      ]
+    },
+    {
+      "spanish": "buenas",
+      "simplified": "好",
+      "traditional": "好",
+      "pinyin": "",
+      "frequency": 151571,
+      "rank": 277,
+      "definitions_es": [
+        "buenas"
+      ]
+    },
+    {
+      "spanish": "somos",
+      "simplified": "我们",
+      "traditional": "我们",
+      "pinyin": "",
+      "frequency": 151256,
+      "rank": 278,
+      "definitions_es": [
+        "somos"
+      ]
+    },
+    {
+      "spanish": "cualquier",
+      "simplified": "任何",
+      "traditional": "任何",
+      "pinyin": "",
+      "frequency": 150946,
+      "rank": 279,
+      "definitions_es": [
+        "cualquier"
+      ]
+    },
+    {
+      "spanish": "forma",
+      "simplified": "组成",
+      "traditional": "组成",
+      "pinyin": "",
+      "frequency": 150750,
+      "rank": 280,
+      "definitions_es": [
+        "forma"
+      ]
+    },
+    {
+      "spanish": "mientras",
+      "simplified": "虽然",
+      "traditional": "虽然",
+      "pinyin": "",
+      "frequency": 150383,
+      "rank": 281,
+      "definitions_es": [
+        "mientras"
+      ]
+    },
+    {
+      "spanish": "lado",
+      "simplified": "一边",
+      "traditional": "一边",
+      "pinyin": "",
+      "frequency": 149162,
+      "rank": 282,
+      "definitions_es": [
+        "lado"
+      ]
+    },
+    {
+      "spanish": "debo",
+      "simplified": "我必须",
+      "traditional": "我必须",
+      "pinyin": "",
+      "frequency": 148975,
+      "rank": 283,
+      "definitions_es": [
+        "debo"
+      ]
+    },
+    {
+      "spanish": "sería",
+      "simplified": "将是",
+      "traditional": "将是",
+      "pinyin": "",
+      "frequency": 148309,
+      "rank": 284,
+      "definitions_es": [
+        "sería"
+      ]
+    },
+    {
+      "spanish": "caso",
+      "simplified": "个案",
+      "traditional": "个案",
+      "pinyin": "",
+      "frequency": 148273,
+      "rank": 285,
+      "definitions_es": [
+        "caso"
+      ]
+    },
+    {
+      "spanish": "pueden",
+      "simplified": "会",
+      "traditional": "会",
+      "pinyin": "",
+      "frequency": 148183,
+      "rank": 286,
+      "definitions_es": [
+        "pueden"
+      ]
+    },
+    {
+      "spanish": "pasó",
+      "simplified": "通过",
+      "traditional": "通过",
+      "pinyin": "",
+      "frequency": 145810,
+      "rank": 287,
+      "definitions_es": [
+        "pasó"
+      ]
+    },
+    {
+      "spanish": "primera",
+      "simplified": "第一次",
+      "traditional": "第一次",
+      "pinyin": "",
+      "frequency": 145110,
+      "rank": 288,
+      "definitions_es": [
+        "primera"
+      ]
+    },
+    {
+      "spanish": "genial",
+      "simplified": "大",
+      "traditional": "大",
+      "pinyin": "",
+      "frequency": 145028,
+      "rank": 289,
+      "definitions_es": [
+        "genial"
+      ]
+    },
+    {
+      "spanish": "chico",
+      "simplified": "男孩",
+      "traditional": "男孩",
+      "pinyin": "",
+      "frequency": 145009,
+      "rank": 290,
+      "definitions_es": [
+        "chico"
+      ]
+    },
+    {
+      "spanish": "supuesto",
+      "simplified": "据称",
+      "traditional": "据称",
+      "pinyin": "",
+      "frequency": 144428,
+      "rank": 291,
+      "definitions_es": [
+        "supuesto"
+      ]
+    },
+    {
+      "spanish": "hice",
+      "simplified": "我做了",
+      "traditional": "我做了",
+      "pinyin": "",
+      "frequency": 144174,
+      "rank": 292,
+      "definitions_es": [
+        "hice"
+      ]
+    },
+    {
+      "spanish": "pues",
+      "simplified": "对于",
+      "traditional": "对于",
+      "pinyin": "",
+      "frequency": 143870,
+      "rank": 293,
+      "definitions_es": [
+        "pues"
+      ]
+    },
+    {
+      "spanish": "adiós",
+      "simplified": "再会",
+      "traditional": "再会",
+      "pinyin": "",
+      "frequency": 143677,
+      "rank": 294,
+      "definitions_es": [
+        "adiós"
+      ]
+    },
+    {
+      "spanish": "muchas",
+      "simplified": "很多",
+      "traditional": "很多",
+      "pinyin": "",
+      "frequency": 143007,
+      "rank": 295,
+      "definitions_es": [
+        "muchas"
+      ]
+    },
+    {
+      "spanish": "personas",
+      "simplified": "人民",
+      "traditional": "人民",
+      "pinyin": "",
+      "frequency": 141945,
+      "rank": 296,
+      "definitions_es": [
+        "personas"
+      ]
+    },
+    {
+      "spanish": "señora",
+      "simplified": "夫人",
+      "traditional": "夫人",
+      "pinyin": "",
+      "frequency": 141893,
+      "rank": 297,
+      "definitions_es": [
+        "señora"
+      ]
+    },
+    {
+      "spanish": "volver",
+      "simplified": "返回",
+      "traditional": "返回",
+      "pinyin": "",
+      "frequency": 141009,
+      "rank": 298,
+      "definitions_es": [
+        "volver"
+      ]
+    },
+    {
+      "spanish": "esas",
+      "simplified": "那些",
+      "traditional": "那些",
+      "pinyin": "",
+      "frequency": 140885,
+      "rank": 299,
+      "definitions_es": [
+        "esas"
+      ]
+    },
+    {
+      "spanish": "quizá",
+      "simplified": "兴许",
+      "traditional": "兴许",
+      "pinyin": "",
+      "frequency": 140794,
+      "rank": 300,
+      "definitions_es": [
+        "quizá"
+      ]
+    },
+    {
+      "spanish": "contra",
+      "simplified": "反对",
+      "traditional": "反对",
+      "pinyin": "",
+      "frequency": 140485,
+      "rank": 301,
+      "definitions_es": [
+        "contra"
+      ]
+    },
+    {
+      "spanish": "camino",
+      "simplified": "办法",
+      "traditional": "办法",
+      "pinyin": "",
+      "frequency": 140092,
+      "rank": 302,
+      "definitions_es": [
+        "camino"
+      ]
+    },
+    {
+      "spanish": "durante",
+      "simplified": "期间",
+      "traditional": "期间",
+      "pinyin": "",
+      "frequency": 139987,
+      "rank": 303,
+      "definitions_es": [
+        "durante"
+      ]
+    },
+    {
+      "spanish": "hablando",
+      "simplified": "发言",
+      "traditional": "发言",
+      "pinyin": "",
+      "frequency": 139007,
+      "rank": 304,
+      "definitions_es": [
+        "hablando"
+      ]
+    },
+    {
+      "spanish": "manera",
+      "simplified": "办法",
+      "traditional": "办法",
+      "pinyin": "",
+      "frequency": 137722,
+      "rank": 305,
+      "definitions_es": [
+        "manera"
+      ]
+    },
+    {
+      "spanish": "muerto",
+      "simplified": "死人",
+      "traditional": "死人",
+      "pinyin": "",
+      "frequency": 137301,
+      "rank": 306,
+      "definitions_es": [
+        "muerto"
+      ]
+    },
+    {
+      "spanish": "persona",
+      "simplified": "人品",
+      "traditional": "人品",
+      "pinyin": "",
+      "frequency": 136985,
+      "rank": 307,
+      "definitions_es": [
+        "persona"
+      ]
+    },
+    {
+      "spanish": "rápido",
+      "simplified": "快",
+      "traditional": "快",
+      "pinyin": "",
+      "frequency": 136953,
+      "rank": 308,
+      "definitions_es": [
+        "rápido"
+      ]
+    },
+    {
+      "spanish": "cuál",
+      "simplified": "其中",
+      "traditional": "其中",
+      "pinyin": "",
+      "frequency": 136406,
+      "rank": 309,
+      "definitions_es": [
+        "cuál"
+      ]
+    },
+    {
+      "spanish": "ayuda",
+      "simplified": "帮助",
+      "traditional": "帮助",
+      "pinyin": "",
+      "frequency": 136155,
+      "rank": 310,
+      "definitions_es": [
+        "ayuda"
+      ]
+    },
+    {
+      "spanish": "historia",
+      "simplified": "历史",
+      "traditional": "历史",
+      "pinyin": "",
+      "frequency": 135924,
+      "rank": 311,
+      "definitions_es": [
+        "historia"
+      ]
+    },
+    {
+      "spanish": "iba",
+      "simplified": "伊巴",
+      "traditional": "伊巴",
+      "pinyin": "",
+      "frequency": 135256,
+      "rank": 312,
+      "definitions_es": [
+        "iba"
+      ]
+    },
+    {
+      "spanish": "supongo",
+      "simplified": "我想",
+      "traditional": "我想",
+      "pinyin": "",
+      "frequency": 134885,
+      "rank": 313,
+      "definitions_es": [
+        "supongo"
+      ]
+    },
+    {
+      "spanish": "nueva",
+      "simplified": "新",
+      "traditional": "新",
+      "pinyin": "",
+      "frequency": 134490,
+      "rank": 314,
+      "definitions_es": [
+        "nueva"
+      ]
+    },
+    {
+      "spanish": "entiendo",
+      "simplified": "我明白",
+      "traditional": "我明白",
+      "pinyin": "",
+      "frequency": 134138,
+      "rank": 315,
+      "definitions_es": [
+        "entiendo"
+      ]
+    },
+    {
+      "spanish": "dentro",
+      "simplified": "内侧",
+      "traditional": "内侧",
+      "pinyin": "",
+      "frequency": 133954,
+      "rank": 316,
+      "definitions_es": [
+        "dentro"
+      ]
+    },
+    {
+      "spanish": "casi",
+      "simplified": "险些",
+      "traditional": "险些",
+      "pinyin": "",
+      "frequency": 133614,
+      "rank": 317,
+      "definitions_es": [
+        "casi"
+      ]
+    },
+    {
+      "spanish": "puerta",
+      "simplified": "门",
+      "traditional": "门",
+      "pinyin": "",
+      "frequency": 133533,
+      "rank": 318,
+      "definitions_es": [
+        "puerta"
+      ]
+    },
+    {
+      "spanish": "ves",
+      "simplified": "看看",
+      "traditional": "看看",
+      "pinyin": "",
+      "frequency": 133094,
+      "rank": 319,
+      "definitions_es": [
+        "ves"
+      ]
+    },
+    {
+      "spanish": "pasar",
+      "simplified": "前往",
+      "traditional": "前往",
+      "pinyin": "",
+      "frequency": 131693,
+      "rank": 320,
+      "definitions_es": [
+        "pasar"
+      ]
+    },
+    {
+      "spanish": "primero",
+      "simplified": "第一次",
+      "traditional": "第一次",
+      "pinyin": "",
+      "frequency": 131298,
+      "rank": 321,
+      "definitions_es": [
+        "primero"
+      ]
+    },
+    {
+      "spanish": "significa",
+      "simplified": "办法",
+      "traditional": "办法",
+      "pinyin": "",
+      "frequency": 130774,
+      "rank": 322,
+      "definitions_es": [
+        "significa"
+      ]
+    },
+    {
+      "spanish": "semana",
+      "simplified": "周",
+      "traditional": "周",
+      "pinyin": "",
+      "frequency": 130555,
+      "rank": 323,
+      "definitions_es": [
+        "semana"
+      ]
+    },
+    {
+      "spanish": "hacia",
+      "simplified": "至",
+      "traditional": "至",
+      "pinyin": "",
+      "frequency": 130000,
+      "rank": 324,
+      "definitions_es": [
+        "hacia"
+      ]
+    },
+    {
+      "spanish": "quizás",
+      "simplified": "兴许",
+      "traditional": "兴许",
+      "pinyin": "",
+      "frequency": 129544,
+      "rank": 325,
+      "definitions_es": [
+        "quizás"
+      ]
+    },
+    {
+      "spanish": "espero",
+      "simplified": "我期待着",
+      "traditional": "我期待着",
+      "pinyin": "",
+      "frequency": 129454,
+      "rank": 326,
+      "definitions_es": [
+        "espero"
+      ]
+    },
+    {
+      "spanish": "juntos",
+      "simplified": "在一起",
+      "traditional": "在一起",
+      "pinyin": "",
+      "frequency": 129353,
+      "rank": 327,
+      "definitions_es": [
+        "juntos"
+      ]
+    },
+    {
+      "spanish": "año",
+      "simplified": "年",
+      "traditional": "年",
+      "pinyin": "",
+      "frequency": 128910,
+      "rank": 328,
+      "definitions_es": [
+        "año"
+      ]
+    },
+    {
+      "spanish": "niños",
+      "simplified": "儿童",
+      "traditional": "儿童",
+      "pinyin": "",
+      "frequency": 128856,
+      "rank": 329,
+      "definitions_es": [
+        "niños"
+      ]
+    },
+    {
+      "spanish": "pronto",
+      "simplified": "不久",
+      "traditional": "不久",
+      "pinyin": "",
+      "frequency": 128135,
+      "rank": 330,
+      "definitions_es": [
+        "pronto"
+      ]
+    },
+    {
+      "spanish": "tío",
+      "simplified": "叔叔",
+      "traditional": "叔叔",
+      "pinyin": "",
+      "frequency": 127895,
+      "rank": 331,
+      "definitions_es": [
+        "tío"
+      ]
+    },
+    {
+      "spanish": "suerte",
+      "simplified": "好运",
+      "traditional": "好运",
+      "pinyin": "",
+      "frequency": 127246,
+      "rank": 332,
+      "definitions_es": [
+        "suerte"
+      ]
+    },
+    {
+      "spanish": "ciudad",
+      "simplified": "城市",
+      "traditional": "城市",
+      "pinyin": "",
+      "frequency": 126710,
+      "rank": 333,
+      "definitions_es": [
+        "ciudad"
+      ]
+    },
+    {
+      "spanish": "siquiera",
+      "simplified": "偶数的",
+      "traditional": "偶数的",
+      "pinyin": "",
+      "frequency": 126506,
+      "rank": 334,
+      "definitions_es": [
+        "siquiera"
+      ]
+    },
+    {
+      "spanish": "feliz",
+      "simplified": "喜滋滋",
+      "traditional": "喜滋滋",
+      "pinyin": "",
+      "frequency": 125692,
+      "rank": 335,
+      "definitions_es": [
+        "feliz"
+      ]
+    },
+    {
+      "spanish": "venir",
+      "simplified": "来",
+      "traditional": "来",
+      "pinyin": "",
+      "frequency": 124376,
+      "rank": 336,
+      "definitions_es": [
+        "venir"
+      ]
+    },
+    {
+      "spanish": "hija",
+      "simplified": "女儿",
+      "traditional": "女儿",
+      "pinyin": "",
+      "frequency": 124289,
+      "rank": 337,
+      "definitions_es": [
+        "hija"
+      ]
+    },
+    {
+      "spanish": "gustaría",
+      "simplified": "希望",
+      "traditional": "希望",
+      "pinyin": "",
+      "frequency": 124196,
+      "rank": 338,
+      "definitions_es": [
+        "gustaría"
+      ]
+    },
+    {
+      "spanish": "minutos",
+      "simplified": "分钟",
+      "traditional": "分钟",
+      "pinyin": "",
+      "frequency": 123912,
+      "rank": 339,
+      "definitions_es": [
+        "minutos"
+      ]
+    },
+    {
+      "spanish": "cuánto",
+      "simplified": "多少",
+      "traditional": "多少",
+      "pinyin": "",
+      "frequency": 123138,
+      "rank": 340,
+      "definitions_es": [
+        "cuánto"
+      ]
+    },
+    {
+      "spanish": "os",
+      "simplified": "os",
+      "traditional": "os",
+      "pinyin": "",
+      "frequency": 122754,
+      "rank": 341,
+      "definitions_es": [
+        "os"
+      ]
+    },
+    {
+      "spanish": "hey",
+      "simplified": "嘿",
+      "traditional": "嘿",
+      "pinyin": "",
+      "frequency": 122432,
+      "rank": 342,
+      "definitions_es": [
+        "hey"
+      ]
+    },
+    {
+      "spanish": "muerte",
+      "simplified": "死亡",
+      "traditional": "死亡",
+      "pinyin": "",
+      "frequency": 122057,
+      "rank": 343,
+      "definitions_es": [
+        "muerte"
+      ]
+    },
+    {
+      "spanish": "dejar",
+      "simplified": "离开",
+      "traditional": "离开",
+      "pinyin": "",
+      "frequency": 121779,
+      "rank": 344,
+      "definitions_es": [
+        "dejar"
+      ]
+    },
+    {
+      "spanish": "realidad",
+      "simplified": "现实",
+      "traditional": "现实",
+      "pinyin": "",
+      "frequency": 121027,
+      "rank": 345,
+      "definitions_es": [
+        "realidad"
+      ]
+    },
+    {
+      "spanish": "deja",
+      "simplified": "离开",
+      "traditional": "离开",
+      "pinyin": "",
+      "frequency": 120259,
+      "rank": 346,
+      "definitions_es": [
+        "deja"
+      ]
+    },
+    {
+      "spanish": "problemas",
+      "simplified": "问题",
+      "traditional": "问题",
+      "pinyin": "",
+      "frequency": 120138,
+      "rank": 347,
+      "definitions_es": [
+        "problemas"
+      ]
+    },
+    {
+      "spanish": "vi",
+      "simplified": "vi",
+      "traditional": "vi",
+      "pinyin": "",
+      "frequency": 119856,
+      "rank": 348,
+      "definitions_es": [
+        "vi"
+      ]
+    },
+    {
+      "spanish": "da",
+      "simplified": "da",
+      "traditional": "da",
+      "pinyin": "",
+      "frequency": 119199,
+      "rank": 349,
+      "definitions_es": [
+        "da"
+      ]
+    },
+    {
+      "spanish": "importante",
+      "simplified": "重要",
+      "traditional": "重要",
+      "pinyin": "",
+      "frequency": 119177,
+      "rank": 350,
+      "definitions_es": [
+        "importante"
+      ]
+    },
+    {
+      "spanish": "dijiste",
+      "simplified": "你说",
+      "traditional": "你说",
+      "pinyin": "",
+      "frequency": 119038,
+      "rank": 351,
+      "definitions_es": [
+        "dijiste"
+      ]
+    },
+    {
+      "spanish": "corazón",
+      "simplified": "心灵",
+      "traditional": "心灵",
+      "pinyin": "",
+      "frequency": 118685,
+      "rank": 352,
+      "definitions_es": [
+        "corazón"
+      ]
+    },
+    {
+      "spanish": "miedo",
+      "simplified": "担心",
+      "traditional": "担心",
+      "pinyin": "",
+      "frequency": 118624,
+      "rank": 353,
+      "definitions_es": [
+        "miedo"
+      ]
+    },
+    {
+      "spanish": "jefe",
+      "simplified": "首席",
+      "traditional": "首席",
+      "pinyin": "",
+      "frequency": 118458,
+      "rank": 354,
+      "definitions_es": [
+        "jefe"
+      ]
+    },
+    {
+      "spanish": "agua",
+      "simplified": "水",
+      "traditional": "水",
+      "pinyin": "",
+      "frequency": 117654,
+      "rank": 355,
+      "definitions_es": [
+        "agua"
+      ]
+    },
+    {
+      "spanish": "haré",
+      "simplified": "我会",
+      "traditional": "我会",
+      "pinyin": "",
+      "frequency": 117579,
+      "rank": 356,
+      "definitions_es": [
+        "haré"
+      ]
+    },
+    {
+      "spanish": "justo",
+      "simplified": "只是",
+      "traditional": "只是",
+      "pinyin": "",
+      "frequency": 117044,
+      "rank": 357,
+      "definitions_es": [
+        "justo"
+      ]
+    },
+    {
+      "spanish": "horas",
+      "simplified": "时数",
+      "traditional": "时数",
+      "pinyin": "",
+      "frequency": 116873,
+      "rank": 358,
+      "definitions_es": [
+        "horas"
+      ]
+    },
+    {
+      "spanish": "poder",
+      "simplified": "权力",
+      "traditional": "权力",
+      "pinyin": "",
+      "frequency": 115246,
+      "rank": 359,
+      "definitions_es": [
+        "poder"
+      ]
+    },
+    {
+      "spanish": "buenos",
+      "simplified": "好",
+      "traditional": "好",
+      "pinyin": "",
+      "frequency": 115064,
+      "rank": 360,
+      "definitions_es": [
+        "buenos"
+      ]
+    },
+    {
+      "spanish": "esposa",
+      "simplified": "妻子",
+      "traditional": "妻子",
+      "pinyin": "",
+      "frequency": 114925,
+      "rank": 361,
+      "definitions_es": [
+        "esposa"
+      ]
+    },
+    {
+      "spanish": "manos",
+      "simplified": "手上",
+      "traditional": "手上",
+      "pinyin": "",
+      "frequency": 114921,
+      "rank": 362,
+      "definitions_es": [
+        "manos"
+      ]
+    },
+    {
+      "spanish": "debes",
+      "simplified": "你必须",
+      "traditional": "你必须",
+      "pinyin": "",
+      "frequency": 114812,
+      "rank": 363,
+      "definitions_es": [
+        "debes"
+      ]
+    },
+    {
+      "spanish": "viene",
+      "simplified": "可在",
+      "traditional": "可在",
+      "pinyin": "",
+      "frequency": 114395,
+      "rank": 364,
+      "definitions_es": [
+        "viene"
+      ]
+    },
+    {
+      "spanish": "venga",
+      "simplified": "前往",
+      "traditional": "前往",
+      "pinyin": "",
+      "frequency": 114109,
+      "rank": 365,
+      "definitions_es": [
+        "venga"
+      ]
+    },
+    {
+      "spanish": "nuestros",
+      "simplified": "我们的",
+      "traditional": "我们的",
+      "pinyin": "",
+      "frequency": 114018,
+      "rank": 366,
+      "definitions_es": [
+        "nuestros"
+      ]
+    },
+    {
+      "spanish": "ojos",
+      "simplified": "眼睛",
+      "traditional": "眼睛",
+      "pinyin": "",
+      "frequency": 113772,
+      "rank": 367,
+      "definitions_es": [
+        "ojos"
+      ]
+    },
+    {
+      "spanish": "adelante",
+      "simplified": "开始",
+      "traditional": "开始",
+      "pinyin": "",
+      "frequency": 113192,
+      "rank": 368,
+      "definitions_es": [
+        "adelante"
+      ]
+    },
+    {
+      "spanish": "encontrar",
+      "simplified": "找到",
+      "traditional": "找到",
+      "pinyin": "",
+      "frequency": 113028,
+      "rank": 369,
+      "definitions_es": [
+        "encontrar"
+      ]
+    },
+    {
+      "spanish": "mano",
+      "simplified": "手动",
+      "traditional": "手动",
+      "pinyin": "",
+      "frequency": 112665,
+      "rank": 370,
+      "definitions_es": [
+        "mano"
+      ]
+    },
+    {
+      "spanish": "cinco",
+      "simplified": "五个",
+      "traditional": "五个",
+      "pinyin": "",
+      "frequency": 112532,
+      "rank": 371,
+      "definitions_es": [
+        "cinco"
+      ]
+    },
+    {
+      "spanish": "niño",
+      "simplified": "孩子",
+      "traditional": "孩子",
+      "pinyin": "",
+      "frequency": 112512,
+      "rank": 372,
+      "definitions_es": [
+        "niño"
+      ]
+    },
+    {
+      "spanish": "ninguna",
+      "simplified": "无",
+      "traditional": "无",
+      "pinyin": "",
+      "frequency": 112227,
+      "rank": 373,
+      "definitions_es": [
+        "ninguna"
+      ]
+    },
+    {
+      "spanish": "otros",
+      "simplified": "其他",
+      "traditional": "其他",
+      "pinyin": "",
+      "frequency": 112169,
+      "rank": 374,
+      "definitions_es": [
+        "otros"
+      ]
+    },
+    {
+      "spanish": "cara",
+      "simplified": "脸庞",
+      "traditional": "脸庞",
+      "pinyin": "",
+      "frequency": 111953,
+      "rank": 375,
+      "definitions_es": [
+        "cara"
+      ]
+    },
+    {
+      "spanish": "cuidado",
+      "simplified": "关怀",
+      "traditional": "关怀",
+      "pinyin": "",
+      "frequency": 111524,
+      "rank": 376,
+      "definitions_es": [
+        "cuidado"
+      ]
+    },
+    {
+      "spanish": "bajo",
+      "simplified": "根据",
+      "traditional": "根据",
+      "pinyin": "",
+      "frequency": 111241,
+      "rank": 377,
+      "definitions_es": [
+        "bajo"
+      ]
+    },
+    {
+      "spanish": "cerca",
+      "simplified": "附近",
+      "traditional": "附近",
+      "pinyin": "",
+      "frequency": 110690,
+      "rank": 378,
+      "definitions_es": [
+        "cerca"
+      ]
+    },
+    {
+      "spanish": "viejo",
+      "simplified": "久远",
+      "traditional": "久远",
+      "pinyin": "",
+      "frequency": 110403,
+      "rank": 379,
+      "definitions_es": [
+        "viejo"
+      ]
+    },
+    {
+      "spanish": "déjame",
+      "simplified": "让我",
+      "traditional": "让我",
+      "pinyin": "",
+      "frequency": 109679,
+      "rank": 380,
+      "definitions_es": [
+        "déjame"
+      ]
+    },
+    {
+      "spanish": "noches",
+      "simplified": "夜里",
+      "traditional": "夜里",
+      "pinyin": "",
+      "frequency": 109592,
+      "rank": 381,
+      "definitions_es": [
+        "noches"
+      ]
+    },
+    {
+      "spanish": "bastante",
+      "simplified": "颇为",
+      "traditional": "颇为",
+      "pinyin": "",
+      "frequency": 109431,
+      "rank": 382,
+      "definitions_es": [
+        "bastante"
+      ]
+    },
+    {
+      "spanish": "fin",
+      "simplified": "最后",
+      "traditional": "最后",
+      "pinyin": "",
+      "frequency": 109402,
+      "rank": 383,
+      "definitions_es": [
+        "fin"
+      ]
+    },
+    {
+      "spanish": "tomar",
+      "simplified": "从...中获取",
+      "traditional": "从...中获取",
+      "pinyin": "",
+      "frequency": 109183,
+      "rank": 384,
+      "definitions_es": [
+        "tomar"
+      ]
+    },
+    {
+      "spanish": "único",
+      "simplified": "只是",
+      "traditional": "只是",
+      "pinyin": "",
+      "frequency": 108435,
+      "rank": 385,
+      "definitions_es": [
+        "único"
+      ]
+    },
+    {
+      "spanish": "misma",
+      "simplified": "一样",
+      "traditional": "一样",
+      "pinyin": "",
+      "frequency": 108033,
+      "rank": 386,
+      "definitions_es": [
+        "misma"
+      ]
+    },
+    {
+      "spanish": "escucha",
+      "simplified": "倾听",
+      "traditional": "倾听",
+      "pinyin": "",
+      "frequency": 107286,
+      "rank": 387,
+      "definitions_es": [
+        "escucha"
+      ]
+    },
+    {
+      "spanish": "ningún",
+      "simplified": "没有",
+      "traditional": "没有",
+      "pinyin": "",
+      "frequency": 107193,
+      "rank": 388,
+      "definitions_es": [
+        "ningún"
+      ]
+    },
+    {
+      "spanish": "suficiente",
+      "simplified": "充足",
+      "traditional": "充足",
+      "pinyin": "",
+      "frequency": 107106,
+      "rank": 389,
+      "definitions_es": [
+        "suficiente"
+      ]
+    },
+    {
+      "spanish": "punto",
+      "simplified": "点",
+      "traditional": "点",
+      "pinyin": "",
+      "frequency": 106940,
+      "rank": 390,
+      "definitions_es": [
+        "punto"
+      ]
+    },
+    {
+      "spanish": "cuándo",
+      "simplified": "当",
+      "traditional": "当",
+      "pinyin": "",
+      "frequency": 106920,
+      "rank": 391,
+      "definitions_es": [
+        "cuándo"
+      ]
+    },
+    {
+      "spanish": "sigue",
+      "simplified": "前往",
+      "traditional": "前往",
+      "pinyin": "",
+      "frequency": 106764,
+      "rank": 392,
+      "definitions_es": [
+        "sigue"
+      ]
+    },
+    {
+      "spanish": "haya",
+      "simplified": "榉树",
+      "traditional": "榉树",
+      "pinyin": "",
+      "frequency": 106729,
+      "rank": 393,
+      "definitions_es": [
+        "haya"
+      ]
+    },
+    {
+      "spanish": "equipo",
+      "simplified": "团队",
+      "traditional": "团队",
+      "pinyin": "",
+      "frequency": 106584,
+      "rank": 394,
+      "definitions_es": [
+        "equipo"
+      ]
+    },
+    {
+      "spanish": "grande",
+      "simplified": "颙",
+      "traditional": "颙",
+      "pinyin": "",
+      "frequency": 106057,
+      "rank": 395,
+      "definitions_es": [
+        "grande"
+      ]
+    },
+    {
+      "spanish": "necesita",
+      "simplified": "需要",
+      "traditional": "需要",
+      "pinyin": "",
+      "frequency": 105889,
+      "rank": 396,
+      "definitions_es": [
+        "necesita"
+      ]
+    },
+    {
+      "spanish": "llegar",
+      "simplified": "前往",
+      "traditional": "前往",
+      "pinyin": "",
+      "frequency": 105719,
+      "rank": 397,
+      "definitions_es": [
+        "llegar"
+      ]
+    },
+    {
+      "spanish": "incluso",
+      "simplified": "包括",
+      "traditional": "包括",
+      "pinyin": "",
+      "frequency": 105304,
+      "rank": 398,
+      "definitions_es": [
+        "incluso"
+      ]
+    },
+    {
+      "spanish": "algunos",
+      "simplified": "一些",
+      "traditional": "一些",
+      "pinyin": "",
+      "frequency": 105052,
+      "rank": 399,
+      "definitions_es": [
+        "algunos"
+      ]
+    },
+    {
+      "spanish": "doctor",
+      "simplified": "博士",
+      "traditional": "博士",
+      "pinyin": "",
+      "frequency": 104991,
+      "rank": 400,
+      "definitions_es": [
+        "doctor"
+      ]
+    },
+    {
+      "spanish": "difícil",
+      "simplified": "难",
+      "traditional": "难",
+      "pinyin": "",
+      "frequency": 104985,
+      "rank": 401,
+      "definitions_es": [
+        "difícil"
+      ]
+    },
+    {
+      "spanish": "aunque",
+      "simplified": "虽说",
+      "traditional": "虽说",
+      "pinyin": "",
+      "frequency": 104655,
+      "rank": 402,
+      "definitions_es": [
+        "aunque"
+      ]
+    },
+    {
+      "spanish": "hubiera",
+      "simplified": "会",
+      "traditional": "会",
+      "pinyin": "",
+      "frequency": 104473,
+      "rank": 403,
+      "definitions_es": [
+        "hubiera"
+      ]
+    },
+    {
+      "spanish": "primer",
+      "simplified": "第一次",
+      "traditional": "第一次",
+      "pinyin": "",
+      "frequency": 104138,
+      "rank": 404,
+      "definitions_es": [
+        "primer"
+      ]
+    },
+    {
+      "spanish": "coche",
+      "simplified": "汽车",
+      "traditional": "汽车",
+      "pinyin": "",
+      "frequency": 103946,
+      "rank": 405,
+      "definitions_es": [
+        "coche"
+      ]
+    },
+    {
+      "spanish": "hago",
+      "simplified": "我愿意",
+      "traditional": "我愿意",
+      "pinyin": "",
+      "frequency": 103901,
+      "rank": 406,
+      "definitions_es": [
+        "hago"
+      ]
+    },
+    {
+      "spanish": "clase",
+      "simplified": "类",
+      "traditional": "类",
+      "pinyin": "",
+      "frequency": 103827,
+      "rank": 407,
+      "definitions_es": [
+        "clase"
+      ]
+    },
+    {
+      "spanish": "cuatro",
+      "simplified": "四",
+      "traditional": "四",
+      "pinyin": "",
+      "frequency": 103805,
+      "rank": 408,
+      "definitions_es": [
+        "cuatro"
+      ]
+    },
+    {
+      "spanish": "mas",
+      "simplified": "更多",
+      "traditional": "更多",
+      "pinyin": "",
+      "frequency": 103445,
+      "rank": 409,
+      "definitions_es": [
+        "mas"
+      ]
+    },
+    {
+      "spanish": "dices",
+      "simplified": "你说",
+      "traditional": "你说",
+      "pinyin": "",
+      "frequency": 103279,
+      "rank": 410,
+      "definitions_es": [
+        "dices"
+      ]
+    },
+    {
+      "spanish": "pequeño",
+      "simplified": "小",
+      "traditional": "小",
+      "pinyin": "",
+      "frequency": 103016,
+      "rank": 411,
+      "definitions_es": [
+        "pequeño"
+      ]
+    },
+    {
+      "spanish": "llama",
+      "simplified": "火焰",
+      "traditional": "火焰",
+      "pinyin": "",
+      "frequency": 102848,
+      "rank": 412,
+      "definitions_es": [
+        "llama"
+      ]
+    },
+    {
+      "spanish": "toma",
+      "simplified": "从...中获取",
+      "traditional": "从...中获取",
+      "pinyin": "",
+      "frequency": 102733,
+      "rank": 413,
+      "definitions_es": [
+        "toma"
+      ]
+    },
+    {
+      "spanish": "hiciste",
+      "simplified": "你做了",
+      "traditional": "你做了",
+      "pinyin": "",
+      "frequency": 102722,
+      "rank": 414,
+      "definitions_es": [
+        "hiciste"
+      ]
+    },
+    {
+      "spanish": "allá",
+      "simplified": "那儿",
+      "traditional": "那儿",
+      "pinyin": "",
+      "frequency": 102642,
+      "rank": 415,
+      "definitions_es": [
+        "allá"
+      ]
+    },
+    {
+      "spanish": "última",
+      "simplified": "最后一个",
+      "traditional": "最后一个",
+      "pinyin": "",
+      "frequency": 102333,
+      "rank": 416,
+      "definitions_es": [
+        "última"
+      ]
+    },
+    {
+      "spanish": "arriba",
+      "simplified": "向上",
+      "traditional": "向上",
+      "pinyin": "",
+      "frequency": 102254,
+      "rank": 417,
+      "definitions_es": [
+        "arriba"
+      ]
+    },
+    {
+      "spanish": "tierra",
+      "simplified": "土地",
+      "traditional": "土地",
+      "pinyin": "",
+      "frequency": 102197,
+      "rank": 418,
+      "definitions_es": [
+        "tierra"
+      ]
+    },
+    {
+      "spanish": "guerra",
+      "simplified": "战",
+      "traditional": "战",
+      "pinyin": "",
+      "frequency": 101887,
+      "rank": 419,
+      "definitions_es": [
+        "guerra"
+      ]
+    },
+    {
+      "spanish": "pensar",
+      "simplified": "觉得",
+      "traditional": "觉得",
+      "pinyin": "",
+      "frequency": 101695,
+      "rank": 420,
+      "definitions_es": [
+        "pensar"
+      ]
+    },
+    {
+      "spanish": "pueda",
+      "simplified": "会",
+      "traditional": "会",
+      "pinyin": "",
+      "frequency": 101487,
+      "rank": 421,
+      "definitions_es": [
+        "pueda"
+      ]
+    },
+    {
+      "spanish": "igual",
+      "simplified": "一样",
+      "traditional": "一样",
+      "pinyin": "",
+      "frequency": 101272,
+      "rank": 422,
+      "definitions_es": [
+        "igual"
+      ]
+    },
+    {
+      "spanish": "loco",
+      "simplified": "机车",
+      "traditional": "机车",
+      "pinyin": "",
+      "frequency": 100021,
+      "rank": 423,
+      "definitions_es": [
+        "loco"
+      ]
+    },
+    {
+      "spanish": "sangre",
+      "simplified": "血液",
+      "traditional": "血液",
+      "pinyin": "",
+      "frequency": 99844,
+      "rank": 424,
+      "definitions_es": [
+        "sangre"
+      ]
+    },
+    {
+      "spanish": "mujeres",
+      "simplified": "妇女",
+      "traditional": "妇女",
+      "pinyin": "",
+      "frequency": 99536,
+      "rank": 425,
+      "definitions_es": [
+        "mujeres"
+      ]
+    },
+    {
+      "spanish": "vuelta",
+      "simplified": "返回",
+      "traditional": "返回",
+      "pinyin": "",
+      "frequency": 99529,
+      "rank": 426,
+      "definitions_es": [
+        "vuelta"
+      ]
+    },
+    {
+      "spanish": "fui",
+      "simplified": "我去了",
+      "traditional": "我去了",
+      "pinyin": "",
+      "frequency": 99366,
+      "rank": 427,
+      "definitions_es": [
+        "fui"
+      ]
+    },
+    {
+      "spanish": "trabajar",
+      "simplified": "工作",
+      "traditional": "工作",
+      "pinyin": "",
+      "frequency": 99262,
+      "rank": 428,
+      "definitions_es": [
+        "trabajar"
+      ]
+    },
+    {
+      "spanish": "tenido",
+      "simplified": "曾经",
+      "traditional": "曾经",
+      "pinyin": "",
+      "frequency": 99237,
+      "rank": 429,
+      "definitions_es": [
+        "tenido"
+      ]
+    },
+    {
+      "spanish": "juego",
+      "simplified": "比赛",
+      "traditional": "比赛",
+      "pinyin": "",
+      "frequency": 99041,
+      "rank": 430,
+      "definitions_es": [
+        "juego"
+      ]
+    },
+    {
+      "spanish": "deberías",
+      "simplified": "你应该",
+      "traditional": "你应该",
+      "pinyin": "",
+      "frequency": 98960,
+      "rank": 431,
+      "definitions_es": [
+        "deberías"
+      ]
+    },
+    {
+      "spanish": "cuerpo",
+      "simplified": "机构",
+      "traditional": "机构",
+      "pinyin": "",
+      "frequency": 98410,
+      "rank": 432,
+      "definitions_es": [
+        "cuerpo"
+      ]
+    },
+    {
+      "spanish": "algunas",
+      "simplified": "一些",
+      "traditional": "一些",
+      "pinyin": "",
+      "frequency": 96075,
+      "rank": 433,
+      "definitions_es": [
+        "algunas"
+      ]
+    },
+    {
+      "spanish": "entrar",
+      "simplified": "走进",
+      "traditional": "走进",
+      "pinyin": "",
+      "frequency": 95899,
+      "rank": 434,
+      "definitions_es": [
+        "entrar"
+      ]
+    },
+    {
+      "spanish": "cree",
+      "simplified": "相信",
+      "traditional": "相信",
+      "pinyin": "",
+      "frequency": 95859,
+      "rank": 435,
+      "definitions_es": [
+        "cree"
+      ]
+    },
+    {
+      "spanish": "podía",
+      "simplified": "可以",
+      "traditional": "可以",
+      "pinyin": "",
+      "frequency": 95527,
+      "rank": 436,
+      "definitions_es": [
+        "podía"
+      ]
+    },
+    {
+      "spanish": "debemos",
+      "simplified": "我们必须",
+      "traditional": "我们必须",
+      "pinyin": "",
+      "frequency": 95445,
+      "rank": 437,
+      "definitions_es": [
+        "debemos"
+      ]
+    },
+    {
+      "spanish": "oportunidad",
+      "simplified": "机缘",
+      "traditional": "机缘",
+      "pinyin": "",
+      "frequency": 95375,
+      "rank": 438,
+      "definitions_es": [
+        "oportunidad"
+      ]
+    },
+    {
+      "spanish": "teléfono",
+      "simplified": "致电",
+      "traditional": "致电",
+      "pinyin": "",
+      "frequency": 95015,
+      "rank": 439,
+      "definitions_es": [
+        "teléfono"
+      ]
+    },
+    {
+      "spanish": "necesitamos",
+      "simplified": "我们需要",
+      "traditional": "我们需要",
+      "pinyin": "",
+      "frequency": 94964,
+      "rank": 440,
+      "definitions_es": [
+        "necesitamos"
+      ]
+    },
+    {
+      "spanish": "final",
+      "simplified": "终局",
+      "traditional": "终局",
+      "pinyin": "",
+      "frequency": 94883,
+      "rank": 441,
+      "definitions_es": [
+        "final"
+      ]
+    },
+    {
+      "spanish": "listo",
+      "simplified": "就绪",
+      "traditional": "就绪",
+      "pinyin": "",
+      "frequency": 94769,
+      "rank": 442,
+      "definitions_es": [
+        "listo"
+      ]
+    },
+    {
+      "spanish": "fiesta",
+      "simplified": "聚会",
+      "traditional": "聚会",
+      "pinyin": "",
+      "frequency": 94739,
+      "rank": 443,
+      "definitions_es": [
+        "fiesta"
+      ]
+    },
+    {
+      "spanish": "muchos",
+      "simplified": "很多",
+      "traditional": "很多",
+      "pinyin": "",
+      "frequency": 94250,
+      "rank": 444,
+      "definitions_es": [
+        "muchos"
+      ]
+    },
+    {
+      "spanish": "estabas",
+      "simplified": "你们",
+      "traditional": "你们",
+      "pinyin": "",
+      "frequency": 94097,
+      "rank": 445,
+      "definitions_es": [
+        "estabas"
+      ]
+    },
+    {
+      "spanish": "quieren",
+      "simplified": "想",
+      "traditional": "想",
+      "pinyin": "",
+      "frequency": 94018,
+      "rank": 446,
+      "definitions_es": [
+        "quieren"
+      ]
+    },
+    {
+      "spanish": "vete",
+      "simplified": "前往",
+      "traditional": "前往",
+      "pinyin": "",
+      "frequency": 93782,
+      "rank": 447,
+      "definitions_es": [
+        "vete"
+      ]
+    },
+    {
+      "spanish": "auto",
+      "simplified": "汽车",
+      "traditional": "汽车",
+      "pinyin": "",
+      "frequency": 93654,
+      "rank": 448,
+      "definitions_es": [
+        "auto"
+      ]
+    },
+    {
+      "spanish": "dar",
+      "simplified": "与",
+      "traditional": "与",
+      "pinyin": "",
+      "frequency": 92706,
+      "rank": 449,
+      "definitions_es": [
+        "dar"
+      ]
+    },
+    {
+      "spanish": "vivir",
+      "simplified": "生活",
+      "traditional": "生活",
+      "pinyin": "",
+      "frequency": 92629,
+      "rank": 450,
+      "definitions_es": [
+        "vivir"
+      ]
+    },
+    {
+      "spanish": "posible",
+      "simplified": "可能",
+      "traditional": "可能",
+      "pinyin": "",
+      "frequency": 92449,
+      "rank": 451,
+      "definitions_es": [
+        "posible"
+      ]
+    },
+    {
+      "spanish": "ok",
+      "simplified": "好的",
+      "traditional": "好的",
+      "pinyin": "",
+      "frequency": 92398,
+      "rank": 452,
+      "definitions_es": [
+        "ok"
+      ]
+    },
+    {
+      "spanish": "hermana",
+      "simplified": "姐姐",
+      "traditional": "姐姐",
+      "pinyin": "",
+      "frequency": 92291,
+      "rank": 453,
+      "definitions_es": [
+        "hermana"
+      ]
+    },
+    {
+      "spanish": "número",
+      "simplified": "编号",
+      "traditional": "编号",
+      "pinyin": "",
+      "frequency": 92183,
+      "rank": 454,
+      "definitions_es": [
+        "número"
+      ]
+    },
+    {
+      "spanish": "meses",
+      "simplified": "个月",
+      "traditional": "个月",
+      "pinyin": "",
+      "frequency": 92062,
+      "rank": 455,
+      "definitions_es": [
+        "meses"
+      ]
+    },
+    {
+      "spanish": "exactamente",
+      "simplified": "正是",
+      "traditional": "正是",
+      "pinyin": "",
+      "frequency": 91598,
+      "rank": 456,
+      "definitions_es": [
+        "exactamente"
+      ]
+    },
+    {
+      "spanish": "culpa",
+      "simplified": "罪责",
+      "traditional": "罪责",
+      "pinyin": "",
+      "frequency": 91506,
+      "rank": 457,
+      "definitions_es": [
+        "culpa"
+      ]
+    },
+    {
+      "spanish": "abajo",
+      "simplified": "低于",
+      "traditional": "低于",
+      "pinyin": "",
+      "frequency": 91298,
+      "rank": 458,
+      "definitions_es": [
+        "abajo"
+      ]
+    },
+    {
+      "spanish": "escuela",
+      "simplified": "学校",
+      "traditional": "学校",
+      "pinyin": "",
+      "frequency": 90725,
+      "rank": 459,
+      "definitions_es": [
+        "escuela"
+      ]
+    },
+    {
+      "spanish": "ido",
+      "simplified": "逝去的",
+      "traditional": "逝去的",
+      "pinyin": "",
+      "frequency": 90670,
+      "rank": 460,
+      "definitions_es": [
+        "ido"
+      ]
+    },
+    {
+      "spanish": "fuerte",
+      "simplified": "坚强",
+      "traditional": "坚强",
+      "pinyin": "",
+      "frequency": 90226,
+      "rank": 461,
+      "definitions_es": [
+        "fuerte"
+      ]
+    },
+    {
+      "spanish": "diciendo",
+      "simplified": "他说",
+      "traditional": "他说",
+      "pinyin": "",
+      "frequency": 90048,
+      "rank": 462,
+      "definitions_es": [
+        "diciendo"
+      ]
+    },
+    {
+      "spanish": "habla",
+      "simplified": "讲话",
+      "traditional": "讲话",
+      "pinyin": "",
+      "frequency": 90023,
+      "rank": 463,
+      "definitions_es": [
+        "habla"
+      ]
+    },
+    {
+      "spanish": "esté",
+      "simplified": "是",
+      "traditional": "是",
+      "pinyin": "",
+      "frequency": 89826,
+      "rank": 464,
+      "definitions_es": [
+        "esté"
+      ]
+    },
+    {
+      "spanish": "ello",
+      "simplified": "它",
+      "traditional": "它",
+      "pinyin": "",
+      "frequency": 89741,
+      "rank": 465,
+      "definitions_es": [
+        "ello"
+      ]
+    },
+    {
+      "spanish": "pregunta",
+      "simplified": "问题",
+      "traditional": "问题",
+      "pinyin": "",
+      "frequency": 89617,
+      "rank": 466,
+      "definitions_es": [
+        "pregunta"
+      ]
+    },
+    {
+      "spanish": "chicas",
+      "simplified": "女孩",
+      "traditional": "女孩",
+      "pinyin": "",
+      "frequency": 89467,
+      "rank": 467,
+      "definitions_es": [
+        "chicas"
+      ]
+    },
+    {
+      "spanish": "eran",
+      "simplified": "是",
+      "traditional": "是",
+      "pinyin": "",
+      "frequency": 89418,
+      "rank": 468,
+      "definitions_es": [
+        "eran"
+      ]
+    },
+    {
+      "spanish": "unas",
+      "simplified": "一些",
+      "traditional": "一些",
+      "pinyin": "",
+      "frequency": 89043,
+      "rank": 469,
+      "definitions_es": [
+        "unas"
+      ]
+    },
+    {
+      "spanish": "pasando",
+      "simplified": "请访问",
+      "traditional": "请访问",
+      "pinyin": "",
+      "frequency": 88887,
+      "rank": 470,
+      "definitions_es": [
+        "pasando"
+      ]
+    },
+    {
+      "spanish": "atrás",
+      "simplified": "后",
+      "traditional": "后",
+      "pinyin": "",
+      "frequency": 88877,
+      "rank": 471,
+      "definitions_es": [
+        "atrás"
+      ]
+    },
+    {
+      "spanish": "malo",
+      "simplified": "坏的",
+      "traditional": "坏的",
+      "pinyin": "",
+      "frequency": 88555,
+      "rank": 472,
+      "definitions_es": [
+        "malo"
+      ]
+    },
+    {
+      "spanish": "capitán",
+      "simplified": "队长",
+      "traditional": "队长",
+      "pinyin": "",
+      "frequency": 88550,
+      "rank": 473,
+      "definitions_es": [
+        "capitán"
+      ]
+    },
+    {
+      "spanish": "sra.",
+      "simplified": "女士",
+      "traditional": "女士",
+      "pinyin": "",
+      "frequency": 88400,
+      "rank": 474,
+      "definitions_es": [
+        "sra."
+      ]
+    },
+    {
+      "spanish": "bebé",
+      "simplified": "婴幼儿",
+      "traditional": "婴幼儿",
+      "pinyin": "",
+      "frequency": 88307,
+      "rank": 475,
+      "definitions_es": [
+        "bebé"
+      ]
+    },
+    {
+      "spanish": "segundo",
+      "simplified": "附议",
+      "traditional": "附议",
+      "pinyin": "",
+      "frequency": 88232,
+      "rank": 476,
+      "definitions_es": [
+        "segundo"
+      ]
+    },
+    {
+      "spanish": "sabemos",
+      "simplified": "我们知道",
+      "traditional": "我们知道",
+      "pinyin": "",
+      "frequency": 87714,
+      "rank": 477,
+      "definitions_es": [
+        "sabemos"
+      ]
+    },
+    {
+      "spanish": "mayor",
+      "simplified": "更多",
+      "traditional": "更多",
+      "pinyin": "",
+      "frequency": 87707,
+      "rank": 478,
+      "definitions_es": [
+        "mayor"
+      ]
+    },
+    {
+      "spanish": "comida",
+      "simplified": "食物",
+      "traditional": "食物",
+      "pinyin": "",
+      "frequency": 87661,
+      "rank": 479,
+      "definitions_es": [
+        "comida"
+      ]
+    },
+    {
+      "spanish": "morir",
+      "simplified": "与世长辞",
+      "traditional": "与世长辞",
+      "pinyin": "",
+      "frequency": 87614,
+      "rank": 480,
+      "definitions_es": [
+        "morir"
+      ]
+    },
+    {
+      "spanish": "conozco",
+      "simplified": "我知道",
+      "traditional": "我知道",
+      "pinyin": "",
+      "frequency": 87429,
+      "rank": 481,
+      "definitions_es": [
+        "conozco"
+      ]
+    },
+    {
+      "spanish": "dame",
+      "simplified": "给我",
+      "traditional": "给我",
+      "pinyin": "",
+      "frequency": 87200,
+      "rank": 482,
+      "definitions_es": [
+        "dame"
+      ]
+    },
+    {
+      "spanish": "fácil",
+      "simplified": "简便",
+      "traditional": "简便",
+      "pinyin": "",
+      "frequency": 87099,
+      "rank": 483,
+      "definitions_es": [
+        "fácil"
+      ]
+    },
+    {
+      "spanish": "comer",
+      "simplified": "吃",
+      "traditional": "吃",
+      "pinyin": "",
+      "frequency": 86671,
+      "rank": 484,
+      "definitions_es": [
+        "comer"
+      ]
+    },
+    {
+      "spanish": "vino",
+      "simplified": "葡萄酒",
+      "traditional": "葡萄酒",
+      "pinyin": "",
+      "frequency": 86406,
+      "rank": 485,
+      "definitions_es": [
+        "vino"
+      ]
+    },
+    {
+      "spanish": "lista",
+      "simplified": "清单",
+      "traditional": "清单",
+      "pinyin": "",
+      "frequency": 86033,
+      "rank": 486,
+      "definitions_es": [
+        "lista"
+      ]
+    },
+    {
+      "spanish": "haga",
+      "simplified": "前往",
+      "traditional": "前往",
+      "pinyin": "",
+      "frequency": 85884,
+      "rank": 487,
+      "definitions_es": [
+        "haga"
+      ]
+    },
+    {
+      "spanish": "necesitas",
+      "simplified": "你需要",
+      "traditional": "你需要",
+      "pinyin": "",
+      "frequency": 85706,
+      "rank": 488,
+      "definitions_es": [
+        "necesitas"
+      ]
+    },
+    {
+      "spanish": "hijos",
+      "simplified": "儿童",
+      "traditional": "儿童",
+      "pinyin": "",
+      "frequency": 85020,
+      "rank": 489,
+      "definitions_es": [
+        "hijos"
+      ]
+    },
+    {
+      "spanish": "probablemente",
+      "simplified": "也许",
+      "traditional": "也许",
+      "pinyin": "",
+      "frequency": 84911,
+      "rank": 490,
+      "definitions_es": [
+        "probablemente"
+      ]
+    },
+    {
+      "spanish": "padres",
+      "simplified": "父母",
+      "traditional": "父母",
+      "pinyin": "",
+      "frequency": 84855,
+      "rank": 491,
+      "definitions_es": [
+        "padres"
+      ]
+    },
+    {
+      "spanish": "habitación",
+      "simplified": "房间",
+      "traditional": "房间",
+      "pinyin": "",
+      "frequency": 84704,
+      "rank": 492,
+      "definitions_es": [
+        "habitación"
+      ]
+    },
+    {
+      "spanish": "creer",
+      "simplified": "认为",
+      "traditional": "认为",
+      "pinyin": "",
+      "frequency": 84624,
+      "rank": 493,
+      "definitions_es": [
+        "creer"
+      ]
+    },
+    {
+      "spanish": "pensando",
+      "simplified": "思想",
+      "traditional": "思想",
+      "pinyin": "",
+      "frequency": 84438,
+      "rank": 494,
+      "definitions_es": [
+        "pensando"
+      ]
+    },
+    {
+      "spanish": "fueron",
+      "simplified": "是",
+      "traditional": "是",
+      "pinyin": "",
+      "frequency": 84181,
+      "rank": 495,
+      "definitions_es": [
+        "fueron"
+      ]
+    },
+    {
+      "spanish": "dime",
+      "simplified": "告诉我",
+      "traditional": "告诉我",
+      "pinyin": "",
+      "frequency": 84079,
+      "rank": 496,
+      "definitions_es": [
+        "dime"
+      ]
+    },
+    {
+      "spanish": "trata",
+      "simplified": "是",
+      "traditional": "是",
+      "pinyin": "",
+      "frequency": 83906,
+      "rank": 497,
+      "definitions_es": [
+        "trata"
+      ]
+    },
+    {
+      "spanish": "buscando",
+      "simplified": "寻找",
+      "traditional": "寻找",
+      "pinyin": "",
+      "frequency": 83655,
+      "rank": 498,
+      "definitions_es": [
+        "buscando"
+      ]
+    },
+    {
+      "spanish": "tuve",
+      "simplified": "我曾",
+      "traditional": "我曾",
+      "pinyin": "",
+      "frequency": 83608,
+      "rank": 499,
+      "definitions_es": [
+        "tuve"
+      ]
+    },
+    {
+      "spanish": "tampoco",
+      "simplified": "也不",
+      "traditional": "也不",
+      "pinyin": "",
+      "frequency": 83595,
+      "rank": 500,
+      "definitions_es": [
+        "tampoco"
+      ]
+    },
+    {
+      "spanish": "amo",
+      "simplified": "amo",
+      "traditional": "amo",
+      "pinyin": "",
+      "frequency": 83156,
+      "rank": 501,
+      "definitions_es": [
+        "amo"
+      ]
+    },
+    {
+      "spanish": "joven",
+      "simplified": "年轻",
+      "traditional": "年轻",
+      "pinyin": "",
+      "frequency": 82919,
+      "rank": 502,
+      "definitions_es": [
+        "joven"
+      ]
+    },
+    {
+      "spanish": "podrías",
+      "simplified": "你可以",
+      "traditional": "你可以",
+      "pinyin": "",
+      "frequency": 82328,
+      "rank": 503,
+      "definitions_es": [
+        "podrías"
+      ]
+    },
+    {
+      "spanish": "sola",
+      "simplified": "只是",
+      "traditional": "只是",
+      "pinyin": "",
+      "frequency": 82229,
+      "rank": 504,
+      "definitions_es": [
+        "sola"
+      ]
+    },
+    {
+      "spanish": "par",
+      "simplified": "标准杆数",
+      "traditional": "标准杆数",
+      "pinyin": "",
+      "frequency": 81901,
+      "rank": 505,
+      "definitions_es": [
+        "par"
+      ]
+    },
+    {
+      "spanish": "única",
+      "simplified": "只是",
+      "traditional": "只是",
+      "pinyin": "",
+      "frequency": 81808,
+      "rank": 506,
+      "definitions_es": [
+        "única"
+      ]
+    },
+    {
+      "spanish": "hacen",
+      "simplified": "生产",
+      "traditional": "生产",
+      "pinyin": "",
+      "frequency": 81807,
+      "rank": 507,
+      "definitions_es": [
+        "hacen"
+      ]
+    },
+    {
+      "spanish": "seguir",
+      "simplified": "遵循",
+      "traditional": "遵循",
+      "pinyin": "",
+      "frequency": 81723,
+      "rank": 508,
+      "definitions_es": [
+        "seguir"
+      ]
+    },
+    {
+      "spanish": "dr.",
+      "simplified": "博士",
+      "traditional": "博士",
+      "pinyin": "",
+      "frequency": 81308,
+      "rank": 509,
+      "definitions_es": [
+        "dr."
+      ]
+    },
+    {
+      "spanish": "simplemente",
+      "simplified": "只需",
+      "traditional": "只需",
+      "pinyin": "",
+      "frequency": 80350,
+      "rank": 510,
+      "definitions_es": [
+        "simplemente"
+      ]
+    },
+    {
+      "spanish": "dicen",
+      "simplified": "他们说",
+      "traditional": "他们说",
+      "pinyin": "",
+      "frequency": 80310,
+      "rank": 511,
+      "definitions_es": [
+        "dicen"
+      ]
+    },
+    {
+      "spanish": "medio",
+      "simplified": "一半",
+      "traditional": "一半",
+      "pinyin": "",
+      "frequency": 80278,
+      "rank": 512,
+      "definitions_es": [
+        "medio"
+      ]
+    },
+    {
+      "spanish": "puta",
+      "simplified": "妓女",
+      "traditional": "妓女",
+      "pinyin": "",
+      "frequency": 80176,
+      "rank": 513,
+      "definitions_es": [
+        "puta"
+      ]
+    },
+    {
+      "spanish": "saben",
+      "simplified": "知道",
+      "traditional": "知道",
+      "pinyin": "",
+      "frequency": 79988,
+      "rank": 514,
+      "definitions_es": [
+        "saben"
+      ]
+    },
+    {
+      "spanish": "sentido",
+      "simplified": "地址",
+      "traditional": "地址",
+      "pinyin": "",
+      "frequency": 79686,
+      "rank": 515,
+      "definitions_es": [
+        "sentido"
+      ]
+    },
+    {
+      "spanish": "hagas",
+      "simplified": "做",
+      "traditional": "做",
+      "pinyin": "",
+      "frequency": 79398,
+      "rank": 516,
+      "definitions_es": [
+        "hagas"
+      ]
+    },
+    {
+      "spanish": "segura",
+      "simplified": "巩",
+      "traditional": "巩",
+      "pinyin": "",
+      "frequency": 79393,
+      "rank": 517,
+      "definitions_es": [
+        "segura"
+      ]
+    },
+    {
+      "spanish": "esperar",
+      "simplified": "轮候",
+      "traditional": "轮候",
+      "pinyin": "",
+      "frequency": 79115,
+      "rank": 518,
+      "definitions_es": [
+        "esperar"
+      ]
+    },
+    {
+      "spanish": "lejos",
+      "simplified": "最远的",
+      "traditional": "最远的",
+      "pinyin": "",
+      "frequency": 79091,
+      "rank": 519,
+      "definitions_es": [
+        "lejos"
+      ]
+    },
+    {
+      "spanish": "arma",
+      "simplified": "武器",
+      "traditional": "武器",
+      "pinyin": "",
+      "frequency": 78974,
+      "rank": 520,
+      "definitions_es": [
+        "arma"
+      ]
+    },
+    {
+      "spanish": "alto",
+      "simplified": "高",
+      "traditional": "高",
+      "pinyin": "",
+      "frequency": 78496,
+      "rank": 521,
+      "definitions_es": [
+        "alto"
+      ]
+    },
+    {
+      "spanish": "pequeña",
+      "simplified": "小",
+      "traditional": "小",
+      "pinyin": "",
+      "frequency": 78191,
+      "rank": 522,
+      "definitions_es": [
+        "pequeña"
+      ]
+    },
+    {
+      "spanish": "dólares",
+      "simplified": "美元",
+      "traditional": "美元",
+      "pinyin": "",
+      "frequency": 77319,
+      "rank": 523,
+      "definitions_es": [
+        "dólares"
+      ]
+    },
+    {
+      "spanish": "seis",
+      "simplified": "六",
+      "traditional": "六",
+      "pinyin": "",
+      "frequency": 77064,
+      "rank": 524,
+      "definitions_es": [
+        "seis"
+      ]
+    },
+    {
+      "spanish": "estaban",
+      "simplified": "是",
+      "traditional": "是",
+      "pinyin": "",
+      "frequency": 76916,
+      "rank": 525,
+      "definitions_es": [
+        "estaban"
+      ]
+    },
+    {
+      "spanish": "seguridad",
+      "simplified": "安全",
+      "traditional": "安全",
+      "pinyin": "",
+      "frequency": 76807,
+      "rank": 526,
+      "definitions_es": [
+        "seguridad"
+      ]
+    },
+    {
+      "spanish": "maldita",
+      "simplified": "该死",
+      "traditional": "该死",
+      "pinyin": "",
+      "frequency": 76765,
+      "rank": 527,
+      "definitions_es": [
+        "maldita"
+      ]
+    },
+    {
+      "spanish": "estuvo",
+      "simplified": "是",
+      "traditional": "是",
+      "pinyin": "",
+      "frequency": 76639,
+      "rank": 528,
+      "definitions_es": [
+        "estuvo"
+      ]
+    },
+    {
+      "spanish": "preocupes",
+      "simplified": "担忧",
+      "traditional": "担忧",
+      "pinyin": "",
+      "frequency": 76606,
+      "rank": 529,
+      "definitions_es": [
+        "preocupes"
+      ]
+    },
+    {
+      "spanish": "palabra",
+      "simplified": "词",
+      "traditional": "词",
+      "pinyin": "",
+      "frequency": 76589,
+      "rank": 530,
+      "definitions_es": [
+        "palabra"
+      ]
+    },
+    {
+      "spanish": "esperando",
+      "simplified": "以期",
+      "traditional": "以期",
+      "pinyin": "",
+      "frequency": 76353,
+      "rank": 531,
+      "definitions_es": [
+        "esperando"
+      ]
+    },
+    {
+      "spanish": "queda",
+      "simplified": "在",
+      "traditional": "在",
+      "pinyin": "",
+      "frequency": 76150,
+      "rank": 532,
+      "definitions_es": [
+        "queda"
+      ]
+    },
+    {
+      "spanish": "oficina",
+      "simplified": "办公室",
+      "traditional": "办公室",
+      "pinyin": "",
+      "frequency": 75697,
+      "rank": 533,
+      "definitions_es": [
+        "oficina"
+      ]
+    },
+    {
+      "spanish": "matar",
+      "simplified": "杀死",
+      "traditional": "杀死",
+      "pinyin": "",
+      "frequency": 75652,
+      "rank": 534,
+      "definitions_es": [
+        "matar"
+      ]
+    },
+    {
+      "spanish": "iré",
+      "simplified": "我会去",
+      "traditional": "我会去",
+      "pinyin": "",
+      "frequency": 75521,
+      "rank": 535,
+      "definitions_es": [
+        "iré"
+      ]
+    },
+    {
+      "spanish": "cama",
+      "simplified": "床铺",
+      "traditional": "床铺",
+      "pinyin": "",
+      "frequency": 75441,
+      "rank": 536,
+      "definitions_es": [
+        "cama"
+      ]
+    },
+    {
+      "spanish": "además",
+      "simplified": "还",
+      "traditional": "还",
+      "pinyin": "",
+      "frequency": 75259,
+      "rank": 537,
+      "definitions_es": [
+        "además"
+      ]
+    },
+    {
+      "spanish": "último",
+      "simplified": "最后一个",
+      "traditional": "最后一个",
+      "pinyin": "",
+      "frequency": 75205,
+      "rank": 538,
+      "definitions_es": [
+        "último"
+      ]
+    },
+    {
+      "spanish": "oído",
+      "simplified": "耳朵",
+      "traditional": "耳朵",
+      "pinyin": "",
+      "frequency": 75123,
+      "rank": 539,
+      "definitions_es": [
+        "oído"
+      ]
+    },
+    {
+      "spanish": "habría",
+      "simplified": "会有",
+      "traditional": "会有",
+      "pinyin": "",
+      "frequency": 74848,
+      "rank": 540,
+      "definitions_es": [
+        "habría"
+      ]
+    },
+    {
+      "spanish": "estará",
+      "simplified": "将",
+      "traditional": "将",
+      "pinyin": "",
+      "frequency": 74836,
+      "rank": 541,
+      "definitions_es": [
+        "estará"
+      ]
+    },
+    {
+      "spanish": "dio",
+      "simplified": "天文台",
+      "traditional": "天文台",
+      "pinyin": "",
+      "frequency": 74745,
+      "rank": 542,
+      "definitions_es": [
+        "dio"
+      ]
+    },
+    {
+      "spanish": "recuerdo",
+      "simplified": "忆述",
+      "traditional": "忆述",
+      "pinyin": "",
+      "frequency": 74344,
+      "rank": 543,
+      "definitions_es": [
+        "recuerdo"
+      ]
+    },
+    {
+      "spanish": "siendo",
+      "simplified": "作为",
+      "traditional": "作为",
+      "pinyin": "",
+      "frequency": 74265,
+      "rank": 544,
+      "definitions_es": [
+        "siendo"
+      ]
+    },
+    {
+      "spanish": "acerca",
+      "simplified": "关于",
+      "traditional": "关于",
+      "pinyin": "",
+      "frequency": 74051,
+      "rank": 545,
+      "definitions_es": [
+        "acerca"
+      ]
+    },
+    {
+      "spanish": "tenga",
+      "simplified": "有",
+      "traditional": "有",
+      "pinyin": "",
+      "frequency": 73994,
+      "rank": 546,
+      "definitions_es": [
+        "tenga"
+      ]
+    },
+    {
+      "spanish": "luz",
+      "simplified": "轻",
+      "traditional": "轻",
+      "pinyin": "",
+      "frequency": 73886,
+      "rank": 547,
+      "definitions_es": [
+        "luz"
+      ]
+    },
+    {
+      "spanish": "correcto",
+      "simplified": "正确的",
+      "traditional": "正确的",
+      "pinyin": "",
+      "frequency": 73881,
+      "rank": 548,
+      "definitions_es": [
+        "correcto"
+      ]
+    },
+    {
+      "spanish": "ud.",
+      "simplified": "ud.",
+      "traditional": "ud.",
+      "pinyin": "",
+      "frequency": 73708,
+      "rank": 549,
+      "definitions_es": [
+        "ud."
+      ]
+    },
+    {
+      "spanish": "demonios",
+      "simplified": "恶魔",
+      "traditional": "恶魔",
+      "pinyin": "",
+      "frequency": 73485,
+      "rank": 550,
+      "definitions_es": [
+        "demonios"
+      ]
+    },
+    {
+      "spanish": "nuestras",
+      "simplified": "我们的",
+      "traditional": "我们的",
+      "pinyin": "",
+      "frequency": 73354,
+      "rank": 551,
+      "definitions_es": [
+        "nuestras"
+      ]
+    },
+    {
+      "spanish": "verte",
+      "simplified": "再见",
+      "traditional": "再见",
+      "pinyin": "",
+      "frequency": 73227,
+      "rank": 552,
+      "definitions_es": [
+        "verte"
+      ]
+    },
+    {
+      "spanish": "dormir",
+      "simplified": "睡眠",
+      "traditional": "睡眠",
+      "pinyin": "",
+      "frequency": 73064,
+      "rank": 553,
+      "definitions_es": [
+        "dormir"
+      ]
+    },
+    {
+      "spanish": "sitio",
+      "simplified": "地点",
+      "traditional": "地点",
+      "pinyin": "",
+      "frequency": 73036,
+      "rank": 554,
+      "definitions_es": [
+        "sitio"
+      ]
+    },
+    {
+      "spanish": "ayudar",
+      "simplified": "帮助",
+      "traditional": "帮助",
+      "pinyin": "",
+      "frequency": 72837,
+      "rank": 555,
+      "definitions_es": [
+        "ayudar"
+      ]
+    },
+    {
+      "spanish": "conseguir",
+      "simplified": "获取",
+      "traditional": "获取",
+      "pinyin": "",
+      "frequency": 72697,
+      "rank": 556,
+      "definitions_es": [
+        "conseguir"
+      ]
+    },
+    {
+      "spanish": "di",
+      "simplified": "di",
+      "traditional": "di",
+      "pinyin": "",
+      "frequency": 72555,
+      "rank": 557,
+      "definitions_es": [
+        "di"
+      ]
+    },
+    {
+      "spanish": "marido",
+      "simplified": "丈夫",
+      "traditional": "丈夫",
+      "pinyin": "",
+      "frequency": 72210,
+      "rank": 558,
+      "definitions_es": [
+        "marido"
+      ]
+    },
+    {
+      "spanish": "paz",
+      "simplified": "和平",
+      "traditional": "和平",
+      "pinyin": "",
+      "frequency": 72000,
+      "rank": 559,
+      "definitions_es": [
+        "paz"
+      ]
+    },
+    {
+      "spanish": "idiota",
+      "simplified": "白痴",
+      "traditional": "白痴",
+      "pinyin": "",
+      "frequency": 71856,
+      "rank": 560,
+      "definitions_es": [
+        "idiota"
+      ]
+    },
+    {
+      "spanish": "plan",
+      "simplified": "规划",
+      "traditional": "规划",
+      "pinyin": "",
+      "frequency": 71640,
+      "rank": 561,
+      "definitions_es": [
+        "plan"
+      ]
+    },
+    {
+      "spanish": "dado",
+      "simplified": "考虑到",
+      "traditional": "考虑到",
+      "pinyin": "",
+      "frequency": 71249,
+      "rank": 562,
+      "definitions_es": [
+        "dado"
+      ]
+    },
+    {
+      "spanish": "cuanto",
+      "simplified": "多少钱",
+      "traditional": "多少钱",
+      "pinyin": "",
+      "frequency": 71197,
+      "rank": 563,
+      "definitions_es": [
+        "cuanto"
+      ]
+    },
+    {
+      "spanish": "peor",
+      "simplified": "最差",
+      "traditional": "最差",
+      "pinyin": "",
+      "frequency": 70692,
+      "rank": 564,
+      "definitions_es": [
+        "peor"
+      ]
+    },
+    {
+      "spanish": "murió",
+      "simplified": "死了",
+      "traditional": "死了",
+      "pinyin": "",
+      "frequency": 70466,
+      "rank": 565,
+      "definitions_es": [
+        "murió"
+      ]
+    },
+    {
+      "spanish": "pueblo",
+      "simplified": "该村",
+      "traditional": "该村",
+      "pinyin": "",
+      "frequency": 70465,
+      "rank": 566,
+      "definitions_es": [
+        "pueblo"
+      ]
+    },
+    {
+      "spanish": "vivo",
+      "simplified": "活体",
+      "traditional": "活体",
+      "pinyin": "",
+      "frequency": 70329,
+      "rank": 567,
+      "definitions_es": [
+        "vivo"
+      ]
+    },
+    {
+      "spanish": "venido",
+      "simplified": "来",
+      "traditional": "来",
+      "pinyin": "",
+      "frequency": 70151,
+      "rank": 568,
+      "definitions_es": [
+        "venido"
+      ]
+    },
+    {
+      "spanish": "john",
+      "simplified": "约翰",
+      "traditional": "约翰",
+      "pinyin": "",
+      "frequency": 69978,
+      "rank": 569,
+      "definitions_es": [
+        "john"
+      ]
+    },
+    {
+      "spanish": "basta",
+      "simplified": "足够",
+      "traditional": "足够",
+      "pinyin": "",
+      "frequency": 69973,
+      "rank": 570,
+      "definitions_es": [
+        "basta"
+      ]
+    },
+    {
+      "spanish": "paso",
+      "simplified": "步骤",
+      "traditional": "步骤",
+      "pinyin": "",
+      "frequency": 69865,
+      "rank": 571,
+      "definitions_es": [
+        "paso"
+      ]
+    },
+    {
+      "spanish": "deberíamos",
+      "simplified": "我们应该",
+      "traditional": "我们应该",
+      "pinyin": "",
+      "frequency": 69574,
+      "rank": 572,
+      "definitions_es": [
+        "deberíamos"
+      ]
+    },
+    {
+      "spanish": "música",
+      "simplified": "音乐",
+      "traditional": "音乐",
+      "pinyin": "",
+      "frequency": 69241,
+      "rank": 573,
+      "definitions_es": [
+        "música"
+      ]
+    },
+    {
+      "spanish": "diga",
+      "simplified": "会说",
+      "traditional": "会说",
+      "pinyin": "",
+      "frequency": 68941,
+      "rank": 574,
+      "definitions_es": [
+        "diga"
+      ]
+    },
+    {
+      "spanish": "minuto",
+      "simplified": "分钟",
+      "traditional": "分钟",
+      "pinyin": "",
+      "frequency": 68878,
+      "rank": 575,
+      "definitions_es": [
+        "minuto"
+      ]
+    },
+    {
+      "spanish": "anoche",
+      "simplified": "昨晚",
+      "traditional": "昨晚",
+      "pinyin": "",
+      "frequency": 68870,
+      "rank": 576,
+      "definitions_es": [
+        "anoche"
+      ]
+    },
+    {
+      "spanish": "llamar",
+      "simplified": "致电",
+      "traditional": "致电",
+      "pinyin": "",
+      "frequency": 68861,
+      "rank": 577,
+      "definitions_es": [
+        "llamar"
+      ]
+    },
+    {
+      "spanish": "piensa",
+      "simplified": "觉得",
+      "traditional": "觉得",
+      "pinyin": "",
+      "frequency": 68552,
+      "rank": 578,
+      "definitions_es": [
+        "piensa"
+      ]
+    },
+    {
+      "spanish": "país",
+      "simplified": "国家",
+      "traditional": "国家",
+      "pinyin": "",
+      "frequency": 68539,
+      "rank": 579,
+      "definitions_es": [
+        "país"
+      ]
+    },
+    {
+      "spanish": "digas",
+      "simplified": "会说",
+      "traditional": "会说",
+      "pinyin": "",
+      "frequency": 68227,
+      "rank": 580,
+      "definitions_es": [
+        "digas"
+      ]
+    },
+    {
+      "spanish": "rey",
+      "simplified": "王",
+      "traditional": "王",
+      "pinyin": "",
+      "frequency": 67803,
+      "rank": 581,
+      "definitions_es": [
+        "rey"
+      ]
+    },
+    {
+      "spanish": "perdón",
+      "simplified": "对不起",
+      "traditional": "对不起",
+      "pinyin": "",
+      "frequency": 67516,
+      "rank": 582,
+      "definitions_es": [
+        "perdón"
+      ]
+    },
+    {
+      "spanish": "mucha",
+      "simplified": "很多",
+      "traditional": "很多",
+      "pinyin": "",
+      "frequency": 67426,
+      "rank": 583,
+      "definitions_es": [
+        "mucha"
+      ]
+    },
+    {
+      "spanish": "falta",
+      "simplified": "失踪",
+      "traditional": "失踪",
+      "pinyin": "",
+      "frequency": 67152,
+      "rank": 584,
+      "definitions_es": [
+        "falta"
+      ]
+    },
+    {
+      "spanish": "pienso",
+      "simplified": "喂食",
+      "traditional": "喂食",
+      "pinyin": "",
+      "frequency": 67140,
+      "rank": 585,
+      "definitions_es": [
+        "pienso"
+      ]
+    },
+    {
+      "spanish": "diablos",
+      "simplified": "魔鬼",
+      "traditional": "魔鬼",
+      "pinyin": "",
+      "frequency": 67119,
+      "rank": 586,
+      "definitions_es": [
+        "diablos"
+      ]
+    },
+    {
+      "spanish": "perdido",
+      "simplified": "丢失的",
+      "traditional": "丢失的",
+      "pinyin": "",
+      "frequency": 66882,
+      "rank": 587,
+      "definitions_es": [
+        "perdido"
+      ]
+    },
+    {
+      "spanish": "niña",
+      "simplified": "女孩",
+      "traditional": "女孩",
+      "pinyin": "",
+      "frequency": 66672,
+      "rank": 588,
+      "definitions_es": [
+        "niña"
+      ]
+    },
+    {
+      "spanish": "señorita",
+      "simplified": "小姐",
+      "traditional": "小姐",
+      "pinyin": "",
+      "frequency": 66491,
+      "rank": 589,
+      "definitions_es": [
+        "señorita"
+      ]
+    },
+    {
+      "spanish": "diez",
+      "simplified": "十",
+      "traditional": "十",
+      "pinyin": "",
+      "frequency": 66429,
+      "rank": 590,
+      "definitions_es": [
+        "diez"
+      ]
+    },
+    {
+      "spanish": "lleva",
+      "simplified": "携带",
+      "traditional": "携带",
+      "pinyin": "",
+      "frequency": 66407,
+      "rank": 591,
+      "definitions_es": [
+        "lleva"
+      ]
+    },
+    {
+      "spanish": "hospital",
+      "simplified": "医院",
+      "traditional": "医院",
+      "pinyin": "",
+      "frequency": 66316,
+      "rank": 592,
+      "definitions_es": [
+        "hospital"
+      ]
+    },
+    {
+      "spanish": "grandes",
+      "simplified": "大",
+      "traditional": "大",
+      "pinyin": "",
+      "frequency": 66186,
+      "rank": 593,
+      "definitions_es": [
+        "grandes"
+      ]
+    },
+    {
+      "spanish": "maldito",
+      "simplified": "血腥",
+      "traditional": "血腥",
+      "pinyin": "",
+      "frequency": 66025,
+      "rank": 594,
+      "definitions_es": [
+        "maldito"
+      ]
+    },
+    {
+      "spanish": "otras",
+      "simplified": "其他",
+      "traditional": "其他",
+      "pinyin": "",
+      "frequency": 65924,
+      "rank": 595,
+      "definitions_es": [
+        "otras"
+      ]
+    },
+    {
+      "spanish": "llamado",
+      "simplified": "人称",
+      "traditional": "人称",
+      "pinyin": "",
+      "frequency": 65650,
+      "rank": 596,
+      "definitions_es": [
+        "llamado"
+      ]
+    },
+    {
+      "spanish": "hacemos",
+      "simplified": "我们",
+      "traditional": "我们",
+      "pinyin": "",
+      "frequency": 65535,
+      "rank": 597,
+      "definitions_es": [
+        "hacemos"
+      ]
+    },
+    {
+      "spanish": "llevar",
+      "simplified": "携带",
+      "traditional": "携带",
+      "pinyin": "",
+      "frequency": 65446,
+      "rank": 598,
+      "definitions_es": [
+        "llevar"
+      ]
+    },
+    {
+      "spanish": "fuego",
+      "simplified": "抨击",
+      "traditional": "抨击",
+      "pinyin": "",
+      "frequency": 65442,
+      "rank": 599,
+      "definitions_es": [
+        "fuego"
+      ]
+    },
+    {
+      "spanish": "aqui",
+      "simplified": "这里",
+      "traditional": "这里",
+      "pinyin": "",
+      "frequency": 65202,
+      "rank": 600,
+      "definitions_es": [
+        "aqui"
+      ]
+    },
+    {
+      "spanish": "tuvo",
+      "simplified": "曾经",
+      "traditional": "曾经",
+      "pinyin": "",
+      "frequency": 65130,
+      "rank": 601,
+      "definitions_es": [
+        "tuvo"
+      ]
+    },
+    {
+      "spanish": "poner",
+      "simplified": "提出问题",
+      "traditional": "提出问题",
+      "pinyin": "",
+      "frequency": 64740,
+      "rank": 602,
+      "definitions_es": [
+        "poner"
+      ]
+    },
+    {
+      "spanish": "calle",
+      "simplified": "街道",
+      "traditional": "街道",
+      "pinyin": "",
+      "frequency": 64675,
+      "rank": 603,
+      "definitions_es": [
+        "calle"
+      ]
+    },
+    {
+      "spanish": "acaba",
+      "simplified": "结束",
+      "traditional": "结束",
+      "pinyin": "",
+      "frequency": 64600,
+      "rank": 604,
+      "definitions_es": [
+        "acaba"
+      ]
+    },
+    {
+      "spanish": "prueba",
+      "simplified": "测试",
+      "traditional": "测试",
+      "pinyin": "",
+      "frequency": 64593,
+      "rank": 605,
+      "definitions_es": [
+        "prueba"
+      ]
+    },
+    {
+      "spanish": "increíble",
+      "simplified": "难以置信",
+      "traditional": "难以置信",
+      "pinyin": "",
+      "frequency": 64527,
+      "rank": 606,
+      "definitions_es": [
+        "increíble"
+      ]
+    },
+    {
+      "spanish": "real",
+      "simplified": "真正的",
+      "traditional": "真正的",
+      "pinyin": "",
+      "frequency": 64511,
+      "rank": 607,
+      "definitions_es": [
+        "real"
+      ]
+    },
+    {
+      "spanish": "libro",
+      "simplified": "图书",
+      "traditional": "图书",
+      "pinyin": "",
+      "frequency": 64445,
+      "rank": 608,
+      "definitions_es": [
+        "libro"
+      ]
+    },
+    {
+      "spanish": "orden",
+      "simplified": "订单",
+      "traditional": "订单",
+      "pinyin": "",
+      "frequency": 64437,
+      "rank": 609,
+      "definitions_es": [
+        "orden"
+      ]
+    },
+    {
+      "spanish": "semanas",
+      "simplified": "周数",
+      "traditional": "周数",
+      "pinyin": "",
+      "frequency": 64300,
+      "rank": 610,
+      "definitions_es": [
+        "semanas"
+      ]
+    },
+    {
+      "spanish": "especial",
+      "simplified": "特殊",
+      "traditional": "特殊",
+      "pinyin": "",
+      "frequency": 64240,
+      "rank": 611,
+      "definitions_es": [
+        "especial"
+      ]
+    },
+    {
+      "spanish": "mía",
+      "simplified": "矿井",
+      "traditional": "矿井",
+      "pinyin": "",
+      "frequency": 64132,
+      "rank": 612,
+      "definitions_es": [
+        "mía"
+      ]
+    },
+    {
+      "spanish": "café",
+      "simplified": "咖啡",
+      "traditional": "咖啡",
+      "pinyin": "",
+      "frequency": 63914,
+      "rank": 613,
+      "definitions_es": [
+        "café"
+      ]
+    },
+    {
+      "spanish": "duro",
+      "simplified": "艰苦",
+      "traditional": "艰苦",
+      "pinyin": "",
+      "frequency": 63800,
+      "rank": 614,
+      "definitions_es": [
+        "duro"
+      ]
+    },
+    {
+      "spanish": "empezar",
+      "simplified": "启动",
+      "traditional": "启动",
+      "pinyin": "",
+      "frequency": 63463,
+      "rank": 615,
+      "definitions_es": [
+        "empezar"
+      ]
+    },
+    {
+      "spanish": "afuera",
+      "simplified": "外",
+      "traditional": "外",
+      "pinyin": "",
+      "frequency": 63387,
+      "rank": 616,
+      "definitions_es": [
+        "afuera"
+      ]
+    },
+    {
+      "spanish": "queremos",
+      "simplified": "我们要",
+      "traditional": "我们要",
+      "pinyin": "",
+      "frequency": 63319,
+      "rank": 617,
+      "definitions_es": [
+        "queremos"
+      ]
+    },
+    {
+      "spanish": "perro",
+      "simplified": "狗",
+      "traditional": "狗",
+      "pinyin": "",
+      "frequency": 63070,
+      "rank": 618,
+      "definitions_es": [
+        "perro"
+      ]
+    },
+    {
+      "spanish": "cielo",
+      "simplified": "天空",
+      "traditional": "天空",
+      "pinyin": "",
+      "frequency": 62981,
+      "rank": 619,
+      "definitions_es": [
+        "cielo"
+      ]
+    },
+    {
+      "spanish": "jack",
+      "simplified": "插孔",
+      "traditional": "插孔",
+      "pinyin": "",
+      "frequency": 62965,
+      "rank": 620,
+      "definitions_es": [
+        "jack"
+      ]
+    },
+    {
+      "spanish": "puesto",
+      "simplified": "邮寄",
+      "traditional": "邮寄",
+      "pinyin": "",
+      "frequency": 62949,
+      "rank": 621,
+      "definitions_es": [
+        "puesto"
+      ]
+    },
+    {
+      "spanish": "viaje",
+      "simplified": "旅行",
+      "traditional": "旅行",
+      "pinyin": "",
+      "frequency": 62667,
+      "rank": 622,
+      "definitions_es": [
+        "viaje"
+      ]
+    },
+    {
+      "spanish": "detrás",
+      "simplified": "后",
+      "traditional": "后",
+      "pinyin": "",
+      "frequency": 62621,
+      "rank": 623,
+      "definitions_es": [
+        "detrás"
+      ]
+    },
+    {
+      "spanish": "cuarto",
+      "simplified": "房间",
+      "traditional": "房间",
+      "pinyin": "",
+      "frequency": 62590,
+      "rank": 624,
+      "definitions_es": [
+        "cuarto"
+      ]
+    },
+    {
+      "spanish": "querida",
+      "simplified": "亲爱的",
+      "traditional": "亲爱的",
+      "pinyin": "",
+      "frequency": 62549,
+      "rank": 625,
+      "definitions_es": [
+        "querida"
+      ]
+    },
+    {
+      "spanish": "haría",
+      "simplified": "就会",
+      "traditional": "就会",
+      "pinyin": "",
+      "frequency": 62547,
+      "rank": 626,
+      "definitions_es": [
+        "haría"
+      ]
+    },
+    {
+      "spanish": "preguntas",
+      "simplified": "问题",
+      "traditional": "问题",
+      "pinyin": "",
+      "frequency": 62505,
+      "rank": 627,
+      "definitions_es": [
+        "preguntas"
+      ]
+    },
+    {
+      "spanish": "piensas",
+      "simplified": "你认为",
+      "traditional": "你认为",
+      "pinyin": "",
+      "frequency": 62433,
+      "rank": 628,
+      "definitions_es": [
+        "piensas"
+      ]
+    },
+    {
+      "spanish": "querido",
+      "simplified": "亲爱的",
+      "traditional": "亲爱的",
+      "pinyin": "",
+      "frequency": 62425,
+      "rank": 629,
+      "definitions_es": [
+        "querido"
+      ]
+    },
+    {
+      "spanish": "libre",
+      "simplified": "免费的",
+      "traditional": "免费的",
+      "pinyin": "",
+      "frequency": 62421,
+      "rank": 630,
+      "definitions_es": [
+        "libre"
+      ]
+    },
+    {
+      "spanish": "buscar",
+      "simplified": "搜索",
+      "traditional": "搜索",
+      "pinyin": "",
+      "frequency": 62319,
+      "rank": 631,
+      "definitions_es": [
+        "buscar"
+      ]
+    },
+    {
+      "spanish": "cual",
+      "simplified": "其中",
+      "traditional": "其中",
+      "pinyin": "",
+      "frequency": 62288,
+      "rank": 632,
+      "definitions_es": [
+        "cual"
+      ]
+    },
+    {
+      "spanish": "diré",
+      "simplified": "我会说",
+      "traditional": "我会说",
+      "pinyin": "",
+      "frequency": 62193,
+      "rank": 633,
+      "definitions_es": [
+        "diré"
+      ]
+    },
+    {
+      "spanish": "suena",
+      "simplified": "声音",
+      "traditional": "声音",
+      "pinyin": "",
+      "frequency": 62170,
+      "rank": 634,
+      "definitions_es": [
+        "suena"
+      ]
+    },
+    {
+      "spanish": "jugar",
+      "simplified": "游戏",
+      "traditional": "游戏",
+      "pinyin": "",
+      "frequency": 62132,
+      "rank": 635,
+      "definitions_es": [
+        "jugar"
+      ]
+    },
+    {
+      "spanish": "cambio",
+      "simplified": "交流",
+      "traditional": "交流",
+      "pinyin": "",
+      "frequency": 62106,
+      "rank": 636,
+      "definitions_es": [
+        "cambio"
+      ]
+    },
+    {
+      "spanish": "película",
+      "simplified": "胶片",
+      "traditional": "胶片",
+      "pinyin": "",
+      "frequency": 61985,
+      "rank": 637,
+      "definitions_es": [
+        "película"
+      ]
+    },
+    {
+      "spanish": "millones",
+      "simplified": "百万",
+      "traditional": "百万",
+      "pinyin": "",
+      "frequency": 61876,
+      "rank": 638,
+      "definitions_es": [
+        "millones"
+      ]
+    },
+    {
+      "spanish": "habrá",
+      "simplified": "会有",
+      "traditional": "会有",
+      "pinyin": "",
+      "frequency": 61821,
+      "rank": 639,
+      "definitions_es": [
+        "habrá"
+      ]
+    },
+    {
+      "spanish": "llamada",
+      "simplified": "致电",
+      "traditional": "致电",
+      "pinyin": "",
+      "frequency": 61791,
+      "rank": 640,
+      "definitions_es": [
+        "llamada"
+      ]
+    },
+    {
+      "spanish": "resto",
+      "simplified": "休息时间",
+      "traditional": "休息时间",
+      "pinyin": "",
+      "frequency": 61752,
+      "rank": 641,
+      "definitions_es": [
+        "resto"
+      ]
+    },
+    {
+      "spanish": "vemos",
+      "simplified": "看看",
+      "traditional": "看看",
+      "pinyin": "",
+      "frequency": 61545,
+      "rank": 642,
+      "definitions_es": [
+        "vemos"
+      ]
+    },
+    {
+      "spanish": "extraño",
+      "simplified": "生人",
+      "traditional": "生人",
+      "pinyin": "",
+      "frequency": 61249,
+      "rank": 643,
+      "definitions_es": [
+        "extraño"
+      ]
+    },
+    {
+      "spanish": "mala",
+      "simplified": "坏的",
+      "traditional": "坏的",
+      "pinyin": "",
+      "frequency": 61177,
+      "rank": 644,
+      "definitions_es": [
+        "mala"
+      ]
+    },
+    {
+      "spanish": "presidente",
+      "simplified": "总统",
+      "traditional": "总统",
+      "pinyin": "",
+      "frequency": 61090,
+      "rank": 645,
+      "definitions_es": [
+        "presidente"
+      ]
+    },
+    {
+      "spanish": "srta.",
+      "simplified": "女士",
+      "traditional": "女士",
+      "pinyin": "",
+      "frequency": 60636,
+      "rank": 646,
+      "definitions_es": [
+        "srta."
+      ]
+    },
+    {
+      "spanish": "irme",
+      "simplified": "前往",
+      "traditional": "前往",
+      "pinyin": "",
+      "frequency": 60622,
+      "rank": 647,
+      "definitions_es": [
+        "irme"
+      ]
+    },
+    {
+      "spanish": "ropa",
+      "simplified": "服装",
+      "traditional": "服装",
+      "pinyin": "",
+      "frequency": 60542,
+      "rank": 648,
+      "definitions_es": [
+        "ropa"
+      ]
+    },
+    {
+      "spanish": "perder",
+      "simplified": "失去",
+      "traditional": "失去",
+      "pinyin": "",
+      "frequency": 60378,
+      "rank": 649,
+      "definitions_es": [
+        "perder"
+      ]
+    },
+    {
+      "spanish": "vuelve",
+      "simplified": "返回",
+      "traditional": "返回",
+      "pinyin": "",
+      "frequency": 60172,
+      "rank": 650,
+      "definitions_es": [
+        "vuelve"
+      ]
+    },
+    {
+      "spanish": "agente",
+      "simplified": "代理人",
+      "traditional": "代理人",
+      "pinyin": "",
+      "frequency": 60171,
+      "rank": 651,
+      "definitions_es": [
+        "agente"
+      ]
+    },
+    {
+      "spanish": "palabras",
+      "simplified": "话语",
+      "traditional": "话语",
+      "pinyin": "",
+      "frequency": 60090,
+      "rank": 652,
+      "definitions_es": [
+        "palabras"
+      ]
+    },
+    {
+      "spanish": "información",
+      "simplified": "信息",
+      "traditional": "信息",
+      "pinyin": "",
+      "frequency": 60090,
+      "rank": 653,
+      "definitions_es": [
+        "información"
+      ]
+    },
+    {
+      "spanish": "raro",
+      "simplified": "稀有",
+      "traditional": "稀有",
+      "pinyin": "",
+      "frequency": 60086,
+      "rank": 654,
+      "definitions_es": [
+        "raro"
+      ]
+    },
+    {
+      "spanish": "hará",
+      "simplified": "将",
+      "traditional": "将",
+      "pinyin": "",
+      "frequency": 59965,
+      "rank": 655,
+      "definitions_es": [
+        "hará"
+      ]
+    },
+    {
+      "spanish": "entiendes",
+      "simplified": "你明白",
+      "traditional": "你明白",
+      "pinyin": "",
+      "frequency": 59914,
+      "rank": 656,
+      "definitions_es": [
+        "entiendes"
+      ]
+    },
+    {
+      "spanish": "éste",
+      "simplified": "此",
+      "traditional": "此",
+      "pinyin": "",
+      "frequency": 59792,
+      "rank": 657,
+      "definitions_es": [
+        "éste"
+      ]
+    },
+    {
+      "spanish": "trabajando",
+      "simplified": "工作",
+      "traditional": "工作",
+      "pinyin": "",
+      "frequency": 59674,
+      "rank": 658,
+      "definitions_es": [
+        "trabajando"
+      ]
+    },
+    {
+      "spanish": "tratando",
+      "simplified": "通过尝试",
+      "traditional": "通过尝试",
+      "pinyin": "",
+      "frequency": 59643,
+      "rank": 659,
+      "definitions_es": [
+        "tratando"
+      ]
+    },
+    {
+      "spanish": "general",
+      "simplified": "一般",
+      "traditional": "一般",
+      "pinyin": "",
+      "frequency": 59593,
+      "rank": 660,
+      "definitions_es": [
+        "general"
+      ]
+    },
+    {
+      "spanish": "trato",
+      "simplified": "待遇",
+      "traditional": "待遇",
+      "pinyin": "",
+      "frequency": 59469,
+      "rank": 661,
+      "definitions_es": [
+        "trato"
+      ]
+    },
+    {
+      "spanish": "usar",
+      "simplified": "使用",
+      "traditional": "使用",
+      "pinyin": "",
+      "frequency": 59267,
+      "rank": 662,
+      "definitions_es": [
+        "usar"
+      ]
+    },
+    {
+      "spanish": "perfecto",
+      "simplified": "完美",
+      "traditional": "完美",
+      "pinyin": "",
+      "frequency": 59208,
+      "rank": 663,
+      "definitions_es": [
+        "perfecto"
+      ]
+    },
+    {
+      "spanish": "derecho",
+      "simplified": "对",
+      "traditional": "对",
+      "pinyin": "",
+      "frequency": 59164,
+      "rank": 664,
+      "definitions_es": [
+        "derecho"
+      ]
+    },
+    {
+      "spanish": "modo",
+      "simplified": "模式",
+      "traditional": "模式",
+      "pinyin": "",
+      "frequency": 59041,
+      "rank": 665,
+      "definitions_es": [
+        "modo"
+      ]
+    },
+    {
+      "spanish": "ayer",
+      "simplified": "昨天",
+      "traditional": "昨天",
+      "pinyin": "",
+      "frequency": 59013,
+      "rank": 666,
+      "definitions_es": [
+        "ayer"
+      ]
+    },
+    {
+      "spanish": "conoces",
+      "simplified": "你知道",
+      "traditional": "你知道",
+      "pinyin": "",
+      "frequency": 58941,
+      "rank": 667,
+      "definitions_es": [
+        "conoces"
+      ]
+    },
+    {
+      "spanish": "demás",
+      "simplified": "其他",
+      "traditional": "其他",
+      "pinyin": "",
+      "frequency": 58811,
+      "rank": 668,
+      "definitions_es": [
+        "demás"
+      ]
+    },
+    {
+      "spanish": "quieras",
+      "simplified": "您想",
+      "traditional": "您想",
+      "pinyin": "",
+      "frequency": 58704,
+      "rank": 669,
+      "definitions_es": [
+        "quieras"
+      ]
+    },
+    {
+      "spanish": "podríamos",
+      "simplified": "我们可以",
+      "traditional": "我们可以",
+      "pinyin": "",
+      "frequency": 58548,
+      "rank": 670,
+      "definitions_es": [
+        "podríamos"
+      ]
+    },
+    {
+      "spanish": "noticias",
+      "simplified": "新闻",
+      "traditional": "新闻",
+      "pinyin": "",
+      "frequency": 58530,
+      "rank": 671,
+      "definitions_es": [
+        "noticias"
+      ]
+    },
+    {
+      "spanish": "asesino",
+      "simplified": "杀手锏",
+      "traditional": "杀手锏",
+      "pinyin": "",
+      "frequency": 58507,
+      "rank": 672,
+      "definitions_es": [
+        "asesino"
+      ]
+    },
+    {
+      "spanish": "encontrado",
+      "simplified": "发现",
+      "traditional": "发现",
+      "pinyin": "",
+      "frequency": 57581,
+      "rank": 673,
+      "definitions_es": [
+        "encontrado"
+      ]
+    },
+    {
+      "spanish": "control",
+      "simplified": "控制权",
+      "traditional": "控制权",
+      "pinyin": "",
+      "frequency": 57479,
+      "rank": 674,
+      "definitions_es": [
+        "control"
+      ]
+    },
+    {
+      "spanish": "odio",
+      "simplified": "恨",
+      "traditional": "恨",
+      "pinyin": "",
+      "frequency": 57427,
+      "rank": 675,
+      "definitions_es": [
+        "odio"
+      ]
+    },
+    {
+      "spanish": "frente",
+      "simplified": "战线",
+      "traditional": "战线",
+      "pinyin": "",
+      "frequency": 57371,
+      "rank": 676,
+      "definitions_es": [
+        "frente"
+      ]
+    },
+    {
+      "spanish": "sexo",
+      "simplified": "性别",
+      "traditional": "性别",
+      "pinyin": "",
+      "frequency": 57281,
+      "rank": 677,
+      "definitions_es": [
+        "sexo"
+      ]
+    },
+    {
+      "spanish": "decirle",
+      "simplified": "告诉他",
+      "traditional": "告诉他",
+      "pinyin": "",
+      "frequency": 57135,
+      "rank": 678,
+      "definitions_es": [
+        "decirle"
+      ]
+    },
+    {
+      "spanish": "estaré",
+      "simplified": "我将",
+      "traditional": "我将",
+      "pinyin": "",
+      "frequency": 57085,
+      "rank": 679,
+      "definitions_es": [
+        "estaré"
+      ]
+    },
+    {
+      "spanish": "divertido",
+      "simplified": "有趣",
+      "traditional": "有趣",
+      "pinyin": "",
+      "frequency": 56908,
+      "rank": 680,
+      "definitions_es": [
+        "divertido"
+      ]
+    },
+    {
+      "spanish": "armas",
+      "simplified": "武器",
+      "traditional": "武器",
+      "pinyin": "",
+      "frequency": 56785,
+      "rank": 681,
+      "definitions_es": [
+        "armas"
+      ]
+    },
+    {
+      "spanish": "recuerdas",
+      "simplified": "记",
+      "traditional": "记",
+      "pinyin": "",
+      "frequency": 56669,
+      "rank": 682,
+      "definitions_es": [
+        "recuerdas"
+      ]
+    },
+    {
+      "spanish": "amiga",
+      "simplified": "朋友",
+      "traditional": "朋友",
+      "pinyin": "",
+      "frequency": 56665,
+      "rank": 683,
+      "definitions_es": [
+        "amiga"
+      ]
+    },
+    {
+      "spanish": "grupo",
+      "simplified": "组",
+      "traditional": "组",
+      "pinyin": "",
+      "frequency": 56638,
+      "rank": 684,
+      "definitions_es": [
+        "grupo"
+      ]
+    },
+    {
+      "spanish": "asunto",
+      "simplified": "议题",
+      "traditional": "议题",
+      "pinyin": "",
+      "frequency": 56622,
+      "rank": 685,
+      "definitions_es": [
+        "asunto"
+      ]
+    },
+    {
+      "spanish": "acabo",
+      "simplified": "我刚刚",
+      "traditional": "我刚刚",
+      "pinyin": "",
+      "frequency": 56586,
+      "rank": 686,
+      "definitions_es": [
+        "acabo"
+      ]
+    },
+    {
+      "spanish": "mensaje",
+      "simplified": "信息",
+      "traditional": "信息",
+      "pinyin": "",
+      "frequency": 56126,
+      "rank": 687,
+      "definitions_es": [
+        "mensaje"
+      ]
+    },
+    {
+      "spanish": "encima",
+      "simplified": "顶部",
+      "traditional": "顶部",
+      "pinyin": "",
+      "frequency": 56110,
+      "rank": 688,
+      "definitions_es": [
+        "encima"
+      ]
+    },
+    {
+      "spanish": "atención",
+      "simplified": "注意",
+      "traditional": "注意",
+      "pinyin": "",
+      "frequency": 56092,
+      "rank": 689,
+      "definitions_es": [
+        "atención"
+      ]
+    },
+    {
+      "spanish": "diferente",
+      "simplified": "不同的",
+      "traditional": "不同的",
+      "pinyin": "",
+      "frequency": 56028,
+      "rank": 690,
+      "definitions_es": [
+        "diferente"
+      ]
+    },
+    {
+      "spanish": "uh",
+      "simplified": "啊",
+      "traditional": "啊",
+      "pinyin": "",
+      "frequency": 55996,
+      "rank": 691,
+      "definitions_es": [
+        "uh"
+      ]
+    },
+    {
+      "spanish": "cállate",
+      "simplified": "住口",
+      "traditional": "住口",
+      "pinyin": "",
+      "frequency": 55856,
+      "rank": 692,
+      "definitions_es": [
+        "cállate"
+      ]
+    },
+    {
+      "spanish": "daño",
+      "simplified": "损失",
+      "traditional": "损失",
+      "pinyin": "",
+      "frequency": 55599,
+      "rank": 693,
+      "definitions_es": [
+        "daño"
+      ]
+    },
+    {
+      "spanish": "sucede",
+      "simplified": "会发生",
+      "traditional": "会发生",
+      "pinyin": "",
+      "frequency": 55572,
+      "rank": 694,
+      "definitions_es": [
+        "sucede"
+      ]
+    },
+    {
+      "spanish": "cambiar",
+      "simplified": "改变",
+      "traditional": "改变",
+      "pinyin": "",
+      "frequency": 55360,
+      "rank": 695,
+      "definitions_es": [
+        "cambiar"
+      ]
+    },
+    {
+      "spanish": "siguiente",
+      "simplified": "下一个",
+      "traditional": "下一个",
+      "pinyin": "",
+      "frequency": 55300,
+      "rank": 696,
+      "definitions_es": [
+        "siguiente"
+      ]
+    },
+    {
+      "spanish": "sino",
+      "simplified": "但",
+      "traditional": "但",
+      "pinyin": "",
+      "frequency": 55136,
+      "rank": 697,
+      "definitions_es": [
+        "sino"
+      ]
+    },
+    {
+      "spanish": "the",
+      "simplified": "的",
+      "traditional": "的",
+      "pinyin": "",
+      "frequency": 54966,
+      "rank": 698,
+      "definitions_es": [
+        "the"
+      ]
+    },
+    {
+      "spanish": "seas",
+      "simplified": "你是",
+      "traditional": "你是",
+      "pinyin": "",
+      "frequency": 54799,
+      "rank": 699,
+      "definitions_es": [
+        "seas"
+      ]
+    },
+    {
+      "spanish": "médico",
+      "simplified": "医生",
+      "traditional": "医生",
+      "pinyin": "",
+      "frequency": 54547,
+      "rank": 700,
+      "definitions_es": [
+        "médico"
+      ]
+    },
+    {
+      "spanish": "boca",
+      "simplified": "口",
+      "traditional": "口",
+      "pinyin": "",
+      "frequency": 54512,
+      "rank": 701,
+      "definitions_es": [
+        "boca"
+      ]
+    },
+    {
+      "spanish": "dejó",
+      "simplified": "左侧",
+      "traditional": "左侧",
+      "pinyin": "",
+      "frequency": 54435,
+      "rank": 702,
+      "definitions_es": [
+        "dejó"
+      ]
+    },
+    {
+      "spanish": "error",
+      "simplified": "错误",
+      "traditional": "错误",
+      "pinyin": "",
+      "frequency": 54414,
+      "rank": 703,
+      "definitions_es": [
+        "error"
+      ]
+    },
+    {
+      "spanish": "jamás",
+      "simplified": "常",
+      "traditional": "常",
+      "pinyin": "",
+      "frequency": 54158,
+      "rank": 704,
+      "definitions_es": [
+        "jamás"
+      ]
+    },
+    {
+      "spanish": "largo",
+      "simplified": "长",
+      "traditional": "长",
+      "pinyin": "",
+      "frequency": 53833,
+      "rank": 705,
+      "definitions_es": [
+        "largo"
+      ]
+    },
+    {
+      "spanish": "pena",
+      "simplified": "罚则",
+      "traditional": "罚则",
+      "pinyin": "",
+      "frequency": 53618,
+      "rank": 706,
+      "definitions_es": [
+        "pena"
+      ]
+    },
+    {
+      "spanish": "voz",
+      "simplified": "嗓音",
+      "traditional": "嗓音",
+      "pinyin": "",
+      "frequency": 53574,
+      "rank": 707,
+      "definitions_es": [
+        "voz"
+      ]
+    },
+    {
+      "spanish": "futuro",
+      "simplified": "未来",
+      "traditional": "未来",
+      "pinyin": "",
+      "frequency": 53557,
+      "rank": 708,
+      "definitions_es": [
+        "futuro"
+      ]
+    },
+    {
+      "spanish": "siente",
+      "simplified": "感觉",
+      "traditional": "感觉",
+      "pinyin": "",
+      "frequency": 53518,
+      "rank": 709,
+      "definitions_es": [
+        "siente"
+      ]
+    },
+    {
+      "spanish": "secreto",
+      "simplified": "秘密",
+      "traditional": "秘密",
+      "pinyin": "",
+      "frequency": 53504,
+      "rank": 710,
+      "definitions_es": [
+        "secreto"
+      ]
+    },
+    {
+      "spanish": "baño",
+      "simplified": "洗手间",
+      "traditional": "洗手间",
+      "pinyin": "",
+      "frequency": 53455,
+      "rank": 711,
+      "definitions_es": [
+        "baño"
+      ]
+    },
+    {
+      "spanish": "mil",
+      "simplified": "千",
+      "traditional": "千",
+      "pinyin": "",
+      "frequency": 53364,
+      "rank": 712,
+      "definitions_es": [
+        "mil"
+      ]
+    },
+    {
+      "spanish": "decirte",
+      "simplified": "告诉你",
+      "traditional": "告诉你",
+      "pinyin": "",
+      "frequency": 53207,
+      "rank": 713,
+      "definitions_es": [
+        "decirte"
+      ]
+    },
+    {
+      "spanish": "sam",
+      "simplified": "翅",
+      "traditional": "翅",
+      "pinyin": "",
+      "frequency": 53082,
+      "rank": 714,
+      "definitions_es": [
+        "sam"
+      ]
+    },
+    {
+      "spanish": "pensaba",
+      "simplified": "思想",
+      "traditional": "思想",
+      "pinyin": "",
+      "frequency": 53018,
+      "rank": 715,
+      "definitions_es": [
+        "pensaba"
+      ]
+    },
+    {
+      "spanish": "novia",
+      "simplified": "婚礼",
+      "traditional": "婚礼",
+      "pinyin": "",
+      "frequency": 52984,
+      "rank": 716,
+      "definitions_es": [
+        "novia"
+      ]
+    },
+    {
+      "spanish": "propia",
+      "simplified": "拥有",
+      "traditional": "拥有",
+      "pinyin": "",
+      "frequency": 52973,
+      "rank": 717,
+      "definitions_es": [
+        "propia"
+      ]
+    },
+    {
+      "spanish": "sueño",
+      "simplified": "梦见",
+      "traditional": "梦见",
+      "pinyin": "",
+      "frequency": 52956,
+      "rank": 718,
+      "definitions_es": [
+        "sueño"
+      ]
+    },
+    {
+      "spanish": "haz",
+      "simplified": "前往",
+      "traditional": "前往",
+      "pinyin": "",
+      "frequency": 52344,
+      "rank": 719,
+      "definitions_es": [
+        "haz"
+      ]
+    },
+    {
+      "spanish": "fuerza",
+      "simplified": "强逼",
+      "traditional": "强逼",
+      "pinyin": "",
+      "frequency": 52316,
+      "rank": 720,
+      "definitions_es": [
+        "fuerza"
+      ]
+    },
+    {
+      "spanish": "deben",
+      "simplified": "应",
+      "traditional": "应",
+      "pinyin": "",
+      "frequency": 52297,
+      "rank": 721,
+      "definitions_es": [
+        "deben"
+      ]
+    },
+    {
+      "spanish": "supone",
+      "simplified": "办法",
+      "traditional": "办法",
+      "pinyin": "",
+      "frequency": 52250,
+      "rank": 722,
+      "definitions_es": [
+        "supone"
+      ]
+    },
+    {
+      "spanish": "estábamos",
+      "simplified": "我们",
+      "traditional": "我们",
+      "pinyin": "",
+      "frequency": 52003,
+      "rank": 723,
+      "definitions_es": [
+        "estábamos"
+      ]
+    },
+    {
+      "spanish": "ambos",
+      "simplified": "两个",
+      "traditional": "两个",
+      "pinyin": "",
+      "frequency": 51916,
+      "rank": 724,
+      "definitions_es": [
+        "ambos"
+      ]
+    },
+    {
+      "spanish": "ay",
+      "simplified": "可以",
+      "traditional": "可以",
+      "pinyin": "",
+      "frequency": 51890,
+      "rank": 725,
+      "definitions_es": [
+        "ay"
+      ]
+    },
+    {
+      "spanish": "estuve",
+      "simplified": "我在",
+      "traditional": "我在",
+      "pinyin": "",
+      "frequency": 51592,
+      "rank": 726,
+      "definitions_es": [
+        "estuve"
+      ]
+    },
+    {
+      "spanish": "encontré",
+      "simplified": "我发现",
+      "traditional": "我发现",
+      "pinyin": "",
+      "frequency": 51507,
+      "rank": 727,
+      "definitions_es": [
+        "encontré"
+      ]
+    },
+    {
+      "spanish": "vuelto",
+      "simplified": "返回",
+      "traditional": "返回",
+      "pinyin": "",
+      "frequency": 51505,
+      "rank": 728,
+      "definitions_es": [
+        "vuelto"
+      ]
+    },
+    {
+      "spanish": "dolor",
+      "simplified": "疼痛",
+      "traditional": "疼痛",
+      "pinyin": "",
+      "frequency": 51283,
+      "rank": 729,
+      "definitions_es": [
+        "dolor"
+      ]
+    },
+    {
+      "spanish": "dile",
+      "simplified": "告诉他",
+      "traditional": "告诉他",
+      "pinyin": "",
+      "frequency": 51271,
+      "rank": 730,
+      "definitions_es": [
+        "dile"
+      ]
+    },
+    {
+      "spanish": "encanta",
+      "simplified": "爱",
+      "traditional": "爱",
+      "pinyin": "",
+      "frequency": 51240,
+      "rank": 731,
+      "definitions_es": [
+        "encanta"
+      ]
+    },
+    {
+      "spanish": "edad",
+      "simplified": "年龄",
+      "traditional": "年龄",
+      "pinyin": "",
+      "frequency": 51163,
+      "rank": 732,
+      "definitions_es": [
+        "edad"
+      ]
+    },
+    {
+      "spanish": "darle",
+      "simplified": "给他",
+      "traditional": "给他",
+      "pinyin": "",
+      "frequency": 51120,
+      "rank": 733,
+      "definitions_es": [
+        "darle"
+      ]
+    },
+    {
+      "spanish": "pie",
+      "simplified": "脚踏",
+      "traditional": "脚踏",
+      "pinyin": "",
+      "frequency": 51066,
+      "rank": 734,
+      "definitions_es": [
+        "pie"
+      ]
+    },
+    {
+      "spanish": "negro",
+      "simplified": "黑色",
+      "traditional": "黑色",
+      "pinyin": "",
+      "frequency": 50987,
+      "rank": 735,
+      "definitions_es": [
+        "negro"
+      ]
+    },
+    {
+      "spanish": "ganar",
+      "simplified": "赢",
+      "traditional": "赢",
+      "pinyin": "",
+      "frequency": 50970,
+      "rank": 736,
+      "definitions_es": [
+        "ganar"
+      ]
+    },
+    {
+      "spanish": "york",
+      "simplified": "约克",
+      "traditional": "约克",
+      "pinyin": "",
+      "frequency": 50964,
+      "rank": 737,
+      "definitions_es": [
+        "york"
+      ]
+    },
+    {
+      "spanish": "aire",
+      "simplified": "气",
+      "traditional": "气",
+      "pinyin": "",
+      "frequency": 50788,
+      "rank": 738,
+      "definitions_es": [
+        "aire"
+      ]
+    },
+    {
+      "spanish": "lamento",
+      "simplified": "遗憾",
+      "traditional": "遗憾",
+      "pinyin": "",
+      "frequency": 50766,
+      "rank": 739,
+      "definitions_es": [
+        "lamento"
+      ]
+    },
+    {
+      "spanish": "verlo",
+      "simplified": "看看",
+      "traditional": "看看",
+      "pinyin": "",
+      "frequency": 50765,
+      "rank": 740,
+      "definitions_es": [
+        "verlo"
+      ]
+    },
+    {
+      "spanish": "asesinato",
+      "simplified": "谋杀罪",
+      "traditional": "谋杀罪",
+      "pinyin": "",
+      "frequency": 50759,
+      "rank": 741,
+      "definitions_es": [
+        "asesinato"
+      ]
+    },
+    {
+      "spanish": "vio",
+      "simplified": "看看",
+      "traditional": "看看",
+      "pinyin": "",
+      "frequency": 50756,
+      "rank": 742,
+      "definitions_es": [
+        "vio"
+      ]
+    },
+    {
+      "spanish": "adónde",
+      "simplified": "其中",
+      "traditional": "其中",
+      "pinyin": "",
+      "frequency": 50674,
+      "rank": 743,
+      "definitions_es": [
+        "adónde"
+      ]
+    },
+    {
+      "spanish": "llegado",
+      "simplified": "到达",
+      "traditional": "到达",
+      "pinyin": "",
+      "frequency": 50534,
+      "rank": 744,
+      "definitions_es": [
+        "llegado"
+      ]
+    },
+    {
+      "spanish": "disculpe",
+      "simplified": "对不起",
+      "traditional": "对不起",
+      "pinyin": "",
+      "frequency": 50520,
+      "rank": 745,
+      "definitions_es": [
+        "disculpe"
+      ]
+    },
+    {
+      "spanish": "cita",
+      "simplified": "引用",
+      "traditional": "引用",
+      "pinyin": "",
+      "frequency": 50399,
+      "rank": 746,
+      "definitions_es": [
+        "cita"
+      ]
+    },
+    {
+      "spanish": "estaría",
+      "simplified": "将是",
+      "traditional": "将是",
+      "pinyin": "",
+      "frequency": 50270,
+      "rank": 747,
+      "definitions_es": [
+        "estaría"
+      ]
+    },
+    {
+      "spanish": "fuiste",
+      "simplified": "你们",
+      "traditional": "你们",
+      "pinyin": "",
+      "frequency": 50201,
+      "rank": 748,
+      "definitions_es": [
+        "fuiste"
+      ]
+    },
+    {
+      "spanish": "sistema",
+      "simplified": "系统",
+      "traditional": "系统",
+      "pinyin": "",
+      "frequency": 50050,
+      "rank": 749,
+      "definitions_es": [
+        "sistema"
+      ]
+    },
+    {
+      "spanish": "gusto",
+      "simplified": "味道",
+      "traditional": "味道",
+      "pinyin": "",
+      "frequency": 50039,
+      "rank": 750,
+      "definitions_es": [
+        "gusto"
+      ]
+    },
+    {
+      "spanish": "pobre",
+      "simplified": "穷人",
+      "traditional": "穷人",
+      "pinyin": "",
+      "frequency": 50019,
+      "rank": 751,
+      "definitions_es": [
+        "pobre"
+      ]
+    },
+    {
+      "spanish": "negocio",
+      "simplified": "生意",
+      "traditional": "生意",
+      "pinyin": "",
+      "frequency": 49896,
+      "rank": 752,
+      "definitions_es": [
+        "negocio"
+      ]
+    },
+    {
+      "spanish": "mente",
+      "simplified": "心头",
+      "traditional": "心头",
+      "pinyin": "",
+      "frequency": 49842,
+      "rank": 753,
+      "definitions_es": [
+        "mente"
+      ]
+    },
+    {
+      "spanish": "tuyo",
+      "simplified": "你的",
+      "traditional": "你的",
+      "pinyin": "",
+      "frequency": 49799,
+      "rank": 754,
+      "definitions_es": [
+        "tuyo"
+      ]
+    },
+    {
+      "spanish": "campo",
+      "simplified": "领域",
+      "traditional": "领域",
+      "pinyin": "",
+      "frequency": 49614,
+      "rank": 755,
+      "definitions_es": [
+        "campo"
+      ]
+    },
+    {
+      "spanish": "mire",
+      "simplified": "看看",
+      "traditional": "看看",
+      "pinyin": "",
+      "frequency": 49575,
+      "rank": 756,
+      "definitions_es": [
+        "mire"
+      ]
+    },
+    {
+      "spanish": "situación",
+      "simplified": "情势",
+      "traditional": "情势",
+      "pinyin": "",
+      "frequency": 49426,
+      "rank": 757,
+      "definitions_es": [
+        "situación"
+      ]
+    },
+    {
+      "spanish": "tras",
+      "simplified": "后",
+      "traditional": "后",
+      "pinyin": "",
+      "frequency": 49345,
+      "rank": 758,
+      "definitions_es": [
+        "tras"
+      ]
+    },
+    {
+      "spanish": "hotel",
+      "simplified": "酒店",
+      "traditional": "酒店",
+      "pinyin": "",
+      "frequency": 49177,
+      "rank": 759,
+      "definitions_es": [
+        "hotel"
+      ]
+    },
+    {
+      "spanish": "vosotros",
+      "simplified": "你",
+      "traditional": "你",
+      "pinyin": "",
+      "frequency": 49111,
+      "rank": 760,
+      "definitions_es": [
+        "vosotros"
+      ]
+    },
+    {
+      "spanish": "funciona",
+      "simplified": "作品",
+      "traditional": "作品",
+      "pinyin": "",
+      "frequency": 48956,
+      "rank": 761,
+      "definitions_es": [
+        "funciona"
+      ]
+    },
+    {
+      "spanish": "foto",
+      "simplified": "照片",
+      "traditional": "照片",
+      "pinyin": "",
+      "frequency": 48915,
+      "rank": 762,
+      "definitions_es": [
+        "foto"
+      ]
+    },
+    {
+      "spanish": "abogado",
+      "simplified": "律师",
+      "traditional": "律师",
+      "pinyin": "",
+      "frequency": 48914,
+      "rank": 763,
+      "definitions_es": [
+        "abogado"
+      ]
+    },
+    {
+      "spanish": "loca",
+      "simplified": "女疯子",
+      "traditional": "女疯子",
+      "pinyin": "",
+      "frequency": 48859,
+      "rank": 764,
+      "definitions_es": [
+        "loca"
+      ]
+    },
+    {
+      "spanish": "propio",
+      "simplified": "拥有",
+      "traditional": "拥有",
+      "pinyin": "",
+      "frequency": 48844,
+      "rank": 765,
+      "definitions_es": [
+        "propio"
+      ]
+    },
+    {
+      "spanish": "alrededor",
+      "simplified": "围绕",
+      "traditional": "围绕",
+      "pinyin": "",
+      "frequency": 48767,
+      "rank": 766,
+      "definitions_es": [
+        "alrededor"
+      ]
+    },
+    {
+      "spanish": "próxima",
+      "simplified": "下一个",
+      "traditional": "下一个",
+      "pinyin": "",
+      "frequency": 48701,
+      "rank": 767,
+      "definitions_es": [
+        "próxima"
+      ]
+    },
+    {
+      "spanish": "terminado",
+      "simplified": "完成",
+      "traditional": "完成",
+      "pinyin": "",
+      "frequency": 48673,
+      "rank": 768,
+      "definitions_es": [
+        "terminado"
+      ]
+    },
+    {
+      "spanish": "hablas",
+      "simplified": "你说",
+      "traditional": "你说",
+      "pinyin": "",
+      "frequency": 48652,
+      "rank": 769,
+      "definitions_es": [
+        "hablas"
+      ]
+    },
+    {
+      "spanish": "pagar",
+      "simplified": "工资",
+      "traditional": "工资",
+      "pinyin": "",
+      "frequency": 48636,
+      "rank": 770,
+      "definitions_es": [
+        "pagar"
+      ]
+    },
+    {
+      "spanish": "mató",
+      "simplified": "蒙难",
+      "traditional": "蒙难",
+      "pinyin": "",
+      "frequency": 48583,
+      "rank": 771,
+      "definitions_es": [
+        "mató"
+      ]
+    },
+    {
+      "spanish": "llamo",
+      "simplified": "我打电话",
+      "traditional": "我打电话",
+      "pinyin": "",
+      "frequency": 48473,
+      "rank": 772,
+      "definitions_es": [
+        "llamo"
+      ]
+    },
+    {
+      "spanish": "personal",
+      "simplified": "员工",
+      "traditional": "员工",
+      "pinyin": "",
+      "frequency": 48419,
+      "rank": 773,
+      "definitions_es": [
+        "personal"
+      ]
+    },
+    {
+      "spanish": "sientes",
+      "simplified": "你觉得",
+      "traditional": "你觉得",
+      "pinyin": "",
+      "frequency": 48410,
+      "rank": 774,
+      "definitions_es": [
+        "sientes"
+      ]
+    },
+    {
+      "spanish": "ocurre",
+      "simplified": "发生",
+      "traditional": "发生",
+      "pinyin": "",
+      "frequency": 48364,
+      "rank": 775,
+      "definitions_es": [
+        "ocurre"
+      ]
+    },
+    {
+      "spanish": "ésta",
+      "simplified": "此",
+      "traditional": "此",
+      "pinyin": "",
+      "frequency": 48338,
+      "rank": 776,
+      "definitions_es": [
+        "ésta"
+      ]
+    },
+    {
+      "spanish": "recuerda",
+      "simplified": "记",
+      "traditional": "记",
+      "pinyin": "",
+      "frequency": 48335,
+      "rank": 777,
+      "definitions_es": [
+        "recuerda"
+      ]
+    },
+    {
+      "spanish": "mitad",
+      "simplified": "参半",
+      "traditional": "参半",
+      "pinyin": "",
+      "frequency": 48317,
+      "rank": 778,
+      "definitions_es": [
+        "mitad"
+      ]
+    },
+    {
+      "spanish": "quiera",
+      "simplified": "希望",
+      "traditional": "希望",
+      "pinyin": "",
+      "frequency": 48299,
+      "rank": 779,
+      "definitions_es": [
+        "quiera"
+      ]
+    },
+    {
+      "spanish": "pelo",
+      "simplified": "发",
+      "traditional": "发",
+      "pinyin": "",
+      "frequency": 48293,
+      "rank": 780,
+      "definitions_es": [
+        "pelo"
+      ]
+    },
+    {
+      "spanish": "tenías",
+      "simplified": "你曾",
+      "traditional": "你曾",
+      "pinyin": "",
+      "frequency": 48183,
+      "rank": 781,
+      "definitions_es": [
+        "tenías"
+      ]
+    },
+    {
+      "spanish": "viste",
+      "simplified": "外观",
+      "traditional": "外观",
+      "pinyin": "",
+      "frequency": 47962,
+      "rank": 782,
+      "definitions_es": [
+        "viste"
+      ]
+    },
+    {
+      "spanish": "oficial",
+      "simplified": "官员",
+      "traditional": "官员",
+      "pinyin": "",
+      "frequency": 47960,
+      "rank": 783,
+      "definitions_es": [
+        "oficial"
+      ]
+    },
+    {
+      "spanish": "llegó",
+      "simplified": "到达",
+      "traditional": "到达",
+      "pinyin": "",
+      "frequency": 47852,
+      "rank": 784,
+      "definitions_es": [
+        "llegó"
+      ]
+    },
+    {
+      "spanish": "compañía",
+      "simplified": "公司",
+      "traditional": "公司",
+      "pinyin": "",
+      "frequency": 47842,
+      "rank": 785,
+      "definitions_es": [
+        "compañía"
+      ]
+    },
+    {
+      "spanish": "relación",
+      "simplified": "链接",
+      "traditional": "链接",
+      "pinyin": "",
+      "frequency": 47824,
+      "rank": 786,
+      "definitions_es": [
+        "relación"
+      ]
+    },
+    {
+      "spanish": "conoce",
+      "simplified": "游览",
+      "traditional": "游览",
+      "pinyin": "",
+      "frequency": 47688,
+      "rank": 787,
+      "definitions_es": [
+        "conoce"
+      ]
+    },
+    {
+      "spanish": "pase",
+      "simplified": "通过",
+      "traditional": "通过",
+      "pinyin": "",
+      "frequency": 47622,
+      "rank": 788,
+      "definitions_es": [
+        "pase"
+      ]
+    },
+    {
+      "spanish": "montón",
+      "simplified": "堆积",
+      "traditional": "堆积",
+      "pinyin": "",
+      "frequency": 47610,
+      "rank": 789,
+      "definitions_es": [
+        "montón"
+      ]
+    },
+    {
+      "spanish": "mejores",
+      "simplified": "最好的",
+      "traditional": "最好的",
+      "pinyin": "",
+      "frequency": 47509,
+      "rank": 790,
+      "definitions_es": [
+        "mejores"
+      ]
+    },
+    {
+      "spanish": "creí",
+      "simplified": "我想",
+      "traditional": "我想",
+      "pinyin": "",
+      "frequency": 47494,
+      "rank": 791,
+      "definitions_es": [
+        "creí"
+      ]
+    },
+    {
+      "spanish": "cena",
+      "simplified": "晚餐",
+      "traditional": "晚餐",
+      "pinyin": "",
+      "frequency": 47357,
+      "rank": 792,
+      "definitions_es": [
+        "cena"
+      ]
+    },
+    {
+      "spanish": "sentir",
+      "simplified": "感觉",
+      "traditional": "感觉",
+      "pinyin": "",
+      "frequency": 47337,
+      "rank": 793,
+      "definitions_es": [
+        "sentir"
+      ]
+    },
+    {
+      "spanish": "través",
+      "simplified": "经由",
+      "traditional": "经由",
+      "pinyin": "",
+      "frequency": 47295,
+      "rank": 794,
+      "definitions_es": [
+        "través"
+      ]
+    },
+    {
+      "spanish": "accidente",
+      "simplified": "意外",
+      "traditional": "意外",
+      "pinyin": "",
+      "frequency": 47117,
+      "rank": 795,
+      "definitions_es": [
+        "accidente"
+      ]
+    },
+    {
+      "spanish": "ellas",
+      "simplified": "她们",
+      "traditional": "她们",
+      "pinyin": "",
+      "frequency": 46892,
+      "rank": 796,
+      "definitions_es": [
+        "ellas"
+      ]
+    },
+    {
+      "spanish": "caja",
+      "simplified": "箱",
+      "traditional": "箱",
+      "pinyin": "",
+      "frequency": 46635,
+      "rank": 797,
+      "definitions_es": [
+        "caja"
+      ]
+    },
+    {
+      "spanish": "tranquilo",
+      "simplified": "安静",
+      "traditional": "安静",
+      "pinyin": "",
+      "frequency": 46587,
+      "rank": 798,
+      "definitions_es": [
+        "tranquilo"
+      ]
+    },
+    {
+      "spanish": "bonito",
+      "simplified": "漂亮",
+      "traditional": "漂亮",
+      "pinyin": "",
+      "frequency": 46554,
+      "rank": 799,
+      "definitions_es": [
+        "bonito"
+      ]
+    },
+    {
+      "spanish": "eras",
+      "simplified": "年代",
+      "traditional": "年代",
+      "pinyin": "",
+      "frequency": 46544,
+      "rank": 800,
+      "definitions_es": [
+        "eras"
+      ]
+    },
+    {
+      "spanish": "asi",
+      "simplified": "那么",
+      "traditional": "那么",
+      "pinyin": "",
+      "frequency": 46535,
+      "rank": 801,
+      "definitions_es": [
+        "asi"
+      ]
+    },
+    {
+      "spanish": "pudo",
+      "simplified": "可以",
+      "traditional": "可以",
+      "pinyin": "",
+      "frequency": 46533,
+      "rank": 802,
+      "definitions_es": [
+        "pudo"
+      ]
+    },
+    {
+      "spanish": "vive",
+      "simplified": "生活",
+      "traditional": "生活",
+      "pinyin": "",
+      "frequency": 46462,
+      "rank": 803,
+      "definitions_es": [
+        "vive"
+      ]
+    },
+    {
+      "spanish": "vista",
+      "simplified": "看看",
+      "traditional": "看看",
+      "pinyin": "",
+      "frequency": 46461,
+      "rank": 804,
+      "definitions_es": [
+        "vista"
+      ]
+    },
+    {
+      "spanish": "estúpido",
+      "simplified": "愚蠢的",
+      "traditional": "愚蠢的",
+      "pinyin": "",
+      "frequency": 46441,
+      "rank": 805,
+      "definitions_es": [
+        "estúpido"
+      ]
+    },
+    {
+      "spanish": "línea",
+      "simplified": "线条",
+      "traditional": "线条",
+      "pinyin": "",
+      "frequency": 46341,
+      "rank": 806,
+      "definitions_es": [
+        "línea"
+      ]
+    },
+    {
+      "spanish": "caballeros",
+      "simplified": "先生们",
+      "traditional": "先生们",
+      "pinyin": "",
+      "frequency": 46158,
+      "rank": 807,
+      "definitions_es": [
+        "caballeros"
+      ]
+    },
+    {
+      "spanish": "haremos",
+      "simplified": "我们将",
+      "traditional": "我们将",
+      "pinyin": "",
+      "frequency": 46119,
+      "rank": 808,
+      "definitions_es": [
+        "haremos"
+      ]
+    },
+    {
+      "spanish": "dan",
+      "simplified": "丹",
+      "traditional": "丹",
+      "pinyin": "",
+      "frequency": 46063,
+      "rank": 809,
+      "definitions_es": [
+        "dan"
+      ]
+    },
+    {
+      "spanish": "quédate",
+      "simplified": "逗留",
+      "traditional": "逗留",
+      "pinyin": "",
+      "frequency": 46054,
+      "rank": 810,
+      "definitions_es": [
+        "quédate"
+      ]
+    },
+    {
+      "spanish": "tienda",
+      "simplified": "购物",
+      "traditional": "购物",
+      "pinyin": "",
+      "frequency": 45913,
+      "rank": 811,
+      "definitions_es": [
+        "tienda"
+      ]
+    },
+    {
+      "spanish": "comprar",
+      "simplified": "买到",
+      "traditional": "买到",
+      "pinyin": "",
+      "frequency": 45899,
+      "rank": 812,
+      "definitions_es": [
+        "comprar"
+      ]
+    },
+    {
+      "spanish": "entendido",
+      "simplified": "理解",
+      "traditional": "理解",
+      "pinyin": "",
+      "frequency": 45877,
+      "rank": 813,
+      "definitions_es": [
+        "entendido"
+      ]
+    },
+    {
+      "spanish": "centro",
+      "simplified": "中心",
+      "traditional": "中心",
+      "pinyin": "",
+      "frequency": 45864,
+      "rank": 814,
+      "definitions_es": [
+        "centro"
+      ]
+    },
+    {
+      "spanish": "salvo",
+      "simplified": "除开",
+      "traditional": "除开",
+      "pinyin": "",
+      "frequency": 45755,
+      "rank": 815,
+      "definitions_es": [
+        "salvo"
+      ]
+    },
+    {
+      "spanish": "mes",
+      "simplified": "月",
+      "traditional": "月",
+      "pinyin": "",
+      "frequency": 45648,
+      "rank": 816,
+      "definitions_es": [
+        "mes"
+      ]
+    },
+    {
+      "spanish": "joe",
+      "simplified": "梁智辉",
+      "traditional": "梁智辉",
+      "pinyin": "",
+      "frequency": 45615,
+      "rank": 817,
+      "definitions_es": [
+        "joe"
+      ]
+    },
+    {
+      "spanish": "sol",
+      "simplified": "阳",
+      "traditional": "阳",
+      "pinyin": "",
+      "frequency": 45567,
+      "rank": 818,
+      "definitions_es": [
+        "sol"
+      ]
+    },
+    {
+      "spanish": "tonto",
+      "simplified": "糊涂",
+      "traditional": "糊涂",
+      "pinyin": "",
+      "frequency": 45479,
+      "rank": 819,
+      "definitions_es": [
+        "tonto"
+      ]
+    },
+    {
+      "spanish": "hambre",
+      "simplified": "饥饿",
+      "traditional": "饥饿",
+      "pinyin": "",
+      "frequency": 45455,
+      "rank": 820,
+      "definitions_es": [
+        "hambre"
+      ]
+    },
+    {
+      "spanish": "michael",
+      "simplified": "迈克尔",
+      "traditional": "迈克尔",
+      "pinyin": "",
+      "frequency": 45411,
+      "rank": 821,
+      "definitions_es": [
+        "michael"
+      ]
+    },
+    {
+      "spanish": "mesa",
+      "simplified": "桌",
+      "traditional": "桌",
+      "pinyin": "",
+      "frequency": 45409,
+      "rank": 822,
+      "definitions_es": [
+        "mesa"
+      ]
+    },
+    {
+      "spanish": "respuesta",
+      "simplified": "回复",
+      "traditional": "回复",
+      "pinyin": "",
+      "frequency": 45345,
+      "rank": 823,
+      "definitions_es": [
+        "respuesta"
+      ]
+    },
+    {
+      "spanish": "completamente",
+      "simplified": "一干二净",
+      "traditional": "一干二净",
+      "pinyin": "",
+      "frequency": 45342,
+      "rank": 824,
+      "definitions_es": [
+        "completamente"
+      ]
+    },
+    {
+      "spanish": "david",
+      "simplified": "大卫",
+      "traditional": "大卫",
+      "pinyin": "",
+      "frequency": 45220,
+      "rank": 825,
+      "definitions_es": [
+        "david"
+      ]
+    },
+    {
+      "spanish": "carta",
+      "simplified": "书信",
+      "traditional": "书信",
+      "pinyin": "",
+      "frequency": 45152,
+      "rank": 826,
+      "definitions_es": [
+        "carta"
+      ]
+    },
+    {
+      "spanish": "totalmente",
+      "simplified": "完全",
+      "traditional": "完全",
+      "pinyin": "",
+      "frequency": 45016,
+      "rank": 827,
+      "definitions_es": [
+        "totalmente"
+      ]
+    },
+    {
+      "spanish": "imposible",
+      "simplified": "不可能",
+      "traditional": "不可能",
+      "pinyin": "",
+      "frequency": 44898,
+      "rank": 828,
+      "definitions_es": [
+        "imposible"
+      ]
+    },
+    {
+      "spanish": "pruebas",
+      "simplified": "证据",
+      "traditional": "证据",
+      "pinyin": "",
+      "frequency": 44861,
+      "rank": 829,
+      "definitions_es": [
+        "pruebas"
+      ]
+    },
+    {
+      "spanish": "novio",
+      "simplified": "男朋友",
+      "traditional": "男朋友",
+      "pinyin": "",
+      "frequency": 44832,
+      "rank": 830,
+      "definitions_es": [
+        "novio"
+      ]
+    },
+    {
+      "spanish": "normal",
+      "simplified": "正常",
+      "traditional": "正常",
+      "pinyin": "",
+      "frequency": 44793,
+      "rank": 831,
+      "definitions_es": [
+        "normal"
+      ]
+    },
+    {
+      "spanish": "gustan",
+      "simplified": "喜欢",
+      "traditional": "喜欢",
+      "pinyin": "",
+      "frequency": 44761,
+      "rank": 832,
+      "definitions_es": [
+        "gustan"
+      ]
+    },
+    {
+      "spanish": "frank",
+      "simplified": "坦率",
+      "traditional": "坦率",
+      "pinyin": "",
+      "frequency": 44615,
+      "rank": 833,
+      "definitions_es": [
+        "frank"
+      ]
+    },
+    {
+      "spanish": "pude",
+      "simplified": "我可以",
+      "traditional": "我可以",
+      "pinyin": "",
+      "frequency": 44614,
+      "rank": 834,
+      "definitions_es": [
+        "pude"
+      ]
+    },
+    {
+      "spanish": "charlie",
+      "simplified": "查理",
+      "traditional": "查理",
+      "pinyin": "",
+      "frequency": 44589,
+      "rank": 835,
+      "definitions_es": [
+        "charlie"
+      ]
+    },
+    {
+      "spanish": "traje",
+      "simplified": "适合",
+      "traditional": "适合",
+      "pinyin": "",
+      "frequency": 44234,
+      "rank": 836,
+      "definitions_es": [
+        "traje"
+      ]
+    },
+    {
+      "spanish": "dirección",
+      "simplified": "地址",
+      "traditional": "地址",
+      "pinyin": "",
+      "frequency": 44229,
+      "rank": 837,
+      "definitions_es": [
+        "dirección"
+      ]
+    },
+    {
+      "spanish": "siete",
+      "simplified": "七",
+      "traditional": "七",
+      "pinyin": "",
+      "frequency": 44169,
+      "rank": 838,
+      "definitions_es": [
+        "siete"
+      ]
+    },
+    {
+      "spanish": "dijeron",
+      "simplified": "说过",
+      "traditional": "说过",
+      "pinyin": "",
+      "frequency": 44151,
+      "rank": 839,
+      "definitions_es": [
+        "dijeron"
+      ]
+    },
+    {
+      "spanish": "placer",
+      "simplified": "愉悦",
+      "traditional": "愉悦",
+      "pinyin": "",
+      "frequency": 44038,
+      "rank": 840,
+      "definitions_es": [
+        "placer"
+      ]
+    },
+    {
+      "spanish": "sean",
+      "simplified": "是",
+      "traditional": "是",
+      "pinyin": "",
+      "frequency": 43979,
+      "rank": 841,
+      "definitions_es": [
+        "sean"
+      ]
+    },
+    {
+      "spanish": "tendrá",
+      "simplified": "将有",
+      "traditional": "将有",
+      "pinyin": "",
+      "frequency": 43656,
+      "rank": 842,
+      "definitions_es": [
+        "tendrá"
+      ]
+    },
+    {
+      "spanish": "barco",
+      "simplified": "船运",
+      "traditional": "船运",
+      "pinyin": "",
+      "frequency": 43597,
+      "rank": 843,
+      "definitions_es": [
+        "barco"
+      ]
+    },
+    {
+      "spanish": "blanco",
+      "simplified": "白色",
+      "traditional": "白色",
+      "pinyin": "",
+      "frequency": 43530,
+      "rank": 844,
+      "definitions_es": [
+        "blanco"
+      ]
+    },
+    {
+      "spanish": "tom",
+      "simplified": "汤姆",
+      "traditional": "汤姆",
+      "pinyin": "",
+      "frequency": 43467,
+      "rank": 845,
+      "definitions_es": [
+        "tom"
+      ]
+    },
+    {
+      "spanish": "profesor",
+      "simplified": "教授",
+      "traditional": "教授",
+      "pinyin": "",
+      "frequency": 43370,
+      "rank": 846,
+      "definitions_es": [
+        "profesor"
+      ]
+    },
+    {
+      "spanish": "servicio",
+      "simplified": "服务",
+      "traditional": "服务",
+      "pinyin": "",
+      "frequency": 43358,
+      "rank": 847,
+      "definitions_es": [
+        "servicio"
+      ]
+    },
+    {
+      "spanish": "muchacho",
+      "simplified": "男孩",
+      "traditional": "男孩",
+      "pinyin": "",
+      "frequency": 43295,
+      "rank": 848,
+      "definitions_es": [
+        "muchacho"
+      ]
+    },
+    {
+      "spanish": "reunión",
+      "simplified": "会议",
+      "traditional": "会议",
+      "pinyin": "",
+      "frequency": 43217,
+      "rank": 849,
+      "definitions_es": [
+        "reunión"
+      ]
+    },
+    {
+      "spanish": "dejado",
+      "simplified": "左侧",
+      "traditional": "左侧",
+      "pinyin": "",
+      "frequency": 43162,
+      "rank": 850,
+      "definitions_es": [
+        "dejado"
+      ]
+    },
+    {
+      "spanish": "ley",
+      "simplified": "法学",
+      "traditional": "法学",
+      "pinyin": "",
+      "frequency": 43043,
+      "rank": 851,
+      "definitions_es": [
+        "ley"
+      ]
+    },
+    {
+      "spanish": "quisiera",
+      "simplified": "希望",
+      "traditional": "希望",
+      "pinyin": "",
+      "frequency": 42974,
+      "rank": 852,
+      "definitions_es": [
+        "quisiera"
+      ]
+    },
+    {
+      "spanish": "hubo",
+      "simplified": "有",
+      "traditional": "有",
+      "pinyin": "",
+      "frequency": 42830,
+      "rank": 853,
+      "definitions_es": [
+        "hubo"
+      ]
+    },
+    {
+      "spanish": "george",
+      "simplified": "乔治",
+      "traditional": "乔治",
+      "pinyin": "",
+      "frequency": 42765,
+      "rank": 854,
+      "definitions_es": [
+        "george"
+      ]
+    },
+    {
+      "spanish": "programa",
+      "simplified": "计划",
+      "traditional": "计划",
+      "pinyin": "",
+      "frequency": 42763,
+      "rank": 855,
+      "definitions_es": [
+        "programa"
+      ]
+    },
+    {
+      "spanish": "carrera",
+      "simplified": "人种",
+      "traditional": "人种",
+      "pinyin": "",
+      "frequency": 42759,
+      "rank": 856,
+      "definitions_es": [
+        "carrera"
+      ]
+    },
+    {
+      "spanish": "cumpleaños",
+      "simplified": "生日",
+      "traditional": "生日",
+      "pinyin": "",
+      "frequency": 42596,
+      "rank": 857,
+      "definitions_es": [
+        "cumpleaños"
+      ]
+    },
+    {
+      "spanish": "muchachos",
+      "simplified": "男孩",
+      "traditional": "男孩",
+      "pinyin": "",
+      "frequency": 42571,
+      "rank": 858,
+      "definitions_es": [
+        "muchachos"
+      ]
+    },
+    {
+      "spanish": "culo",
+      "simplified": "屁股",
+      "traditional": "屁股",
+      "pinyin": "",
+      "frequency": 42470,
+      "rank": 859,
+      "definitions_es": [
+        "culo"
+      ]
+    },
+    {
+      "spanish": "canción",
+      "simplified": "歌曲",
+      "traditional": "歌曲",
+      "pinyin": "",
+      "frequency": 42468,
+      "rank": 860,
+      "definitions_es": [
+        "canción"
+      ]
+    },
+    {
+      "spanish": "hermosa",
+      "simplified": "美丽",
+      "traditional": "美丽",
+      "pinyin": "",
+      "frequency": 42438,
+      "rank": 861,
+      "definitions_es": [
+        "hermosa"
+      ]
+    },
+    {
+      "spanish": "universidad",
+      "simplified": "大学",
+      "traditional": "大学",
+      "pinyin": "",
+      "frequency": 42412,
+      "rank": 862,
+      "definitions_es": [
+        "universidad"
+      ]
+    },
+    {
+      "spanish": "boda",
+      "simplified": "婚礼",
+      "traditional": "婚礼",
+      "pinyin": "",
+      "frequency": 42403,
+      "rank": 863,
+      "definitions_es": [
+        "boda"
+      ]
+    },
+    {
+      "spanish": "decirme",
+      "simplified": "告诉我",
+      "traditional": "告诉我",
+      "pinyin": "",
+      "frequency": 42378,
+      "rank": 864,
+      "definitions_es": [
+        "decirme"
+      ]
+    },
+    {
+      "spanish": "cualquiera",
+      "simplified": "任何人",
+      "traditional": "任何人",
+      "pinyin": "",
+      "frequency": 42369,
+      "rank": 865,
+      "definitions_es": [
+        "cualquiera"
+      ]
+    },
+    {
+      "spanish": "tengas",
+      "simplified": "您有",
+      "traditional": "您有",
+      "pinyin": "",
+      "frequency": 42271,
+      "rank": 866,
+      "definitions_es": [
+        "tengas"
+      ]
+    },
+    {
+      "spanish": "hacía",
+      "simplified": "至",
+      "traditional": "至",
+      "pinyin": "",
+      "frequency": 42256,
+      "rank": 867,
+      "definitions_es": [
+        "hacía"
+      ]
+    },
+    {
+      "spanish": "estés",
+      "simplified": "你是",
+      "traditional": "你是",
+      "pinyin": "",
+      "frequency": 42240,
+      "rank": 868,
+      "definitions_es": [
+        "estés"
+      ]
+    },
+    {
+      "spanish": "sala",
+      "simplified": "房间",
+      "traditional": "房间",
+      "pinyin": "",
+      "frequency": 42122,
+      "rank": 869,
+      "definitions_es": [
+        "sala"
+      ]
+    },
+    {
+      "spanish": "llevo",
+      "simplified": "我穿着",
+      "traditional": "我穿着",
+      "pinyin": "",
+      "frequency": 42084,
+      "rank": 870,
+      "definitions_es": [
+        "llevo"
+      ]
+    },
+    {
+      "spanish": "decisión",
+      "simplified": "决策",
+      "traditional": "决策",
+      "pinyin": "",
+      "frequency": 42011,
+      "rank": 871,
+      "definitions_es": [
+        "decisión"
+      ]
+    },
+    {
+      "spanish": "espere",
+      "simplified": "轮候",
+      "traditional": "轮候",
+      "pinyin": "",
+      "frequency": 42008,
+      "rank": 872,
+      "definitions_es": [
+        "espere"
+      ]
+    },
+    {
+      "spanish": "don",
+      "simplified": "不",
+      "traditional": "不",
+      "pinyin": "",
+      "frequency": 41978,
+      "rank": 873,
+      "definitions_es": [
+        "don"
+      ]
+    },
+    {
+      "spanish": "necesario",
+      "simplified": "所需",
+      "traditional": "所需",
+      "pinyin": "",
+      "frequency": 41752,
+      "rank": 874,
+      "definitions_es": [
+        "necesario"
+      ]
+    },
+    {
+      "spanish": "sal",
+      "simplified": "食盐",
+      "traditional": "食盐",
+      "pinyin": "",
+      "frequency": 41725,
+      "rank": 875,
+      "definitions_es": [
+        "sal"
+      ]
+    },
+    {
+      "spanish": "entra",
+      "simplified": "走进",
+      "traditional": "走进",
+      "pinyin": "",
+      "frequency": 41706,
+      "rank": 876,
+      "definitions_es": [
+        "entra"
+      ]
+    },
+    {
+      "spanish": "prisa",
+      "simplified": "匆忙",
+      "traditional": "匆忙",
+      "pinyin": "",
+      "frequency": 41706,
+      "rank": 877,
+      "definitions_es": [
+        "prisa"
+      ]
+    },
+    {
+      "spanish": "carajo",
+      "simplified": "入肉",
+      "traditional": "入肉",
+      "pinyin": "",
+      "frequency": 41656,
+      "rank": 878,
+      "definitions_es": [
+        "carajo"
+      ]
+    },
+    {
+      "spanish": "embargo",
+      "simplified": "没收",
+      "traditional": "没收",
+      "pinyin": "",
+      "frequency": 41642,
+      "rank": 879,
+      "definitions_es": [
+        "embargo"
+      ]
+    },
+    {
+      "spanish": "interesante",
+      "simplified": "有趣",
+      "traditional": "有趣",
+      "pinyin": "",
+      "frequency": 41640,
+      "rank": 880,
+      "definitions_es": [
+        "interesante"
+      ]
+    },
+    {
+      "spanish": "tendrás",
+      "simplified": "您将拥有",
+      "traditional": "您将拥有",
+      "pinyin": "",
+      "frequency": 41583,
+      "rank": 881,
+      "definitions_es": [
+        "tendrás"
+      ]
+    },
+    {
+      "spanish": "escuchar",
+      "simplified": "倾听",
+      "traditional": "倾听",
+      "pinyin": "",
+      "frequency": 41472,
+      "rank": 882,
+      "definitions_es": [
+        "escuchar"
+      ]
+    },
+    {
+      "spanish": "abuela",
+      "simplified": "祖母",
+      "traditional": "祖母",
+      "pinyin": "",
+      "frequency": 41377,
+      "rank": 883,
+      "definitions_es": [
+        "abuela"
+      ]
+    },
+    {
+      "spanish": "hicieron",
+      "simplified": "作出",
+      "traditional": "作出",
+      "pinyin": "",
+      "frequency": 41321,
+      "rank": 884,
+      "definitions_es": [
+        "hicieron"
+      ]
+    },
+    {
+      "spanish": "detective",
+      "simplified": "侦察员",
+      "traditional": "侦察员",
+      "pinyin": "",
+      "frequency": 41299,
+      "rank": 885,
+      "definitions_es": [
+        "detective"
+      ]
+    },
+    {
+      "spanish": "horrible",
+      "simplified": "可怕",
+      "traditional": "可怕",
+      "pinyin": "",
+      "frequency": 41259,
+      "rank": 886,
+      "definitions_es": [
+        "horrible"
+      ]
+    },
+    {
+      "spanish": "suelo",
+      "simplified": "地面",
+      "traditional": "地面",
+      "pinyin": "",
+      "frequency": 41247,
+      "rank": 887,
+      "definitions_es": [
+        "suelo"
+      ]
+    },
+    {
+      "spanish": "fotos",
+      "simplified": "照片",
+      "traditional": "照片",
+      "pinyin": "",
+      "frequency": 41245,
+      "rank": 888,
+      "definitions_es": [
+        "fotos"
+      ]
+    },
+    {
+      "spanish": "cárcel",
+      "simplified": "监狱",
+      "traditional": "监狱",
+      "pinyin": "",
+      "frequency": 41152,
+      "rank": 889,
+      "definitions_es": [
+        "cárcel"
+      ]
+    },
+    {
+      "spanish": "acá",
+      "simplified": "这里",
+      "traditional": "这里",
+      "pinyin": "",
+      "frequency": 41151,
+      "rank": 890,
+      "definitions_es": [
+        "acá"
+      ]
+    },
+    {
+      "spanish": "io",
+      "simplified": "io",
+      "traditional": "io",
+      "pinyin": "",
+      "frequency": 41134,
+      "rank": 891,
+      "definitions_es": [
+        "io"
+      ]
+    },
+    {
+      "spanish": "mike",
+      "simplified": "麦克",
+      "traditional": "麦克",
+      "pinyin": "",
+      "frequency": 41066,
+      "rank": 892,
+      "definitions_es": [
+        "mike"
+      ]
+    },
+    {
+      "spanish": "siéntate",
+      "simplified": "坐下",
+      "traditional": "坐下",
+      "pinyin": "",
+      "frequency": 40993,
+      "rank": 893,
+      "definitions_es": [
+        "siéntate"
+      ]
+    },
+    {
+      "spanish": "decía",
+      "simplified": "说过",
+      "traditional": "说过",
+      "pinyin": "",
+      "frequency": 40982,
+      "rank": 894,
+      "definitions_es": [
+        "decía"
+      ]
+    },
+    {
+      "spanish": "intentando",
+      "simplified": "难",
+      "traditional": "难",
+      "pinyin": "",
+      "frequency": 40706,
+      "rank": 895,
+      "definitions_es": [
+        "intentando"
+      ]
+    },
+    {
+      "spanish": "vámonos",
+      "simplified": "走吧",
+      "traditional": "走吧",
+      "pinyin": "",
+      "frequency": 40700,
+      "rank": 896,
+      "definitions_es": [
+        "vámonos"
+      ]
+    },
+    {
+      "spanish": "maldición",
+      "simplified": "诅咒",
+      "traditional": "诅咒",
+      "pinyin": "",
+      "frequency": 40681,
+      "rank": 897,
+      "definitions_es": [
+        "maldición"
+      ]
+    },
+    {
+      "spanish": "silencio",
+      "simplified": "缄默",
+      "traditional": "缄默",
+      "pinyin": "",
+      "frequency": 40675,
+      "rank": 898,
+      "definitions_es": [
+        "silencio"
+      ]
+    },
+    {
+      "spanish": "muerta",
+      "simplified": "死人",
+      "traditional": "死人",
+      "pinyin": "",
+      "frequency": 40660,
+      "rank": 899,
+      "definitions_es": [
+        "muerta"
+      ]
+    },
+    {
+      "spanish": "capaz",
+      "simplified": "能够",
+      "traditional": "能够",
+      "pinyin": "",
+      "frequency": 40541,
+      "rank": 900,
+      "definitions_es": [
+        "capaz"
+      ]
+    },
+    {
+      "spanish": "salió",
+      "simplified": "去了",
+      "traditional": "去了",
+      "pinyin": "",
+      "frequency": 40377,
+      "rank": 901,
+      "definitions_es": [
+        "salió"
+      ]
+    },
+    {
+      "spanish": "club",
+      "simplified": "俱乐部",
+      "traditional": "俱乐部",
+      "pinyin": "",
+      "frequency": 40360,
+      "rank": 902,
+      "definitions_es": [
+        "club"
+      ]
+    },
+    {
+      "spanish": "terminar",
+      "simplified": "最后",
+      "traditional": "最后",
+      "pinyin": "",
+      "frequency": 40338,
+      "rank": 903,
+      "definitions_es": [
+        "terminar"
+      ]
+    },
+    {
+      "spanish": "temo",
+      "simplified": "我担心",
+      "traditional": "我担心",
+      "pinyin": "",
+      "frequency": 40288,
+      "rank": 904,
+      "definitions_es": [
+        "temo"
+      ]
+    },
+    {
+      "spanish": "broma",
+      "simplified": "谑",
+      "traditional": "谑",
+      "pinyin": "",
+      "frequency": 40281,
+      "rank": 905,
+      "definitions_es": [
+        "broma"
+      ]
+    },
+    {
+      "spanish": "gobierno",
+      "simplified": "政府",
+      "traditional": "政府",
+      "pinyin": "",
+      "frequency": 40236,
+      "rank": 906,
+      "definitions_es": [
+        "gobierno"
+      ]
+    },
+    {
+      "spanish": "prometo",
+      "simplified": "我保证",
+      "traditional": "我保证",
+      "pinyin": "",
+      "frequency": 40224,
+      "rank": 907,
+      "definitions_es": [
+        "prometo"
+      ]
+    },
+    {
+      "spanish": "cámara",
+      "simplified": "照相机",
+      "traditional": "照相机",
+      "pinyin": "",
+      "frequency": 40045,
+      "rank": 908,
+      "definitions_es": [
+        "cámara"
+      ]
+    },
+    {
+      "spanish": "media",
+      "simplified": "参半",
+      "traditional": "参半",
+      "pinyin": "",
+      "frequency": 39998,
+      "rank": 909,
+      "definitions_es": [
+        "media"
+      ]
+    },
+    {
+      "spanish": "terrible",
+      "simplified": "可怕",
+      "traditional": "可怕",
+      "pinyin": "",
+      "frequency": 39993,
+      "rank": 910,
+      "definitions_es": [
+        "terrible"
+      ]
+    },
+    {
+      "spanish": "llamó",
+      "simplified": "人称",
+      "traditional": "人称",
+      "pinyin": "",
+      "frequency": 39922,
+      "rank": 911,
+      "definitions_es": [
+        "llamó"
+      ]
+    },
+    {
+      "spanish": "regalo",
+      "simplified": "馈赠",
+      "traditional": "馈赠",
+      "pinyin": "",
+      "frequency": 39903,
+      "rank": 912,
+      "definitions_es": [
+        "regalo"
+      ]
+    },
+    {
+      "spanish": "amable",
+      "simplified": "一种",
+      "traditional": "一种",
+      "pinyin": "",
+      "frequency": 39841,
+      "rank": 913,
+      "definitions_es": [
+        "amable"
+      ]
+    },
+    {
+      "spanish": "dulce",
+      "simplified": "甜味",
+      "traditional": "甜味",
+      "pinyin": "",
+      "frequency": 39818,
+      "rank": 914,
+      "definitions_es": [
+        "dulce"
+      ]
+    },
+    {
+      "spanish": "muertos",
+      "simplified": "死人",
+      "traditional": "死人",
+      "pinyin": "",
+      "frequency": 39809,
+      "rank": 915,
+      "definitions_es": [
+        "muertos"
+      ]
+    },
+    {
+      "spanish": "querías",
+      "simplified": "你想",
+      "traditional": "你想",
+      "pinyin": "",
+      "frequency": 39797,
+      "rank": 916,
+      "definitions_es": [
+        "querías"
+      ]
+    },
+    {
+      "spanish": "ataque",
+      "simplified": "袭击",
+      "traditional": "袭击",
+      "pinyin": "",
+      "frequency": 39782,
+      "rank": 917,
+      "definitions_es": [
+        "ataque"
+      ]
+    },
+    {
+      "spanish": "das",
+      "simplified": "达斯",
+      "traditional": "达斯",
+      "pinyin": "",
+      "frequency": 39589,
+      "rank": 918,
+      "definitions_es": [
+        "das"
+      ]
+    },
+    {
+      "spanish": "navidad",
+      "simplified": "圣诞节",
+      "traditional": "圣诞节",
+      "pinyin": "",
+      "frequency": 39589,
+      "rank": 919,
+      "definitions_es": [
+        "navidad"
+      ]
+    },
+    {
+      "spanish": "negocios",
+      "simplified": "生意",
+      "traditional": "生意",
+      "pinyin": "",
+      "frequency": 39553,
+      "rank": 920,
+      "definitions_es": [
+        "negocios"
+      ]
+    },
+    {
+      "spanish": "pudiera",
+      "simplified": "可以",
+      "traditional": "可以",
+      "pinyin": "",
+      "frequency": 39528,
+      "rank": 921,
+      "definitions_es": [
+        "pudiera"
+      ]
+    },
+    {
+      "spanish": "ocho",
+      "simplified": "八",
+      "traditional": "八",
+      "pinyin": "",
+      "frequency": 39524,
+      "rank": 922,
+      "definitions_es": [
+        "ocho"
+      ]
+    },
+    {
+      "spanish": "avión",
+      "simplified": "飞机",
+      "traditional": "飞机",
+      "pinyin": "",
+      "frequency": 39484,
+      "rank": 923,
+      "definitions_es": [
+        "avión"
+      ]
+    },
+    {
+      "spanish": "investigación",
+      "simplified": "研究",
+      "traditional": "研究",
+      "pinyin": "",
+      "frequency": 39465,
+      "rank": 924,
+      "definitions_es": [
+        "investigación"
+      ]
+    },
+    {
+      "spanish": "acabó",
+      "simplified": "结束",
+      "traditional": "结束",
+      "pinyin": "",
+      "frequency": 39429,
+      "rank": 925,
+      "definitions_es": [
+        "acabó"
+      ]
+    },
+    {
+      "spanish": "juro",
+      "simplified": "我发誓",
+      "traditional": "我发誓",
+      "pinyin": "",
+      "frequency": 39329,
+      "rank": 926,
+      "definitions_es": [
+        "juro"
+      ]
+    },
+    {
+      "spanish": "mantener",
+      "simplified": "保养",
+      "traditional": "保养",
+      "pinyin": "",
+      "frequency": 39327,
+      "rank": 927,
+      "definitions_es": [
+        "mantener"
+      ]
+    },
+    {
+      "spanish": "ejército",
+      "simplified": "军",
+      "traditional": "军",
+      "pinyin": "",
+      "frequency": 39290,
+      "rank": 928,
+      "definitions_es": [
+        "ejército"
+      ]
+    },
+    {
+      "spanish": "papel",
+      "simplified": "纸张",
+      "traditional": "纸张",
+      "pinyin": "",
+      "frequency": 39262,
+      "rank": 929,
+      "definitions_es": [
+        "papel"
+      ]
+    },
+    {
+      "spanish": "partes",
+      "simplified": "部件",
+      "traditional": "部件",
+      "pinyin": "",
+      "frequency": 39255,
+      "rank": 930,
+      "definitions_es": [
+        "partes"
+      ]
+    },
+    {
+      "spanish": "ten",
+      "simplified": "十",
+      "traditional": "十",
+      "pinyin": "",
+      "frequency": 39243,
+      "rank": 931,
+      "definitions_es": [
+        "ten"
+      ]
+    },
+    {
+      "spanish": "gracioso",
+      "simplified": "有趣",
+      "traditional": "有趣",
+      "pinyin": "",
+      "frequency": 39166,
+      "rank": 932,
+      "definitions_es": [
+        "gracioso"
+      ]
+    },
+    {
+      "spanish": "diría",
+      "simplified": "我会说",
+      "traditional": "我会说",
+      "pinyin": "",
+      "frequency": 39163,
+      "rank": 933,
+      "definitions_es": [
+        "diría"
+      ]
+    },
+    {
+      "spanish": "principio",
+      "simplified": "则",
+      "traditional": "则",
+      "pinyin": "",
+      "frequency": 39155,
+      "rank": 934,
+      "definitions_es": [
+        "principio"
+      ]
+    },
+    {
+      "spanish": "delante",
+      "simplified": "前面",
+      "traditional": "前面",
+      "pinyin": "",
+      "frequency": 38898,
+      "rank": 935,
+      "definitions_es": [
+        "delante"
+      ]
+    },
+    {
+      "spanish": "teniente",
+      "simplified": "陆军中尉",
+      "traditional": "陆军中尉",
+      "pinyin": "",
+      "frequency": 38628,
+      "rank": 936,
+      "definitions_es": [
+        "teniente"
+      ]
+    },
+    {
+      "spanish": "deseo",
+      "simplified": "我希望",
+      "traditional": "我希望",
+      "pinyin": "",
+      "frequency": 38627,
+      "rank": 937,
+      "definitions_es": [
+        "deseo"
+      ]
+    },
+    {
+      "spanish": "vayas",
+      "simplified": "前往",
+      "traditional": "前往",
+      "pinyin": "",
+      "frequency": 38593,
+      "rank": 938,
+      "definitions_es": [
+        "vayas"
+      ]
+    },
+    {
+      "spanish": "nave",
+      "simplified": "船运",
+      "traditional": "船运",
+      "pinyin": "",
+      "frequency": 38459,
+      "rank": 939,
+      "definitions_es": [
+        "nave"
+      ]
+    },
+    {
+      "spanish": "sale",
+      "simplified": "前往",
+      "traditional": "前往",
+      "pinyin": "",
+      "frequency": 38407,
+      "rank": 940,
+      "definitions_es": [
+        "sale"
+      ]
+    },
+    {
+      "spanish": "basura",
+      "simplified": "诋毁",
+      "traditional": "诋毁",
+      "pinyin": "",
+      "frequency": 38280,
+      "rank": 941,
+      "definitions_es": [
+        "basura"
+      ]
+    },
+    {
+      "spanish": "vine",
+      "simplified": "我来了",
+      "traditional": "我来了",
+      "pinyin": "",
+      "frequency": 38168,
+      "rank": 942,
+      "definitions_es": [
+        "vine"
+      ]
+    },
+    {
+      "spanish": "contacto",
+      "simplified": "联系",
+      "traditional": "联系",
+      "pinyin": "",
+      "frequency": 38028,
+      "rank": 943,
+      "definitions_es": [
+        "contacto"
+      ]
+    },
+    {
+      "spanish": "esposo",
+      "simplified": "丈夫",
+      "traditional": "丈夫",
+      "pinyin": "",
+      "frequency": 38011,
+      "rank": 944,
+      "definitions_es": [
+        "esposo"
+      ]
+    },
+    {
+      "spanish": "tren",
+      "simplified": "训练",
+      "traditional": "训练",
+      "pinyin": "",
+      "frequency": 37976,
+      "rank": 945,
+      "definitions_es": [
+        "tren"
+      ]
+    },
+    {
+      "spanish": "encontramos",
+      "simplified": "我们发现",
+      "traditional": "我们发现",
+      "pinyin": "",
+      "frequency": 37952,
+      "rank": 946,
+      "definitions_es": [
+        "encontramos"
+      ]
+    },
+    {
+      "spanish": "dale",
+      "simplified": "戴尔",
+      "traditional": "戴尔",
+      "pinyin": "",
+      "frequency": 37876,
+      "rank": 947,
+      "definitions_es": [
+        "dale"
+      ]
+    },
+    {
+      "spanish": "verdadero",
+      "simplified": "真正的",
+      "traditional": "真正的",
+      "pinyin": "",
+      "frequency": 37844,
+      "rank": 948,
+      "definitions_es": [
+        "verdadero"
+      ]
+    },
+    {
+      "spanish": "tuya",
+      "simplified": "你的",
+      "traditional": "你的",
+      "pinyin": "",
+      "frequency": 37837,
+      "rank": 949,
+      "definitions_es": [
+        "tuya"
+      ]
+    },
+    {
+      "spanish": "alma",
+      "simplified": "魂灵",
+      "traditional": "魂灵",
+      "pinyin": "",
+      "frequency": 37824,
+      "rank": 950,
+      "definitions_es": [
+        "alma"
+      ]
+    },
+    {
+      "spanish": "hazlo",
+      "simplified": "动手",
+      "traditional": "动手",
+      "pinyin": "",
+      "frequency": 37804,
+      "rank": 951,
+      "definitions_es": [
+        "hazlo"
+      ]
+    },
+    {
+      "spanish": "disculpa",
+      "simplified": "对不起",
+      "traditional": "对不起",
+      "pinyin": "",
+      "frequency": 37801,
+      "rank": 952,
+      "definitions_es": [
+        "disculpa"
+      ]
+    },
+    {
+      "spanish": "junto",
+      "simplified": "在一起",
+      "traditional": "在一起",
+      "pinyin": "",
+      "frequency": 37794,
+      "rank": 953,
+      "definitions_es": [
+        "junto"
+      ]
+    },
+    {
+      "spanish": "anda",
+      "simplified": "前往",
+      "traditional": "前往",
+      "pinyin": "",
+      "frequency": 37779,
+      "rank": 954,
+      "definitions_es": [
+        "anda"
+      ]
+    },
+    {
+      "spanish": "tendré",
+      "simplified": "我将有",
+      "traditional": "我将有",
+      "pinyin": "",
+      "frequency": 37662,
+      "rank": 955,
+      "definitions_es": [
+        "tendré"
+      ]
+    },
+    {
+      "spanish": "matrimonio",
+      "simplified": "婚姻",
+      "traditional": "婚姻",
+      "pinyin": "",
+      "frequency": 37656,
+      "rank": 956,
+      "definitions_es": [
+        "matrimonio"
+      ]
+    },
+    {
+      "spanish": "saberlo",
+      "simplified": "知道它",
+      "traditional": "知道它",
+      "pinyin": "",
+      "frequency": 37540,
+      "rank": 957,
+      "definitions_es": [
+        "saberlo"
+      ]
+    },
+    {
+      "spanish": "locura",
+      "simplified": "乱象",
+      "traditional": "乱象",
+      "pinyin": "",
+      "frequency": 37525,
+      "rank": 958,
+      "definitions_es": [
+        "locura"
+      ]
+    },
+    {
+      "spanish": "oro",
+      "simplified": "金子",
+      "traditional": "金子",
+      "pinyin": "",
+      "frequency": 37500,
+      "rank": 959,
+      "definitions_es": [
+        "oro"
+      ]
+    },
+    {
+      "spanish": "permiso",
+      "simplified": "许可证",
+      "traditional": "许可证",
+      "pinyin": "",
+      "frequency": 37465,
+      "rank": 960,
+      "definitions_es": [
+        "permiso"
+      ]
+    },
+    {
+      "spanish": "director",
+      "simplified": "总监",
+      "traditional": "总监",
+      "pinyin": "",
+      "frequency": 37428,
+      "rank": 961,
+      "definitions_es": [
+        "director"
+      ]
+    },
+    {
+      "spanish": "peligro",
+      "simplified": "险",
+      "traditional": "险",
+      "pinyin": "",
+      "frequency": 37415,
+      "rank": 962,
+      "definitions_es": [
+        "peligro"
+      ]
+    },
+    {
+      "spanish": "libertad",
+      "simplified": "自由",
+      "traditional": "自由",
+      "pinyin": "",
+      "frequency": 37412,
+      "rank": 963,
+      "definitions_es": [
+        "libertad"
+      ]
+    },
+    {
+      "spanish": "alegro",
+      "simplified": "开心",
+      "traditional": "开心",
+      "pinyin": "",
+      "frequency": 37403,
+      "rank": 964,
+      "definitions_es": [
+        "alegro"
+      ]
+    },
+    {
+      "spanish": "baja",
+      "simplified": "低",
+      "traditional": "低",
+      "pinyin": "",
+      "frequency": 37298,
+      "rank": 965,
+      "definitions_es": [
+        "baja"
+      ]
+    },
+    {
+      "spanish": "tendremos",
+      "simplified": "我们将拥有",
+      "traditional": "我们将拥有",
+      "pinyin": "",
+      "frequency": 37262,
+      "rank": 966,
+      "definitions_es": [
+        "tendremos"
+      ]
+    },
+    {
+      "spanish": "derecha",
+      "simplified": "对",
+      "traditional": "对",
+      "pinyin": "",
+      "frequency": 37262,
+      "rank": 967,
+      "definitions_es": [
+        "derecha"
+      ]
+    },
+    {
+      "spanish": "encuentra",
+      "simplified": "请访问",
+      "traditional": "请访问",
+      "pinyin": "",
+      "frequency": 37241,
+      "rank": 968,
+      "definitions_es": [
+        "encuentra"
+      ]
+    },
+    {
+      "spanish": "pies",
+      "simplified": "脚下",
+      "traditional": "脚下",
+      "pinyin": "",
+      "frequency": 37222,
+      "rank": 969,
+      "definitions_es": [
+        "pies"
+      ]
+    },
+    {
+      "spanish": "segunda",
+      "simplified": "附议",
+      "traditional": "附议",
+      "pinyin": "",
+      "frequency": 37192,
+      "rank": 970,
+      "definitions_es": [
+        "segunda"
+      ]
+    },
+    {
+      "spanish": "maravilloso",
+      "simplified": "精采",
+      "traditional": "精采",
+      "pinyin": "",
+      "frequency": 37115,
+      "rank": 971,
+      "definitions_es": [
+        "maravilloso"
+      ]
+    },
+    {
+      "spanish": "espacio",
+      "simplified": "空间",
+      "traditional": "空间",
+      "pinyin": "",
+      "frequency": 37114,
+      "rank": 972,
+      "definitions_es": [
+        "espacio"
+      ]
+    },
+    {
+      "spanish": "rato",
+      "simplified": "一时",
+      "traditional": "一时",
+      "pinyin": "",
+      "frequency": 37101,
+      "rank": 973,
+      "definitions_es": [
+        "rato"
+      ]
+    },
+    {
+      "spanish": "abuelo",
+      "simplified": "祖父",
+      "traditional": "祖父",
+      "pinyin": "",
+      "frequency": 37062,
+      "rank": 974,
+      "definitions_es": [
+        "abuelo"
+      ]
+    },
+    {
+      "spanish": "esperaba",
+      "simplified": "预期",
+      "traditional": "预期",
+      "pinyin": "",
+      "frequency": 37031,
+      "rank": 975,
+      "definitions_es": [
+        "esperaba"
+      ]
+    },
+    {
+      "spanish": "mirando",
+      "simplified": "综观",
+      "traditional": "综观",
+      "pinyin": "",
+      "frequency": 37030,
+      "rank": 976,
+      "definitions_es": [
+        "mirando"
+      ]
+    },
+    {
+      "spanish": "salud",
+      "simplified": "保健",
+      "traditional": "保健",
+      "pinyin": "",
+      "frequency": 37016,
+      "rank": 977,
+      "definitions_es": [
+        "salud"
+      ]
+    },
+    {
+      "spanish": "sorpresa",
+      "simplified": "惊奇",
+      "traditional": "惊奇",
+      "pinyin": "",
+      "frequency": 37012,
+      "rank": 978,
+      "definitions_es": [
+        "sorpresa"
+      ]
+    },
+    {
+      "spanish": "ninguno",
+      "simplified": "无",
+      "traditional": "无",
+      "pinyin": "",
+      "frequency": 37007,
+      "rank": 979,
+      "definitions_es": [
+        "ninguno"
+      ]
+    },
+    {
+      "spanish": "miren",
+      "simplified": "看看",
+      "traditional": "看看",
+      "pinyin": "",
+      "frequency": 37000,
+      "rank": 980,
+      "definitions_es": [
+        "miren"
+      ]
+    },
+    {
+      "spanish": "triste",
+      "simplified": "悲哀",
+      "traditional": "悲哀",
+      "pinyin": "",
+      "frequency": 36968,
+      "rank": 981,
+      "definitions_es": [
+        "triste"
+      ]
+    },
+    {
+      "spanish": "aun",
+      "simplified": "偶数的",
+      "traditional": "偶数的",
+      "pinyin": "",
+      "frequency": 36908,
+      "rank": 982,
+      "definitions_es": [
+        "aun"
+      ]
+    },
+    {
+      "spanish": "pensado",
+      "simplified": "预定的",
+      "traditional": "预定的",
+      "pinyin": "",
+      "frequency": 36904,
+      "rank": 983,
+      "definitions_es": [
+        "pensado"
+      ]
+    },
+    {
+      "spanish": "maestro",
+      "simplified": "教师",
+      "traditional": "教师",
+      "pinyin": "",
+      "frequency": 36887,
+      "rank": 984,
+      "definitions_es": [
+        "maestro"
+      ]
+    },
+    {
+      "spanish": "según",
+      "simplified": "根据",
+      "traditional": "根据",
+      "pinyin": "",
+      "frequency": 36882,
+      "rank": 985,
+      "definitions_es": [
+        "según"
+      ]
+    },
+    {
+      "spanish": "infierno",
+      "simplified": "天堂",
+      "traditional": "天堂",
+      "pinyin": "",
+      "frequency": 36835,
+      "rank": 986,
+      "definitions_es": [
+        "infierno"
+      ]
+    },
+    {
+      "spanish": "podrían",
+      "simplified": "可以",
+      "traditional": "可以",
+      "pinyin": "",
+      "frequency": 36824,
+      "rank": 987,
+      "definitions_es": [
+        "podrían"
+      ]
+    },
+    {
+      "spanish": "tipos",
+      "simplified": "类型",
+      "traditional": "类型",
+      "pinyin": "",
+      "frequency": 36703,
+      "rank": 988,
+      "definitions_es": [
+        "tipos"
+      ]
+    },
+    {
+      "spanish": "tía",
+      "simplified": "伯母",
+      "traditional": "伯母",
+      "pinyin": "",
+      "frequency": 36607,
+      "rank": 989,
+      "definitions_es": [
+        "tía"
+      ]
+    },
+    {
+      "spanish": "crimen",
+      "simplified": "犯罪",
+      "traditional": "犯罪",
+      "pinyin": "",
+      "frequency": 36579,
+      "rank": 990,
+      "definitions_es": [
+        "crimen"
+      ]
+    },
+    {
+      "spanish": "conocido",
+      "simplified": "已知",
+      "traditional": "已知",
+      "pinyin": "",
+      "frequency": 36564,
+      "rank": 991,
+      "definitions_es": [
+        "conocido"
+      ]
+    },
+    {
+      "spanish": "consejo",
+      "simplified": "理事会",
+      "traditional": "理事会",
+      "pinyin": "",
+      "frequency": 36446,
+      "rank": 992,
+      "definitions_es": [
+        "consejo"
+      ]
+    },
+    {
+      "spanish": "ante",
+      "simplified": "至",
+      "traditional": "至",
+      "pinyin": "",
+      "frequency": 36426,
+      "rank": 993,
+      "definitions_es": [
+        "ante"
+      ]
+    },
+    {
+      "spanish": "iglesia",
+      "simplified": "教堂",
+      "traditional": "教堂",
+      "pinyin": "",
+      "frequency": 36300,
+      "rank": 994,
+      "definitions_es": [
+        "iglesia"
+      ]
+    },
+    {
+      "spanish": "intento",
+      "simplified": "尝试",
+      "traditional": "尝试",
+      "pinyin": "",
+      "frequency": 36197,
+      "rank": 995,
+      "definitions_es": [
+        "intento"
+      ]
+    },
+    {
+      "spanish": "mayoría",
+      "simplified": "部分",
+      "traditional": "部分",
+      "pinyin": "",
+      "frequency": 36167,
+      "rank": 996,
+      "definitions_es": [
+        "mayoría"
+      ]
+    },
+    {
+      "spanish": "doy",
+      "simplified": "我给",
+      "traditional": "我给",
+      "pinyin": "",
+      "frequency": 36153,
+      "rank": 997,
+      "definitions_es": [
+        "doy"
+      ]
+    },
+    {
+      "spanish": "peter",
+      "simplified": "彼得",
+      "traditional": "彼得",
+      "pinyin": "",
+      "frequency": 36107,
+      "rank": 998,
+      "definitions_es": [
+        "peter"
+      ]
+    },
+    {
+      "spanish": "hicimos",
+      "simplified": "我们",
+      "traditional": "我们",
+      "pinyin": "",
+      "frequency": 36096,
+      "rank": 999,
+      "definitions_es": [
+        "hicimos"
+      ]
+    },
+    {
+      "spanish": "escena",
+      "simplified": "现场",
+      "traditional": "现场",
+      "pinyin": "",
+      "frequency": 36065,
+      "rank": 1000,
+      "definitions_es": [
+        "escena"
       ]
     }
   ]
