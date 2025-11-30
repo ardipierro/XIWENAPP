@@ -184,7 +184,7 @@ export default function ImageLightbox({
           className="bg-white/10 hover:bg-white/20 border-white/20 text-white"
         >
           <Maximize2 size={18} />
-          <span className="text-xs">{Math.round(scale * 100)}%</span>
+          <span className="text-xs text-white">{Math.round(scale * 100)}%</span>
         </BaseButton>
         <BaseButton
           variant="outline"
