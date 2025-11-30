@@ -33,9 +33,9 @@ export async function loadDictionary() {
 
   loadingPromise = (async () => {
     try {
-      logger.info('Cargando diccionario CEDICT...', 'dictionaryService');
+      logger.info('Cargando diccionario CEDICT completo...', 'dictionaryService');
 
-      const response = await fetch('/dictionaries/cedict_es_sample.json');
+      const response = await fetch('/dictionaries/cedict_es_full.json');
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
