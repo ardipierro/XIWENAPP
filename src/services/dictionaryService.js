@@ -223,12 +223,29 @@ export async function searchDictionary(query, options = {}) {
  * @returns {'chinese'|'pinyin'|'spanish'}
  */
 function detectSearchType(query) {
+  // 1. Si tiene caracteres chinos, es búsqueda china
   if (isChinese(query)) {
     return 'chinese';
   }
-  if (isPinyin(query) && !query.includes(' ') && query.length <= 10) {
+
+  // 2. Si tiene caracteres especiales de español (acentos, ñ), es español
+  if (/[áéíóúñ¿¡]/i.test(query)) {
+    return 'spanish';
+  }
+
+  // 3. Si tiene números de tono (1-4) típicos de pinyin, es pinyin
+  if (/[1-4]$/.test(query.trim())) {
     return 'pinyin';
   }
+
+  // 4. Si tiene marcas de tono de pinyin, es pinyin
+  if (/[āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜ]/.test(query)) {
+    return 'pinyin';
+  }
+
+  // 5. DEFAULT: Asumir español (prioridad a español sobre pinyin)
+  // El pinyin solo se usa si el usuario explícitamente lo especifica
+  // o si tiene marcadores claros de pinyin (tonos)
   return 'spanish';
 }
 
