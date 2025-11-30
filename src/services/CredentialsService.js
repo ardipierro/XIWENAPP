@@ -125,7 +125,7 @@ class CredentialsService {
 
   /**
    * Get API key for a provider
-   * Priority: User credential > localStorage fallback > Backend credential
+   * Priority: User credential > Environment variables > localStorage fallback > Backend credential
    *
    * @param {string} providerId - Provider ID (e.g., 'openai', 'anthropic')
    * @returns {Promise<string|null>} API key or null
@@ -143,7 +143,14 @@ class CredentialsService {
       return userCred.apiKey.trim();
     }
 
-    // 2. FALLBACK: Check localStorage directly (for pre-migration data)
+    // 2. FALLBACK: Check environment variables (.env)
+    const envValue = this._getEnvVarForProvider(normalizedId);
+    if (envValue?.trim()) {
+      logger.info(`Found credential in environment variables: ${normalizedId}`, 'CredentialsService');
+      return envValue.trim();
+    }
+
+    // 3. FALLBACK: Check localStorage directly (for pre-migration data)
     const localStorageKey = this._getLocalStorageKeyForProvider(normalizedId);
     if (localStorageKey) {
       try {
@@ -159,7 +166,7 @@ class CredentialsService {
       }
     }
 
-    // 3. Check backend credential
+    // 4. Check backend credential
     const provider = getProviderById(normalizedId) || getProviderByBackendAlias(normalizedId);
     if (provider) {
       const backendKey = provider.backendAlias || provider.id;
@@ -170,11 +177,48 @@ class CredentialsService {
       }
     }
 
-    // 4. Check if this is a custom credential
+    // 5. Check if this is a custom credential
     const customId = `custom_${normalizedId.replace(/\s+/g, '_')}`;
     const customCred = this._cache[customId];
     if (customCred?.apiKey?.trim()) {
       return customCred.apiKey.trim();
+    }
+
+    return null;
+  }
+
+  /**
+   * Get environment variable value for a provider ID
+   * Checks multiple possible variable names
+   * @private
+   */
+  _getEnvVarForProvider(providerId) {
+    // Mapping of provider ID to possible environment variable names
+    const envVarMappings = {
+      'openai': ['VITE_OPENAI_APIKEY', 'VITE_OPENAI_API_KEY'],
+      'anthropic': ['VITE_ANTHROPIC_APIKEY', 'VITE_CLAUDE_API_KEY'],
+      'google': ['VITE_GOOGLE_AI_APIKEY', 'VITE_GEMINI_API_KEY'],
+      'google_translate': ['VITE_GOOGLE_TRANSLATE_APIKEY'],
+      'grok': ['VITE_XAI_APIKEY', 'VITE_GROK_API_KEY'],
+      'elevenlabs': ['VITE_ELEVENLABS_APIKEY'],
+      'stability': ['VITE_STABILITY_APIKEY'],
+      'replicate': ['VITE_REPLICATE_APIKEY'],
+      'leonardo': ['VITE_LEONARDO_APIKEY'],
+      'huggingface': ['VITE_HUGGINGFACE_APIKEY']
+    };
+
+    const possibleVars = envVarMappings[providerId] || [`VITE_${providerId.toUpperCase()}_APIKEY`];
+
+    // Return the first variable that has a value
+    for (const varName of possibleVars) {
+      try {
+        const value = import.meta.env[varName];
+        if (value?.trim()) {
+          return value;
+        }
+      } catch (e) {
+        // Environment variables might not be available
+      }
     }
 
     return null;
