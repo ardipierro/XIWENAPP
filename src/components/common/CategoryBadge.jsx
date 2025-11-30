@@ -202,14 +202,20 @@ function CategoryBadge({
     category: badgeConfig.category,
     label: badgeConfig.label,
     presetName: appliedPreset?.name,
-    enabled: appliedPreset?.enabled,
+    presetEnabled: appliedPreset?.enabled,
+    badgeConfigEnabled: badgeConfig.enabled,
+    finalEnabled: badgeConfig.enabled !== undefined ? badgeConfig.enabled : (appliedPreset ? appliedPreset.enabled !== false : true),
     showIcon: appliedPreset?.showIcon,
     showText: appliedPreset?.showText,
     showBackground: appliedPreset?.showBackground
   });
 
   // 🆕 Si el badge está deshabilitado por preset o config, no renderizar nada
-  const isEnabled = appliedPreset ? appliedPreset.enabled !== false : badgeConfig.enabled !== false;
+  // PRIORIDAD: Individual badge enabled > Preset enabled > Default true
+  const isEnabled = badgeConfig.enabled !== undefined
+    ? badgeConfig.enabled
+    : (appliedPreset ? appliedPreset.enabled !== false : true);
+
   if (!isEnabled) {
     return null;
   }

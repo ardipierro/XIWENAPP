@@ -282,8 +282,11 @@ function useBadgeConfig() {
 
   /**
    * Actualizar cualquier propiedad de un badge
+   * CRÍTICO: Guarda INMEDIATAMENTE para que los cambios se apliquen en tiempo real
    */
   const updateProperty = useCallback((badgeKey, property, value) => {
+    console.log('🔥 updateProperty LLAMADO:', { badgeKey, property, value });
+
     setConfig((prev) => {
       const badge = prev[badgeKey];
       if (!badge) {
@@ -291,13 +294,27 @@ function useBadgeConfig() {
         return prev;
       }
 
-      return {
+      const updated = {
         ...prev,
         [badgeKey]: {
           ...badge,
           [property]: value,
         },
       };
+
+      console.log('💾 Guardando badge config:', updated);
+
+      // Guardar inmediatamente a localStorage
+      const saved = saveBadgeConfig(updated);
+      console.log('✅ Resultado de saveBadgeConfig:', saved);
+
+      // Disparar evento para que CategoryBadge se entere del cambio
+      window.dispatchEvent(new Event('xiwen_badge_config_changed'));
+      console.log('📡 Evento xiwen_badge_config_changed disparado');
+
+      logger.info(`Badge ${badgeKey} property ${property} set to: ${value} (saved immediately)`, 'useBadgeConfig');
+
+      return updated;
     });
     setHasChanges(true);
   }, []);

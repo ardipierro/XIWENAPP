@@ -167,7 +167,7 @@ function CredentialsTab() {
     }
   };
 
-  // Get credential value for a provider (checks Firestore first, then localStorage)
+  // Get credential value for a provider (checks Firestore first, then environment variables, then localStorage)
   const getCredentialValue = (provider) => {
     // First check Firestore credentials
     const cred = credentials[provider.id];
@@ -175,7 +175,34 @@ function CredentialsTab() {
       return cred.apiKey;
     }
 
-    // Fallback: check localStorage
+    // Second: check environment variables
+    const envVarMappings = {
+      'openai': ['VITE_OPENAI_APIKEY', 'VITE_OPENAI_API_KEY'],
+      'anthropic': ['VITE_ANTHROPIC_APIKEY', 'VITE_CLAUDE_API_KEY'],
+      'google': ['VITE_GOOGLE_AI_APIKEY', 'VITE_GEMINI_API_KEY'],
+      'google_translate': ['VITE_GOOGLE_TRANSLATE_APIKEY'],
+      'grok': ['VITE_XAI_APIKEY', 'VITE_GROK_API_KEY'],
+      'elevenlabs': ['VITE_ELEVENLABS_APIKEY'],
+      'stability': ['VITE_STABILITY_APIKEY'],
+      'replicate': ['VITE_REPLICATE_APIKEY'],
+      'leonardo': ['VITE_LEONARDO_APIKEY'],
+      'huggingface': ['VITE_HUGGINGFACE_APIKEY']
+    };
+
+    const possibleEnvVars = envVarMappings[provider.id] || [`VITE_${provider.id.toUpperCase()}_APIKEY`];
+
+    try {
+      for (const varName of possibleEnvVars) {
+        const value = import.meta.env[varName];
+        if (value?.trim()) {
+          return value;
+        }
+      }
+    } catch (e) {
+      // Environment variables not available
+    }
+
+    // Third: check localStorage
     const localStorageKeyMappings = {
       'openai': ['ai_credentials_OpenAI', 'ai_credentials_openai'],
       'anthropic': ['ai_credentials_Claude', 'ai_credentials_claude', 'ai_credentials_Anthropic'],
@@ -334,6 +361,7 @@ function CredentialsTab() {
                     {isConfigured ? 'Editar' : 'Configurar'}
                   </button>
                 }
+                onClick={() => setSelectedProvider(provider)}
               />
             );
           })}

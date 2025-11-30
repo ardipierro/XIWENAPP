@@ -171,6 +171,40 @@ export function CredentialsProvider({ children }) {
   }, []);
 
   /**
+   * Check environment variables for a provider's credential
+   * @param {string} providerId - Provider ID
+   * @returns {boolean} Whether credential exists in environment variables
+   */
+  const checkEnvironmentVariables = useCallback((providerId) => {
+    const envVarMappings = {
+      'openai': ['VITE_OPENAI_APIKEY', 'VITE_OPENAI_API_KEY'],
+      'anthropic': ['VITE_ANTHROPIC_APIKEY', 'VITE_CLAUDE_API_KEY'],
+      'google': ['VITE_GOOGLE_AI_APIKEY', 'VITE_GEMINI_API_KEY'],
+      'google_translate': ['VITE_GOOGLE_TRANSLATE_APIKEY'],
+      'grok': ['VITE_XAI_APIKEY', 'VITE_GROK_API_KEY'],
+      'elevenlabs': ['VITE_ELEVENLABS_APIKEY'],
+      'stability': ['VITE_STABILITY_APIKEY'],
+      'replicate': ['VITE_REPLICATE_APIKEY'],
+      'leonardo': ['VITE_LEONARDO_APIKEY'],
+      'huggingface': ['VITE_HUGGINGFACE_APIKEY']
+    };
+
+    const possibleVars = envVarMappings[providerId] || [`VITE_${providerId.toUpperCase()}_APIKEY`];
+
+    try {
+      for (const varName of possibleVars) {
+        const value = import.meta.env[varName];
+        if (value?.trim()) {
+          return true;
+        }
+      }
+    } catch (e) {
+      // Environment variables not available
+    }
+    return false;
+  }, []);
+
+  /**
    * Check localStorage for a provider's credential
    * @param {string} providerId - Provider ID
    * @returns {boolean} Whether credential exists in localStorage
@@ -211,17 +245,20 @@ export function CredentialsProvider({ children }) {
     return AI_PROVIDERS.map(provider => {
       const credential = credentials[provider.id];
       const hasKeyInFirestore = !!(credential?.apiKey?.trim());
-      // Also check localStorage as fallback
-      const hasKeyInLocalStorage = !hasKeyInFirestore && checkLocalStorage(provider.id);
-      const hasKey = hasKeyInFirestore || hasKeyInLocalStorage;
+      // Also check environment variables and localStorage as fallbacks
+      const hasKeyInEnv = !hasKeyInFirestore && checkEnvironmentVariables(provider.id);
+      const hasKeyInLocalStorage = !hasKeyInFirestore && !hasKeyInEnv && checkLocalStorage(provider.id);
+      const hasKey = hasKeyInFirestore || hasKeyInEnv || hasKeyInLocalStorage;
 
       return {
         ...provider,
         configured: hasKey,
-        source: hasKeyInFirestore ? (credential?.source || 'user') : (hasKeyInLocalStorage ? 'localStorage' : 'none')
+        source: hasKeyInFirestore
+          ? (credential?.source || 'user')
+          : (hasKeyInEnv ? 'env' : (hasKeyInLocalStorage ? 'localStorage' : 'none'))
       };
     });
-  }, [credentials, checkLocalStorage]);
+  }, [credentials, checkEnvironmentVariables, checkLocalStorage]);
 
   /**
    * Count of configured providers
