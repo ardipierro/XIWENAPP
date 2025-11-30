@@ -65,6 +65,9 @@ class DictionaryTranslator:
 
         try:
             translated = self.translator.translate(text)
+            # Si la traducción es None o vacía, usar original
+            if not translated:
+                translated = text
             self.cache[text] = translated
             self.stats['translated'] += 1
             return translated
@@ -142,6 +145,9 @@ def create_spanish_search_index(entries: List[Dict]) -> Dict:
 
     for i, entry in enumerate(entries):
         for defn in entry.get('definitions_es', []):
+            # Saltar definiciones vacías o None
+            if not defn:
+                continue
             # Extraer palabras clave de la definición
             words = defn.lower().split()
             for word in words:
