@@ -4,10 +4,14 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Save, Eye, EyeOff, Volume2, Lightbulb, Type, Edit3 } from 'lucide-react';
+import { Save, Volume2, Lightbulb, Type, Edit3, Eye, EyeOff } from 'lucide-react';
 import { BaseButton, BaseInput, BaseAlert } from '../common';
-import FillInBlanksExercise from './FillInBlanksExercise';
+import { ExercisePreview, FillBlankRenderer } from '../exercises';
 import logger from '../../utils/logger';
+
+// Texto de ejemplo para preview
+const EXAMPLE_TEXT = `Mi nombre es *María* y vivo en *Buenos Aires*.
+Me gusta *leer* libros en mi tiempo libre.`;
 
 /**
  * Panel de configuración para ejercicios de completar palabras
@@ -36,12 +40,9 @@ function FillBlanksConfig({ onSave }) {
     soundEnabled: true
   });
 
-  const [showPreview, setShowPreview] = useState(false);
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
-
-  // Texto de ejemplo para preview
-  const exampleText = 'Mi nombre es *María* y vivo en *Buenos Aires*. Me gusta *leer* libros.';
+  const [showPreview, setShowPreview] = useState(false);
 
   /**
    * Guardar configuración
@@ -342,7 +343,7 @@ Me gusta *leer* libros en mi tiempo libre.`}
           icon={showPreview ? EyeOff : Eye}
           onClick={() => setShowPreview(!showPreview)}
         >
-          {showPreview ? 'Ocultar' : 'Mostrar'} Preview
+          {showPreview ? 'Ocultar Preview' : 'Ver Preview'}
         </BaseButton>
         <BaseButton
           variant="primary"
@@ -356,21 +357,16 @@ Me gusta *leer* libros en mi tiempo libre.`}
       {/* Preview del ejercicio */}
       {showPreview && (
         <div className="mt-6 p-6 rounded-lg border-2 border-dashed" style={{ borderColor: 'var(--color-border)' }}>
-          <div className="mb-4">
-            <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-              Vista previa del ejercicio
-            </h4>
-            <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-              Texto de ejemplo: {exampleText}
-            </p>
-          </div>
-          <FillInBlanksExercise
-            text={exampleText}
-            config={config}
-            onComplete={(result) => {
-              logger.info('Preview completed:', result);
-              alert(`Ejercicio completado!\nPuntuación: ${result.score}\nCorrectas: ${result.correct}/${result.total}`);
-            }}
+          <h4 className="text-sm font-semibold mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+            Vista previa del ejercicio
+          </h4>
+          <ExercisePreview
+            renderer={FillBlankRenderer}
+            exerciseConfig={config}
+            text={EXAMPLE_TEXT}
+            caseSensitive={config.caseSensitive}
+            allowHints={config.allowHints}
+            onComplete={(result) => logger.info('Preview completed:', result, 'FillBlanksConfig')}
           />
         </div>
       )}

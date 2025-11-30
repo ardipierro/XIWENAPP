@@ -62,9 +62,6 @@ const GameContainer = lazy(() => import('./GameContainer'));
 // Guardian views
 const GuardianView = lazy(() => import('./guardian/GuardianView'));
 
-// ADE1 Content Viewer
-const ADE1ContentViewer = lazy(() => import('./ADE1ContentViewer'));
-
 // Modal Layout Test
 const ModalLayoutTest = lazy(() => import('./exercises/layouts/ModalLayoutTest'));
 
@@ -163,14 +160,6 @@ function HomeView({ user, onNavigate }) {
       isExternal: true // Indica que es una ruta externa al dashboard
     },
     */
-    {
-      title: 'ADE1 2026 - Fonética',
-      description: 'Libro interactivo con 120+ slides y ejercicios',
-      icon: BookOpen,
-      path: '/dashboard/ade1-content',
-      permission: null, // Disponible para todos
-      hideForStudents: true // Ocultar para estudiantes
-    },
     {
       title: '🧪 Test Modal Layout',
       description: 'Prueba el nuevo sistema de renderizado de ejercicios',
@@ -506,10 +495,6 @@ function UniversalDashboardInner() {
             case '/dashboard/unified-content':
               if (!can('create-content')) return <PlaceholderView title="Sin acceso" />;
               return <ContentManagerTabs user={effectiveUser} userRole={effectiveUser.role} />;
-
-            // ADE1 2026 CONTENT VIEWER - Libro interactivo
-            case '/dashboard/ade1-content':
-              return <ADE1ContentViewer />;
 
             // ESTUDIANTES (redirige a /users)
             case '/dashboard/students':

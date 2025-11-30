@@ -6,8 +6,12 @@
 import { useState, useEffect } from 'react';
 import { Save, Eye, EyeOff, Volume2, Shuffle, Move } from 'lucide-react';
 import { BaseButton, BaseInput, BaseAlert } from '../common';
-import DragDropBlanksExercise from './DragDropBlanksExercise';
+import { ExercisePreview, DragDropRenderer } from '../exercises';
 import logger from '../../utils/logger';
+
+// Texto de ejemplo para preview
+const EXAMPLE_TEXT = `El *perro* ladra y el *gato* maúlla.
+Los *pájaros* cantan en el *árbol*.`;
 
 /**
  * Panel de configuración para ejercicios de arrastrar y soltar
@@ -31,12 +35,9 @@ function DragDropConfig({ onSave }) {
     soundEnabled: true
   });
 
-  const [showPreview, setShowPreview] = useState(false);
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
-
-  // Texto de ejemplo para preview
-  const exampleText = 'El *perro* ladra y el *gato* maúlla. Los *pájaros* cantan en el *árbol*.';
+  const [showPreview, setShowPreview] = useState(false);
 
   /**
    * Guardar configuración
@@ -287,7 +288,7 @@ Los *pájaros* cantan en el *árbol*.`}
           icon={showPreview ? EyeOff : Eye}
           onClick={() => setShowPreview(!showPreview)}
         >
-          {showPreview ? 'Ocultar' : 'Mostrar'} Preview
+          {showPreview ? 'Ocultar Preview' : 'Ver Preview'}
         </BaseButton>
         <BaseButton
           variant="primary"
@@ -301,21 +302,16 @@ Los *pájaros* cantan en el *árbol*.`}
       {/* Preview del ejercicio */}
       {showPreview && (
         <div className="mt-6 p-6 rounded-lg border-2 border-dashed" style={{ borderColor: 'var(--color-border)' }}>
-          <div className="mb-4">
-            <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-              Vista previa del ejercicio
-            </h4>
-            <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-              Texto de ejemplo: {exampleText}
-            </p>
-          </div>
-          <DragDropBlanksExercise
-            text={exampleText}
-            config={config}
-            onComplete={(result) => {
-              logger.info('Preview completed:', result);
-              alert(`Ejercicio completado!\nPuntuación: ${result.score}\nCorrectas: ${result.correct}/${result.total}`);
-            }}
+          <h4 className="text-sm font-semibold mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+            Vista previa del ejercicio
+          </h4>
+          <ExercisePreview
+            renderer={DragDropRenderer}
+            exerciseConfig={config}
+            text={EXAMPLE_TEXT}
+            instruction="Arrastra las palabras al lugar correcto"
+            shuffleWords={config.shuffleWords}
+            onComplete={(result) => logger.info('Preview completed:', result, 'DragDropConfig')}
           />
         </div>
       )}

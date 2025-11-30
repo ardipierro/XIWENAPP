@@ -23,7 +23,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { BaseBadge, BaseButton } from '../common';
-import CharacterVoiceManager from '../interactive-book/CharacterVoiceManager';
+import { CharacterVoiceManager } from '../audio';
 import logger from '../../utils/logger';
 
 // Configuración por defecto

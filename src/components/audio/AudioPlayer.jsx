@@ -1,6 +1,6 @@
 /**
  * @fileoverview Reproductor de audio con soporte TTS automático
- * @module components/interactive-book/AudioPlayer
+ * @module components/audio/AudioPlayer
  */
 
 import { useState, useRef, useEffect } from 'react';

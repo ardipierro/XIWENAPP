@@ -4,9 +4,9 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Save, Eye, EyeOff, MessageSquare, CheckCircle, Type, AlignLeft } from 'lucide-react';
+import { Save, MessageSquare, CheckCircle, Type, AlignLeft, Eye, EyeOff } from 'lucide-react';
 import { BaseButton, BaseInput, BaseAlert } from '../common';
-import OpenQuestionsExercise from './OpenQuestionsExercise';
+import { ExercisePreview, OpenQuestionsRenderer } from '../exercises';
 import logger from '../../utils/logger';
 
 /**
@@ -477,13 +477,22 @@ R: El tiempo es muy desagradable.`}
               Vista previa del ejercicio - "Diga lo contrario"
             </h4>
           </div>
-          <OpenQuestionsExercise
+          <ExercisePreview
+            renderer={OpenQuestionsRenderer}
+            exerciseConfig={config}
             questions={exampleQuestions}
-            config={config}
-            onComplete={(result) => {
-              logger.info('Preview completed:', result);
-              alert(`Ejercicio completado!\nPuntuación: ${result.score}/${result.maxScore}\nCorrectas: ${result.correct}/${result.total}`);
-            }}
+            instruction="Transforme las oraciones diciendo lo contrario"
+            validateAnswers={config.validateAnswers}
+            caseSensitive={config.caseSensitive}
+            ignoreAccents={config.ignoreAccents}
+            ignorePunctuation={config.ignorePunctuation}
+            acceptPartialMatch={config.acceptPartialMatch}
+            partialMatchThreshold={config.partialMatchThreshold}
+            showCorrectAnswer={config.showCorrectAnswer}
+            allowRetry={config.allowRetry}
+            maxRetries={config.maxRetries}
+            maxLength={config.textareaMaxLength}
+            onComplete={(result) => logger.info('Preview completed:', result, 'OpenQuestionsConfig')}
           />
         </div>
       )}

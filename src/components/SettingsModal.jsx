@@ -4,11 +4,10 @@
  * @module components/SettingsModal
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
   Settings,
-  Palette,
   Monitor,
   Volume2,
   Gauge,
@@ -18,7 +17,6 @@ import {
   ZoomOut,
   Eye,
   EyeOff,
-  Image,
   Mic,
   Bookmark,
   TrendingUp,
@@ -28,9 +26,7 @@ import {
 } from 'lucide-react';
 import BaseModal from './common/BaseModal';
 import { BaseButton, BaseBadge, BaseTabs } from './common';
-import ViewCustomizer from './interactive-book/ViewCustomizer';
-import AIImageGenerator from './interactive-book/AIImageGenerator';
-import CharacterVoiceManager from './interactive-book/CharacterVoiceManager';
+import { CharacterVoiceManager } from './audio';
 import AudioCacheTab from './settings/AudioCacheTab';
 import BadgeCustomizerTab from './settings/BadgeCustomizerTab';
 import logger from '../utils/logger';
@@ -39,7 +35,7 @@ import logger from '../utils/logger';
  * Modal de configuración completo con tabs
  */
 function SettingsModal({ isOpen, onClose, characters = [], user = null }) {
-  const [activeTab, setActiveTab] = useState('appearance');
+  const [activeTab, setActiveTab] = useState('display');
   const [displaySettings, setDisplaySettings] = useState({
     zoom: 100,
     width: 'normal',
@@ -48,7 +44,6 @@ function SettingsModal({ isOpen, onClose, characters = [], user = null }) {
     showMetadataBadges: true
   });
   const [saveMessage, setSaveMessage] = useState(null); // { type: 'success' | 'error', text: string }
-  const viewCustomizerSaveRef = useRef(null); // Referencia a la función de guardado de ViewCustomizer
 
   // Cargar configuración de pantalla
   useEffect(() => {
@@ -136,14 +131,8 @@ function SettingsModal({ isOpen, onClose, characters = [], user = null }) {
     }
   };
 
-  // ✅ 7 tabs principales (Apariencia, Pantalla, Fuentes, Audio, Caché, Badges, Avanzado)
+  // ✅ 6 tabs principales (Pantalla, Fuentes, Audio, Caché, Badges, Avanzado)
   const tabs = [
-    {
-      id: 'appearance',
-      label: 'Apariencia',
-      icon: Palette,
-      description: 'Visual, tipografía y diseño'
-    },
     {
       id: 'display',
       label: 'Pantalla',
@@ -178,7 +167,7 @@ function SettingsModal({ isOpen, onClose, characters = [], user = null }) {
       id: 'advanced',
       label: 'Avanzado',
       icon: Settings,
-      description: 'Progreso, imágenes IA y más'
+      description: 'Progreso y estadísticas'
     }
   ];
 
@@ -192,20 +181,8 @@ function SettingsModal({ isOpen, onClose, characters = [], user = null }) {
 
   // Manejar guardado de configuración
   const handleSaveSettings = () => {
-    // Guardar ViewCustomizer si existe la referencia
-    if (viewCustomizerSaveRef.current) {
-      viewCustomizerSaveRef.current();
-    }
-
     setSaveMessage({ type: 'success', text: '✓ Configuración guardada correctamente' });
     setTimeout(() => setSaveMessage(null), 3000);
-  };
-
-  // Callback para recibir la función de guardado de ViewCustomizer
-  const handleViewCustomizerChange = (data) => {
-    if (data && typeof data.saveSettings === 'function') {
-      viewCustomizerSaveRef.current = data.saveSettings;
-    }
   };
 
   return (
@@ -231,20 +208,7 @@ function SettingsModal({ isOpen, onClose, characters = [], user = null }) {
         {/* Content */}
         <div className="flex-1 overflow-y-auto pb-4">
           {/* ========================================= */}
-          {/* TAB 1: APARIENCIA (Visual + Tipografía) */}
-          {/* ========================================= */}
-          {activeTab === 'appearance' && (
-            <div>
-              <ViewCustomizer
-                alwaysOpen={true}
-                autoSave={false}
-                onSettingsChange={handleViewCustomizerChange}
-              />
-            </div>
-          )}
-
-          {/* ========================================= */}
-          {/* TAB 2: PANTALLA (Zoom, ancho, fullscreen) */}
+          {/* TAB 1: PANTALLA (Zoom, ancho, fullscreen) */}
           {/* ========================================= */}
           {activeTab === 'display' && (
             <div className="space-y-6">
@@ -709,18 +673,10 @@ function SettingsModal({ isOpen, onClose, characters = [], user = null }) {
           )}
 
           {/* ========================================= */}
-          {/* TAB: AVANZADO (Progreso + Imágenes IA) */}
+          {/* TAB: AVANZADO (Progreso y Estadísticas) */}
           {/* ========================================= */}
           {activeTab === 'advanced' && (
             <div className="space-y-8">
-              {/* Sección: Imágenes IA */}
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 pb-2 border-b-2 border-purple-200 dark:border-purple-800">
-                  🎨 Generación de Imágenes IA
-                </h3>
-                <AIImageGenerator alwaysOpen={true} />
-              </div>
-
               {/* Sección: Progreso */}
               <div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4 pb-2 border-b-2 border-purple-200 dark:border-purple-800">

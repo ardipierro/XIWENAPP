@@ -6,8 +6,6 @@
 import { useState, useEffect } from 'react';
 import {
   Save,
-  Eye,
-  EyeOff,
   HelpCircle,
   CheckCircle2,
   XCircle,
@@ -15,10 +13,12 @@ import {
   Timer,
   Volume2,
   Shuffle,
-  ListChecks
+  ListChecks,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { BaseButton, BaseInput, BaseAlert } from '../common';
-import MultipleChoiceExercise from './MultipleChoiceExercise';
+import { ExercisePreview, MultipleChoiceRenderer } from '../exercises';
 import logger from '../../utils/logger';
 
 const STORAGE_KEY = 'xiwen_multipleChoiceConfig';
@@ -657,9 +657,17 @@ Opción incorrecta
           <h4 className="text-lg font-semibold mb-4" style={{ color: 'var(--color-text-primary)' }}>
             Preview del Ejercicio
           </h4>
-          <MultipleChoiceExercise
-            questions={EXAMPLE_QUESTIONS}
-            config={config}
+          <ExercisePreview
+            renderer={MultipleChoiceRenderer}
+            exerciseConfig={config}
+            question={EXAMPLE_QUESTIONS[0].question}
+            options={EXAMPLE_QUESTIONS[0].options}
+            correctAnswer={EXAMPLE_QUESTIONS[0].correct}
+            explanation={EXAMPLE_QUESTIONS[0].explanation}
+            optionExplanations={EXAMPLE_QUESTIONS[0].optionExplanations}
+            multiSelect={Array.isArray(EXAMPLE_QUESTIONS[0].correct)}
+            shuffleOptions={config.shuffleOptions}
+            showLetters={config.showOptionLetters}
             onComplete={(result) => logger.info('Preview completed', 'MultipleChoiceConfig', result)}
           />
         </div>
