@@ -337,9 +337,23 @@ function searchBySpanish(query, limit, fuzzy) {
     }
   });
 
-  // Ordenar por score (mayor a menor) y devolver los top N
-  const sortedResults = candidatesWithScore
+  // DEBUG: Log top 5 candidates with scores
+  const topCandidates = candidatesWithScore
     .sort((a, b) => b.score - a.score)
+    .slice(0, 5);
+
+  if (topCandidates.length > 0) {
+    console.log(`[dictionaryService] Top ${topCandidates.length} results for "${query}":`);
+    topCandidates.forEach((item, idx) => {
+      const simplified = item.entry.s || item.entry.simplified;
+      const definitions = item.entry.d || item.entry.definitions_es;
+      const firstDef = definitions?.[0] || '';
+      console.log(`  ${idx + 1}. ${simplified} (${simplified.length} chars) - score: ${item.score.toFixed(0)} - def: "${firstDef.substring(0, 50)}..."`);
+    });
+  }
+
+  // Ordenar por score (mayor a menor) y devolver los top N
+  const sortedResults = topCandidates
     .slice(0, limit)
     .map(item => formatEntry(item.entry));
 
