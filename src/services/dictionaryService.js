@@ -321,164 +321,89 @@ function searchByPinyin(query, limit, fuzzy) {
 }
 
 /**
- * Búsqueda por español con ranking por relevancia
- * NUEVA ESTRATEGIA: Búsqueda exhaustiva en TODO el diccionario + ranking agresivo
+ * Búsqueda por español - ESTRATEGIA SIMPLE
+ * Buscar palabra exacta en TODAS las definiciones + ordenar solo por longitud
  */
 function searchBySpanish(query, limit, fuzzy) {
   const normalizedQuery = query.toLowerCase().trim();
-  const candidatesWithScore = [];
+  const candidates = [];
 
   // BÚSQUEDA EXHAUSTIVA: Revisar TODAS las entradas del diccionario
   dictionaryCache.forEach((entry, idx) => {
     const definitions = entry.d || entry.definitions_es;
     if (!definitions || !Array.isArray(definitions) || definitions.length === 0) return;
 
-    // Calcular score de relevancia
-    const score = calculateSpanishRelevance(entry, normalizedQuery);
+    const simplified = entry.s || entry.simplified;
+    if (!simplified) return;
 
-    // Solo incluir si tiene score > 0 (hay match)
-    if (score > 0) {
-      candidatesWithScore.push({ entry, score, idx });
+    // Buscar la palabra en CUALQUIER definición
+    let foundMatch = false;
+    let matchType = 0; // 0=substring, 1=palabra completa, 2=primera palabra
+
+    for (const def of definitions) {
+      if (!def || typeof def !== 'string') continue;
+
+      const cleanDef = def.toLowerCase()
+        .replace(/^\s*\([^)]*\)\s*/, '') // Remover (jerga), (fig.)
+        .trim();
+
+      // Buscar como palabra completa (con límites de palabra)
+      const wordBoundaryRegex = new RegExp(`\\b${normalizedQuery}\\b`);
+      if (wordBoundaryRegex.test(cleanDef)) {
+        foundMatch = true;
+
+        // Check si es la primera palabra
+        const firstWord = cleanDef.split(/[\s,;\/]/)[0];
+        if (firstWord === normalizedQuery) {
+          matchType = 2; // Primera palabra = mejor match
+          break;
+        } else {
+          matchType = Math.max(matchType, 1); // Palabra completa
+        }
+      }
+      // Buscar como substring si no encontró palabra completa
+      else if (matchType === 0 && cleanDef.includes(normalizedQuery)) {
+        foundMatch = true;
+        matchType = 0;
+      }
+    }
+
+    if (foundMatch) {
+      candidates.push({
+        entry,
+        charLength: simplified.length,
+        matchType
+      });
     }
   });
 
-  // DEBUG: Log top 5 candidates with scores
-  const topCandidates = candidatesWithScore
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 5);
+  // ORDENAR: Primero por tipo de match, luego por longitud de caracteres (más corto primero)
+  candidates.sort((a, b) => {
+    // Prioridad 1: Tipo de match (2 > 1 > 0)
+    if (b.matchType !== a.matchType) {
+      return b.matchType - a.matchType;
+    }
+    // Prioridad 2: Longitud de caracteres chinos (más corto = mejor)
+    return a.charLength - b.charLength;
+  });
 
-  if (topCandidates.length > 0) {
+  // DEBUG: Log top 5 candidates
+  if (candidates.length > 0) {
+    const topCandidates = candidates.slice(0, 5);
     console.log(`[dictionaryService] Top ${topCandidates.length} results for "${query}":`);
     topCandidates.forEach((item, idx) => {
       const simplified = item.entry.s || item.entry.simplified;
       const definitions = item.entry.d || item.entry.definitions_es;
       const firstDef = definitions?.[0] || '';
-      console.log(`  ${idx + 1}. ${simplified} (${simplified.length} chars) - score: ${item.score.toFixed(0)} - def: "${firstDef.substring(0, 50)}..."`);
+      const matchTypeLabel = item.matchType === 2 ? 'FIRST_WORD' : item.matchType === 1 ? 'WORD_MATCH' : 'SUBSTRING';
+      console.log(`  ${idx + 1}. ${simplified} (${item.charLength} chars) - ${matchTypeLabel} - def: "${firstDef.substring(0, 50)}..."`);
     });
   }
 
-  // Ordenar por score (mayor a menor) y devolver los top N
-  const sortedResults = topCandidates
+  // Devolver top N resultados
+  return candidates
     .slice(0, limit)
     .map(item => formatEntry(item.entry));
-
-  return sortedResults;
-}
-
-/**
- * Calcula relevancia de una entrada del diccionario para una búsqueda en español
- * ESTRATEGIA AGRESIVA: Priorizar traducciones simples y directas
- * @param {Object} entry - Entrada del diccionario
- * @param {string} query - Consulta normalizada
- * @returns {number} Score de relevancia (mayor = más relevante)
- */
-function calculateSpanishRelevance(entry, query) {
-  const definitions = entry.d || entry.definitions_es;
-  if (!definitions || !Array.isArray(definitions)) return 0;
-
-  const simplified = entry.s || entry.simplified;
-  let score = 0;
-
-  // Analizar solo primera definición (las demás son secundarias)
-  const firstDef = definitions[0];
-  if (!firstDef || typeof firstDef !== 'string') return 0;
-
-  const normalizedDef = firstDef.toLowerCase();
-
-  // Limpiar definición de prefijos comunes
-  const cleanDef = normalizedDef
-    .replace(/^\s*\([^)]*\)\s*/, '') // Remover (jerga), (fig.), etc.
-    .replace(/^[^\w\u00C0-\u017F]+/, '') // Remover símbolos iniciales
-    .trim();
-
-  // Dividir definición en segmentos por comas/punto y coma
-  const defSegments = cleanDef.split(/[,;\/\(\)]/).map(s => s.trim()).filter(s => s);
-  const firstSegment = defSegments[0] || '';
-
-  // Extraer PRIMERA PALABRA del primer segmento (no toda la frase)
-  const firstWord = firstSegment.split(/\s+/)[0] || '';
-
-  // === SCORING AGRESIVO ===
-
-  // 🏆 TIER 1: Match EXACTO en primera palabra (+1000)
-  if (firstWord === query) {
-    score += 1000;
-  }
-  // 🏆 TIER 2: Primera palabra EMPIEZA con query (+500)
-  else if (firstWord.startsWith(query)) {
-    score += 500;
-  }
-  // 🏆 TIER 3: Query es la definición completa (+300)
-  else if (cleanDef === query) {
-    score += 300;
-  }
-  // 🥈 TIER 4: Definición EMPIEZA con query (+200)
-  else if (cleanDef.startsWith(query)) {
-    score += 200;
-  }
-  // 🥉 TIER 5: Query aparece como palabra completa (+50)
-  else if (new RegExp(`\\b${query}\\b`).test(cleanDef)) {
-    score += 50;
-  }
-  // TIER 6: Query está en la definición como substring (+10)
-  else if (cleanDef.includes(query)) {
-    score += 10;
-  }
-  // NO MATCH: score = 0
-  else {
-    return 0;
-  }
-
-  // === BONUS POR SIMPLICIDAD (APLICAR ANTES PARA MULTIPLICAR) ===
-
-  if (simplified) {
-    // 🌟 MEGA BONUS: Caracteres chinos MUY simples (1 carácter)
-    if (simplified.length === 1) {
-      score *= 10; // Multiplicar por 10 para priorizar SIEMPRE
-      score += 1000; // Más bonus extra
-    }
-    // 🌟 BONUS: Caracteres simples (2 caracteres)
-    else if (simplified.length === 2) {
-      score *= 3; // Multiplicar por 3
-      score += 300;
-    }
-    // Penalización FUERTE por caracteres largos (3+)
-    else if (simplified.length >= 3) {
-      score *= 0.3; // Reducir a 30%
-    }
-  }
-
-  // === BONUS POR DEFINICIÓN SIMPLE ===
-
-  // BONUS: Definición corta y directa (+100)
-  if (firstDef.length <= 30) {
-    score += 100;
-  }
-  // BONUS: Solo una palabra en la primera parte de la definición (+150)
-  if (defSegments.length === 1 || (defSegments.length === 2 && defSegments[0].split(/\s+/).length === 1)) {
-    score += 150;
-  }
-
-  // === PENALIZACIONES ===
-
-  // PENALIZACIÓN FUERTE: Modismos, jerga, figurativo (-70%)
-  if (/(modismo|jerga|fig\.|lit\.|metáfora|expr\.)/.test(normalizedDef)) {
-    score *= 0.3;
-  }
-
-  // PENALIZACIÓN: Definiciones muy largas (probablemente explicaciones) (-50%)
-  if (firstDef.length > 100) {
-    score *= 0.5;
-  }
-
-  // PENALIZACIÓN: Query aparece con modificadores (no es palabra principal) (-60%)
-  // Ej: "gato carey" cuando buscamos "gato"
-  const queryWithModifier = new RegExp(`\\b${query}\\s+\\w+`, 'i');
-  if (queryWithModifier.test(cleanDef) && !cleanDef.startsWith(query + ',')) {
-    score *= 0.4;
-  }
-
-  return score;
 }
 
 /**
