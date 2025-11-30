@@ -1,0 +1,4149 @@
+{
+  "metadata": {
+    "source": "CC-CEDICT",
+    "entries_count": 198,
+    "language_from": "en",
+    "language_to": "zh"
+  },
+  "entries": [
+    {
+      "traditional": "你好",
+      "simplified": "你好",
+      "pinyin": "nǐ hǎo",
+      "pinyin_tones": "ni3 hao3",
+      "definitions": [
+        "hello",
+        "hi",
+        "how are you?"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "再見",
+      "simplified": "再见",
+      "pinyin": "zài jiàn",
+      "pinyin_tones": "zai4 jian4",
+      "definitions": [
+        "goodbye",
+        "see you again later"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "謝謝",
+      "simplified": "谢谢",
+      "pinyin": "xiè xie",
+      "pinyin_tones": "xie4 xie5",
+      "definitions": [
+        "to thank",
+        "thanks",
+        "thank you"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "不客氣",
+      "simplified": "不客气",
+      "pinyin": "bù kè qi",
+      "pinyin_tones": "bu4 ke4 qi5",
+      "definitions": [
+        "you're welcome",
+        "don't mention it",
+        "impolite"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "對不起",
+      "simplified": "对不起",
+      "pinyin": "duì bu qǐ",
+      "pinyin_tones": "dui4 bu5 qi3",
+      "definitions": [
+        "unworthy",
+        "to let down",
+        "I'm sorry",
+        "excuse me",
+        "pardon me"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "沒關係",
+      "simplified": "没关系",
+      "pinyin": "méi guān xi",
+      "pinyin_tones": "mei2 guan1 xi5",
+      "definitions": [
+        "it doesn't matter"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "請",
+      "simplified": "请",
+      "pinyin": "qǐng",
+      "pinyin_tones": "qing3",
+      "definitions": [
+        "to ask",
+        "to invite",
+        "please (do sth)",
+        "to treat (to a meal etc)",
+        "to request"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "是",
+      "simplified": "是",
+      "pinyin": "shì",
+      "pinyin_tones": "shi4",
+      "definitions": [
+        "is",
+        "are",
+        "am",
+        "yes",
+        "to be"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "不",
+      "simplified": "不",
+      "pinyin": "bù",
+      "pinyin_tones": "bu4",
+      "definitions": [
+        "no",
+        "not"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "好",
+      "simplified": "好",
+      "pinyin": "hǎo",
+      "pinyin_tones": "hao3",
+      "definitions": [
+        "good",
+        "well",
+        "proper",
+        "good to",
+        "easy to",
+        "very",
+        "so"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "大",
+      "simplified": "大",
+      "pinyin": "dà",
+      "pinyin_tones": "da4",
+      "definitions": [
+        "big",
+        "huge",
+        "large",
+        "major",
+        "great",
+        "wide",
+        "deep",
+        "older (than)",
+        "oldest",
+        "eldest",
+        "greatly",
+        "very much"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "小",
+      "simplified": "小",
+      "pinyin": "xiǎo",
+      "pinyin_tones": "xiao3",
+      "definitions": [
+        "small",
+        "tiny",
+        "few",
+        "young"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "中國",
+      "simplified": "中国",
+      "pinyin": "zhōng guó",
+      "pinyin_tones": "Zhong1 guo2",
+      "definitions": [
+        "China"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "美國",
+      "simplified": "美国",
+      "pinyin": "měi guó",
+      "pinyin_tones": "Mei3 guo2",
+      "definitions": [
+        "United States",
+        "USA"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "日本",
+      "simplified": "日本",
+      "pinyin": "rì běn",
+      "pinyin_tones": "Ri4 ben3",
+      "definitions": [
+        "Japan"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "韓國",
+      "simplified": "韩国",
+      "pinyin": "hán guó",
+      "pinyin_tones": "Han2 guo2",
+      "definitions": [
+        "South Korea",
+        "Republic of Korea"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "西班牙",
+      "simplified": "西班牙",
+      "pinyin": "xī bān yá",
+      "pinyin_tones": "Xi1 ban1 ya2",
+      "definitions": [
+        "Spain"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "英國",
+      "simplified": "英国",
+      "pinyin": "yīng guó",
+      "pinyin_tones": "Ying1 guo2",
+      "definitions": [
+        "United Kingdom",
+        "Britain",
+        "England"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "法國",
+      "simplified": "法国",
+      "pinyin": "fǎ guó",
+      "pinyin_tones": "Fa3 guo2",
+      "definitions": [
+        "France"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "德國",
+      "simplified": "德国",
+      "pinyin": "dé guó",
+      "pinyin_tones": "De2 guo2",
+      "definitions": [
+        "Germany"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "我",
+      "simplified": "我",
+      "pinyin": "wǒ",
+      "pinyin_tones": "wo3",
+      "definitions": [
+        "I",
+        "me",
+        "my"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "你",
+      "simplified": "你",
+      "pinyin": "nǐ",
+      "pinyin_tones": "ni3",
+      "definitions": [
+        "you (singular)"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "他",
+      "simplified": "他",
+      "pinyin": "tā",
+      "pinyin_tones": "ta1",
+      "definitions": [
+        "he",
+        "him"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "她",
+      "simplified": "她",
+      "pinyin": "tā",
+      "pinyin_tones": "ta1",
+      "definitions": [
+        "she",
+        "her"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "我們",
+      "simplified": "我们",
+      "pinyin": "wǒ men",
+      "pinyin_tones": "wo3 men5",
+      "definitions": [
+        "we",
+        "us",
+        "ourselves",
+        "our"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "他們",
+      "simplified": "他们",
+      "pinyin": "tā men",
+      "pinyin_tones": "ta1 men5",
+      "definitions": [
+        "they",
+        "them"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "人",
+      "simplified": "人",
+      "pinyin": "rén",
+      "pinyin_tones": "ren2",
+      "definitions": [
+        "man",
+        "person",
+        "people"
+      ],
+      "classifiers": [
+        "個|个,位[wei4]"
+      ]
+    },
+    {
+      "traditional": "男人",
+      "simplified": "男人",
+      "pinyin": "nán rén",
+      "pinyin_tones": "nan2 ren2",
+      "definitions": [
+        "a man",
+        "a male",
+        "men"
+      ],
+      "classifiers": [
+        "個|个"
+      ]
+    },
+    {
+      "traditional": "女人",
+      "simplified": "女人",
+      "pinyin": "nǚ rén",
+      "pinyin_tones": "nv3 ren2",
+      "definitions": [
+        "woman"
+      ],
+      "classifiers": [
+        "個|个,位[wei4]"
+      ]
+    },
+    {
+      "traditional": "孩子",
+      "simplified": "孩子",
+      "pinyin": "hái zi",
+      "pinyin_tones": "hai2 zi5",
+      "definitions": [
+        "child"
+      ],
+      "classifiers": [
+        "個|个"
+      ]
+    },
+    {
+      "traditional": "朋友",
+      "simplified": "朋友",
+      "pinyin": "péng you",
+      "pinyin_tones": "peng2 you5",
+      "definitions": [
+        "friend"
+      ],
+      "classifiers": [
+        "個|个,位[wei4]"
+      ]
+    },
+    {
+      "traditional": "家",
+      "simplified": "家",
+      "pinyin": "jiā",
+      "pinyin_tones": "jia1",
+      "definitions": [
+        "home",
+        "family",
+        "household"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "家人",
+      "simplified": "家人",
+      "pinyin": "jiā rén",
+      "pinyin_tones": "jia1 ren2",
+      "definitions": [
+        "household",
+        "family",
+        "family members"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "父親",
+      "simplified": "父亲",
+      "pinyin": "fù qīn",
+      "pinyin_tones": "fu4 qin1",
+      "definitions": [
+        "father"
+      ],
+      "classifiers": [
+        "個|个"
+      ]
+    },
+    {
+      "traditional": "母親",
+      "simplified": "母亲",
+      "pinyin": "mǔ qīn",
+      "pinyin_tones": "mu3 qin1",
+      "definitions": [
+        "mother"
+      ],
+      "classifiers": [
+        "個|个"
+      ]
+    },
+    {
+      "traditional": "爸爸",
+      "simplified": "爸爸",
+      "pinyin": "bà ba",
+      "pinyin_tones": "ba4 ba5",
+      "definitions": [
+        "father",
+        "dad",
+        "papa"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "媽媽",
+      "simplified": "妈妈",
+      "pinyin": "mā ma",
+      "pinyin_tones": "ma1 ma5",
+      "definitions": [
+        "mama",
+        "mommy",
+        "mother"
+      ],
+      "classifiers": [
+        "個|个,位[wei4]"
+      ]
+    },
+    {
+      "traditional": "哥哥",
+      "simplified": "哥哥",
+      "pinyin": "gē ge",
+      "pinyin_tones": "ge1 ge5",
+      "definitions": [
+        "older brother"
+      ],
+      "classifiers": [
+        "個|个,位[wei4]"
+      ]
+    },
+    {
+      "traditional": "姐姐",
+      "simplified": "姐姐",
+      "pinyin": "jiě jie",
+      "pinyin_tones": "jie3 jie5",
+      "definitions": [
+        "older sister"
+      ],
+      "classifiers": [
+        "個|个,位[wei4]"
+      ]
+    },
+    {
+      "traditional": "弟弟",
+      "simplified": "弟弟",
+      "pinyin": "dì di",
+      "pinyin_tones": "di4 di5",
+      "definitions": [
+        "younger brother"
+      ],
+      "classifiers": [
+        "個|个,位[wei4]"
+      ]
+    },
+    {
+      "traditional": "妹妹",
+      "simplified": "妹妹",
+      "pinyin": "mèi mei",
+      "pinyin_tones": "mei4 mei5",
+      "definitions": [
+        "younger sister"
+      ],
+      "classifiers": [
+        "個|个,位[wei4]"
+      ]
+    },
+    {
+      "traditional": "老師",
+      "simplified": "老师",
+      "pinyin": "lǎo shī",
+      "pinyin_tones": "lao3 shi1",
+      "definitions": [
+        "teacher"
+      ],
+      "classifiers": [
+        "個|个,位[wei4]"
+      ]
+    },
+    {
+      "traditional": "學生",
+      "simplified": "学生",
+      "pinyin": "xué shēng",
+      "pinyin_tones": "xue2 sheng1",
+      "definitions": [
+        "student",
+        "schoolchild"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "學校",
+      "simplified": "学校",
+      "pinyin": "xué xiào",
+      "pinyin_tones": "xue2 xiao4",
+      "definitions": [
+        "school"
+      ],
+      "classifiers": [
+        "所[suo3]"
+      ]
+    },
+    {
+      "traditional": "大學",
+      "simplified": "大学",
+      "pinyin": "dà xué",
+      "pinyin_tones": "da4 xue2",
+      "definitions": [
+        "university",
+        "college"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "書",
+      "simplified": "书",
+      "pinyin": "shū",
+      "pinyin_tones": "shu1",
+      "definitions": [
+        "book",
+        "letter",
+        "document"
+      ],
+      "classifiers": [
+        "本[ben3],冊|册[ce4],部[bu4]"
+      ]
+    },
+    {
+      "traditional": "筆",
+      "simplified": "笔",
+      "pinyin": "bǐ",
+      "pinyin_tones": "bi3",
+      "definitions": [
+        "pen",
+        "pencil",
+        "writing brush",
+        "to write or compose"
+      ],
+      "classifiers": [
+        "支[zhi1],枝[zhi1]"
+      ]
+    },
+    {
+      "traditional": "紙",
+      "simplified": "纸",
+      "pinyin": "zhǐ",
+      "pinyin_tones": "zhi3",
+      "definitions": [
+        "paper"
+      ],
+      "classifiers": [
+        "張|张[zhang1],沓[da2]"
+      ]
+    },
+    {
+      "traditional": "水",
+      "simplified": "水",
+      "pinyin": "shuǐ",
+      "pinyin_tones": "shui3",
+      "definitions": [
+        "water",
+        "river",
+        "liquid",
+        "beverage"
+      ],
+      "classifiers": [
+        "滴[di1],杯[bei1]"
+      ]
+    },
+    {
+      "traditional": "茶",
+      "simplified": "茶",
+      "pinyin": "chá",
+      "pinyin_tones": "cha2",
+      "definitions": [
+        "tea",
+        "tea plant"
+      ],
+      "classifiers": [
+        "杯[bei1],壺|壶[hu2]"
+      ]
+    },
+    {
+      "traditional": "咖啡",
+      "simplified": "咖啡",
+      "pinyin": "kā fēi",
+      "pinyin_tones": "ka1 fei1",
+      "definitions": [
+        "coffee"
+      ],
+      "classifiers": [
+        "杯[bei1]"
+      ]
+    },
+    {
+      "traditional": "飯",
+      "simplified": "饭",
+      "pinyin": "fàn",
+      "pinyin_tones": "fan4",
+      "definitions": [
+        "food",
+        "cuisine",
+        "cooked rice",
+        "meal"
+      ],
+      "classifiers": [
+        "碗[wan3],頓|顿[dun4]"
+      ]
+    },
+    {
+      "traditional": "米飯",
+      "simplified": "米饭",
+      "pinyin": "mǐ fàn",
+      "pinyin_tones": "mi3 fan4",
+      "definitions": [
+        "cooked rice"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "麵",
+      "simplified": "面",
+      "pinyin": "miàn",
+      "pinyin_tones": "mian4",
+      "definitions": [
+        "flour",
+        "noodles"
+      ],
+      "classifiers": [
+        "條|条[tiao2]"
+      ]
+    },
+    {
+      "traditional": "麵包",
+      "simplified": "面包",
+      "pinyin": "miàn bāo",
+      "pinyin_tones": "mian4 bao1",
+      "definitions": [
+        "bread"
+      ],
+      "classifiers": [
+        "片[pian4],袋[dai4],塊|块[kuai4]"
+      ]
+    },
+    {
+      "traditional": "肉",
+      "simplified": "肉",
+      "pinyin": "ròu",
+      "pinyin_tones": "rou4",
+      "definitions": [
+        "meat",
+        "flesh",
+        "pulp (of a fruit)"
+      ],
+      "classifiers": [
+        "塊|块[kuai4]"
+      ]
+    },
+    {
+      "traditional": "魚",
+      "simplified": "鱼",
+      "pinyin": "yú",
+      "pinyin_tones": "yu2",
+      "definitions": [
+        "fish"
+      ],
+      "classifiers": [
+        "條|条[tiao2],尾[wei3]"
+      ]
+    },
+    {
+      "traditional": "雞",
+      "simplified": "鸡",
+      "pinyin": "jī",
+      "pinyin_tones": "ji1",
+      "definitions": [
+        "chicken"
+      ],
+      "classifiers": [
+        "隻|只[zhi1]"
+      ]
+    },
+    {
+      "traditional": "蔬菜",
+      "simplified": "蔬菜",
+      "pinyin": "shū cài",
+      "pinyin_tones": "shu1 cai4",
+      "definitions": [
+        "vegetables"
+      ],
+      "classifiers": [
+        "種|种[zhong3]"
+      ]
+    },
+    {
+      "traditional": "水果",
+      "simplified": "水果",
+      "pinyin": "shuǐ guǒ",
+      "pinyin_tones": "shui3 guo3",
+      "definitions": [
+        "fruit"
+      ],
+      "classifiers": [
+        "個|个"
+      ]
+    },
+    {
+      "traditional": "蘋果",
+      "simplified": "苹果",
+      "pinyin": "píng guǒ",
+      "pinyin_tones": "ping2 guo3",
+      "definitions": [
+        "apple"
+      ],
+      "classifiers": [
+        "個|个,顆|颗[ke1]"
+      ]
+    },
+    {
+      "traditional": "香蕉",
+      "simplified": "香蕉",
+      "pinyin": "xiāng jiāo",
+      "pinyin_tones": "xiang1 jiao1",
+      "definitions": [
+        "banana"
+      ],
+      "classifiers": [
+        "枝[zhi1],根[gen1],個|个,把[ba3]"
+      ]
+    },
+    {
+      "traditional": "一",
+      "simplified": "一",
+      "pinyin": "yī",
+      "pinyin_tones": "yi1",
+      "definitions": [
+        "one",
+        "single",
+        "a (article)"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "二",
+      "simplified": "二",
+      "pinyin": "èr",
+      "pinyin_tones": "er4",
+      "definitions": [
+        "two",
+        "2",
+        "stupid (Beijing dialect)"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "三",
+      "simplified": "三",
+      "pinyin": "sān",
+      "pinyin_tones": "san1",
+      "definitions": [
+        "three",
+        "3"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "四",
+      "simplified": "四",
+      "pinyin": "sì",
+      "pinyin_tones": "si4",
+      "definitions": [
+        "four",
+        "4"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "五",
+      "simplified": "五",
+      "pinyin": "wǔ",
+      "pinyin_tones": "wu3",
+      "definitions": [
+        "five",
+        "5"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "六",
+      "simplified": "六",
+      "pinyin": "liù",
+      "pinyin_tones": "liu4",
+      "definitions": [
+        "six",
+        "6"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "七",
+      "simplified": "七",
+      "pinyin": "qī",
+      "pinyin_tones": "qi1",
+      "definitions": [
+        "seven",
+        "7"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "八",
+      "simplified": "八",
+      "pinyin": "bā",
+      "pinyin_tones": "ba1",
+      "definitions": [
+        "eight",
+        "8"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "九",
+      "simplified": "九",
+      "pinyin": "jiǔ",
+      "pinyin_tones": "jiu3",
+      "definitions": [
+        "nine",
+        "9"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "十",
+      "simplified": "十",
+      "pinyin": "shí",
+      "pinyin_tones": "shi2",
+      "definitions": [
+        "ten",
+        "10"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "百",
+      "simplified": "百",
+      "pinyin": "bǎi",
+      "pinyin_tones": "bai3",
+      "definitions": [
+        "hundred",
+        "numerous",
+        "all kinds of"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "千",
+      "simplified": "千",
+      "pinyin": "qiān",
+      "pinyin_tones": "qian1",
+      "definitions": [
+        "thousand"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "萬",
+      "simplified": "万",
+      "pinyin": "wàn",
+      "pinyin_tones": "wan4",
+      "definitions": [
+        "ten thousand",
+        "myriad"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "今天",
+      "simplified": "今天",
+      "pinyin": "jīn tiān",
+      "pinyin_tones": "jin1 tian1",
+      "definitions": [
+        "today",
+        "at the present",
+        "now"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "明天",
+      "simplified": "明天",
+      "pinyin": "míng tiān",
+      "pinyin_tones": "ming2 tian1",
+      "definitions": [
+        "tomorrow"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "昨天",
+      "simplified": "昨天",
+      "pinyin": "zuó tiān",
+      "pinyin_tones": "zuo2 tian1",
+      "definitions": [
+        "yesterday"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "年",
+      "simplified": "年",
+      "pinyin": "nián",
+      "pinyin_tones": "nian2",
+      "definitions": [
+        "year"
+      ],
+      "classifiers": [
+        "個|个"
+      ]
+    },
+    {
+      "traditional": "月",
+      "simplified": "月",
+      "pinyin": "yuè",
+      "pinyin_tones": "yue4",
+      "definitions": [
+        "moon",
+        "month"
+      ],
+      "classifiers": [
+        "個|个,輪|轮[lun2]"
+      ]
+    },
+    {
+      "traditional": "日",
+      "simplified": "日",
+      "pinyin": "rì",
+      "pinyin_tones": "ri4",
+      "definitions": [
+        "sun",
+        "day",
+        "date, day of the month"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "星期",
+      "simplified": "星期",
+      "pinyin": "xīng qī",
+      "pinyin_tones": "xing1 qi1",
+      "definitions": [
+        "week"
+      ],
+      "classifiers": [
+        "個|个"
+      ]
+    },
+    {
+      "traditional": "時間",
+      "simplified": "时间",
+      "pinyin": "shí jiān",
+      "pinyin_tones": "shi2 jian1",
+      "definitions": [
+        "time",
+        "period"
+      ],
+      "classifiers": [
+        "段[duan4]"
+      ]
+    },
+    {
+      "traditional": "小時",
+      "simplified": "小时",
+      "pinyin": "xiǎo shí",
+      "pinyin_tones": "xiao3 shi2",
+      "definitions": [
+        "hour"
+      ],
+      "classifiers": [
+        "個|个"
+      ]
+    },
+    {
+      "traditional": "分鐘",
+      "simplified": "分钟",
+      "pinyin": "fēn zhōng",
+      "pinyin_tones": "fen1 zhong1",
+      "definitions": [
+        "minute"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "秒",
+      "simplified": "秒",
+      "pinyin": "miǎo",
+      "pinyin_tones": "miao3",
+      "definitions": [
+        "second (of time)"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "早上",
+      "simplified": "早上",
+      "pinyin": "zǎo shang",
+      "pinyin_tones": "zao3 shang5",
+      "definitions": [
+        "early morning"
+      ],
+      "classifiers": [
+        "個|个"
+      ]
+    },
+    {
+      "traditional": "中午",
+      "simplified": "中午",
+      "pinyin": "zhōng wǔ",
+      "pinyin_tones": "zhong1 wu3",
+      "definitions": [
+        "noon",
+        "midday"
+      ],
+      "classifiers": [
+        "個|个"
+      ]
+    },
+    {
+      "traditional": "下午",
+      "simplified": "下午",
+      "pinyin": "xià wǔ",
+      "pinyin_tones": "xia4 wu3",
+      "definitions": [
+        "afternoon",
+        "p.m."
+      ],
+      "classifiers": [
+        "個|个"
+      ]
+    },
+    {
+      "traditional": "晚上",
+      "simplified": "晚上",
+      "pinyin": "wǎn shang",
+      "pinyin_tones": "wan3 shang5",
+      "definitions": [
+        "evening",
+        "night"
+      ],
+      "classifiers": [
+        "個|个"
+      ]
+    },
+    {
+      "traditional": "紅",
+      "simplified": "红",
+      "pinyin": "hóng",
+      "pinyin_tones": "hong2",
+      "definitions": [
+        "red",
+        "popular",
+        "revolutionary",
+        "bonus"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "藍",
+      "simplified": "蓝",
+      "pinyin": "lán",
+      "pinyin_tones": "lan2",
+      "definitions": [
+        "blue",
+        "indigo plant"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "綠",
+      "simplified": "绿",
+      "pinyin": "lǜ",
+      "pinyin_tones": "lv4",
+      "definitions": [
+        "green"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "黃",
+      "simplified": "黄",
+      "pinyin": "huáng",
+      "pinyin_tones": "huang2",
+      "definitions": [
+        "yellow",
+        "pornographic"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "白",
+      "simplified": "白",
+      "pinyin": "bái",
+      "pinyin_tones": "bai2",
+      "definitions": [
+        "white",
+        "snowy",
+        "pure",
+        "bright",
+        "empty",
+        "blank",
+        "plain"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "黑",
+      "simplified": "黑",
+      "pinyin": "hēi",
+      "pinyin_tones": "hei1",
+      "definitions": [
+        "black",
+        "dark",
+        "sinister"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "貓",
+      "simplified": "猫",
+      "pinyin": "māo",
+      "pinyin_tones": "mao1",
+      "definitions": [
+        "cat"
+      ],
+      "classifiers": [
+        "隻|只[zhi1]"
+      ]
+    },
+    {
+      "traditional": "狗",
+      "simplified": "狗",
+      "pinyin": "gǒu",
+      "pinyin_tones": "gou3",
+      "definitions": [
+        "dog"
+      ],
+      "classifiers": [
+        "隻|只[zhi1],條|条[tiao2]"
+      ]
+    },
+    {
+      "traditional": "鳥",
+      "simplified": "鸟",
+      "pinyin": "niǎo",
+      "pinyin_tones": "niao3",
+      "definitions": [
+        "bird"
+      ],
+      "classifiers": [
+        "隻|只[zhi1],群[qun2]"
+      ]
+    },
+    {
+      "traditional": "馬",
+      "simplified": "马",
+      "pinyin": "mǎ",
+      "pinyin_tones": "ma3",
+      "definitions": [
+        "horse"
+      ],
+      "classifiers": [
+        "匹[pi3]"
+      ]
+    },
+    {
+      "traditional": "牛",
+      "simplified": "牛",
+      "pinyin": "niú",
+      "pinyin_tones": "niu2",
+      "definitions": [
+        "ox",
+        "cow",
+        "bull"
+      ],
+      "classifiers": [
+        "條|条[tiao2],頭|头[tou2]"
+      ]
+    },
+    {
+      "traditional": "豬",
+      "simplified": "猪",
+      "pinyin": "zhū",
+      "pinyin_tones": "zhu1",
+      "definitions": [
+        "pig",
+        "hog"
+      ],
+      "classifiers": [
+        "口[kou3],頭|头[tou2]"
+      ]
+    },
+    {
+      "traditional": "羊",
+      "simplified": "羊",
+      "pinyin": "yáng",
+      "pinyin_tones": "yang2",
+      "definitions": [
+        "sheep",
+        "goat"
+      ],
+      "classifiers": [
+        "頭|头[tou2],隻|只[zhi1]"
+      ]
+    },
+    {
+      "traditional": "龍",
+      "simplified": "龙",
+      "pinyin": "lóng",
+      "pinyin_tones": "long2",
+      "definitions": [
+        "dragon"
+      ],
+      "classifiers": [
+        "條|条[tiao2]"
+      ]
+    },
+    {
+      "traditional": "虎",
+      "simplified": "虎",
+      "pinyin": "hǔ",
+      "pinyin_tones": "hu3",
+      "definitions": [
+        "tiger"
+      ],
+      "classifiers": [
+        "隻|只[zhi1]"
+      ]
+    },
+    {
+      "traditional": "兔",
+      "simplified": "兔",
+      "pinyin": "tù",
+      "pinyin_tones": "tu4",
+      "definitions": [
+        "rabbit"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "蛇",
+      "simplified": "蛇",
+      "pinyin": "shé",
+      "pinyin_tones": "she2",
+      "definitions": [
+        "snake",
+        "serpent"
+      ],
+      "classifiers": [
+        "條|条[tiao2]"
+      ]
+    },
+    {
+      "traditional": "愛",
+      "simplified": "爱",
+      "pinyin": "ài",
+      "pinyin_tones": "ai4",
+      "definitions": [
+        "to love",
+        "to be fond of",
+        "to like",
+        "affection"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "喜歡",
+      "simplified": "喜欢",
+      "pinyin": "xǐ huan",
+      "pinyin_tones": "xi3 huan5",
+      "definitions": [
+        "to like",
+        "to be fond of"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "想",
+      "simplified": "想",
+      "pinyin": "xiǎng",
+      "pinyin_tones": "xiang3",
+      "definitions": [
+        "to think",
+        "to believe",
+        "to suppose",
+        "to wish",
+        "to want",
+        "to miss (feel wistful about the absence of sb or sth)"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "要",
+      "simplified": "要",
+      "pinyin": "yào",
+      "pinyin_tones": "yao4",
+      "definitions": [
+        "to want",
+        "to need",
+        "must",
+        "important"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "知道",
+      "simplified": "知道",
+      "pinyin": "zhī dào",
+      "pinyin_tones": "zhi1 dao4",
+      "definitions": [
+        "to know",
+        "to become aware of",
+        "also pr. [zhi1 dao5]"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "說",
+      "simplified": "说",
+      "pinyin": "shuō",
+      "pinyin_tones": "shuo1",
+      "definitions": [
+        "to speak",
+        "to say",
+        "to explain"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "聽",
+      "simplified": "听",
+      "pinyin": "tīng",
+      "pinyin_tones": "ting1",
+      "definitions": [
+        "to listen",
+        "to hear",
+        "to obey"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "看",
+      "simplified": "看",
+      "pinyin": "kàn",
+      "pinyin_tones": "kan4",
+      "definitions": [
+        "to see",
+        "to look at",
+        "to read",
+        "to watch"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "寫",
+      "simplified": "写",
+      "pinyin": "xiě",
+      "pinyin_tones": "xie3",
+      "definitions": [
+        "to write"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "讀",
+      "simplified": "读",
+      "pinyin": "dú",
+      "pinyin_tones": "du2",
+      "definitions": [
+        "to read",
+        "to study"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "學",
+      "simplified": "学",
+      "pinyin": "xué",
+      "pinyin_tones": "xue2",
+      "definitions": [
+        "to learn",
+        "to study"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "教",
+      "simplified": "教",
+      "pinyin": "jiāo",
+      "pinyin_tones": "jiao1",
+      "definitions": [
+        "to teach",
+        "to instruct"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "吃",
+      "simplified": "吃",
+      "pinyin": "chī",
+      "pinyin_tones": "chi1",
+      "definitions": [
+        "to eat",
+        "to consume"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "喝",
+      "simplified": "喝",
+      "pinyin": "hē",
+      "pinyin_tones": "he1",
+      "definitions": [
+        "to drink"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "走",
+      "simplified": "走",
+      "pinyin": "zǒu",
+      "pinyin_tones": "zou3",
+      "definitions": [
+        "to walk",
+        "to go",
+        "to run",
+        "to move"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "跑",
+      "simplified": "跑",
+      "pinyin": "pǎo",
+      "pinyin_tones": "pao3",
+      "definitions": [
+        "to run",
+        "to run away",
+        "to escape"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "來",
+      "simplified": "来",
+      "pinyin": "lái",
+      "pinyin_tones": "lai2",
+      "definitions": [
+        "to come",
+        "to arrive"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "去",
+      "simplified": "去",
+      "pinyin": "qù",
+      "pinyin_tones": "qu4",
+      "definitions": [
+        "to go",
+        "to go to"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "回",
+      "simplified": "回",
+      "pinyin": "huí",
+      "pinyin_tones": "hui2",
+      "definitions": [
+        "to return",
+        "to go back"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "坐",
+      "simplified": "坐",
+      "pinyin": "zuò",
+      "pinyin_tones": "zuo4",
+      "definitions": [
+        "to sit",
+        "to take a seat"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "站",
+      "simplified": "站",
+      "pinyin": "zhàn",
+      "pinyin_tones": "zhan4",
+      "definitions": [
+        "to stand",
+        "station"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "睡覺",
+      "simplified": "睡觉",
+      "pinyin": "shuì jiào",
+      "pinyin_tones": "shui4 jiao4",
+      "definitions": [
+        "to go to bed",
+        "to sleep"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "起床",
+      "simplified": "起床",
+      "pinyin": "qǐ chuáng",
+      "pinyin_tones": "qi3 chuang2",
+      "definitions": [
+        "to get up",
+        "to leave bed"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "工作",
+      "simplified": "工作",
+      "pinyin": "gōng zuò",
+      "pinyin_tones": "gong1 zuo4",
+      "definitions": [
+        "to work",
+        "work",
+        "job"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "買",
+      "simplified": "买",
+      "pinyin": "mǎi",
+      "pinyin_tones": "mai3",
+      "definitions": [
+        "to buy",
+        "to purchase"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "賣",
+      "simplified": "卖",
+      "pinyin": "mài",
+      "pinyin_tones": "mai4",
+      "definitions": [
+        "to sell"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "錢",
+      "simplified": "钱",
+      "pinyin": "qián",
+      "pinyin_tones": "qian2",
+      "definitions": [
+        "coin",
+        "money"
+      ],
+      "classifiers": [
+        "筆|笔[bi3]"
+      ]
+    },
+    {
+      "traditional": "電話",
+      "simplified": "电话",
+      "pinyin": "diàn huà",
+      "pinyin_tones": "dian4 hua4",
+      "definitions": [
+        "telephone",
+        "phone call"
+      ],
+      "classifiers": [
+        "部[bu4],通[tong1]"
+      ]
+    },
+    {
+      "traditional": "電腦",
+      "simplified": "电脑",
+      "pinyin": "diàn nǎo",
+      "pinyin_tones": "dian4 nao3",
+      "definitions": [
+        "computer"
+      ],
+      "classifiers": [
+        "臺|台[tai2]"
+      ]
+    },
+    {
+      "traditional": "手機",
+      "simplified": "手机",
+      "pinyin": "shǒu jī",
+      "pinyin_tones": "shou3 ji1",
+      "definitions": [
+        "cell phone",
+        "mobile phone"
+      ],
+      "classifiers": [
+        "部[bu4],支[zhi1]"
+      ]
+    },
+    {
+      "traditional": "互聯網",
+      "simplified": "互联网",
+      "pinyin": "hù lián wǎng",
+      "pinyin_tones": "Hu4 lian2 wang3",
+      "definitions": [
+        "Internet"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "網站",
+      "simplified": "网站",
+      "pinyin": "wǎng zhàn",
+      "pinyin_tones": "wang3 zhan4",
+      "definitions": [
+        "website",
+        "network station"
+      ],
+      "classifiers": [
+        "個|个"
+      ]
+    },
+    {
+      "traditional": "電影",
+      "simplified": "电影",
+      "pinyin": "diàn yǐng",
+      "pinyin_tones": "dian4 ying3",
+      "definitions": [
+        "movie",
+        "film"
+      ],
+      "classifiers": [
+        "部[bu4],片[pian4],幕[mu4],場|场[chang3]"
+      ]
+    },
+    {
+      "traditional": "音樂",
+      "simplified": "音乐",
+      "pinyin": "yīn yuè",
+      "pinyin_tones": "yin1 yue4",
+      "definitions": [
+        "music"
+      ],
+      "classifiers": [
+        "張|张[zhang1],曲[qu3],段[duan4]"
+      ]
+    },
+    {
+      "traditional": "漂亮",
+      "simplified": "漂亮",
+      "pinyin": "piào liang",
+      "pinyin_tones": "piao4 liang5",
+      "definitions": [
+        "pretty",
+        "beautiful"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "好看",
+      "simplified": "好看",
+      "pinyin": "hǎo kàn",
+      "pinyin_tones": "hao3 kan4",
+      "definitions": [
+        "good-looking",
+        "nice-looking"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "可愛",
+      "simplified": "可爱",
+      "pinyin": "kě ài",
+      "pinyin_tones": "ke3 ai4",
+      "definitions": [
+        "adorable",
+        "cute",
+        "lovely"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "快",
+      "simplified": "快",
+      "pinyin": "kuài",
+      "pinyin_tones": "kuai4",
+      "definitions": [
+        "quick",
+        "fast",
+        "swift",
+        "rapid"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "慢",
+      "simplified": "慢",
+      "pinyin": "màn",
+      "pinyin_tones": "man4",
+      "definitions": [
+        "slow"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "高",
+      "simplified": "高",
+      "pinyin": "gāo",
+      "pinyin_tones": "gao1",
+      "definitions": [
+        "high",
+        "tall",
+        "lofty"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "矮",
+      "simplified": "矮",
+      "pinyin": "ǎi",
+      "pinyin_tones": "ai3",
+      "definitions": [
+        "low",
+        "short (in stature)"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "胖",
+      "simplified": "胖",
+      "pinyin": "pàng",
+      "pinyin_tones": "pang4",
+      "definitions": [
+        "fat",
+        "plump"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "瘦",
+      "simplified": "瘦",
+      "pinyin": "shòu",
+      "pinyin_tones": "shou4",
+      "definitions": [
+        "thin",
+        "to lose weight"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "冷",
+      "simplified": "冷",
+      "pinyin": "lěng",
+      "pinyin_tones": "leng3",
+      "definitions": [
+        "cold"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "熱",
+      "simplified": "热",
+      "pinyin": "rè",
+      "pinyin_tones": "re4",
+      "definitions": [
+        "to heat",
+        "hot (of weather)",
+        "warm up"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "天氣",
+      "simplified": "天气",
+      "pinyin": "tiān qì",
+      "pinyin_tones": "tian1 qi4",
+      "definitions": [
+        "weather"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "下雨",
+      "simplified": "下雨",
+      "pinyin": "xià yǔ",
+      "pinyin_tones": "xia4 yu3",
+      "definitions": [
+        "to rain",
+        "rainy"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "下雪",
+      "simplified": "下雪",
+      "pinyin": "xià xuě",
+      "pinyin_tones": "xia4 xue3",
+      "definitions": [
+        "to snow"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "風",
+      "simplified": "风",
+      "pinyin": "fēng",
+      "pinyin_tones": "feng1",
+      "definitions": [
+        "wind",
+        "news",
+        "style",
+        "custom"
+      ],
+      "classifiers": [
+        "陣|阵[zhen4],絲|丝[si1]"
+      ]
+    },
+    {
+      "traditional": "太陽",
+      "simplified": "太阳",
+      "pinyin": "tài yáng",
+      "pinyin_tones": "tai4 yang2",
+      "definitions": [
+        "sun"
+      ],
+      "classifiers": [
+        "個|个"
+      ]
+    },
+    {
+      "traditional": "月亮",
+      "simplified": "月亮",
+      "pinyin": "yuè liang",
+      "pinyin_tones": "yue4 liang5",
+      "definitions": [
+        "the moon"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "星星",
+      "simplified": "星星",
+      "pinyin": "xīng xing",
+      "pinyin_tones": "xing1 xing5",
+      "definitions": [
+        "star (in the sky)"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "東",
+      "simplified": "东",
+      "pinyin": "dōng",
+      "pinyin_tones": "dong1",
+      "definitions": [
+        "east",
+        "host (i.e. sitting on east side of guest)",
+        "landlord"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "西",
+      "simplified": "西",
+      "pinyin": "xī",
+      "pinyin_tones": "xi1",
+      "definitions": [
+        "west"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "南",
+      "simplified": "南",
+      "pinyin": "nán",
+      "pinyin_tones": "nan2",
+      "definitions": [
+        "south"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "北",
+      "simplified": "北",
+      "pinyin": "běi",
+      "pinyin_tones": "bei3",
+      "definitions": [
+        "north"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "左",
+      "simplified": "左",
+      "pinyin": "zuǒ",
+      "pinyin_tones": "zuo3",
+      "definitions": [
+        "left"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "右",
+      "simplified": "右",
+      "pinyin": "yòu",
+      "pinyin_tones": "you4",
+      "definitions": [
+        "right"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "上",
+      "simplified": "上",
+      "pinyin": "shàng",
+      "pinyin_tones": "shang4",
+      "definitions": [
+        "on top",
+        "upon",
+        "above",
+        "upper",
+        "previous"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "下",
+      "simplified": "下",
+      "pinyin": "xià",
+      "pinyin_tones": "xia4",
+      "definitions": [
+        "down",
+        "downwards",
+        "below",
+        "lower"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "前",
+      "simplified": "前",
+      "pinyin": "qián",
+      "pinyin_tones": "qian2",
+      "definitions": [
+        "front",
+        "forward",
+        "ago",
+        "before"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "後",
+      "simplified": "后",
+      "pinyin": "hòu",
+      "pinyin_tones": "hou4",
+      "definitions": [
+        "back",
+        "behind",
+        "rear",
+        "afterwards"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "裡",
+      "simplified": "里",
+      "pinyin": "lǐ",
+      "pinyin_tones": "li3",
+      "definitions": [
+        "inside",
+        "interior"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "外",
+      "simplified": "外",
+      "pinyin": "wài",
+      "pinyin_tones": "wai4",
+      "definitions": [
+        "outside",
+        "in addition",
+        "foreign",
+        "external"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "這",
+      "simplified": "这",
+      "pinyin": "zhè",
+      "pinyin_tones": "zhe4",
+      "definitions": [
+        "this",
+        "these"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "那",
+      "simplified": "那",
+      "pinyin": "nà",
+      "pinyin_tones": "na4",
+      "definitions": [
+        "that",
+        "those"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "什麼",
+      "simplified": "什么",
+      "pinyin": "shén me",
+      "pinyin_tones": "shen2 me5",
+      "definitions": [
+        "what?",
+        "something"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "誰",
+      "simplified": "谁",
+      "pinyin": "shuí",
+      "pinyin_tones": "shui2",
+      "definitions": [
+        "who",
+        "someone"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "哪",
+      "simplified": "哪",
+      "pinyin": "nǎ",
+      "pinyin_tones": "na3",
+      "definitions": [
+        "which",
+        "how"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "哪裡",
+      "simplified": "哪里",
+      "pinyin": "nǎ lǐ",
+      "pinyin_tones": "na3 li3",
+      "definitions": [
+        "where?",
+        "somewhere",
+        "anywhere"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "怎麼",
+      "simplified": "怎么",
+      "pinyin": "zěn me",
+      "pinyin_tones": "zen3 me5",
+      "definitions": [
+        "how",
+        "what",
+        "why"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "為什麼",
+      "simplified": "为什么",
+      "pinyin": "wèi shén me",
+      "pinyin_tones": "wei4 shen2 me5",
+      "definitions": [
+        "why?",
+        "for what reason?"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "多少",
+      "simplified": "多少",
+      "pinyin": "duō shǎo",
+      "pinyin_tones": "duo1 shao3",
+      "definitions": [
+        "how much",
+        "how many"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "幾",
+      "simplified": "几",
+      "pinyin": "jǐ",
+      "pinyin_tones": "ji3",
+      "definitions": [
+        "how much",
+        "how many"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "很",
+      "simplified": "很",
+      "pinyin": "hěn",
+      "pinyin_tones": "hen3",
+      "definitions": [
+        "very",
+        "quite",
+        "awfully"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "非常",
+      "simplified": "非常",
+      "pinyin": "fēi cháng",
+      "pinyin_tones": "fei1 chang2",
+      "definitions": [
+        "very",
+        "very much",
+        "unusual",
+        "extraordinary"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "太",
+      "simplified": "太",
+      "pinyin": "tài",
+      "pinyin_tones": "tai4",
+      "definitions": [
+        "too (much)",
+        "very",
+        "extremely"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "真",
+      "simplified": "真",
+      "pinyin": "zhēn",
+      "pinyin_tones": "zhen1",
+      "definitions": [
+        "really",
+        "truly",
+        "indeed",
+        "real",
+        "true"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "都",
+      "simplified": "都",
+      "pinyin": "dōu",
+      "pinyin_tones": "dou1",
+      "definitions": [
+        "all",
+        "both",
+        "entirely",
+        "even"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "也",
+      "simplified": "也",
+      "pinyin": "yě",
+      "pinyin_tones": "ye3",
+      "definitions": [
+        "also",
+        "too"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "還",
+      "simplified": "还",
+      "pinyin": "hái",
+      "pinyin_tones": "hai2",
+      "definitions": [
+        "still",
+        "yet",
+        "also",
+        "fairly"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "又",
+      "simplified": "又",
+      "pinyin": "yòu",
+      "pinyin_tones": "you4",
+      "definitions": [
+        "again",
+        "also",
+        "both... and..."
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "和",
+      "simplified": "和",
+      "pinyin": "hé",
+      "pinyin_tones": "he2",
+      "definitions": [
+        "and",
+        "together with",
+        "with",
+        "sum",
+        "union"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "在",
+      "simplified": "在",
+      "pinyin": "zài",
+      "pinyin_tones": "zai4",
+      "definitions": [
+        "at",
+        "in",
+        "to exist"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "有",
+      "simplified": "有",
+      "pinyin": "yǒu",
+      "pinyin_tones": "you3",
+      "definitions": [
+        "to have",
+        "there is",
+        "there are"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "沒有",
+      "simplified": "没有",
+      "pinyin": "méi yǒu",
+      "pinyin_tones": "mei2 you3",
+      "definitions": [
+        "haven't",
+        "hasn't",
+        "doesn't exist",
+        "without"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "能",
+      "simplified": "能",
+      "pinyin": "néng",
+      "pinyin_tones": "neng2",
+      "definitions": [
+        "can",
+        "to be able to",
+        "might possibly"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "會",
+      "simplified": "会",
+      "pinyin": "huì",
+      "pinyin_tones": "hui4",
+      "definitions": [
+        "can",
+        "to be possible",
+        "to be able to"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "可以",
+      "simplified": "可以",
+      "pinyin": "kě yǐ",
+      "pinyin_tones": "ke3 yi3",
+      "definitions": [
+        "can",
+        "may",
+        "possible",
+        "able to"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "應該",
+      "simplified": "应该",
+      "pinyin": "yīng gāi",
+      "pinyin_tones": "ying1 gai1",
+      "definitions": [
+        "ought to",
+        "should",
+        "must"
+      ],
+      "classifiers": []
+    },
+    {
+      "traditional": "必須",
+      "simplified": "必须",
+      "pinyin": "bì xū",
+      "pinyin_tones": "bi4 xu1",
+      "definitions": [
+        "to have to",
+        "must"
+      ],
+      "classifiers": []
+    }
+  ],
+  "index": {
+    "by_simplified": {
+      "你好": [
+        0
+      ],
+      "再见": [
+        1
+      ],
+      "谢谢": [
+        2
+      ],
+      "不客气": [
+        3
+      ],
+      "对不起": [
+        4
+      ],
+      "没关系": [
+        5
+      ],
+      "请": [
+        6
+      ],
+      "是": [
+        7
+      ],
+      "不": [
+        8
+      ],
+      "好": [
+        9
+      ],
+      "大": [
+        10
+      ],
+      "小": [
+        11
+      ],
+      "中国": [
+        12
+      ],
+      "美国": [
+        13
+      ],
+      "日本": [
+        14
+      ],
+      "韩国": [
+        15
+      ],
+      "西班牙": [
+        16
+      ],
+      "英国": [
+        17
+      ],
+      "法国": [
+        18
+      ],
+      "德国": [
+        19
+      ],
+      "我": [
+        20
+      ],
+      "你": [
+        21
+      ],
+      "他": [
+        22
+      ],
+      "她": [
+        23
+      ],
+      "我们": [
+        24
+      ],
+      "他们": [
+        25
+      ],
+      "人": [
+        26
+      ],
+      "男人": [
+        27
+      ],
+      "女人": [
+        28
+      ],
+      "孩子": [
+        29
+      ],
+      "朋友": [
+        30
+      ],
+      "家": [
+        31
+      ],
+      "家人": [
+        32
+      ],
+      "父亲": [
+        33
+      ],
+      "母亲": [
+        34
+      ],
+      "爸爸": [
+        35
+      ],
+      "妈妈": [
+        36
+      ],
+      "哥哥": [
+        37
+      ],
+      "姐姐": [
+        38
+      ],
+      "弟弟": [
+        39
+      ],
+      "妹妹": [
+        40
+      ],
+      "老师": [
+        41
+      ],
+      "学生": [
+        42
+      ],
+      "学校": [
+        43
+      ],
+      "大学": [
+        44
+      ],
+      "书": [
+        45
+      ],
+      "笔": [
+        46
+      ],
+      "纸": [
+        47
+      ],
+      "水": [
+        48
+      ],
+      "茶": [
+        49
+      ],
+      "咖啡": [
+        50
+      ],
+      "饭": [
+        51
+      ],
+      "米饭": [
+        52
+      ],
+      "面": [
+        53
+      ],
+      "面包": [
+        54
+      ],
+      "肉": [
+        55
+      ],
+      "鱼": [
+        56
+      ],
+      "鸡": [
+        57
+      ],
+      "蔬菜": [
+        58
+      ],
+      "水果": [
+        59
+      ],
+      "苹果": [
+        60
+      ],
+      "香蕉": [
+        61
+      ],
+      "一": [
+        62
+      ],
+      "二": [
+        63
+      ],
+      "三": [
+        64
+      ],
+      "四": [
+        65
+      ],
+      "五": [
+        66
+      ],
+      "六": [
+        67
+      ],
+      "七": [
+        68
+      ],
+      "八": [
+        69
+      ],
+      "九": [
+        70
+      ],
+      "十": [
+        71
+      ],
+      "百": [
+        72
+      ],
+      "千": [
+        73
+      ],
+      "万": [
+        74
+      ],
+      "今天": [
+        75
+      ],
+      "明天": [
+        76
+      ],
+      "昨天": [
+        77
+      ],
+      "年": [
+        78
+      ],
+      "月": [
+        79
+      ],
+      "日": [
+        80
+      ],
+      "星期": [
+        81
+      ],
+      "时间": [
+        82
+      ],
+      "小时": [
+        83
+      ],
+      "分钟": [
+        84
+      ],
+      "秒": [
+        85
+      ],
+      "早上": [
+        86
+      ],
+      "中午": [
+        87
+      ],
+      "下午": [
+        88
+      ],
+      "晚上": [
+        89
+      ],
+      "红": [
+        90
+      ],
+      "蓝": [
+        91
+      ],
+      "绿": [
+        92
+      ],
+      "黄": [
+        93
+      ],
+      "白": [
+        94
+      ],
+      "黑": [
+        95
+      ],
+      "猫": [
+        96
+      ],
+      "狗": [
+        97
+      ],
+      "鸟": [
+        98
+      ],
+      "马": [
+        99
+      ],
+      "牛": [
+        100
+      ],
+      "猪": [
+        101
+      ],
+      "羊": [
+        102
+      ],
+      "龙": [
+        103
+      ],
+      "虎": [
+        104
+      ],
+      "兔": [
+        105
+      ],
+      "蛇": [
+        106
+      ],
+      "爱": [
+        107
+      ],
+      "喜欢": [
+        108
+      ],
+      "想": [
+        109
+      ],
+      "要": [
+        110
+      ],
+      "知道": [
+        111
+      ],
+      "说": [
+        112
+      ],
+      "听": [
+        113
+      ],
+      "看": [
+        114
+      ],
+      "写": [
+        115
+      ],
+      "读": [
+        116
+      ],
+      "学": [
+        117
+      ],
+      "教": [
+        118
+      ],
+      "吃": [
+        119
+      ],
+      "喝": [
+        120
+      ],
+      "走": [
+        121
+      ],
+      "跑": [
+        122
+      ],
+      "来": [
+        123
+      ],
+      "去": [
+        124
+      ],
+      "回": [
+        125
+      ],
+      "坐": [
+        126
+      ],
+      "站": [
+        127
+      ],
+      "睡觉": [
+        128
+      ],
+      "起床": [
+        129
+      ],
+      "工作": [
+        130
+      ],
+      "买": [
+        131
+      ],
+      "卖": [
+        132
+      ],
+      "钱": [
+        133
+      ],
+      "电话": [
+        134
+      ],
+      "电脑": [
+        135
+      ],
+      "手机": [
+        136
+      ],
+      "互联网": [
+        137
+      ],
+      "网站": [
+        138
+      ],
+      "电影": [
+        139
+      ],
+      "音乐": [
+        140
+      ],
+      "漂亮": [
+        141
+      ],
+      "好看": [
+        142
+      ],
+      "可爱": [
+        143
+      ],
+      "快": [
+        144
+      ],
+      "慢": [
+        145
+      ],
+      "高": [
+        146
+      ],
+      "矮": [
+        147
+      ],
+      "胖": [
+        148
+      ],
+      "瘦": [
+        149
+      ],
+      "冷": [
+        150
+      ],
+      "热": [
+        151
+      ],
+      "天气": [
+        152
+      ],
+      "下雨": [
+        153
+      ],
+      "下雪": [
+        154
+      ],
+      "风": [
+        155
+      ],
+      "太阳": [
+        156
+      ],
+      "月亮": [
+        157
+      ],
+      "星星": [
+        158
+      ],
+      "东": [
+        159
+      ],
+      "西": [
+        160
+      ],
+      "南": [
+        161
+      ],
+      "北": [
+        162
+      ],
+      "左": [
+        163
+      ],
+      "右": [
+        164
+      ],
+      "上": [
+        165
+      ],
+      "下": [
+        166
+      ],
+      "前": [
+        167
+      ],
+      "后": [
+        168
+      ],
+      "里": [
+        169
+      ],
+      "外": [
+        170
+      ],
+      "这": [
+        171
+      ],
+      "那": [
+        172
+      ],
+      "什么": [
+        173
+      ],
+      "谁": [
+        174
+      ],
+      "哪": [
+        175
+      ],
+      "哪里": [
+        176
+      ],
+      "怎么": [
+        177
+      ],
+      "为什么": [
+        178
+      ],
+      "多少": [
+        179
+      ],
+      "几": [
+        180
+      ],
+      "很": [
+        181
+      ],
+      "非常": [
+        182
+      ],
+      "太": [
+        183
+      ],
+      "真": [
+        184
+      ],
+      "都": [
+        185
+      ],
+      "也": [
+        186
+      ],
+      "还": [
+        187
+      ],
+      "又": [
+        188
+      ],
+      "和": [
+        189
+      ],
+      "在": [
+        190
+      ],
+      "有": [
+        191
+      ],
+      "没有": [
+        192
+      ],
+      "能": [
+        193
+      ],
+      "会": [
+        194
+      ],
+      "可以": [
+        195
+      ],
+      "应该": [
+        196
+      ],
+      "必须": [
+        197
+      ]
+    },
+    "by_traditional": {
+      "你好": [
+        0
+      ],
+      "再見": [
+        1
+      ],
+      "謝謝": [
+        2
+      ],
+      "不客氣": [
+        3
+      ],
+      "對不起": [
+        4
+      ],
+      "沒關係": [
+        5
+      ],
+      "請": [
+        6
+      ],
+      "是": [
+        7
+      ],
+      "不": [
+        8
+      ],
+      "好": [
+        9
+      ],
+      "大": [
+        10
+      ],
+      "小": [
+        11
+      ],
+      "中國": [
+        12
+      ],
+      "美國": [
+        13
+      ],
+      "日本": [
+        14
+      ],
+      "韓國": [
+        15
+      ],
+      "西班牙": [
+        16
+      ],
+      "英國": [
+        17
+      ],
+      "法國": [
+        18
+      ],
+      "德國": [
+        19
+      ],
+      "我": [
+        20
+      ],
+      "你": [
+        21
+      ],
+      "他": [
+        22
+      ],
+      "她": [
+        23
+      ],
+      "我們": [
+        24
+      ],
+      "他們": [
+        25
+      ],
+      "人": [
+        26
+      ],
+      "男人": [
+        27
+      ],
+      "女人": [
+        28
+      ],
+      "孩子": [
+        29
+      ],
+      "朋友": [
+        30
+      ],
+      "家": [
+        31
+      ],
+      "家人": [
+        32
+      ],
+      "父親": [
+        33
+      ],
+      "母親": [
+        34
+      ],
+      "爸爸": [
+        35
+      ],
+      "媽媽": [
+        36
+      ],
+      "哥哥": [
+        37
+      ],
+      "姐姐": [
+        38
+      ],
+      "弟弟": [
+        39
+      ],
+      "妹妹": [
+        40
+      ],
+      "老師": [
+        41
+      ],
+      "學生": [
+        42
+      ],
+      "學校": [
+        43
+      ],
+      "大學": [
+        44
+      ],
+      "書": [
+        45
+      ],
+      "筆": [
+        46
+      ],
+      "紙": [
+        47
+      ],
+      "水": [
+        48
+      ],
+      "茶": [
+        49
+      ],
+      "咖啡": [
+        50
+      ],
+      "飯": [
+        51
+      ],
+      "米飯": [
+        52
+      ],
+      "麵": [
+        53
+      ],
+      "麵包": [
+        54
+      ],
+      "肉": [
+        55
+      ],
+      "魚": [
+        56
+      ],
+      "雞": [
+        57
+      ],
+      "蔬菜": [
+        58
+      ],
+      "水果": [
+        59
+      ],
+      "蘋果": [
+        60
+      ],
+      "香蕉": [
+        61
+      ],
+      "一": [
+        62
+      ],
+      "二": [
+        63
+      ],
+      "三": [
+        64
+      ],
+      "四": [
+        65
+      ],
+      "五": [
+        66
+      ],
+      "六": [
+        67
+      ],
+      "七": [
+        68
+      ],
+      "八": [
+        69
+      ],
+      "九": [
+        70
+      ],
+      "十": [
+        71
+      ],
+      "百": [
+        72
+      ],
+      "千": [
+        73
+      ],
+      "萬": [
+        74
+      ],
+      "今天": [
+        75
+      ],
+      "明天": [
+        76
+      ],
+      "昨天": [
+        77
+      ],
+      "年": [
+        78
+      ],
+      "月": [
+        79
+      ],
+      "日": [
+        80
+      ],
+      "星期": [
+        81
+      ],
+      "時間": [
+        82
+      ],
+      "小時": [
+        83
+      ],
+      "分鐘": [
+        84
+      ],
+      "秒": [
+        85
+      ],
+      "早上": [
+        86
+      ],
+      "中午": [
+        87
+      ],
+      "下午": [
+        88
+      ],
+      "晚上": [
+        89
+      ],
+      "紅": [
+        90
+      ],
+      "藍": [
+        91
+      ],
+      "綠": [
+        92
+      ],
+      "黃": [
+        93
+      ],
+      "白": [
+        94
+      ],
+      "黑": [
+        95
+      ],
+      "貓": [
+        96
+      ],
+      "狗": [
+        97
+      ],
+      "鳥": [
+        98
+      ],
+      "馬": [
+        99
+      ],
+      "牛": [
+        100
+      ],
+      "豬": [
+        101
+      ],
+      "羊": [
+        102
+      ],
+      "龍": [
+        103
+      ],
+      "虎": [
+        104
+      ],
+      "兔": [
+        105
+      ],
+      "蛇": [
+        106
+      ],
+      "愛": [
+        107
+      ],
+      "喜歡": [
+        108
+      ],
+      "想": [
+        109
+      ],
+      "要": [
+        110
+      ],
+      "知道": [
+        111
+      ],
+      "說": [
+        112
+      ],
+      "聽": [
+        113
+      ],
+      "看": [
+        114
+      ],
+      "寫": [
+        115
+      ],
+      "讀": [
+        116
+      ],
+      "學": [
+        117
+      ],
+      "教": [
+        118
+      ],
+      "吃": [
+        119
+      ],
+      "喝": [
+        120
+      ],
+      "走": [
+        121
+      ],
+      "跑": [
+        122
+      ],
+      "來": [
+        123
+      ],
+      "去": [
+        124
+      ],
+      "回": [
+        125
+      ],
+      "坐": [
+        126
+      ],
+      "站": [
+        127
+      ],
+      "睡覺": [
+        128
+      ],
+      "起床": [
+        129
+      ],
+      "工作": [
+        130
+      ],
+      "買": [
+        131
+      ],
+      "賣": [
+        132
+      ],
+      "錢": [
+        133
+      ],
+      "電話": [
+        134
+      ],
+      "電腦": [
+        135
+      ],
+      "手機": [
+        136
+      ],
+      "互聯網": [
+        137
+      ],
+      "網站": [
+        138
+      ],
+      "電影": [
+        139
+      ],
+      "音樂": [
+        140
+      ],
+      "漂亮": [
+        141
+      ],
+      "好看": [
+        142
+      ],
+      "可愛": [
+        143
+      ],
+      "快": [
+        144
+      ],
+      "慢": [
+        145
+      ],
+      "高": [
+        146
+      ],
+      "矮": [
+        147
+      ],
+      "胖": [
+        148
+      ],
+      "瘦": [
+        149
+      ],
+      "冷": [
+        150
+      ],
+      "熱": [
+        151
+      ],
+      "天氣": [
+        152
+      ],
+      "下雨": [
+        153
+      ],
+      "下雪": [
+        154
+      ],
+      "風": [
+        155
+      ],
+      "太陽": [
+        156
+      ],
+      "月亮": [
+        157
+      ],
+      "星星": [
+        158
+      ],
+      "東": [
+        159
+      ],
+      "西": [
+        160
+      ],
+      "南": [
+        161
+      ],
+      "北": [
+        162
+      ],
+      "左": [
+        163
+      ],
+      "右": [
+        164
+      ],
+      "上": [
+        165
+      ],
+      "下": [
+        166
+      ],
+      "前": [
+        167
+      ],
+      "後": [
+        168
+      ],
+      "裡": [
+        169
+      ],
+      "外": [
+        170
+      ],
+      "這": [
+        171
+      ],
+      "那": [
+        172
+      ],
+      "什麼": [
+        173
+      ],
+      "誰": [
+        174
+      ],
+      "哪": [
+        175
+      ],
+      "哪裡": [
+        176
+      ],
+      "怎麼": [
+        177
+      ],
+      "為什麼": [
+        178
+      ],
+      "多少": [
+        179
+      ],
+      "幾": [
+        180
+      ],
+      "很": [
+        181
+      ],
+      "非常": [
+        182
+      ],
+      "太": [
+        183
+      ],
+      "真": [
+        184
+      ],
+      "都": [
+        185
+      ],
+      "也": [
+        186
+      ],
+      "還": [
+        187
+      ],
+      "又": [
+        188
+      ],
+      "和": [
+        189
+      ],
+      "在": [
+        190
+      ],
+      "有": [
+        191
+      ],
+      "沒有": [
+        192
+      ],
+      "能": [
+        193
+      ],
+      "會": [
+        194
+      ],
+      "可以": [
+        195
+      ],
+      "應該": [
+        196
+      ],
+      "必須": [
+        197
+      ]
+    },
+    "by_pinyin": {
+      "nǐhǎo": [
+        0
+      ],
+      "zàijiàn": [
+        1
+      ],
+      "xièxie": [
+        2
+      ],
+      "bùkèqi": [
+        3
+      ],
+      "duìbuqǐ": [
+        4
+      ],
+      "méiguānxi": [
+        5
+      ],
+      "qǐng": [
+        6
+      ],
+      "shì": [
+        7
+      ],
+      "bù": [
+        8
+      ],
+      "hǎo": [
+        9
+      ],
+      "dà": [
+        10
+      ],
+      "xiǎo": [
+        11
+      ],
+      "zhōngguó": [
+        12
+      ],
+      "měiguó": [
+        13
+      ],
+      "rìběn": [
+        14
+      ],
+      "hánguó": [
+        15
+      ],
+      "xībānyá": [
+        16
+      ],
+      "yīngguó": [
+        17
+      ],
+      "fǎguó": [
+        18
+      ],
+      "déguó": [
+        19
+      ],
+      "wǒ": [
+        20
+      ],
+      "nǐ": [
+        21
+      ],
+      "tā": [
+        22,
+        23
+      ],
+      "wǒmen": [
+        24
+      ],
+      "tāmen": [
+        25
+      ],
+      "rén": [
+        26
+      ],
+      "nánrén": [
+        27
+      ],
+      "nǚrén": [
+        28
+      ],
+      "háizi": [
+        29
+      ],
+      "péngyou": [
+        30
+      ],
+      "jiā": [
+        31
+      ],
+      "jiārén": [
+        32
+      ],
+      "fùqīn": [
+        33
+      ],
+      "mǔqīn": [
+        34
+      ],
+      "bàba": [
+        35
+      ],
+      "māma": [
+        36
+      ],
+      "gēge": [
+        37
+      ],
+      "jiějie": [
+        38
+      ],
+      "dìdi": [
+        39
+      ],
+      "mèimei": [
+        40
+      ],
+      "lǎoshī": [
+        41
+      ],
+      "xuéshēng": [
+        42
+      ],
+      "xuéxiào": [
+        43
+      ],
+      "dàxué": [
+        44
+      ],
+      "shū": [
+        45
+      ],
+      "bǐ": [
+        46
+      ],
+      "zhǐ": [
+        47
+      ],
+      "shuǐ": [
+        48
+      ],
+      "chá": [
+        49
+      ],
+      "kāfēi": [
+        50
+      ],
+      "fàn": [
+        51
+      ],
+      "mǐfàn": [
+        52
+      ],
+      "miàn": [
+        53
+      ],
+      "miànbāo": [
+        54
+      ],
+      "ròu": [
+        55
+      ],
+      "yú": [
+        56
+      ],
+      "jī": [
+        57
+      ],
+      "shūcài": [
+        58
+      ],
+      "shuǐguǒ": [
+        59
+      ],
+      "píngguǒ": [
+        60
+      ],
+      "xiāngjiāo": [
+        61
+      ],
+      "yī": [
+        62
+      ],
+      "èr": [
+        63
+      ],
+      "sān": [
+        64
+      ],
+      "sì": [
+        65
+      ],
+      "wǔ": [
+        66
+      ],
+      "liù": [
+        67
+      ],
+      "qī": [
+        68
+      ],
+      "bā": [
+        69
+      ],
+      "jiǔ": [
+        70
+      ],
+      "shí": [
+        71
+      ],
+      "bǎi": [
+        72
+      ],
+      "qiān": [
+        73
+      ],
+      "wàn": [
+        74
+      ],
+      "jīntiān": [
+        75
+      ],
+      "míngtiān": [
+        76
+      ],
+      "zuótiān": [
+        77
+      ],
+      "nián": [
+        78
+      ],
+      "yuè": [
+        79
+      ],
+      "rì": [
+        80
+      ],
+      "xīngqī": [
+        81
+      ],
+      "shíjiān": [
+        82
+      ],
+      "xiǎoshí": [
+        83
+      ],
+      "fēnzhōng": [
+        84
+      ],
+      "miǎo": [
+        85
+      ],
+      "zǎoshang": [
+        86
+      ],
+      "zhōngwǔ": [
+        87
+      ],
+      "xiàwǔ": [
+        88
+      ],
+      "wǎnshang": [
+        89
+      ],
+      "hóng": [
+        90
+      ],
+      "lán": [
+        91
+      ],
+      "lǜ": [
+        92
+      ],
+      "huáng": [
+        93
+      ],
+      "bái": [
+        94
+      ],
+      "hēi": [
+        95
+      ],
+      "māo": [
+        96
+      ],
+      "gǒu": [
+        97
+      ],
+      "niǎo": [
+        98
+      ],
+      "mǎ": [
+        99
+      ],
+      "niú": [
+        100
+      ],
+      "zhū": [
+        101
+      ],
+      "yáng": [
+        102
+      ],
+      "lóng": [
+        103
+      ],
+      "hǔ": [
+        104
+      ],
+      "tù": [
+        105
+      ],
+      "shé": [
+        106
+      ],
+      "ài": [
+        107
+      ],
+      "xǐhuan": [
+        108
+      ],
+      "xiǎng": [
+        109
+      ],
+      "yào": [
+        110
+      ],
+      "zhīdào": [
+        111
+      ],
+      "shuō": [
+        112
+      ],
+      "tīng": [
+        113
+      ],
+      "kàn": [
+        114
+      ],
+      "xiě": [
+        115
+      ],
+      "dú": [
+        116
+      ],
+      "xué": [
+        117
+      ],
+      "jiāo": [
+        118
+      ],
+      "chī": [
+        119
+      ],
+      "hē": [
+        120
+      ],
+      "zǒu": [
+        121
+      ],
+      "pǎo": [
+        122
+      ],
+      "lái": [
+        123
+      ],
+      "qù": [
+        124
+      ],
+      "huí": [
+        125
+      ],
+      "zuò": [
+        126
+      ],
+      "zhàn": [
+        127
+      ],
+      "shuìjiào": [
+        128
+      ],
+      "qǐchuáng": [
+        129
+      ],
+      "gōngzuò": [
+        130
+      ],
+      "mǎi": [
+        131
+      ],
+      "mài": [
+        132
+      ],
+      "qián": [
+        133,
+        167
+      ],
+      "diànhuà": [
+        134
+      ],
+      "diànnǎo": [
+        135
+      ],
+      "shǒujī": [
+        136
+      ],
+      "hùliánwǎng": [
+        137
+      ],
+      "wǎngzhàn": [
+        138
+      ],
+      "diànyǐng": [
+        139
+      ],
+      "yīnyuè": [
+        140
+      ],
+      "piàoliang": [
+        141
+      ],
+      "hǎokàn": [
+        142
+      ],
+      "kěài": [
+        143
+      ],
+      "kuài": [
+        144
+      ],
+      "màn": [
+        145
+      ],
+      "gāo": [
+        146
+      ],
+      "ǎi": [
+        147
+      ],
+      "pàng": [
+        148
+      ],
+      "shòu": [
+        149
+      ],
+      "lěng": [
+        150
+      ],
+      "rè": [
+        151
+      ],
+      "tiānqì": [
+        152
+      ],
+      "xiàyǔ": [
+        153
+      ],
+      "xiàxuě": [
+        154
+      ],
+      "fēng": [
+        155
+      ],
+      "tàiyáng": [
+        156
+      ],
+      "yuèliang": [
+        157
+      ],
+      "xīngxing": [
+        158
+      ],
+      "dōng": [
+        159
+      ],
+      "xī": [
+        160
+      ],
+      "nán": [
+        161
+      ],
+      "běi": [
+        162
+      ],
+      "zuǒ": [
+        163
+      ],
+      "yòu": [
+        164,
+        188
+      ],
+      "shàng": [
+        165
+      ],
+      "xià": [
+        166
+      ],
+      "hòu": [
+        168
+      ],
+      "lǐ": [
+        169
+      ],
+      "wài": [
+        170
+      ],
+      "zhè": [
+        171
+      ],
+      "nà": [
+        172
+      ],
+      "shénme": [
+        173
+      ],
+      "shuí": [
+        174
+      ],
+      "nǎ": [
+        175
+      ],
+      "nǎlǐ": [
+        176
+      ],
+      "zěnme": [
+        177
+      ],
+      "wèishénme": [
+        178
+      ],
+      "duōshǎo": [
+        179
+      ],
+      "jǐ": [
+        180
+      ],
+      "hěn": [
+        181
+      ],
+      "fēicháng": [
+        182
+      ],
+      "tài": [
+        183
+      ],
+      "zhēn": [
+        184
+      ],
+      "dōu": [
+        185
+      ],
+      "yě": [
+        186
+      ],
+      "hái": [
+        187
+      ],
+      "hé": [
+        189
+      ],
+      "zài": [
+        190
+      ],
+      "yǒu": [
+        191
+      ],
+      "méiyǒu": [
+        192
+      ],
+      "néng": [
+        193
+      ],
+      "huì": [
+        194
+      ],
+      "kěyǐ": [
+        195
+      ],
+      "yīnggāi": [
+        196
+      ],
+      "bìxū": [
+        197
+      ]
+    },
+    "by_definition": {}
+  }
+}
