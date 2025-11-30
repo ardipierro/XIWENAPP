@@ -4,9 +4,8 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Save, Eye, EyeOff, MessageSquare, CheckCircle, Type, AlignLeft } from 'lucide-react';
+import { Save, MessageSquare, CheckCircle, Type, AlignLeft } from 'lucide-react';
 import { BaseButton, BaseInput, BaseAlert } from '../common';
-import OpenQuestionsExercise from './OpenQuestionsExercise';
 import logger from '../../utils/logger';
 
 /**

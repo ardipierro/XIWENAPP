@@ -4,9 +4,8 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Save, Eye, EyeOff, Volume2, Shuffle, Move } from 'lucide-react';
+import { Save, Volume2, Shuffle, Move } from 'lucide-react';
 import { BaseButton, BaseInput, BaseAlert } from '../common';
-import DragDropBlanksExercise from './DragDropBlanksExercise';
 import logger from '../../utils/logger';
 
 /**
@@ -31,12 +30,8 @@ function DragDropConfig({ onSave }) {
     soundEnabled: true
   });
 
-  const [showPreview, setShowPreview] = useState(false);
   const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
-
-  // Texto de ejemplo para preview
-  const exampleText = 'El *perro* ladra y el *gato* maúlla. Los *pájaros* cantan en el *árbol*.';
 
   /**
    * Guardar configuración
@@ -283,13 +278,6 @@ Los *pájaros* cantan en el *árbol*.`}
       {/* Botones de acción */}
       <div className="flex gap-3 justify-end">
         <BaseButton
-          variant="secondary"
-          icon={showPreview ? EyeOff : Eye}
-          onClick={() => setShowPreview(!showPreview)}
-        >
-          {showPreview ? 'Ocultar' : 'Mostrar'} Preview
-        </BaseButton>
-        <BaseButton
           variant="primary"
           icon={Save}
           onClick={handleSave}
@@ -297,28 +285,6 @@ Los *pájaros* cantan en el *árbol*.`}
           Guardar Configuración
         </BaseButton>
       </div>
-
-      {/* Preview del ejercicio */}
-      {showPreview && (
-        <div className="mt-6 p-6 rounded-lg border-2 border-dashed" style={{ borderColor: 'var(--color-border)' }}>
-          <div className="mb-4">
-            <h4 className="text-sm font-semibold mb-2" style={{ color: 'var(--color-text-secondary)' }}>
-              Vista previa del ejercicio
-            </h4>
-            <p className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
-              Texto de ejemplo: {exampleText}
-            </p>
-          </div>
-          <DragDropBlanksExercise
-            text={exampleText}
-            config={config}
-            onComplete={(result) => {
-              logger.info('Preview completed:', result);
-              alert(`Ejercicio completado!\nPuntuación: ${result.score}\nCorrectas: ${result.correct}/${result.total}`);
-            }}
-          />
-        </div>
-      )}
     </div>
   );
 }

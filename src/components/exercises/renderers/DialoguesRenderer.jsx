@@ -33,8 +33,7 @@ import {
 import { BaseBadge } from '../../common';
 import { useExercise } from '../core/ExerciseContext';
 import { getDisplayClasses, getDisplayStyles, mergeDisplaySettings } from '../../../constants/displaySettings';
-import AudioPlayer from '../../interactive-book/AudioPlayer';
-import { getCharacterVoiceConfig } from '../../interactive-book/CharacterVoiceManager';
+import { AudioPlayer, getCharacterVoiceConfig } from '../../audio';
 import logger from '../../../utils/logger';
 
 // Configuración por defecto (SIMPLIFICADA - usa variables CSS del tema)

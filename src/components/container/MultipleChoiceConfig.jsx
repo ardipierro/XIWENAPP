@@ -6,8 +6,6 @@
 import { useState, useEffect } from 'react';
 import {
   Save,
-  Eye,
-  EyeOff,
   HelpCircle,
   CheckCircle2,
   XCircle,
@@ -18,7 +16,6 @@ import {
   ListChecks
 } from 'lucide-react';
 import { BaseButton, BaseInput, BaseAlert } from '../common';
-import MultipleChoiceExercise from './MultipleChoiceExercise';
 import logger from '../../utils/logger';
 
 const STORAGE_KEY = 'xiwen_multipleChoiceConfig';

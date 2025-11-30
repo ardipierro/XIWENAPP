@@ -1,7 +1,7 @@
 /**
  * @fileoverview Gestor de voces por personaje
  * Permite asignar diferentes voces, velocidades y configuraciones a cada personaje del diálogo
- * @module components/interactive-book/CharacterVoiceManager
+ * @module components/audio/CharacterVoiceManager
  */
 
 import { useState, useEffect } from 'react';
