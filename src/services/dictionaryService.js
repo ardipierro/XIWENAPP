@@ -317,44 +317,25 @@ function searchByPinyin(query, limit, fuzzy) {
 
 /**
  * Búsqueda por español con ranking por relevancia
+ * NUEVA ESTRATEGIA: Búsqueda exhaustiva en TODO el diccionario + ranking agresivo
  */
 function searchBySpanish(query, limit, fuzzy) {
   const normalizedQuery = query.toLowerCase().trim();
   const candidatesWithScore = [];
-  const seenIndices = new Set();
 
-  // Palabras de la consulta
-  const queryWords = normalizedQuery.split(/\s+/).filter(w => w.length >= 2);
+  // BÚSQUEDA EXHAUSTIVA: Revisar TODAS las entradas del diccionario
+  dictionaryCache.forEach((entry, idx) => {
+    const definitions = entry.d || entry.definitions_es;
+    if (!definitions || !Array.isArray(definitions) || definitions.length === 0) return;
 
-  // Recolectar candidatos de todas las palabras de la consulta
-  queryWords.forEach(word => {
-    const indices = dictionaryIndex.bySpanish.get(word) || [];
-    indices.forEach(idx => {
-      if (!seenIndices.has(idx)) {
-        seenIndices.add(idx);
-        const entry = dictionaryCache[idx];
-        const score = calculateSpanishRelevance(entry, normalizedQuery, queryWords);
-        candidatesWithScore.push({ entry, score, idx });
-      }
-    });
+    // Calcular score de relevancia
+    const score = calculateSpanishRelevance(entry, normalizedQuery);
+
+    // Solo incluir si tiene score > 0 (hay match)
+    if (score > 0) {
+      candidatesWithScore.push({ entry, score, idx });
+    }
   });
-
-  // Búsqueda fuzzy si no hay suficientes candidatos
-  if (candidatesWithScore.length < limit && fuzzy) {
-    dictionaryIndex.bySpanish.forEach((indices, key) => {
-      if (candidatesWithScore.length >= limit * 3) return; // Limitar candidatos fuzzy
-      if (key.startsWith(normalizedQuery) || normalizedQuery.startsWith(key)) {
-        indices.forEach(idx => {
-          if (!seenIndices.has(idx)) {
-            seenIndices.add(idx);
-            const entry = dictionaryCache[idx];
-            const score = calculateSpanishRelevance(entry, normalizedQuery, queryWords) * 0.5; // Penalizar fuzzy
-            candidatesWithScore.push({ entry, score, idx });
-          }
-        });
-      }
-    });
-  }
 
   // Ordenar por score (mayor a menor) y devolver los top N
   const sortedResults = candidatesWithScore
@@ -367,69 +348,110 @@ function searchBySpanish(query, limit, fuzzy) {
 
 /**
  * Calcula relevancia de una entrada del diccionario para una búsqueda en español
+ * ESTRATEGIA AGRESIVA: Priorizar traducciones simples y directas
  * @param {Object} entry - Entrada del diccionario
  * @param {string} query - Consulta normalizada
- * @param {string[]} queryWords - Palabras de la consulta
  * @returns {number} Score de relevancia (mayor = más relevante)
  */
-function calculateSpanishRelevance(entry, query, queryWords) {
+function calculateSpanishRelevance(entry, query) {
   const definitions = entry.d || entry.definitions_es;
   if (!definitions || !Array.isArray(definitions)) return 0;
 
+  const simplified = entry.s || entry.simplified;
   let score = 0;
 
-  definitions.forEach((def, defIndex) => {
-    if (!def || typeof def !== 'string') return;
+  // Analizar solo primera definición (las demás son secundarias)
+  const firstDef = definitions[0];
+  if (!firstDef || typeof firstDef !== 'string') return 0;
 
-    const normalizedDef = def.toLowerCase();
+  const normalizedDef = firstDef.toLowerCase();
 
-    // PRIORIDAD 1: Match exacto en la primera definición (score +100)
-    if (defIndex === 0 && normalizedDef === query) {
-      score += 100;
-      return;
+  // Limpiar definición de prefijos comunes
+  const cleanDef = normalizedDef
+    .replace(/^\s*\([^)]*\)\s*/, '') // Remover (jerga), (fig.), etc.
+    .replace(/^[^\w\u00C0-\u017F]+/, '') // Remover símbolos iniciales
+    .trim();
+
+  // Dividir definición en palabras
+  const defWords = cleanDef.split(/[,;\/\(\)]/).map(s => s.trim()).filter(s => s);
+  const firstWord = defWords[0] || '';
+
+  // === SCORING AGRESIVO ===
+
+  // 🏆 TIER 1: Match EXACTO en primera palabra (+1000)
+  if (firstWord === query) {
+    score += 1000;
+  }
+  // 🏆 TIER 2: Primera palabra EMPIEZA con query (+500)
+  else if (firstWord.startsWith(query)) {
+    score += 500;
+  }
+  // 🏆 TIER 3: Query es la definición completa (+300)
+  else if (cleanDef === query) {
+    score += 300;
+  }
+  // 🥈 TIER 4: Definición EMPIEZA con query (+200)
+  else if (cleanDef.startsWith(query)) {
+    score += 200;
+  }
+  // 🥉 TIER 5: Query aparece como palabra completa (+50)
+  else if (new RegExp(`\\b${query}\\b`).test(cleanDef)) {
+    score += 50;
+  }
+  // TIER 6: Query está en la definición como substring (+10)
+  else if (cleanDef.includes(query)) {
+    score += 10;
+  }
+  // NO MATCH: score = 0
+  else {
+    return 0;
+  }
+
+  // === BONUS POR SIMPLICIDAD ===
+
+  if (simplified) {
+    // 🌟 MEGA BONUS: Caracteres chinos MUY simples (1 carácter) (+500)
+    if (simplified.length === 1) {
+      score += 500;
     }
-
-    // PRIORIDAD 2: Definición comienza con la query (score +50)
-    if (defIndex === 0 && normalizedDef.startsWith(query)) {
-      score += 50;
-      return;
+    // 🌟 BONUS: Caracteres simples (2 caracteres) (+200)
+    else if (simplified.length === 2) {
+      score += 200;
     }
-
-    // PRIORIDAD 3: Query está al inicio de la definición después de símbolos (score +30)
-    const cleanStart = normalizedDef.replace(/^[^\w\u00C0-\u017F]+/, '');
-    if (defIndex === 0 && cleanStart.startsWith(query)) {
-      score += 30;
+    // Penalización leve por caracteres largos (3+)
+    else if (simplified.length >= 3) {
+      score *= 0.8;
     }
+  }
 
-    // PRIORIDAD 4: Todas las palabras de query están en la primera definición (score +20)
-    if (defIndex === 0) {
-      const allWordsPresent = queryWords.every(word => normalizedDef.includes(word));
-      if (allWordsPresent) {
-        score += 20;
-      }
-    }
+  // === BONUS POR DEFINICIÓN SIMPLE ===
 
-    // PRIORIDAD 5: Query aparece como palabra completa en la definición (score +10 por match)
-    const wordBoundaryRegex = new RegExp(`\\b${query}\\b`, 'i');
-    if (wordBoundaryRegex.test(def)) {
-      score += 10 / (defIndex + 1); // Penalizar definiciones secundarias
-    }
+  // BONUS: Definición corta y directa (+100)
+  if (firstDef.length <= 30) {
+    score += 100;
+  }
+  // BONUS: Solo una palabra en la primera parte de la definición (+150)
+  if (defWords.length === 1 || (defWords.length === 2 && defWords[0].split(/\s+/).length === 1)) {
+    score += 150;
+  }
 
-    // PENALIZACIÓN: Si la definición es muy larga (probablemente explicación), reducir score
-    if (def.length > 100) {
-      score *= 0.7;
-    }
+  // === PENALIZACIONES ===
 
-    // PENALIZACIÓN: Si contiene marcadores de modismo/jerga, reducir score para búsquedas simples
-    if (queryWords.length === 1 && /(modismo|jerga|fig\.|lit\.)/.test(normalizedDef)) {
-      score *= 0.5;
-    }
-  });
+  // PENALIZACIÓN FUERTE: Modismos, jerga, figurativo (-70%)
+  if (/(modismo|jerga|fig\.|lit\.|metáfora|expr\.)/.test(normalizedDef)) {
+    score *= 0.3;
+  }
 
-  // BONUS: Entradas con caracteres simples (1-2 caracteres) suelen ser más directas
-  const simplified = entry.s || entry.simplified;
-  if (simplified && simplified.length <= 2 && score > 0) {
-    score += 5;
+  // PENALIZACIÓN: Definiciones muy largas (probablemente explicaciones) (-50%)
+  if (firstDef.length > 100) {
+    score *= 0.5;
+  }
+
+  // PENALIZACIÓN: Query aparece con modificadores (no es palabra principal) (-60%)
+  // Ej: "gato carey" cuando buscamos "gato"
+  const queryWithModifier = new RegExp(`\\b${query}\\s+\\w+`, 'i');
+  if (queryWithModifier.test(cleanDef) && !cleanDef.startsWith(query + ',')) {
+    score *= 0.4;
   }
 
   return score;
