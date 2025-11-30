@@ -1,10 +1,11 @@
 /**
  * @fileoverview SaveSessionModal - Modal para guardar sesiones de pizarra
- * Componente extraído de Whiteboard.jsx para mejorar mantenibilidad
+ * Refactorizado para usar BaseModal
  * @module components/whiteboard/SaveSessionModal
  */
 
-import BaseButton from '../../common/BaseButton';
+import { Save } from 'lucide-react';
+import { BaseModal, BaseButton, BaseInput } from '../../common';
 
 /**
  * Modal para guardar sesión de pizarra
@@ -24,21 +25,15 @@ function SaveSessionModal({
   setSessionTitle,
   currentSessionId
 }) {
-  if (!show) return null;
-
   return (
-    <div className="whiteboard-modal-overlay" onClick={onClose}>
-      <div className="whiteboard-modal" onClick={(e) => e.stopPropagation()}>
-        <h3 className="whiteboard-modal-title">Guardar Sesión</h3>
-        <input
-          type="text"
-          value={sessionTitle}
-          onChange={(e) => setSessionTitle(e.target.value)}
-          placeholder={`Pizarra ${new Date().toLocaleDateString()}`}
-          className="whiteboard-modal-input"
-          autoFocus
-        />
-        <div className="whiteboard-modal-actions">
+    <BaseModal
+      isOpen={show}
+      onClose={onClose}
+      title="Guardar Sesión"
+      icon={Save}
+      size="sm"
+      footer={
+        <div className="flex justify-end gap-3">
           <BaseButton onClick={onClose} variant="secondary">
             Cancelar
           </BaseButton>
@@ -46,8 +41,15 @@ function SaveSessionModal({
             {currentSessionId ? 'Actualizar' : 'Guardar'}
           </BaseButton>
         </div>
-      </div>
-    </div>
+      }
+    >
+      <BaseInput
+        value={sessionTitle}
+        onChange={(e) => setSessionTitle(e.target.value)}
+        placeholder={`Pizarra ${new Date().toLocaleDateString()}`}
+        autoFocus
+      />
+    </BaseModal>
   );
 }
 

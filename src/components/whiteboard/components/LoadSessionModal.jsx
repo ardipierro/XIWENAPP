@@ -1,10 +1,11 @@
 /**
  * @fileoverview LoadSessionModal - Modal para cargar sesiones guardadas
- * Componente extraído de Whiteboard.jsx para mejorar mantenibilidad
+ * Refactorizado para usar BaseModal
  * @module components/whiteboard/LoadSessionModal
  */
 
-import BaseButton from '../../common/BaseButton';
+import { FolderOpen, FileText } from 'lucide-react';
+import { BaseModal, BaseButton, BaseEmptyState } from '../../common';
 
 /**
  * Modal para cargar sesión guardada
@@ -20,42 +21,58 @@ function LoadSessionModal({
   onLoadSession,
   savedSessions
 }) {
-  if (!show) return null;
-
   return (
-    <div className="whiteboard-modal-overlay" onClick={onClose}>
-      <div className="whiteboard-modal large" onClick={(e) => e.stopPropagation()}>
-        <h3 className="whiteboard-modal-title">Cargar Sesión</h3>
-        {savedSessions.length === 0 ? (
-          <p className="whiteboard-modal-empty">No hay sesiones guardadas</p>
-        ) : (
-          <div className="whiteboard-sessions-list">
-            {savedSessions.map((session) => (
-              <div key={session.id} className="whiteboard-session-item">
-                <div className="whiteboard-session-info">
-                  <h4 className="whiteboard-session-title">{session.title}</h4>
-                  <p className="whiteboard-session-meta">
-                    {session.slides?.length || 0} diapositivas •
-                    {session.updatedAt ? new Date(session.updatedAt.seconds * 1000).toLocaleDateString() : 'Sin fecha'}
-                  </p>
-                </div>
-                <BaseButton
-                  onClick={() => onLoadSession(session)}
-                  variant="primary"
-                >
-                  Cargar
-                </BaseButton>
-              </div>
-            ))}
-          </div>
-        )}
-        <div className="whiteboard-modal-actions">
+    <BaseModal
+      isOpen={show}
+      onClose={onClose}
+      title="Cargar Sesión"
+      icon={FolderOpen}
+      size="md"
+      footer={
+        <div className="flex justify-end">
           <BaseButton onClick={onClose} variant="secondary">
             Cerrar
           </BaseButton>
         </div>
-      </div>
-    </div>
+      }
+    >
+      {savedSessions.length === 0 ? (
+        <BaseEmptyState
+          icon={FileText}
+          title="No hay sesiones guardadas"
+          description="Las sesiones que guardes aparecerán aquí"
+          size="sm"
+        />
+      ) : (
+        <div className="space-y-2 max-h-80 overflow-y-auto">
+          {savedSessions.map((session) => (
+            <div
+              key={session.id}
+              className="flex items-center justify-between p-3 rounded-lg bg-[var(--color-bg-secondary)] hover:bg-[var(--color-bg-tertiary)] transition-colors"
+            >
+              <div className="flex-1 min-w-0 mr-3">
+                <h4 className="font-medium text-[var(--color-text-primary)] truncate">
+                  {session.title}
+                </h4>
+                <p className="text-sm text-[var(--color-text-tertiary)]">
+                  {session.slides?.length || 0} diapositivas •{' '}
+                  {session.updatedAt
+                    ? new Date(session.updatedAt.seconds * 1000).toLocaleDateString()
+                    : 'Sin fecha'}
+                </p>
+              </div>
+              <BaseButton
+                onClick={() => onLoadSession(session)}
+                variant="primary"
+                size="sm"
+              >
+                Cargar
+              </BaseButton>
+            </div>
+          ))}
+        </div>
+      )}
+    </BaseModal>
   );
 }
 

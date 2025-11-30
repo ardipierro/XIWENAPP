@@ -1,11 +1,11 @@
 /**
  * @fileoverview ShareContentModal - Modal para compartir contenido en sesión colaborativa
- * Componente extraído de Whiteboard.jsx para mejorar mantenibilidad
+ * Refactorizado para usar BaseModal
  * @module components/whiteboard/ShareContentModal
  */
 
-import BaseButton from '../../common/BaseButton';
-import { Film, FileText, FileImage } from 'lucide-react';
+import { Share2, Film, FileText, FileImage } from 'lucide-react';
+import { BaseModal, BaseButton, BaseInput, BaseAlert } from '../../common';
 
 /**
  * Modal para compartir contenido (video/PDF/imagen)
@@ -27,57 +27,21 @@ function ShareContentModal({
   shareContentType,
   setShareContentType
 }) {
-  if (!show) return null;
+  const placeholderByType = {
+    video: 'URL del video (YouTube, Vimeo, MP4)',
+    pdf: 'URL del PDF',
+    image: 'URL de la imagen'
+  };
 
   return (
-    <div className="whiteboard-modal-overlay" onClick={onClose}>
-      <div className="whiteboard-modal" onClick={(e) => e.stopPropagation()}>
-        <h3 className="whiteboard-modal-title">Compartir Contenido</h3>
-
-        <div className="share-content-type-selector">
-          <BaseButton
-            variant={shareContentType === 'video' ? 'primary' : 'outline'}
-            onClick={() => setShareContentType('video')}
-            icon={Film}
-          >
-            Video
-          </BaseButton>
-          <BaseButton
-            variant={shareContentType === 'pdf' ? 'primary' : 'outline'}
-            onClick={() => setShareContentType('pdf')}
-            icon={FileText}
-          >
-            PDF
-          </BaseButton>
-          <BaseButton
-            variant={shareContentType === 'image' ? 'primary' : 'outline'}
-            onClick={() => setShareContentType('image')}
-            icon={FileImage}
-          >
-            Imagen
-          </BaseButton>
-        </div>
-
-        <input
-          type="url"
-          value={shareContentUrl}
-          onChange={(e) => setShareContentUrl(e.target.value)}
-          placeholder={`URL del ${shareContentType === 'video' ? 'video (YouTube, Vimeo, MP4)' : shareContentType === 'pdf' ? 'PDF' : 'imagen'}`}
-          className="whiteboard-modal-input"
-          autoFocus
-        />
-
-        <div className="share-content-info">
-          <p>💡 El contenido se sincronizará en tiempo real con todos los participantes</p>
-          {shareContentType === 'video' && (
-            <p>📹 Solo el presentador puede controlar la reproducción</p>
-          )}
-          {shareContentType === 'pdf' && (
-            <p>📄 Solo el presentador puede cambiar de página</p>
-          )}
-        </div>
-
-        <div className="whiteboard-modal-actions">
+    <BaseModal
+      isOpen={show}
+      onClose={onClose}
+      title="Compartir Contenido"
+      icon={Share2}
+      size="sm"
+      footer={
+        <div className="flex justify-end gap-3">
           <BaseButton onClick={onClose} variant="secondary">
             Cancelar
           </BaseButton>
@@ -85,8 +49,54 @@ function ShareContentModal({
             Compartir
           </BaseButton>
         </div>
+      }
+    >
+      <div className="space-y-4">
+        {/* Selector de tipo */}
+        <div className="flex gap-2">
+          <BaseButton
+            variant={shareContentType === 'video' ? 'primary' : 'outline'}
+            onClick={() => setShareContentType('video')}
+            iconLeft={Film}
+            size="sm"
+          >
+            Video
+          </BaseButton>
+          <BaseButton
+            variant={shareContentType === 'pdf' ? 'primary' : 'outline'}
+            onClick={() => setShareContentType('pdf')}
+            iconLeft={FileText}
+            size="sm"
+          >
+            PDF
+          </BaseButton>
+          <BaseButton
+            variant={shareContentType === 'image' ? 'primary' : 'outline'}
+            onClick={() => setShareContentType('image')}
+            iconLeft={FileImage}
+            size="sm"
+          >
+            Imagen
+          </BaseButton>
+        </div>
+
+        {/* Input de URL */}
+        <BaseInput
+          type="url"
+          value={shareContentUrl}
+          onChange={(e) => setShareContentUrl(e.target.value)}
+          placeholder={placeholderByType[shareContentType]}
+          autoFocus
+        />
+
+        {/* Info */}
+        <BaseAlert variant="info" size="sm">
+          El contenido se sincronizará en tiempo real con todos los participantes.
+          {shareContentType === 'video' && ' Solo el presentador puede controlar la reproducción.'}
+          {shareContentType === 'pdf' && ' Solo el presentador puede cambiar de página.'}
+        </BaseAlert>
       </div>
-    </div>
+    </BaseModal>
   );
 }
 
