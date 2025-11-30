@@ -33,9 +33,9 @@ export async function loadDictionary() {
 
   loadingPromise = (async () => {
     try {
-      logger.info('Cargando diccionario CEDICT completo...', 'dictionaryService');
+      logger.info('Cargando diccionario por frecuencia (español→chino)...', 'dictionaryService');
 
-      const response = await fetch('/dictionaries/cedict_es_full.json');
+      const response = await fetch('/dictionaries/spanish_freq.json');
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`);
       }
