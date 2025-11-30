@@ -372,9 +372,12 @@ function calculateSpanishRelevance(entry, query) {
     .replace(/^[^\w\u00C0-\u017F]+/, '') // Remover símbolos iniciales
     .trim();
 
-  // Dividir definición en palabras
-  const defWords = cleanDef.split(/[,;\/\(\)]/).map(s => s.trim()).filter(s => s);
-  const firstWord = defWords[0] || '';
+  // Dividir definición en segmentos por comas/punto y coma
+  const defSegments = cleanDef.split(/[,;\/\(\)]/).map(s => s.trim()).filter(s => s);
+  const firstSegment = defSegments[0] || '';
+
+  // Extraer PRIMERA PALABRA del primer segmento (no toda la frase)
+  const firstWord = firstSegment.split(/\s+/)[0] || '';
 
   // === SCORING AGRESIVO ===
 
@@ -407,20 +410,22 @@ function calculateSpanishRelevance(entry, query) {
     return 0;
   }
 
-  // === BONUS POR SIMPLICIDAD ===
+  // === BONUS POR SIMPLICIDAD (APLICAR ANTES PARA MULTIPLICAR) ===
 
   if (simplified) {
-    // 🌟 MEGA BONUS: Caracteres chinos MUY simples (1 carácter) (+500)
+    // 🌟 MEGA BONUS: Caracteres chinos MUY simples (1 carácter)
     if (simplified.length === 1) {
-      score += 500;
+      score *= 10; // Multiplicar por 10 para priorizar SIEMPRE
+      score += 1000; // Más bonus extra
     }
-    // 🌟 BONUS: Caracteres simples (2 caracteres) (+200)
+    // 🌟 BONUS: Caracteres simples (2 caracteres)
     else if (simplified.length === 2) {
-      score += 200;
+      score *= 3; // Multiplicar por 3
+      score += 300;
     }
-    // Penalización leve por caracteres largos (3+)
+    // Penalización FUERTE por caracteres largos (3+)
     else if (simplified.length >= 3) {
-      score *= 0.8;
+      score *= 0.3; // Reducir a 30%
     }
   }
 
