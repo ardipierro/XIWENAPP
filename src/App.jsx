@@ -26,7 +26,6 @@ import { syncOperation } from './utils/offlineFirestore.js';
 const UniversalDashboard = lazy(() => import('./components/UniversalDashboard'));
 const TestPage = lazy(() => import('./TestPage'));
 const PaymentResult = lazy(() => import('./components/PaymentResult'));
-const DesignLab = lazy(() => import('./components/DesignLab'));
 
 import BaseButton from './components/common/BaseButton';
 import './App.css';
@@ -149,12 +148,6 @@ function App() {
           <Route
             path="/test"
             element={<TestPage />}
-          />
-
-          {/* Design Lab - Design System Tester */}
-          <Route
-            path="/design-lab"
-            element={<DesignLab />}
           />
 
           {/* Universal Dashboard - Dashboard unificado con permisos y créditos */}
