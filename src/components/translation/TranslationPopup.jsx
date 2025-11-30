@@ -228,13 +228,6 @@ const TranslationPopup = ({
                     </span>
                   )}
                 </div>
-                {/* Back-translation: verification */}
-                {translation.backTranslation && translation.backTranslation.length > 0 && (
-                  <div className="text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700 pt-2 mt-2">
-                    <span className="font-semibold">↩️ Verifica:</span>{' '}
-                    <span className="italic">{translation.backTranslation.slice(0, 3).join('; ')}</span>
-                  </div>
-                )}
               </div>
             )}
 
