@@ -276,7 +276,12 @@ function searchByChinese(query, limit) {
   if (results.length === 0) {
     dictionaryCache.forEach((entry, idx) => {
       if (results.length >= limit) return;
-      if (entry.s.includes(query) || entry.t.includes(query)) {
+
+      // Normalizar formato (soportar ambos)
+      const simplified = entry.s || entry.simplified;
+      const traditional = entry.t || entry.traditional;
+
+      if (simplified && traditional && (simplified.includes(query) || traditional.includes(query))) {
         results.push(formatEntry(entry));
       }
     });
