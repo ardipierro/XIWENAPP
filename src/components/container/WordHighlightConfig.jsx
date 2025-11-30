@@ -4,8 +4,9 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Save, Gamepad2, Timer, Lightbulb, Sparkles, Volume2, CheckSquare } from 'lucide-react';
+import { Save, Gamepad2, Timer, Lightbulb, Sparkles, Volume2, CheckSquare, Eye, EyeOff } from 'lucide-react';
 import { BaseButton, BaseInput, BaseAlert } from '../common';
+import { ExercisePreview, WordHighlightRenderer } from '../exercises';
 import logger from '../../utils/logger';
 
 /**
@@ -919,13 +920,12 @@ Mi hermano *corre* en el parque.`}
               Texto de ejemplo: {exampleText}
             </p>
           </div>
-          <WordHighlightExercise
+          <ExercisePreview
+            renderer={WordHighlightRenderer}
+            exerciseConfig={config}
             text={exampleText}
-            config={config}
-            onComplete={(result) => {
-              logger.info('Preview completed:', result);
-              alert(`Ejercicio completado!\nPuntuación: ${result.score}\nPalabras marcadas: ${result.totalClicks}`);
-            }}
+            instruction="Haz clic en los verbos (palabras marcadas con asteriscos)"
+            onComplete={(result) => logger.info('Preview completed:', result, 'WordHighlightConfig')}
           />
         </div>
       )}

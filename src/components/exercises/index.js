@@ -77,6 +77,7 @@ export {
 } from './core/ExerciseContext';
 
 export { ExerciseWrapper } from './core/ExerciseWrapper';
+export { default as ExercisePreview } from './ExercisePreview';
 
 // ============================================
 // RENDERERS (Componentes de renderizado)
