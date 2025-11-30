@@ -13,6 +13,25 @@ import useSpeaker from '../../hooks/useSpeaker';
 import { autoTranslate, isGoogleTranslateConfigured } from '../../services/googleTranslateService';
 import logger from '../../utils/logger';
 
+// Configuración por defecto del diccionario
+const DEFAULT_DICTIONARY_CONFIG = {
+  enabled: true,
+  backTranslation: {
+    enabled: true,
+    limit: 3
+  },
+  display: {
+    chineseFontSize: 32,
+    popupWidth: 380,
+    animations: true,
+    showSourceBadge: true
+  },
+  behavior: {
+    autoCopy: false,
+    openExternalOnClick: false
+  }
+};
+
 const SelectionDetector = ({ children, enabled = true, containerRef = null }) => {
   const [selectedText, setSelectedText] = useState('');
   const [selectionPosition, setSelectionPosition] = useState(null);
@@ -26,10 +45,42 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
   const [dictError, setDictError] = useState(null);
   const [copied, setCopied] = useState(false);
 
+  // Configuración del diccionario
+  const [dictConfig, setDictConfig] = useState(DEFAULT_DICTIONARY_CONFIG);
+
   const buttonsRef = useRef(null);
   const selectionTimeoutRef = useRef(null); // ✅ Para debouncing en iOS
   const { translate, isTranslating, error, lastTranslation, clearError } = useTranslator();
   const { speak, isGenerating, error: speakError, clearError: clearSpeakError } = useSpeaker();
+
+  // Cargar configuración del diccionario desde localStorage
+  useEffect(() => {
+    const loadDictConfig = () => {
+      try {
+        const saved = localStorage.getItem('xiwen_dictionary_config');
+        if (saved) {
+          setDictConfig({ ...DEFAULT_DICTIONARY_CONFIG, ...JSON.parse(saved) });
+        }
+      } catch (err) {
+        logger.error('Error loading dictionary config:', err, 'SelectionDetector');
+      }
+    };
+
+    loadDictConfig();
+
+    // Escuchar cambios en la configuración
+    const handleConfigChange = (e) => {
+      if (e.detail) {
+        setDictConfig({ ...DEFAULT_DICTIONARY_CONFIG, ...e.detail });
+      }
+    };
+
+    window.addEventListener('xiwen_dictionary_config_changed', handleConfigChange);
+
+    return () => {
+      window.removeEventListener('xiwen_dictionary_config_changed', handleConfigChange);
+    };
+  }, []);
 
   /**
    * Handle text selection
@@ -138,6 +189,12 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
   const handleDictionary = useCallback(async () => {
     if (!selectedText) return;
 
+    // Verificar si el diccionario está habilitado
+    if (!dictConfig.enabled) {
+      logger.info('Dictionary is disabled in config', 'SelectionDetector');
+      return;
+    }
+
     setIsDictLoading(true);
     setDictError(null);
     setDictTranslation(null);
@@ -153,8 +210,8 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
 
       const result = await autoTranslate(selectedText);
 
-      // BACK-TRANSLATION: Si tradujo ES→ZH, traducir de vuelta con Google para verificar
-      if (result.targetLang === 'zh-CN' && result.translatedText) {
+      // BACK-TRANSLATION: Solo si está habilitado en la config y tradujo ES→ZH
+      if (dictConfig.backTranslation?.enabled && result.targetLang === 'zh-CN' && result.translatedText) {
         console.log('[SelectionDetector] 🔍 Attempting Google back-translation for:', result.translatedText);
         try {
           // Usar Google Translate para traducir el chino de vuelta a español
@@ -170,6 +227,8 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
         } catch (err) {
           console.error('[SelectionDetector] ❌ Google back-translation failed:', err);
         }
+      } else if (!dictConfig.backTranslation?.enabled) {
+        console.log('[SelectionDetector] ⏭️ Back-translation disabled in config');
       } else {
         console.log('[SelectionDetector] ⏭️ Skipping back-translation:', {
           targetLang: result.targetLang,
@@ -181,6 +240,28 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
       setShowButtons(false);
       setShowDictPopup(true);
 
+      // Auto-copy si está habilitado
+      if (dictConfig.behavior?.autoCopy && result.translatedText) {
+        try {
+          await navigator.clipboard.writeText(result.translatedText);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+          logger.info('Translation auto-copied to clipboard', 'SelectionDetector');
+        } catch (copyErr) {
+          logger.error('Auto-copy failed:', copyErr, 'SelectionDetector');
+        }
+      }
+
+      // Abrir en Google Translate si está habilitado
+      if (dictConfig.behavior?.openExternalOnClick) {
+        const hasChineseChars = /[\u4e00-\u9fa5]/.test(selectedText);
+        if (hasChineseChars) {
+          window.open(`https://www.mdbg.net/chinese/dictionary?page=worddict&wdrst=0&wdqb=${encodeURIComponent(selectedText)}`, '_blank');
+        } else {
+          window.open(`https://translate.google.com/?sl=es&tl=zh-CN&text=${encodeURIComponent(selectedText)}&op=translate`, '_blank');
+        }
+      }
+
     } catch (err) {
       logger.error('Dictionary error:', err, 'SelectionDetector');
       setDictError(err.message || 'Error al consultar diccionario');
@@ -189,7 +270,7 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
     } finally {
       setIsDictLoading(false);
     }
-  }, [selectedText]);
+  }, [selectedText, dictConfig]);
 
   /**
    * Copy translation to clipboard
@@ -382,37 +463,39 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
               )}
             </button>
 
-            {/* Dictionary Button - Google Translate rápido */}
-            <button
-              onClick={handleDictionary}
-              disabled={isDictLoading}
-              className="
-                flex items-center justify-center gap-2 px-4 py-3
-                bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600
-                disabled:bg-emerald-400 dark:disabled:bg-emerald-300
-                text-white text-sm font-medium
-                rounded-lg shadow-lg
-                transition-all duration-200
-                hover:scale-105 active:scale-95
-                disabled:cursor-not-allowed
-                min-h-[44px] min-w-[110px]
-                touch-manipulation
-              "
-              style={{ WebkitTapHighlightColor: 'transparent' }}
-              aria-label="Buscar en diccionario Google"
-            >
-              {isDictLoading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span className="whitespace-nowrap">...</span>
-                </>
-              ) : (
-                <>
-                  <BookOpen size={16} strokeWidth={2} />
-                  <span className="whitespace-nowrap">Diccionario</span>
-                </>
-              )}
-            </button>
+            {/* Dictionary Button - Google Translate rápido (solo si está habilitado) */}
+            {dictConfig.enabled && (
+              <button
+                onClick={handleDictionary}
+                disabled={isDictLoading}
+                className="
+                  flex items-center justify-center gap-2 px-4 py-3
+                  bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600
+                  disabled:bg-emerald-400 dark:disabled:bg-emerald-300
+                  text-white text-sm font-medium
+                  rounded-lg shadow-lg
+                  transition-all duration-200
+                  hover:scale-105 active:scale-95
+                  disabled:cursor-not-allowed
+                  min-h-[44px] min-w-[110px]
+                  touch-manipulation
+                "
+                style={{ WebkitTapHighlightColor: 'transparent' }}
+                aria-label="Buscar en diccionario Google"
+              >
+                {isDictLoading ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span className="whitespace-nowrap">...</span>
+                  </>
+                ) : (
+                  <>
+                    <BookOpen size={16} strokeWidth={2} />
+                    <span className="whitespace-nowrap">Diccionario</span>
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -439,14 +522,15 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
 
           {/* Popup Card */}
           <div
-            className="
-              relative w-full max-w-sm
+            className={`
+              relative w-full
               bg-white dark:bg-gray-800
               rounded-2xl shadow-2xl
               border border-gray-200 dark:border-gray-700
               overflow-hidden
-              animate-in zoom-in-95 fade-in duration-200
-            "
+              ${dictConfig.display?.animations !== false ? 'animate-in zoom-in-95 fade-in duration-200' : ''}
+            `}
+            style={{ maxWidth: `${dictConfig.display?.popupWidth || 380}px` }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
@@ -510,20 +594,20 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
                     <div className="flex items-start gap-2">
                       <div className="flex-1 space-y-2">
                         <p
-                          className={`
-                            p-3 rounded-lg border-2 border-emerald-200 dark:border-emerald-800
-                            bg-emerald-50 dark:bg-emerald-900/20
-                            ${dictTranslation.targetLang === 'zh-CN' ? 'text-3xl font-medium' : 'text-base'}
-                            text-gray-900 dark:text-white
-                          `}
+                          className="p-3 rounded-lg border-2 border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 text-gray-900 dark:text-white font-medium"
+                          style={{
+                            fontSize: dictTranslation.targetLang === 'zh-CN'
+                              ? `${dictConfig.display?.chineseFontSize || 32}px`
+                              : '16px'
+                          }}
                         >
                           {dictTranslation.translatedText}
                         </p>
-                        {/* Back-translation verification */}
-                        {dictTranslation.backTranslation && dictTranslation.backTranslation.length > 0 && (
+                        {/* Back-translation verification - only show if enabled in config */}
+                        {dictConfig.backTranslation?.enabled && dictTranslation.backTranslation && dictTranslation.backTranslation.length > 0 && (
                           <div className="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/30 p-2 rounded border border-gray-200 dark:border-gray-700">
                             <span className="font-semibold">↩️ Verifica:</span>{' '}
-                            <span className="italic">{dictTranslation.backTranslation.slice(0, 3).join('; ')}</span>
+                            <span className="italic">{dictTranslation.backTranslation.slice(0, dictConfig.backTranslation?.limit || 3).join('; ')}</span>
                           </div>
                         )}
                       </div>
@@ -541,14 +625,16 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
                     </div>
                   </div>
 
-                  {/* Source Badge */}
+                  {/* Source Badge - configurable */}
                   <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      Fuente: Google Translate
-                    </span>
+                    {dictConfig.display?.showSourceBadge !== false && (
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        Fuente: Google Translate
+                      </span>
+                    )}
                     <button
                       onClick={handleOpenExternal}
-                      className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 hover:underline"
+                      className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 hover:underline ml-auto"
                     >
                       <ExternalLink size={12} />
                       Ver más detalles

@@ -5,7 +5,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { Lightbulb, Filter, Settings, Play, CheckCircle, Edit3, Image as ImageIcon, Layers, Sparkles, Eye } from 'lucide-react';
+import { Lightbulb, Filter, Settings, Play, CheckCircle, Edit3, Image as ImageIcon, Layers, Sparkles, Eye, BookOpen } from 'lucide-react';
 import { getAIConfig, saveAIConfig } from '../firebase/aiConfig';
 import { getAllCorrectionProfiles } from '../firebase/correctionProfiles';
 import logger from '../utils/logger';
@@ -25,6 +25,7 @@ import SelectionSpeakerConfig from './SelectionSpeakerConfig';
 import PromptBasedProfileEditor from './homework/PromptBasedProfileEditor';
 import ImageTaskModal from './ImageTaskModal';
 import TranslatorConfigCard from './settings/TranslatorConfigCard';
+import DictionaryConfigCard from './settings/DictionaryConfigCard';
 import ContentDisplayModal from './settings/ContentDisplayModal';
 import { ExerciseBuilderModal } from './exercisebuilder/ExerciseBuilderModal';
 import { AI_FUNCTIONS, AI_CATEGORIES } from '../constants/aiFunctions';
@@ -55,6 +56,10 @@ function AIConfigPanel() {
   const [translatorConfig, setTranslatorConfig] = useState(null);
   const [showTranslatorModal, setShowTranslatorModal] = useState(false);
 
+  // Estado para configuración del diccionario (Google Translate popup)
+  const [dictionaryConfig, setDictionaryConfig] = useState(null);
+  const [showDictionaryModal, setShowDictionaryModal] = useState(false);
+
   // Estado para Exercise Builder
   const [showExerciseBuilder, setShowExerciseBuilder] = useState(false);
 
@@ -76,6 +81,7 @@ function AIConfigPanel() {
     loadConfig();
     loadCorrectionProfiles();
     loadTranslatorConfig();
+    loadDictionaryConfig();
   }, []);
 
   /**
@@ -109,6 +115,39 @@ function AIConfigPanel() {
       }
     } catch (err) {
       logger.error('Error loading translator config:', err);
+    }
+  };
+
+  /**
+   * Cargar configuración del diccionario (Google Translate popup) desde localStorage
+   */
+  const loadDictionaryConfig = () => {
+    try {
+      const saved = localStorage.getItem('xiwen_dictionary_config');
+      if (saved) {
+        setDictionaryConfig(JSON.parse(saved));
+      } else {
+        // Config por defecto
+        setDictionaryConfig({
+          enabled: true,
+          backTranslation: {
+            enabled: true,
+            limit: 3
+          },
+          display: {
+            chineseFontSize: 32,
+            popupWidth: 380,
+            animations: true,
+            showSourceBadge: true
+          },
+          behavior: {
+            autoCopy: false,
+            openExternalOnClick: false
+          }
+        });
+      }
+    } catch (err) {
+      logger.error('Error loading dictionary config:', err);
     }
   };
 
@@ -200,6 +239,13 @@ function AIConfigPanel() {
    */
   const handleConfigureTranslator = () => {
     setShowTranslatorModal(true);
+  };
+
+  /**
+   * Abrir modal de diccionario (Google Translate popup)
+   */
+  const handleConfigureDictionary = () => {
+    setShowDictionaryModal(true);
   };
 
   /**
@@ -399,6 +445,22 @@ function AIConfigPanel() {
         mode: 'compact',
         showMetadataBadges: true,
         showInstructions: true
+      }
+    });
+
+    // Agregar Diccionario Rápido (Google Translate popup) - siempre disponible
+    functions.push({
+      id: 'dictionary_config',
+      name: 'Diccionario Rápido',
+      description: 'Configura el popup de Google Translate (botón verde)',
+      icon: BookOpen,
+      category: 'tools',
+      isDictionaryConfig: true,
+      defaultConfig: {
+        enabled: true,
+        backTranslation: { enabled: true, limit: 3 },
+        display: { chineseFontSize: 32, popupWidth: 380, animations: true, showSourceBadge: true },
+        behavior: { autoCopy: false, openExternalOnClick: false }
       }
     });
 
@@ -613,6 +675,19 @@ function AIConfigPanel() {
               );
             }
 
+            // Si es la configuración del diccionario (Google Translate popup)
+            if (func.isDictionaryConfig) {
+              return (
+                <AIFunctionCard
+                  key={func.id}
+                  aiFunction={func}
+                  config={dictionaryConfig || func.defaultConfig}
+                  onConfigure={handleConfigureDictionary}
+                  viewMode="grid"
+                />
+              );
+            }
+
             // Función de IA normal
             return (
               <AIFunctionCard
@@ -689,6 +764,19 @@ function AIConfigPanel() {
                   aiFunction={func}
                   config={func.defaultConfig}
                   onConfigure={() => setShowContentModal(true)}
+                  viewMode="list"
+                />
+              );
+            }
+
+            // Si es la configuración del diccionario (Google Translate popup)
+            if (func.isDictionaryConfig) {
+              return (
+                <AIFunctionCard
+                  key={func.id}
+                  aiFunction={func}
+                  config={dictionaryConfig || func.defaultConfig}
+                  onConfigure={handleConfigureDictionary}
                   viewMode="list"
                 />
               );
@@ -892,6 +980,29 @@ function AIConfigPanel() {
         isOpen={showContentModal}
         onClose={() => setShowContentModal(false)}
       />
+
+      {/* Dictionary Config Modal (Google Translate popup) */}
+      {showDictionaryModal && dictionaryConfig && (
+        <BaseModal
+          isOpen={showDictionaryModal}
+          onClose={() => setShowDictionaryModal(false)}
+          title="Diccionario Rápido"
+          icon={BookOpen}
+          size="xl"
+        >
+          <DictionaryConfigCard
+            config={dictionaryConfig}
+            onChange={(newConfig) => {
+              setDictionaryConfig(newConfig);
+              // Guardar automáticamente
+              localStorage.setItem('xiwen_dictionary_config', JSON.stringify(newConfig));
+              window.dispatchEvent(new CustomEvent('xiwen_dictionary_config_changed', { detail: newConfig }));
+              setSuccess('Configuración del diccionario guardada');
+              setTimeout(() => setSuccess(null), 2000);
+            }}
+          />
+        </BaseModal>
+      )}
     </div>
   );
 }
