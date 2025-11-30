@@ -128,8 +128,7 @@ function BaseModal({
         `}
         style={{
           zIndex: 10001,
-          background: 'var(--color-bg-secondary)',
-          border: '1px solid var(--color-border)'
+          background: 'var(--color-bg-secondary)'
         }}
         onClick={(e) => e.stopPropagation()}
       >
