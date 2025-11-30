@@ -2,24 +2,17 @@
 /**
  * @fileoverview Generador de Diccionario Español-Chino usando DeepL Pro
  *
- * DeepL tiene mejor calidad de traducción para español-chino que Google.
- *
  * USO:
  *   node scripts/generate-dictionary-deepl.js --api-key=YOUR_DEEPL_KEY --limit=5000
- *
- * OPCIONES:
- *   --api-key     Tu API key de DeepL Pro (requerido)
- *   --limit       Número de palabras a procesar (default: 5000)
- *   --output      Archivo de salida (default: public/dictionaries/spanish_freq.json)
- *   --resume      Continuar desde archivo parcial existente
- *   --free        Usar API Free de DeepL (límite 500k chars/mes)
- *
- * NOTA: DeepL Pro es mejor para español-chino que Google Translate
  */
 
-const fs = require('fs');
-const path = require('path');
-const https = require('https');
+import fs from 'fs';
+import path from 'path';
+import https from 'https';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // =============================================================================
 // CONFIGURACIÓN
@@ -29,14 +22,11 @@ const CONFIG = {
   inputFile: path.join(__dirname, '../data/es_50k.txt'),
   outputFile: path.join(__dirname, '../public/dictionaries/spanish_freq.json'),
   progressFile: path.join(__dirname, '../data/translation_progress_deepl.json'),
-
-  // DeepL API URLs
   deeplApiPro: 'https://api.deepl.com/v2/translate',
   deeplApiFree: 'https://api-free.deepl.com/v2/translate',
-
   defaultLimit: 5000,
-  batchSize: 50,      // DeepL permite hasta 50 textos por request
-  delayMs: 200,       // Delay entre requests
+  batchSize: 50,
+  delayMs: 250,
 };
 
 // =============================================================================
@@ -65,7 +55,7 @@ function readFrequencyFile(filePath, limit) {
   const lines = content.trim().split('\n');
 
   const words = [];
-  for (let i = 0; i < Math.min(lines.length, limit); i++) {
+  for (let i = 0; i < Math.min(lines.length, limit + 500); i++) {
     const line = lines[i].trim();
     if (!line) continue;
 
@@ -73,20 +63,33 @@ function readFrequencyFile(filePath, limit) {
     const word = parts[0];
     const frequency = parseInt(parts[1], 10) || 0;
 
+    // Filtrar
     if (word.length < 2) continue;
     if (/^\d+$/.test(word)) continue;
     if (/^[^a-záéíóúñü]+$/i.test(word)) continue;
 
     words.push({ spanish: word, frequency, rank: words.length + 1 });
+
+    if (words.length >= limit) break;
   }
 
   console.log(`✅ Leídas ${words.length} palabras válidas`);
   return words;
 }
 
-function httpRequest(url, options, data) {
+function httpRequest(urlString, options, postData) {
   return new Promise((resolve, reject) => {
-    const req = https.request(url, options, (res) => {
+    const url = new URL(urlString);
+
+    const reqOptions = {
+      hostname: url.hostname,
+      port: url.port || 443,
+      path: url.pathname + url.search,
+      method: options.method || 'GET',
+      headers: options.headers || {},
+    };
+
+    const req = https.request(reqOptions, (res) => {
       let body = '';
       res.on('data', chunk => body += chunk);
       res.on('end', () => {
@@ -98,25 +101,25 @@ function httpRequest(url, options, data) {
             reject(new Error(`HTTP ${res.statusCode}: ${json.message || body}`));
           }
         } catch (e) {
-          reject(new Error(`Parse error: ${body}`));
+          reject(new Error(`Parse error: ${body.substring(0, 200)}`));
         }
       });
     });
 
     req.on('error', reject);
-    if (data) req.write(data);
+    req.setTimeout(30000, () => {
+      req.destroy();
+      reject(new Error('Request timeout'));
+    });
+
+    if (postData) req.write(postData);
     req.end();
   });
 }
 
-/**
- * Traduce un batch de palabras usando DeepL
- */
 async function translateBatchDeepL(words, apiKey, useFreeApi) {
   const apiUrl = useFreeApi ? CONFIG.deeplApiFree : CONFIG.deeplApiPro;
-  const url = new URL(apiUrl);
 
-  // DeepL usa form-urlencoded
   const params = new URLSearchParams();
   params.append('auth_key', apiKey);
   words.forEach(word => params.append('text', word));
@@ -125,15 +128,12 @@ async function translateBatchDeepL(words, apiKey, useFreeApi) {
 
   const options = {
     method: 'POST',
-    hostname: url.hostname,
-    path: url.pathname,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      'Content-Length': Buffer.byteLength(params.toString()),
     },
   };
 
-  const response = await httpRequest(url.toString(), options, params.toString());
+  const response = await httpRequest(apiUrl, options, params.toString());
 
   if (!response.translations) {
     throw new Error('Respuesta inválida de DeepL');
@@ -172,7 +172,7 @@ function loadProgress(progressFile) {
 // =============================================================================
 
 async function main() {
-  console.log('\n🔤 GENERADOR DE DICCIONARIO ESPAÑOL-CHINO (DeepL Pro)\n');
+  console.log('\n🔤 GENERADOR DE DICCIONARIO ESPAÑOL-CHINO (DeepL)\n');
   console.log('='.repeat(60));
 
   const args = parseArgs();
@@ -180,22 +180,19 @@ async function main() {
   const apiKey = args['api-key'] || process.env.DEEPL_API_KEY;
   const limit = parseInt(args.limit, 10) || CONFIG.defaultLimit;
   const outputFile = args.output || CONFIG.outputFile;
-  const shouldResume = args.resume === true;
-  const useFreeApi = args.free === true;
+  const shouldResume = args.resume === true || args.resume === 'true';
+  const useFreeApi = args.free === true || args.free === 'true' || apiKey?.endsWith(':fx');
 
   if (!apiKey) {
     console.error('\n❌ ERROR: Se requiere API key de DeepL\n');
-    console.log('Uso:');
-    console.log('  node scripts/generate-dictionary-deepl.js --api-key=YOUR_KEY --limit=5000\n');
-    console.log('Opciones:');
-    console.log('  --free     Usar DeepL API Free (500k chars/mes gratis)\n');
     process.exit(1);
   }
 
   console.log(`📊 Configuración:`);
-  console.log(`   - Palabras a procesar: ${limit}`);
+  console.log(`   - Palabras: ${limit}`);
   console.log(`   - API: DeepL ${useFreeApi ? 'Free' : 'Pro'}`);
-  console.log(`   - Archivo de salida: ${outputFile}`);
+  console.log(`   - Output: ${outputFile}`);
+  console.log(`   - Resume: ${shouldResume}`);
   console.log('');
 
   const words = readFrequencyFile(CONFIG.inputFile, limit);
@@ -203,18 +200,22 @@ async function main() {
   let entries = shouldResume ? loadProgress(CONFIG.progressFile) : [];
   const startIndex = entries.length;
 
+  if (startIndex > 0) {
+    console.log(`⏩ Continuando desde #${startIndex + 1}`);
+  }
+
   const totalBatches = Math.ceil((words.length - startIndex) / CONFIG.batchSize);
   let processedCount = startIndex;
   let errorCount = 0;
 
-  console.log(`\n🚀 Traduciendo ${words.length - startIndex} palabras...\n`);
+  console.log(`\n🚀 Traduciendo ${words.length - startIndex} palabras en ${totalBatches} batches...\n`);
 
   for (let i = startIndex; i < words.length; i += CONFIG.batchSize) {
     const batchNum = Math.floor((i - startIndex) / CONFIG.batchSize) + 1;
     const batch = words.slice(i, i + CONFIG.batchSize);
     const batchWords = batch.map(w => w.spanish);
 
-    process.stdout.write(`📦 Batch ${batchNum}/${totalBatches}... `);
+    process.stdout.write(`📦 Batch ${batchNum}/${totalBatches} (${batchWords.length} palabras)... `);
 
     try {
       const translations = await translateBatchDeepL(batchWords, apiKey, useFreeApi);
@@ -234,20 +235,24 @@ async function main() {
       processedCount += batch.length;
       console.log(`✅ (${processedCount}/${words.length})`);
 
-      if (batchNum % 10 === 0) {
+      // Guardar progreso cada 5 batches
+      if (batchNum % 5 === 0) {
         saveProgress(entries, CONFIG.progressFile);
+        process.stdout.write(`   💾 Progreso guardado\n`);
       }
+
+      errorCount = 0; // Reset error count on success
 
     } catch (error) {
       errorCount++;
       console.log(`❌ ${error.message}`);
       saveProgress(entries, CONFIG.progressFile);
 
-      if (errorCount > 5) {
-        console.error('\n⚠️ Demasiados errores. Ejecuta con --resume para continuar.\n');
+      if (errorCount > 3) {
+        console.error('\n⚠️ Demasiados errores. Usa --resume para continuar.\n');
         process.exit(1);
       }
-      await delay(CONFIG.delayMs * 10);
+      await delay(CONFIG.delayMs * 5);
     }
 
     await delay(CONFIG.delayMs);
@@ -290,9 +295,10 @@ async function main() {
   console.log(`   💾 ${fileSizeKB} KB`);
   console.log('');
 
-  console.log('📋 Primeras 10 entradas:');
-  entries.slice(0, 10).forEach((e, i) => {
-    console.log(`   ${i+1}. ${e.spanish} → ${e.simplified}`);
+  console.log('📋 Primeras 20 entradas:');
+  console.log('-'.repeat(40));
+  entries.slice(0, 20).forEach((e, i) => {
+    console.log(`   ${String(i+1).padStart(2)}. ${e.spanish.padEnd(12)} → ${e.simplified}`);
   });
   console.log('');
 }
