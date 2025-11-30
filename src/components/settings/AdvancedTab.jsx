@@ -4,10 +4,11 @@
  */
 
 import { useState } from 'react';
-import { Key, Database, Home, Lightbulb, Save } from 'lucide-react';
+import { Key, Database, Home, Lightbulb, Save, Languages } from 'lucide-react';
 import BaseTabs from '../common/BaseTabs';
 import CredentialsTab from './CredentialsTab';
 import AudioCacheTab from './AudioCacheTab';
+import GoogleTranslateCacheTab from './GoogleTranslateCacheTab';
 import LandingPageTab from './LandingPageTab';
 import ConfigBackupTab from './ConfigBackupTab';
 import AIConfigPanel from '../AIConfigPanel';
@@ -20,6 +21,7 @@ function AdvancedTab() {
     { id: 'ai-config', label: 'Configurar IA', icon: Lightbulb },
     { id: 'backup', label: 'Backup Configuraciones', icon: Save },
     { id: 'cache', label: 'Caché de Audio', icon: Database },
+    { id: 'translate-cache', label: 'Caché de Google Translate', icon: Languages },
     { id: 'landing', label: 'Landing Page', icon: Home }
   ];
 
@@ -59,6 +61,12 @@ function AdvancedTab() {
         {activeSubTab === 'cache' && (
           <div className="w-full">
             <AudioCacheTab />
+          </div>
+        )}
+
+        {activeSubTab === 'translate-cache' && (
+          <div className="w-full">
+            <GoogleTranslateCacheTab />
           </div>
         )}
 
