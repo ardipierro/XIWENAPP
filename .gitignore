@@ -11,3 +11,19 @@ build/
 # Lighthouse reports
 lighthouse-*-report.html
 .lighthouseci/
+
+# Utility HTML files and development tools
+check-*.html
+diagnose-*.html
+create-*.html
+delete-*.html
+fix-*.html
+find-*.html
+restore-*.html
+rebuild-*.html
+setup-*.html
+simple-*.html
+verify-*.html
+cleanup-*.html
+*.cjs
+CREDENTIALS_README.md
