@@ -153,26 +153,22 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
 
       const result = await autoTranslate(selectedText);
 
-      // BACK-TRANSLATION: Si tradujo ES→ZH, buscar en diccionario local qué significa ese chino
+      // BACK-TRANSLATION: Si tradujo ES→ZH, traducir de vuelta con Google para verificar
       if (result.targetLang === 'zh-CN' && result.translatedText) {
-        console.log('[SelectionDetector] 🔍 Attempting back-translation for:', result.translatedText);
+        console.log('[SelectionDetector] 🔍 Attempting Google back-translation for:', result.translatedText);
         try {
-          const { searchDictionary } = await import('../../services/dictionaryService');
-          const backResults = await searchDictionary(result.translatedText, {
-            limit: 1,
-            searchType: 'chinese'
-          });
+          // Usar Google Translate para traducir el chino de vuelta a español
+          const backResult = await autoTranslate(result.translatedText, 'zh-CN', 'es');
 
-          console.log('[SelectionDetector] Back-translation search results:', backResults);
-
-          if (backResults.length > 0 && backResults[0].meanings) {
-            result.backTranslation = backResults[0].meanings;
-            console.log('[SelectionDetector] ✅ Back-translation added from dictionary:', backResults[0].meanings);
+          if (backResult && backResult.translatedText) {
+            // Guardar como array para compatibilidad con el UI
+            result.backTranslation = [backResult.translatedText];
+            console.log('[SelectionDetector] ✅ Google back-translation added:', backResult.translatedText);
           } else {
-            console.log('[SelectionDetector] ⚠️ No meanings found in back-translation results');
+            console.log('[SelectionDetector] ⚠️ No back-translation returned from Google');
           }
         } catch (err) {
-          console.error('[SelectionDetector] ❌ Back-translation failed:', err);
+          console.error('[SelectionDetector] ❌ Google back-translation failed:', err);
         }
       } else {
         console.log('[SelectionDetector] ⏭️ Skipping back-translation:', {
