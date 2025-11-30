@@ -155,6 +155,7 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
 
       // BACK-TRANSLATION: Si tradujo ES→ZH, buscar en diccionario local qué significa ese chino
       if (result.targetLang === 'zh-CN' && result.translatedText) {
+        console.log('[SelectionDetector] 🔍 Attempting back-translation for:', result.translatedText);
         try {
           const { searchDictionary } = await import('../../services/dictionaryService');
           const backResults = await searchDictionary(result.translatedText, {
@@ -162,13 +163,22 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
             searchType: 'chinese'
           });
 
+          console.log('[SelectionDetector] Back-translation search results:', backResults);
+
           if (backResults.length > 0 && backResults[0].meanings) {
             result.backTranslation = backResults[0].meanings;
             console.log('[SelectionDetector] ✅ Back-translation added from dictionary:', backResults[0].meanings);
+          } else {
+            console.log('[SelectionDetector] ⚠️ No meanings found in back-translation results');
           }
         } catch (err) {
-          console.warn('[SelectionDetector] Back-translation failed:', err);
+          console.error('[SelectionDetector] ❌ Back-translation failed:', err);
         }
+      } else {
+        console.log('[SelectionDetector] ⏭️ Skipping back-translation:', {
+          targetLang: result.targetLang,
+          hasTranslatedText: !!result.translatedText
+        });
       }
 
       setDictTranslation(result);
