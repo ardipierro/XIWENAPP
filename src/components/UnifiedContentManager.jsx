@@ -13,10 +13,7 @@ import {
   Link as LinkIcon,
   PenTool,
   Gamepad2,
-  Plus,
-  Edit,
   Edit2,
-  Trash2,
   Calendar,
   Clock,
   Target,
@@ -26,10 +23,6 @@ import {
 import {
   getAllContent,
   getContentByTeacher,
-  getByType,
-  searchContent as searchContentAPI,
-  createContent,
-  updateContent,
   deleteContent,
   CONTENT_TYPES,
   EXERCISE_TYPES,
@@ -44,14 +37,11 @@ import {
   BaseLoading,
   BaseAlert,
   BaseEmptyState,
-  BaseModal,
   ExpandableModal,
-  VideoPlayer,
   SearchBar
 } from './common';
 import { UniversalCard, CardGrid } from './cards';
 import { ContentRenderer } from './content';
-import CreateContentModal from './CreateContentModal';
 import ExerciseCreatorModal from './ExerciseCreatorModal';
 import ExerciseViewerModal from './ExerciseViewerModal';
 import ContainerViewer from './container/ContainerViewer';
@@ -153,9 +143,7 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
   const [difficultyFilter, setDifficultyFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const [showExerciseModal, setShowExerciseModal] = useState(false);
-  const [selectedContent, setSelectedContent] = useState(null);
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [viewingContent, setViewingContent] = useState(null);
@@ -243,83 +231,11 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
   }, [contents]);
 
   // Handlers
-  const handleCreate = () => {
-    setSelectedContent(null);
-    setShowCreateModal(true);
-  };
-
   const handleEdit = (content) => {
-    // Tipos de ejercicios que se editan con el modal de IA
-    const aiExerciseTypes = [
-      'ai_generated',
-      'word-highlight',
-      'drag-drop',
-      'fill-blanks',
-      'dialogues'
-    ];
-
-    // Verificar si es un ejercicio interactivo por metadata o por contenido
-    const exerciseType = content.metadata?.exerciseType;
-    const isAIExercise = aiExerciseTypes.includes(exerciseType);
-
-    // También detectar por contenido (prefijos #marcar, #arrastrar, #completar, #dialogo o asteriscos)
-    const hasInteractiveContent = content.content && (
-      /^#(marcar|arrastrar|completar|dialogo|diálogo)/i.test(content.content.trim()) ||
-      /\*[^*]+\*/g.test(content.content)
-    );
-
-    if (isAIExercise || hasInteractiveContent) {
-      setSelectedExercise(content);
-      setShowExerciseModal(true);
-      logger.info('Opening interactive exercise in editor (edit):', content);
-    } else {
-      setSelectedContent(content);
-      setShowCreateModal(true);
-    }
-  };
-
-  const handleSave = async (contentData) => {
-    try {
-      let savedId = null;
-
-      if (selectedContent) {
-        // Editar
-        await updateContent(selectedContent.id, contentData);
-        logger.info('Content updated successfully', 'UnifiedContentManager');
-        setSuccessMessage('✅ Contenido actualizado exitosamente');
-        savedId = selectedContent.id;
-      } else {
-        // Crear
-        const result = await createContent(contentData);
-        savedId = result.id;
-        logger.info('Content created successfully', 'UnifiedContentManager');
-        setSuccessMessage('✅ Contenido creado exitosamente');
-        setNewlyCreatedId(savedId);
-
-        // Auto-hide success message after 5 seconds
-        setTimeout(() => {
-          setSuccessMessage(null);
-          setNewlyCreatedId(null);
-        }, 5000);
-      }
-
-      await loadContents();
-      setShowCreateModal(false);
-      setSelectedContent(null);
-
-      // Scroll to new content after a brief delay
-      if (savedId) {
-        setTimeout(() => {
-          const element = document.getElementById(`content-${savedId}`);
-          if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-        }, 300);
-      }
-    } catch (err) {
-      logger.error('Error saving content:', err, 'UnifiedContentManager');
-      throw err;
-    }
+    // Abrir el editor de ejercicios interactivos (ExerciseCreatorModal)
+    setSelectedExercise(content);
+    setShowExerciseModal(true);
+    logger.info('Opening exercise in editor:', content);
   };
 
   const handleDelete = async (contentId) => {
@@ -435,22 +351,13 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
               Contenidos
             </h1>
           </div>
-          <div className="flex gap-2">
-            <BaseButton
-              variant="secondary"
-              icon={PenTool}
-              onClick={() => setShowExerciseModal(true)}
-              title="Crear ejercicio interactivo"
-              size="md"
-            />
-            <BaseButton
-              variant="primary"
-              icon={Plus}
-              onClick={handleCreate}
-              title="Crear contenido"
-              size="md"
-            />
-          </div>
+          <BaseButton
+            variant="primary"
+            icon={PenTool}
+            onClick={() => setShowExerciseModal(true)}
+            title="Crear ejercicio"
+            size="md"
+          />
         </div>
 
         {/* SearchBar Unificado con Filtros */}
@@ -526,11 +433,11 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
           title="No hay contenidos"
           description={searchTerm || typeFilter !== 'all' || difficultyFilter !== 'all'
             ? 'No se encontraron contenidos con los filtros aplicados'
-            : 'Crea tu primer contenido para comenzar'
+            : 'Crea tu primer ejercicio para comenzar'
           }
           action={
-            <BaseButton variant="primary" icon={Plus} onClick={handleCreate}>
-              Crear Contenido
+            <BaseButton variant="primary" icon={PenTool} onClick={() => setShowExerciseModal(true)}>
+              Crear Ejercicio
             </BaseButton>
           }
         />
@@ -563,20 +470,6 @@ function UnifiedContentManager({ user, onBack, onNavigateToAIConfig }) {
           ))}
         </div>
       )}
-
-      {/* Create/Edit Modal */}
-      <CreateContentModal
-        isOpen={showCreateModal}
-        onClose={() => {
-          setShowCreateModal(false);
-          setSelectedContent(null);
-        }}
-        onSave={handleSave}
-        onDelete={handleDelete}
-        initialData={selectedContent}
-        userId={user.uid}
-        onNavigateToAIConfig={onNavigateToAIConfig}
-      />
 
       {/* Exercise Creator Modal */}
       <ExerciseCreatorModal
