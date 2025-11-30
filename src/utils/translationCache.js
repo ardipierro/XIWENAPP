@@ -4,7 +4,7 @@
  */
 
 const CACHE_KEY = 'xiwen_translation_cache';
-const CACHE_VERSION = '1.0';
+const CACHE_VERSION = '2.0'; // v2.0: Búsqueda exhaustiva + scoring agresivo
 const MAX_CACHE_SIZE = 500; // Maximum number of cached translations
 const CACHE_EXPIRY_DAYS = 30; // Cache expires after 30 days
 
