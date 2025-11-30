@@ -8,6 +8,7 @@
 
 import logger from '../utils/logger';
 import credentialsService from './CredentialsService';
+import googleTranslateCache from '../utils/googleTranslateCache';
 
 // Configuración de la API
 const GOOGLE_TRANSLATE_API = 'https://translation.googleapis.com/language/translate/v2';
@@ -97,6 +98,19 @@ export async function translateWithGoogle(text, options = {}) {
     apiKey = null
   } = options;
 
+  if (!text || !text.trim()) {
+    throw new Error('No se proporcionó texto para traducir');
+  }
+
+  const trimmedText = text.trim();
+
+  // Check cache first
+  const cached = googleTranslateCache.getCachedTranslation(trimmedText, source, target);
+  if (cached) {
+    logger.info(`Using cached Google translation for: "${trimmedText.substring(0, 50)}..."`, 'googleTranslateService');
+    return cached;
+  }
+
   // Obtener API key
   const key = apiKey || await getGoogleTranslateApiKey();
 
@@ -104,13 +118,7 @@ export async function translateWithGoogle(text, options = {}) {
     throw new Error('Google Translate API key no configurada. Configúrala en Ajustes > Credenciales.');
   }
 
-  if (!text || !text.trim()) {
-    throw new Error('No se proporcionó texto para traducir');
-  }
-
-  const trimmedText = text.trim();
-
-  logger.info(`Translating with Google: "${trimmedText.substring(0, 50)}..."`, 'googleTranslateService');
+  logger.info(`Translating with Google API: "${trimmedText.substring(0, 50)}..."`, 'googleTranslateService');
 
   try {
     const response = await fetch(`${GOOGLE_TRANSLATE_API}?key=${key}`, {
@@ -151,7 +159,7 @@ export async function translateWithGoogle(text, options = {}) {
 
     logger.info(`Google translation result: "${translation}"`, 'googleTranslateService');
 
-    return {
+    const result = {
       success: true,
       originalText: trimmedText,
       translatedText: translation,
@@ -159,6 +167,11 @@ export async function translateWithGoogle(text, options = {}) {
       targetLang: target,
       source: 'google-translate'
     };
+
+    // Cache the result
+    googleTranslateCache.setCachedTranslation(trimmedText, result, source, target);
+
+    return result;
 
   } catch (error) {
     logger.error('Google Translate API error', error, 'googleTranslateService');

@@ -22,12 +22,14 @@ import {
   TrendingUp,
   Type,
   Database,
-  Tag
+  Tag,
+  Languages
 } from 'lucide-react';
 import BaseModal from './common/BaseModal';
 import { BaseButton, BaseBadge, BaseTabs } from './common';
 import { CharacterVoiceManager } from './audio';
 import AudioCacheTab from './settings/AudioCacheTab';
+import GoogleTranslateCacheTab from './settings/GoogleTranslateCacheTab';
 import BadgeCustomizerTab from './settings/BadgeCustomizerTab';
 import logger from '../utils/logger';
 
@@ -156,6 +158,12 @@ function SettingsModal({ isOpen, onClose, characters = [], user = null }) {
       label: 'Caché de Audio',
       icon: Database,
       description: 'Gestión de audios TTS cacheados'
+    },
+    {
+      id: 'translate-cache',
+      label: 'Caché de Google Translate',
+      icon: Languages,
+      description: 'Gestión de traducciones cacheadas'
     },
     {
       id: 'badges',
@@ -663,6 +671,13 @@ function SettingsModal({ isOpen, onClose, characters = [], user = null }) {
           {/* ========================================= */}
           {activeTab === 'cache' && (
             <AudioCacheTab />
+          )}
+
+          {/* ========================================= */}
+          {/* TAB: CACHÉ DE GOOGLE TRANSLATE */}
+          {/* ========================================= */}
+          {activeTab === 'translate-cache' && (
+            <GoogleTranslateCacheTab />
           )}
 
           {/* ========================================= */}
