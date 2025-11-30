@@ -7,9 +7,8 @@
  * Características:
  * - Imágenes personalizadas (Firebase Storage)
  * - Iconos predefinidos (AVATARS)
- * - Avatares generativos (Boring Avatars)
- * - Banners generativos predefinidos
  * - Iniciales como fallback
+ * - Banner de fondo opcional
  * - Tamaños predefinidos
  * - Dark mode
  * - Animaciones hover
@@ -19,18 +18,9 @@
  */
 
 import { useState, useEffect, memo } from 'react';
-import { User } from 'lucide-react';
-import Avatar from 'boring-avatars';
+import { User, Circle } from 'lucide-react';
 import { AVATARS } from './AvatarSelector';
 import { getUserAvatar, getUserBanner } from '../firebase/firestore';
-import {
-  parseBoringAvatar,
-  AVATAR_PALETTES,
-  parseBanner,
-  getBannerGradient,
-  generateUserBanner
-} from '../utils/profileAssets';
-import { useTheme } from '../contexts/ThemeContext';
 import logger from '../utils/logger';
 
 /**
@@ -58,7 +48,6 @@ const SIZES = {
   xs: {
     container: 'w-6 h-6',
     icon: 12,
-    boringSize: 24,
     text: 'text-xs',
     border: 'border',
     badge: 'w-2 h-2',
@@ -67,7 +56,6 @@ const SIZES = {
   sm: {
     container: 'w-8 h-8',
     icon: 16,
-    boringSize: 32,
     text: 'text-sm',
     border: 'border',
     badge: 'w-2.5 h-2.5',
@@ -76,7 +64,6 @@ const SIZES = {
   md: {
     container: 'w-12 h-12',
     icon: 20,
-    boringSize: 48,
     text: 'text-base',
     border: 'border-2',
     badge: 'w-3 h-3',
@@ -85,7 +72,6 @@ const SIZES = {
   lg: {
     container: 'w-16 h-16',
     icon: 28,
-    boringSize: 64,
     text: 'text-lg',
     border: 'border-2',
     badge: 'w-4 h-4',
@@ -94,7 +80,6 @@ const SIZES = {
   xl: {
     container: 'w-24 h-24',
     icon: 40,
-    boringSize: 96,
     text: 'text-2xl',
     border: 'border-2',
     badge: 'w-5 h-5',
@@ -103,7 +88,6 @@ const SIZES = {
   '2xl': {
     container: 'w-32 h-32',
     icon: 56,
-    boringSize: 128,
     text: 'text-4xl',
     border: 'border-3',
     badge: 'w-6 h-6',
@@ -137,14 +121,14 @@ const STATUS_BADGES = {
  * UserAvatar - Componente universal de avatar (Optimizado con memo)
  *
  * @param {string} userId - ID del usuario (si no se proporciona avatar/avatarUrl)
- * @param {string} avatar - Avatar directo (ID de AVATARS, boring:variant:palette, o URL)
+ * @param {string} avatar - Avatar directo (ID de AVATARS o URL)
  * @param {string} avatarUrl - URL directa de imagen
- * @param {string} name - Nombre del usuario (para iniciales y seed de boring avatars)
+ * @param {string} name - Nombre del usuario (para iniciales)
  * @param {string} email - Email del usuario (para iniciales fallback)
  * @param {string} size - Tamaño: xs, sm, md, lg, xl, 2xl (default: md)
  * @param {boolean} showBanner - Si mostrar banner de fondo (default: false)
  * @param {string} bannerId - ID del usuario para cargar banner (si showBanner=true)
- * @param {string} bannerUrl - URL directa del banner o ID de banner preset
+ * @param {string} bannerUrl - URL directa del banner
  * @param {boolean} clickable - Si mostrar efectos hover (default: false)
  * @param {function} onClick - Callback al hacer click
  * @param {string} className - Clases CSS adicionales
@@ -178,10 +162,6 @@ function UserAvatar({
   const [loadedAvatar, setLoadedAvatar] = useState(avatar || avatarUrl || null);
   const [loadedBanner, setLoadedBanner] = useState(bannerUrl || null);
   const [loading, setLoading] = useState(false);
-
-  // Obtener tema actual
-  const themeContext = useTheme();
-  const theme = themeContext?.theme || 'dark';
 
   // Configuración de tamaño
   const sizeConfig = SIZES[size] || SIZES.md;
@@ -228,11 +208,9 @@ function UserAvatar({
 
   // Determinar qué renderizar
   const isImageUrl = loadedAvatar && loadedAvatar.startsWith('http');
-  const boringAvatarConfig = parseBoringAvatar(loadedAvatar);
-  const avatarKey = !isImageUrl && !boringAvatarConfig ? loadedAvatar : null;
+  const avatarKey = !isImageUrl ? loadedAvatar : null;
   const AvatarIcon = avatarKey && AVATARS[avatarKey] ? AVATARS[avatarKey].icon : AVATARS.default.icon;
   const initials = getInitials(name, email);
-  const avatarSeed = name || email || userId || 'usuario';
 
   // Estilos base del contenedor
   const containerClasses = [
@@ -268,20 +246,7 @@ function UserAvatar({
       );
     }
 
-    // 2. Si es un Boring Avatar
-    if (boringAvatarConfig) {
-      const palette = AVATAR_PALETTES[boringAvatarConfig.paletteId] || AVATAR_PALETTES.blueGray;
-      return (
-        <Avatar
-          size={sizeConfig.boringSize}
-          name={avatarSeed}
-          variant={boringAvatarConfig.variant}
-          colors={palette}
-        />
-      );
-    }
-
-    // 3. Si hay ícono de AVATARS
+    // 2. Si hay ícono de AVATARS
     if (avatarKey && AVATARS[avatarKey]) {
       return (
         <div className="w-full h-full flex items-center justify-center bg-[var(--color-bg-tertiary)]">
@@ -294,7 +259,7 @@ function UserAvatar({
       );
     }
 
-    // 4. Si se deben mostrar iniciales
+    // 3. Si se deben mostrar iniciales
     if (showInitials) {
       return (
         <div className="w-full h-full flex items-center justify-center bg-[var(--color-bg-tertiary)]">
@@ -305,7 +270,7 @@ function UserAvatar({
       );
     }
 
-    // 5. Fallback: ícono de usuario
+    // 4. Fallback: ícono de usuario
     return (
       <div className="w-full h-full flex items-center justify-center bg-[var(--color-bg-tertiary)]">
         <User
@@ -349,45 +314,22 @@ function UserAvatar({
     );
   };
 
-  // Obtener el gradiente del banner
-  const getBannerStyle = () => {
-    // Si es una URL de imagen
-    if (loadedBanner && loadedBanner.startsWith('http')) {
-      return null; // Usar imagen
-    }
-
-    // Si es un banner preset o generativo
-    const bannerGradient = getBannerGradient(loadedBanner, userId, theme);
-    if (bannerGradient) {
-      return { background: bannerGradient };
-    }
-
-    // Banner generativo por defecto basado en userId
-    return { background: generateUserBanner(userId || avatarSeed, theme) };
-  };
-
   // Si se debe mostrar banner de fondo
   if (showBanner) {
-    const bannerStyle = getBannerStyle();
-    const isImageBanner = loadedBanner && loadedBanner.startsWith('http');
-
     return (
       <div
         className={`relative ${clickable ? 'cursor-pointer' : ''}`}
         onClick={onClick}
       >
         {/* Banner de fondo */}
-        {isImageBanner ? (
+        {loadedBanner ? (
           <img
             src={loadedBanner}
             alt="Banner"
             className="absolute inset-0 w-full h-full object-cover rounded-full blur-sm opacity-30"
           />
         ) : (
-          <div
-            className="absolute inset-0 w-full h-full rounded-full blur-sm opacity-40"
-            style={bannerStyle}
-          />
+          <div className="absolute inset-0 w-full h-full rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 blur-sm" />
         )}
 
         {/* Avatar principal */}
@@ -423,7 +365,6 @@ export default memo(UserAvatar, (prevProps, nextProps) => {
     prevProps.email === nextProps.email &&
     prevProps.size === nextProps.size &&
     prevProps.showBanner === nextProps.showBanner &&
-    prevProps.bannerUrl === nextProps.bannerUrl &&
     prevProps.status === nextProps.status &&
     prevProps.notificationCount === nextProps.notificationCount &&
     prevProps.showStatusBadge === nextProps.showStatusBadge &&

@@ -197,7 +197,8 @@
       "Bash(start \"https://console.firebase.google.com/project/xiwen-app-2026/firestore/databases/-default-/data/~2Fexercises\")",
       "Bash(start \"https://console.firebase.google.com/project/xiwen-app-2026/firestore/databases/-default-/data/~2Fexercise_chains\")",
       "Bash(move delete-all-exercises.js delete-all-exercises.cjs)",
-      "Bash(firebase firestore:delete:*)"
+      "Bash(firebase firestore:delete:*)",
+      "Bash(xargs git log --oneline -1)"
     ],
     "deny": [],
     "ask": []
