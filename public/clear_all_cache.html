@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Limpiar Caché - XIWEN</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #2563eb;
+      margin-top: 0;
+    }
+    button {
+      background: #dc2626;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 20px;
+      width: 100%;
+    }
+    button:hover {
+      background: #b91c1c;
+    }
+    .status {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      display: none;
+    }
+    .status.success {
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #86efac;
+      display: block;
+    }
+    .status.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #fca5a5;
+      display: block;
+    }
+    ul {
+      margin: 15px 0;
+      padding-left: 20px;
+    }
+    li {
+      margin: 8px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧹 Limpiar Caché Completo</h1>
+    <p>Esta herramienta limpia <strong>TODOS</strong> los datos almacenados:</p>
+    <ul>
+      <li>✅ Caché de traducciones</li>
+      <li>✅ LocalStorage completo</li>
+      <li>✅ SessionStorage completo</li>
+      <li>✅ IndexedDB completo</li>
+      <li>✅ Service Workers</li>
+      <li>✅ Caché del navegador</li>
+    </ul>
+
+    <button onclick="clearEverything()">🗑️ LIMPIAR TODO Y RECARGAR</button>
+
+    <div id="status" class="status"></div>
+  </div>
+
+  <script>
+    async function clearEverything() {
+      const status = document.getElementById('status');
+      const button = document.querySelector('button');
+
+      button.disabled = true;
+      button.textContent = '⏳ Limpiando...';
+
+      try {
+        // 1. LocalStorage
+        localStorage.clear();
+        console.log('✅ LocalStorage cleared');
+
+        // 2. SessionStorage
+        sessionStorage.clear();
+        console.log('✅ SessionStorage cleared');
+
+        // 3. IndexedDB
+        const databases = await indexedDB.databases();
+        for (const db of databases) {
+          indexedDB.deleteDatabase(db.name);
+          console.log(`✅ IndexedDB "${db.name}" deleted`);
+        }
+
+        // 4. Service Workers
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          for (const registration of registrations) {
+            await registration.unregister();
+            console.log('✅ Service Worker unregistered');
+          }
+        }
+
+        // 5. Cache Storage
+        if ('caches' in window) {
+          const cacheNames = await caches.keys();
+          for (const cacheName of cacheNames) {
+            await caches.delete(cacheName);
+            console.log(`✅ Cache "${cacheName}" deleted`);
+          }
+        }
+
+        status.className = 'status success';
+        status.innerHTML = `
+          <strong>✅ TODO LIMPIO</strong><br>
+          Recargando la página en 2 segundos...
+        `;
+
+        // Recargar después de 2 segundos
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 2000);
+
+      } catch (error) {
+        status.className = 'status error';
+        status.innerHTML = `
+          <strong>❌ Error:</strong><br>
+          ${error.message}
+        `;
+        button.disabled = false;
+        button.textContent = '🔄 Reintentar';
+      }
+    }
+  </script>
+</body>
+</html>

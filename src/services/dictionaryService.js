@@ -105,12 +105,18 @@ function buildSearchIndex(entries) {
       dictionaryIndex.byPinyin.get(pinyinKey).push(index);
     }
 
-    // Índice por palabras en español
-    if (Array.isArray(definitions)) {
-      definitions.forEach(def => {
-        if (!def || typeof def !== 'string') return;
-        const words = def.toLowerCase().split(/\s+/);
-        words.forEach(word => {
+    // Índice por palabras en español - SOLO primera definición, SOLO palabras principales
+    if (Array.isArray(definitions) && definitions.length > 0) {
+      const firstDef = definitions[0];
+      if (firstDef && typeof firstDef === 'string') {
+        // Limpiar prefijos comunes (jerga, fig., lit., etc.)
+        const cleanedDef = firstDef.replace(/^\s*\([^)]*\)\s*/, '').trim();
+
+        // Extraer las primeras 3 palabras significativas de la definición
+        const words = cleanedDef.toLowerCase().split(/[,;\/]|(?:\()/)[0].trim().split(/\s+/);
+
+        // Indexar solo las primeras 3 palabras de la primera definición
+        words.slice(0, 3).forEach(word => {
           const cleanWord = word.replace(/[^\w\u00C0-\u017F]/g, '');
           if (cleanWord.length >= 2) {
             if (!dictionaryIndex.bySpanish.has(cleanWord)) {
@@ -121,7 +127,7 @@ function buildSearchIndex(entries) {
             }
           }
         });
-      });
+      }
     }
   });
 
