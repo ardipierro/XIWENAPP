@@ -15,7 +15,8 @@ import {
   Palette,
   Volume2,
   Sparkles,
-  Key
+  Key,
+  Languages
 } from 'lucide-react';
 
 /**
@@ -77,6 +78,18 @@ export const AI_PROVIDERS = [
     emoji: '🌐',
     color: 'blue',
     docsUrl: 'https://console.cloud.google.com/apis/credentials',
+    capabilities: ['translation'],
+    backendSupported: false
+  },
+  {
+    id: 'deepl_free',
+    name: 'DeepL Free',
+    description: 'Traducción de alta calidad ES↔ZH',
+    services: ['DeepL Translation API', 'Generación de diccionarios'],
+    icon: Languages,
+    emoji: '🌍',
+    color: 'teal',
+    docsUrl: 'https://www.deepl.com/pro-api',
     capabilities: ['translation'],
     backendSupported: false
   },
@@ -202,6 +215,11 @@ export const PROVIDER_COLORS = {
     bg: 'bg-slate-50 dark:bg-slate-900/20',
     border: 'border-slate-200 dark:border-slate-800',
     text: 'text-slate-700 dark:text-slate-300'
+  },
+  teal: {
+    bg: 'bg-teal-50 dark:bg-teal-900/20',
+    border: 'border-teal-200 dark:border-teal-800',
+    text: 'text-teal-700 dark:text-teal-300'
   }
 };
 
