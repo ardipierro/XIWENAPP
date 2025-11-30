@@ -223,6 +223,7 @@ Formato de respuesta (JSON):
       // BACK-TRANSLATION: Buscar qué significa el chino resultante en español
       // Esto ayuda a verificar si la traducción es precisa
       if (translationData?.chinese) {
+        console.log('[useTranslator] Attempting back-translation for:', translationData.chinese);
         try {
           const { searchDictionary } = await import('../services/dictionaryService');
           const backResults = await searchDictionary(translationData.chinese, {
@@ -230,14 +231,22 @@ Formato de respuesta (JSON):
             searchType: 'chinese'
           });
 
+          console.log('[useTranslator] Back-translation results:', backResults);
+
           if (backResults.length > 0 && backResults[0].meanings) {
             translationData.backTranslation = backResults[0].meanings;
+            console.log('[useTranslator] ✅ Back-translation added:', backResults[0].meanings);
             logger.info(`Back-translation: ${translationData.chinese} → ${backResults[0].meanings.join(', ')}`, 'useTranslator');
+          } else {
+            console.log('[useTranslator] ⚠️ No back-translation found');
           }
         } catch (err) {
           // Si falla la back-translation, no es crítico
+          console.error('[useTranslator] ❌ Back-translation error:', err);
           logger.warn('Failed to get back-translation', 'useTranslator');
         }
+      } else {
+        console.log('[useTranslator] ⚠️ No chinese text to back-translate');
       }
 
       // Cache the translation

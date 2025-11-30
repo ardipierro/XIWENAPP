@@ -150,6 +150,24 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
 
       const result = await autoTranslate(selectedText);
 
+      // BACK-TRANSLATION: Si tradujo ES→ZH, buscar en diccionario local qué significa ese chino
+      if (result.targetLang === 'zh-CN' && result.translatedText) {
+        try {
+          const { searchDictionary } = await import('../../services/dictionaryService');
+          const backResults = await searchDictionary(result.translatedText, {
+            limit: 1,
+            searchType: 'chinese'
+          });
+
+          if (backResults.length > 0 && backResults[0].meanings) {
+            result.backTranslation = backResults[0].meanings;
+            console.log('[SelectionDetector] ✅ Back-translation added from dictionary:', backResults[0].meanings);
+          }
+        } catch (err) {
+          console.warn('[SelectionDetector] Back-translation failed:', err);
+        }
+      }
+
       setDictTranslation(result);
       setShowButtons(false);
       setShowDictPopup(true);
@@ -481,16 +499,25 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
                       Traducción ({dictTranslation.targetLang === 'zh-CN' ? '中文' : 'Español'})
                     </p>
                     <div className="flex items-start gap-2">
-                      <p
-                        className={`
-                          flex-1 p-3 rounded-lg border-2 border-emerald-200 dark:border-emerald-800
-                          bg-emerald-50 dark:bg-emerald-900/20
-                          ${dictTranslation.targetLang === 'zh-CN' ? 'text-3xl font-medium' : 'text-base'}
-                          text-gray-900 dark:text-white
-                        `}
-                      >
-                        {dictTranslation.translatedText}
-                      </p>
+                      <div className="flex-1 space-y-2">
+                        <p
+                          className={`
+                            p-3 rounded-lg border-2 border-emerald-200 dark:border-emerald-800
+                            bg-emerald-50 dark:bg-emerald-900/20
+                            ${dictTranslation.targetLang === 'zh-CN' ? 'text-3xl font-medium' : 'text-base'}
+                            text-gray-900 dark:text-white
+                          `}
+                        >
+                          {dictTranslation.translatedText}
+                        </p>
+                        {/* Back-translation verification */}
+                        {dictTranslation.backTranslation && dictTranslation.backTranslation.length > 0 && (
+                          <div className="text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/30 p-2 rounded border border-gray-200 dark:border-gray-700">
+                            <span className="font-semibold">↩️ Verifica:</span>{' '}
+                            <span className="italic">{dictTranslation.backTranslation.slice(0, 3).join('; ')}</span>
+                          </div>
+                        )}
+                      </div>
                       <button
                         onClick={handleCopyTranslation}
                         className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"

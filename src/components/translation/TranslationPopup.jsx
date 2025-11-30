@@ -16,8 +16,28 @@ const TranslationPopup = ({
   error = null
 }) => {
   const popupRef = useRef(null);
+  const openedAtRef = useRef(Date.now()); // Timestamp de cuándo se abrió
   const [copied, setCopied] = useState(false);
   const [config, setConfig] = useState(null);
+
+  // Debug log
+  useEffect(() => {
+    if (translation) {
+      console.log('[TranslationPopup] Translation data:', {
+        word: translation.word,
+        chinese: translation.chinese,
+        pinyin: translation.pinyin,
+        backTranslation: translation.backTranslation,
+        hasBackTranslation: !!translation.backTranslation
+      });
+    }
+  }, [translation]);
+
+  // Reset timestamp cuando se monta el componente
+  useEffect(() => {
+    openedAtRef.current = Date.now();
+    console.log('[TranslationPopup] Popup opened at:', openedAtRef.current);
+  }, []);
 
   // Load configuration
   useEffect(() => {
@@ -43,21 +63,28 @@ const TranslationPopup = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  // Close on click outside - Con delay para evitar cierre inmediato
+  // Close on click outside - Con protección basada en timestamp
   useEffect(() => {
     const handleClickOutside = (e) => {
+      // Solo cerrar si han pasado al menos 300ms desde que se abrió
+      const timeOpen = Date.now() - openedAtRef.current;
+
+      if (timeOpen < 300) {
+        console.log('[TranslationPopup] ⏱️ Click ignored, popup opened recently:', timeOpen, 'ms');
+        return;
+      }
+
       if (popupRef.current && !popupRef.current.contains(e.target)) {
+        console.log('[TranslationPopup] ✅ Click outside detected after', timeOpen, 'ms, closing...');
         onClose();
       }
     };
 
-    // Delay de 100ms para evitar que el click que abre el popup lo cierre inmediatamente
-    const timeoutId = setTimeout(() => {
-      document.addEventListener('mousedown', handleClickOutside);
-    }, 100);
+    // Adjuntar listener inmediatamente, pero con protección de timestamp
+    console.log('[TranslationPopup] Click-outside listener attached with timestamp protection');
+    document.addEventListener('mousedown', handleClickOutside);
 
     return () => {
-      clearTimeout(timeoutId);
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [onClose]);
