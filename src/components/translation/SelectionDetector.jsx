@@ -77,15 +77,18 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
             bottom: rect.bottom + window.scrollY
           });
           setShowButtons(true);
-          setShowPopup(false); // Hide popup if showing
+          // NO cerrar popup si ya está abierto - permite que el usuario interactúe con él
+          // setShowPopup(false);
         } catch (err) {
           // ✅ Manejo de errores si no hay rango (puede pasar en iOS)
           logger.warn('Selection error (expected on iOS):', err);
           setShowButtons(false);
-          setShowPopup(false);
+          // NO cerrar popup en caso de error - deja que el usuario lo cierre manualmente
+          // setShowPopup(false);
         }
       } else {
         setShowButtons(false);
+        // Cerrar popup solo cuando NO hay selección (usuario deseleccionó el texto)
         setShowPopup(false);
       }
     }, 100); // ✅ 100ms delay para iOS
