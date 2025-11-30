@@ -3,14 +3,16 @@
  * @module components/MessagesPanel
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { MessageCircle, Plus, Search, X, MoreVertical, Trash2, Archive, Pin, VolumeX } from 'lucide-react';
 import {
   subscribeToConversations,
   deleteConversation,
   archiveConversation
 } from '../firebase/messages';
-import MessageThread from './MessageThread';
+
+// Lazy load MessageThread (2,238 líneas) para optimizar bundle inicial
+const MessageThread = lazy(() => import('./MessageThread'));
 import NewMessageModal from './NewMessageModal';
 import { BaseButton, BaseEmptyState, BaseLoading } from './common';
 import { useIsMobile } from '../hooks';
@@ -216,12 +218,14 @@ function MessagesPanel({ user }) {
 
           {showChatView && selectedConversation && (
             <div className="messages-main messages-main-mobile">
-              <MessageThread
-                conversation={selectedConversation}
-                currentUser={user}
-                onClose={handleBackToList}
-                isMobile={isMobile}
-              />
+              <Suspense fallback={<BaseLoading text="Cargando mensajes..." />}>
+                <MessageThread
+                  conversation={selectedConversation}
+                  currentUser={user}
+                  onClose={handleBackToList}
+                  isMobile={isMobile}
+                />
+              </Suspense>
             </div>
           )}
         </>
@@ -303,12 +307,14 @@ function MessagesPanel({ user }) {
 
           <div className="messages-main">
             {selectedConversation ? (
-              <MessageThread
-                conversation={selectedConversation}
-                currentUser={user}
-                onClose={() => setSelectedConversation(null)}
-                isMobile={false}
-              />
+              <Suspense fallback={<BaseLoading text="Cargando mensajes..." />}>
+                <MessageThread
+                  conversation={selectedConversation}
+                  currentUser={user}
+                  onClose={() => setSelectedConversation(null)}
+                  isMobile={false}
+                />
+              </Suspense>
             ) : (
               <div className="p-8">
                 <BaseEmptyState

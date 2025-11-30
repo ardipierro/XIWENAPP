@@ -1,9 +1,9 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { X, Video, Presentation, PenTool, Maximize2, Minimize2, Users, Clock } from 'lucide-react';
 import logger from '../utils/logger';
-import Whiteboard from './Whiteboard';
 
 // Lazy load para componentes pesados
+const Whiteboard = lazy(() => import('./Whiteboard')); // Canvas: ~1,973 líneas
 const LiveClassRoom = lazy(() => import('./LiveClassRoom')); // LiveKit: 150 KB
 const ExcalidrawWhiteboard = lazy(() => import('./ExcalidrawWhiteboard')); // Excalidraw: 500 KB
 import { BaseButton, BaseLoading, BaseAlert } from './common';
@@ -212,12 +212,14 @@ function ClassSessionRoom({ session, user, userRole, onLeave }) {
     if (sessionData.whiteboardType === 'canvas') {
       return (
         <div className="h-full">
-          <Whiteboard
-            sessionId={whiteboardSessionId}
-            user={user}
-            isTeacher={sessionData.teacherId === user.uid}
-            mode="embedded"
-          />
+          <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>Cargando pizarra...</div>}>
+            <Whiteboard
+              sessionId={whiteboardSessionId}
+              user={user}
+              isTeacher={sessionData.teacherId === user.uid}
+              mode="embedded"
+            />
+          </Suspense>
         </div>
       );
     }

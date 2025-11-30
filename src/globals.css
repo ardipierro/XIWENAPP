@@ -2059,6 +2059,8 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
   justify-content: center;
   width: 40px;
   height: 40px;
+  min-width: 44px;  /* Touch target mínimo recomendado */
+  min-height: 44px; /* Touch target mínimo recomendado */
   border: none;
   background: transparent;
   border-radius: 0.5rem;
@@ -2794,10 +2796,12 @@ input[type="range"].slider-purple::-moz-range-thumb:active {
     gap: 0.15rem; /* Gap muy reducido */
   }
 
-  /* Iconos aún más pequeños */
+  /* Iconos visualmente más pequeños pero área clickeable accesible */
   .universal-topbar__icon-btn {
-    width: 32px;
-    height: 32px;
+    width: 44px;      /* Mantener touch target mínimo */
+    height: 44px;     /* Mantener touch target mínimo */
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .universal-topbar__icon-btn svg {

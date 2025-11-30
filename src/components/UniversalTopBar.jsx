@@ -5,7 +5,7 @@
  */
 
 import { Menu, Bell, User, Settings, LogOut, Sun, Moon, MessageCircle, ChevronLeft } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useViewAs } from '../contexts/ViewAsContext';
@@ -16,7 +16,9 @@ import { useTopBar } from '../contexts/TopBarContext';
 import useUnreadMessages from '../hooks/useUnreadMessages';
 import useClassNotifications from '../hooks/useClassNotifications';
 import CreditBadge from './common/CreditBadge';
-import UserProfileModal from './UserProfileModal';
+
+// Lazy load UserProfileModal (~987 líneas) - solo se carga cuando se abre
+const UserProfileModal = lazy(() => import('./UserProfileModal'));
 import NotificationCenter from './NotificationCenter';
 import UserAvatar from './UserAvatar';
 import { BaseButton } from './common';
@@ -258,18 +260,20 @@ export function UniversalTopBar({ onMenuToggle, menuOpen }) {
         </div>
       </div>
 
-      {/* User Profile Modal */}
+      {/* User Profile Modal - Lazy loaded */}
       {showProfileModal && (
-        <UserProfileModal
-          isOpen={showProfileModal}
-          user={effectiveUser}
-          userRole={role}
-          currentUserRole={role}
-          currentUser={user}
-          isAdmin={isAdmin()}
-          onClose={() => setShowProfileModal(false)}
-          onUpdate={() => setAvatarKey(prev => prev + 1)}
-        />
+        <Suspense fallback={null}>
+          <UserProfileModal
+            isOpen={showProfileModal}
+            user={effectiveUser}
+            userRole={role}
+            currentUserRole={role}
+            currentUser={user}
+            isAdmin={isAdmin()}
+            onClose={() => setShowProfileModal(false)}
+            onUpdate={() => setAvatarKey(prev => prev + 1)}
+          />
+        </Suspense>
       )}
 
       {/* Notification Center */}
