@@ -4,7 +4,7 @@
  */
 
 const CACHE_KEY = 'xiwen_translation_cache';
-const CACHE_VERSION = '2.1'; // v2.1: Scoring con multiplicadores masivos para 1-2 chars
+const CACHE_VERSION = '2.2'; // v2.2: Fix defWords bug + multiplicadores masivos
 const MAX_CACHE_SIZE = 500; // Maximum number of cached translations
 const CACHE_EXPIRY_DAYS = 30; // Cache expires after 30 days
 

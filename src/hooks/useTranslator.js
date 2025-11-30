@@ -177,20 +177,23 @@ Formato de respuesta (JSON):
     setError(null);
 
     try {
-      // Check cache first
-      const cached = getCachedTranslation(trimmedText, sourceLang, targetLang);
-      if (cached) {
-        logger.info(`Using cached translation for: ${trimmedText}`, 'useTranslator');
-        setLastTranslation(cached);
-        setIsTranslating(false);
-        return cached;
-      }
-
-      // Load translator configuration
+      // Load translator configuration FIRST
       const configStr = localStorage.getItem('xiwen_translator_config');
       const config = configStr ? JSON.parse(configStr) : { mode: 'ai' };
 
       logger.info(`Translation mode: ${config.mode}`, 'useTranslator');
+
+      // SOLO verificar caché para traducciones de IA (costosas)
+      // NO cachear búsquedas de diccionario (instantáneas < 10ms)
+      if (config.mode === 'ai') {
+        const cached = getCachedTranslation(trimmedText, sourceLang, targetLang);
+        if (cached) {
+          logger.info(`Using cached AI translation for: ${trimmedText}`, 'useTranslator');
+          setLastTranslation(cached);
+          setIsTranslating(false);
+          return cached;
+        }
+      }
 
       let translationData = null;
 
@@ -249,8 +252,12 @@ Formato de respuesta (JSON):
         console.log('[useTranslator] ⚠️ No chinese text to back-translate');
       }
 
-      // Cache the translation
-      setCachedTranslation(trimmedText, translationData, sourceLang, targetLang);
+      // SOLO cachear traducciones de IA (costosas)
+      // NO cachear búsquedas de diccionario (instantáneas)
+      if (config.mode === 'ai' || (config.mode === 'hybrid' && translationData?.source !== 'cedict')) {
+        setCachedTranslation(trimmedText, translationData, sourceLang, targetLang);
+        logger.info('Cached AI translation', 'useTranslator');
+      }
 
       setLastTranslation(translationData);
       setIsTranslating(false);
