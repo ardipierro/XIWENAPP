@@ -73,6 +73,11 @@ function buildSearchIndex(entries) {
   };
 
   entries.forEach((entry, index) => {
+    // Validar que la entrada tenga los campos mínimos necesarios
+    if (!entry.s || !entry.t || !entry.d) {
+      return; // Saltar entradas mal formadas
+    }
+
     // Índice por caracteres simplificados
     if (!dictionaryIndex.bySimplified.has(entry.s)) {
       dictionaryIndex.bySimplified.set(entry.s, []);
@@ -87,26 +92,31 @@ function buildSearchIndex(entries) {
 
     // Índice por pinyin (normalizado sin espacios y sin tonos)
     const pinyinKey = normalizePinyin(entry.p);
-    if (!dictionaryIndex.byPinyin.has(pinyinKey)) {
+    if (pinyinKey && !dictionaryIndex.byPinyin.has(pinyinKey)) {
       dictionaryIndex.byPinyin.set(pinyinKey, []);
     }
-    dictionaryIndex.byPinyin.get(pinyinKey).push(index);
+    if (pinyinKey) {
+      dictionaryIndex.byPinyin.get(pinyinKey).push(index);
+    }
 
     // Índice por palabras en español
-    entry.d.forEach(def => {
-      const words = def.toLowerCase().split(/\s+/);
-      words.forEach(word => {
-        const cleanWord = word.replace(/[^\w\u00C0-\u017F]/g, '');
-        if (cleanWord.length >= 2) {
-          if (!dictionaryIndex.bySpanish.has(cleanWord)) {
-            dictionaryIndex.bySpanish.set(cleanWord, []);
+    if (Array.isArray(entry.d)) {
+      entry.d.forEach(def => {
+        if (!def || typeof def !== 'string') return;
+        const words = def.toLowerCase().split(/\s+/);
+        words.forEach(word => {
+          const cleanWord = word.replace(/[^\w\u00C0-\u017F]/g, '');
+          if (cleanWord.length >= 2) {
+            if (!dictionaryIndex.bySpanish.has(cleanWord)) {
+              dictionaryIndex.bySpanish.set(cleanWord, []);
+            }
+            if (!dictionaryIndex.bySpanish.get(cleanWord).includes(index)) {
+              dictionaryIndex.bySpanish.get(cleanWord).push(index);
+            }
           }
-          if (!dictionaryIndex.bySpanish.get(cleanWord).includes(index)) {
-            dictionaryIndex.bySpanish.get(cleanWord).push(index);
-          }
-        }
+        });
       });
-    });
+    }
   });
 
   logger.info(`Índices construidos: ${dictionaryIndex.bySimplified.size} chino, ${dictionaryIndex.bySpanish.size} español`, 'dictionaryService');
@@ -118,6 +128,9 @@ function buildSearchIndex(entries) {
  * @returns {string} Pinyin normalizado
  */
 function normalizePinyin(pinyin) {
+  if (!pinyin || typeof pinyin !== 'string') {
+    return '';
+  }
   return pinyin
     .toLowerCase()
     .replace(/\s+/g, '')
