@@ -888,7 +888,7 @@
   }
 
   .modal-box {
-    @apply rounded-lg max-w-2xl w-full flex flex-col;
+    @apply rounded-lg max-w-2xl w-full flex flex-col overflow-hidden;
     background: var(--color-bg-secondary);
     height: 700px; /* Altura fija para que no salte al cambiar pestañas */
     max-height: 90vh; /* Respeta el viewport en pantallas pequeñas */
