@@ -73,25 +73,31 @@ function buildSearchIndex(entries) {
   };
 
   entries.forEach((entry, index) => {
+    // Normalizar formato: soportar ambos formatos (s/t/p/d y simplified/traditional/pinyin/definitions_es)
+    const simplified = entry.s || entry.simplified;
+    const traditional = entry.t || entry.traditional;
+    const pinyin = entry.p || entry.pinyin;
+    const definitions = entry.d || entry.definitions_es;
+
     // Validar que la entrada tenga los campos mínimos necesarios
-    if (!entry.s || !entry.t || !entry.d) {
+    if (!simplified || !traditional || !definitions) {
       return; // Saltar entradas mal formadas
     }
 
     // Índice por caracteres simplificados
-    if (!dictionaryIndex.bySimplified.has(entry.s)) {
-      dictionaryIndex.bySimplified.set(entry.s, []);
+    if (!dictionaryIndex.bySimplified.has(simplified)) {
+      dictionaryIndex.bySimplified.set(simplified, []);
     }
-    dictionaryIndex.bySimplified.get(entry.s).push(index);
+    dictionaryIndex.bySimplified.get(simplified).push(index);
 
     // Índice por caracteres tradicionales
-    if (!dictionaryIndex.byTraditional.has(entry.t)) {
-      dictionaryIndex.byTraditional.set(entry.t, []);
+    if (!dictionaryIndex.byTraditional.has(traditional)) {
+      dictionaryIndex.byTraditional.set(traditional, []);
     }
-    dictionaryIndex.byTraditional.get(entry.t).push(index);
+    dictionaryIndex.byTraditional.get(traditional).push(index);
 
     // Índice por pinyin (normalizado sin espacios y sin tonos)
-    const pinyinKey = normalizePinyin(entry.p);
+    const pinyinKey = normalizePinyin(pinyin);
     if (pinyinKey && !dictionaryIndex.byPinyin.has(pinyinKey)) {
       dictionaryIndex.byPinyin.set(pinyinKey, []);
     }
@@ -100,8 +106,8 @@ function buildSearchIndex(entries) {
     }
 
     // Índice por palabras en español
-    if (Array.isArray(entry.d)) {
-      entry.d.forEach(def => {
+    if (Array.isArray(definitions)) {
+      definitions.forEach(def => {
         if (!def || typeof def !== 'string') return;
         const words = def.toLowerCase().split(/\s+/);
         words.forEach(word => {
@@ -328,12 +334,18 @@ function searchBySpanish(query, limit, fuzzy) {
  * Formatea una entrada del diccionario para el resultado
  */
 function formatEntry(entry) {
+  // Soportar ambos formatos
+  const simplified = entry.s || entry.simplified;
+  const traditional = entry.t || entry.traditional;
+  const pinyin = entry.p || entry.pinyin;
+  const meanings = entry.d || entry.definitions_es;
+
   return {
-    word: entry.s,
-    simplified: entry.s,
-    traditional: entry.t,
-    pinyin: entry.p,
-    meanings: entry.d,
+    word: simplified,
+    simplified: simplified,
+    traditional: traditional,
+    pinyin: pinyin,
+    meanings: meanings,
     source: 'cedict'
   };
 }
