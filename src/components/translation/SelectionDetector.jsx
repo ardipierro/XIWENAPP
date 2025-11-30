@@ -143,7 +143,8 @@ const SelectionDetector = ({ children, enabled = true, containerRef = null }) =>
       logger.info(`📖 Dictionary lookup: "${selectedText.substring(0, 30)}..."`, 'SelectionDetector');
 
       // Verificar si Google Translate está configurado
-      if (!isGoogleTranslateConfigured()) {
+      const isConfigured = await isGoogleTranslateConfigured();
+      if (!isConfigured) {
         throw new Error('Google Translate no configurado. Ve a Ajustes > Credenciales para agregar tu API key.');
       }
 

@@ -32,8 +32,8 @@ export async function getGoogleTranslateApiKey() {
     // Initialize service
     await credentialsService.initialize();
 
-    // Try 'google' provider first (main Google Cloud credential)
-    let key = await credentialsService.get('google');
+    // Try 'google_translate' provider first (specific for Translation API)
+    let key = await credentialsService.get('google_translate');
 
     // If not found or is backend marker, try custom credentials
     if (!key || key === '***BACKEND***') {
@@ -71,7 +71,7 @@ export async function getGoogleTranslateApiKey() {
 export async function setGoogleTranslateApiKey(apiKey) {
   try {
     if (apiKey && apiKey.trim()) {
-      await credentialsService.set('google', apiKey.trim());
+      await credentialsService.set('google_translate', apiKey.trim());
       _apiKeyCache = apiKey.trim();
       _apiKeyCacheTimestamp = Date.now();
       logger.info('Google Translate API key saved', 'googleTranslateService');
