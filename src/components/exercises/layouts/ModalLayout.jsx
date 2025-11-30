@@ -1333,22 +1333,6 @@ export function ModalLayout({
         {/* Contenido y Footer */}
         {exerciseType ? (
           <ExerciseProvider config={finalConfig} onComplete={handleExerciseComplete}>
-            {/* Info bar - Timer y Progress */}
-            <div
-              className="flex-shrink-0 px-6 py-2 flex items-center justify-between gap-4"
-              style={{
-                borderBottom: '1px solid var(--color-border)',
-                backgroundColor: 'var(--color-bg-secondary)'
-              }}
-            >
-              <div className="flex items-center gap-3">
-                <ExerciseProgressWrapper />
-              </div>
-              <div className="flex items-center gap-3">
-                <ExerciseTimerWrapper />
-              </div>
-            </div>
-
             {/* Contenido */}
             <div
               className={`flex-1 overflow-y-auto ${displayClasses.container}`}
